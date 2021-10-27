@@ -1,0 +1,18 @@
+hnf[a_] := Last[HermiteDecomposition[a]];
+
+grahamDefactor[m_] := Module[{hermite, transformation},
+  hermite = hnf[m];
+  transformation = Inverse[Transpose[Take[hnf[Transpose[hermite]], MatrixRank[m]]]];
+  Print[transformation // MatrixForm, ".", hermite // MatrixForm];
+
+  transformation.hermite
+];
+
+grahamDefactor[{{5, 8, 12}, {24, 38, 56}}]
+hnf[%]
+grahamDefactor[{{3, 0, -1}, {0, 3, 5}}]
+hnf[%]
+grahamDefactor[{{6, 5, -4}, {4, -4, 1}}]
+hnf[%]
+grahamDefactor[{{17, 16, -4}, {4, -4, 1}}]
+hnf[%]
