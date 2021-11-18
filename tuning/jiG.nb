@@ -3,7 +3,7 @@
 jiG[mapping]
 
 Returns JI generators for the given temperament
-(provided as a mapping or comma-basis).
+(provided as a mapping or comma basis).
 
 Examples:
 
