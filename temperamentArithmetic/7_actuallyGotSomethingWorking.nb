@@ -1,0 +1,473 @@
+getCollinearity[t1_, t2_] := Module[{sharedCovectors},
+sharedCovectors = dual[meet[t1, t2]];
+sharedVectors = dual[join[t1, t2]];
+
+(*Print["sharedCovectors: ", sharedCovectors, "sharedVectors: ", sharedVectors];*)
+
+If[
+allZeros[getA[sharedCovectors]],
+If[
+allZeros[getA[sharedVectors]],
+Error,
+sharedVectors
+],
+sharedCovectors
+]
+];
+
+temperamentArithmetic[t1_, t2_, isSum_] := If[
+getR[t1] != getR[t2] || getD[t1] != getD[t2] ,
+Error,
+Module[{collinearity},
+collinearity = getCollinearity[t1, t2]; (* TODO: naming vars definitely needs some cleanup, this should probably just be called "collinearity" and maybe replaced "shared" with "collinear" *)
+
+(*Print["sharedVectors", sharedVectors, sharedVectors === Error, getR[t1] != getR[t2], getD[t1] != getD[t2], isContra[sharedVectors]];*)
+
+If[
+collinearity === Error,
+Error,
+If[
+isContra[collinearity],
+validTemperamentArithmeticByC[t1, t2, isSum, getA[collinearity]],
+validTemperamentArithmeticByM[t1, t2, isSum,getA[ collinearity]]
+]
+]
+]
+];
+
+temperamentSum[t1_, t2_] :=If[
+canonicalForm[t1] == canonicalForm[t2],
+t1,
+temperamentArithmetic[t1, t2, True]
+];
+temperamentDifference[t1_, t2_] := If[
+canonicalForm[t1] == canonicalForm[t2],
+Error,
+temperamentArithmetic[t1, t2, False]
+];
+
+isEnfactored[a_] := hnf[a] != hnf[colHermiteDefactor[a]];
+
+(*TODO: definitely hope we can clean this up so that we don't need byM and byC versions of everything; like maybe just an antitranspose can solve the problem *)
+defactorWithSharedByM[t_, r_, sharedVectors_] := Module[{m},
+m = Take[Join[sharedVectors, getM[t]],r];
+
+While[
+isEnfactored[m],
+(*Print["latest m: ", m];*)
+m[[r]] = divideOutGcd[m[[r]]  + First[sharedVectors]]
+];
+
+m
+];
+
+defactorWithSharedByC[t_, n_, sharedVectors_] := Module[{m},
+c = Take[Join[sharedVectors, getC[t]],n];
+
+While[
+isEnfactored[c],
+(*Print["latest c: ", c];*)
+c[[n]] = divideOutGcd[c[[n]]  + First[sharedVectors]]
+];
+
+c
+];
+
+(*TODO: still sad that I need minors to figure this out... figure out if there's any other way*)
+isNegativeByM[m_, r_] := leadingEntry[First[Minors[m, r]]] < 0;
+isNegativeByC[c_, n_] := Module[{},
+(*Print["what da dog doing", First[Minors[c, n]]];*)
+trailingEntry[First[Minors[c, n]]] < 0
+];
+
+validTemperamentArithmeticByM[t1_, t2_, isSum_, sharedVectors_] := Module[{v,r, m1,m2},
+(*Print["we make it here", t1, t2, isSum, sharedVectors];*)
+v = getV[t1];
+r = getR[t1];
+
+m1 = defactorWithSharedByM[t1, r, sharedVectors];
+m2 = defactorWithSharedByM[t2, r, sharedVectors];
+
+(*Print["befire correction, m1: ", m1, " m2: ", m2];*)
+
+If[
+isNegativeByM[m1,r],
+m1[[r]] = -m1[[r]]
+];
+
+If[
+isSum,
+If[
+isNegativeByM[m2,r],
+m2[[r]] = -m2[[r]]
+],
+If[
+!isNegativeByM[m2,r],
+m2[[r]] = -m2[[r]]
+],
+];
+
+(*Print["AFTER SUM/DIFF CORRECTION! m1: ", m1, " m2: ", m2];*)
+
+If[
+isContra[t1],
+dual[{m1+m2, "co"}],
+canonicalForm[{m1 + m2, "co"}]
+]
+];
+
+validTemperamentArithmeticByC[t1_, t2_, isSum_, sharedVectors_] := Module[{v,n, c1,c2},
+(*Print["we go here instead", t1, t2, isSum, sharedVectors];*)
+v = getV[t1];
+n = getN[t1];
+
+c1 = defactorWithSharedByC[t1, n, sharedVectors];
+c2 = defactorWithSharedByC[t2, n, sharedVectors];
+
+(*Print["before, c1: ", c1, " c2: ",c2];*)
+
+If[
+isNegativeByC[c1,n],
+c1[[n]] = -c1[[n]]
+];
+
+If[
+isSum,
+If[
+isNegativeByC[c2,n],
+c2[[n]] = -c2[[n]]
+],
+If[
+!isNegativeByC[c2,n],
+c2[[n]] = -c2[[n]]
+],
+];
+
+(*Print["AFTER SUM/DIFF CORRECTION! c1: ", c1, " c2: ",c2, isSum, isNegativeByC[c1,n], isNegativeByC[c2,n]];*)
+
+If[
+isContra[t1],
+canonicalForm[{c1+c2, "contra"}],
+dual[{c1 + c2, "contra"}]
+]
+];
+
+(* all examples tested from both sides of duality *)
+
+(* collinear mappings*)
+meantoneM = {{{1,0,-4},{0,1,4}},"co"};
+porcupineM = {{{1,2,3},{0,3,5}},"co"};
+matrixToMultivector[temperamentSum[meantoneM, porcupineM]]
+matrixToMultivector[temperamentDifference[meantoneM, porcupineM]]
+meantoneC = {{{4,-4,1}},"contra"};
+porcupineC = {{{1, -5, 3}}, "contra"};
+matrixToMultivector[temperamentSum[meantoneC, porcupineC]]
+matrixToMultivector[temperamentDifference[meantoneC, porcupineC]]
+
+(*collinear comma bases *)
+et7M = {{{7,11,16}},"co"};
+et5M = {{{5,8,12}}, "co"};
+matrixToMultivector[temperamentSum[et7M, et5M]]
+matrixToMultivector[temperamentDifference[et7M, et5M]]
+et7C = dual[et7M];
+et5C = dual[et5M];
+matrixToMultivector[temperamentSum[et7C, et5C]]
+matrixToMultivector[temperamentDifference[et7C, et5C]]
+
+(* noncollinear - error! *)
+septimalMeantoneM = {{{1,0,-4,-13},{0,1,4,10}}, "co"};
+septimalBlackwoodM = {{{5,8,0,14},{0,0,1,0}}, "co"};
+temperamentSum[septimalMeantoneM, septimalBlackwoodM]
+temperamentDifference[septimalMeantoneM, septimalBlackwoodM]
+septimalMeantoneC = dual[septimalMeantoneM];
+septimalBlackwoodC = dual[septimalBlackwoodM];
+temperamentSum[septimalMeantoneC, septimalBlackwoodC]
+temperamentDifference[septimalMeantoneC, septimalBlackwoodC]
+
+(* doubly collinear (comma bases) *)
+et12M = {{{12,19,28,34}},"co"}; (*dual[{{{4,-4,1,0},{-10,-1,5,0},{-5,2,2,-1}},"contra"}]*)
+et19M = {{{19,30,44,53}},"co"}; (*dual[{{{4,-4,1,0},{6,-2,0,-1},{-5,2,2,-1}},"contra"}]*)
+matrixToMultivector[temperamentSum[et12M, et19M]]
+matrixToMultivector[temperamentDifference[et12M, et19M]]
+et12C =dual[et12M];
+et19C = dual[et19M];
+matrixToMultivector[temperamentSum[et12C, et19C]]
+matrixToMultivector[temperamentDifference[et12C, et19C]]
+
+(*examples with themselves *)
+temperamentSum[meantoneM, meantoneM]
+temperamentDifference[meantoneM, meantoneM]
+temperamentSum[meantoneC, meantoneC]
+temperamentDifference[meantoneC, meantoneC]
+temperamentSum[et7M, et7M]
+temperamentDifference[et7M, et7M]
+temperamentSum[et7C, et7C]
+temperamentDifference[et7C, et7C]
+
+(* mismatched r & n but matching d *)
+temperamentSum[et7M, meantoneM]
+temperamentDifference[et7M, meantoneM]
+temperamentSum[et7C, meantoneC]
+temperamentDifference[et7C, meantoneC]
+
+(* mismatched d but matching r or n *)
+temperamentSum[et7M, et12M]
+temperamentDifference[et7M, et12M]
+temperamentSum[et7C, et12C]
+temperamentDifference[et7C, et12C]
+
+(*some basic examples *)
+augmentedM = {{{3,0,7},{0,1,0}},"co"}; (* <<3 0 -7]] *)
+diminishedM = {{{4,0,3},{0,1,1}}, "co"}; (* <<4 4 -3]] *)
+tetracotM = {{{1,1,1},{0,4,9}},"co"}; (* <<4 9 5]] *)
+dicotM = {{{1,1,2},{0,2,1}},"co"}; (* <<2 1 -3]] *)
+srutalM = {{{2,0,11},{0,1,-2}},"co"}; (* <<2 -4 -11]] *)
+matrixToMultivector[temperamentSum[augmentedM, diminishedM]] (* <<3 0 -7]] + <<4 4 -3]] = <<7 4 -10]]*)
+matrixToMultivector[temperamentDifference[augmentedM, diminishedM]](* <<3 0 -7]] - <<4 4 -3]] = <<1 4 4]]*)
+matrixToMultivector[temperamentSum[augmentedM, tetracotM]] (* <<3 0 -7]] + <<4 9 5]] = <<7 9 -2]]*)
+matrixToMultivector[temperamentDifference[augmentedM, tetracotM]] (* <<3 0 -7]] - <<4 9 5]] = <<1 9 12]]*)
+matrixToMultivector[temperamentSum[augmentedM, dicotM]] (* <<3 0 -7]] + <<2 1 -3]] = <<5 1 -10]]*)
+matrixToMultivector[temperamentDifference[augmentedM, dicotM]] (* <<3 0 -7]] - <<2 1 -3]] = <<1 -1 -4]]*)
+matrixToMultivector[temperamentSum[augmentedM, srutalM]] (* <<3 0 -7]] + <<2 -4 -11]] = <<5 -4 -18]]*)
+matrixToMultivector[temperamentDifference[augmentedM, srutalM]] (* <<3 0 -7]] - <<2 -4 -11]] = <<1 4 4]]*)
+matrixToMultivector[temperamentSum[diminishedM, tetracotM]] (* <<4 4 -3]] + <<4 9 5]] = <<8 13 2]]*)
+matrixToMultivector[temperamentDifference[diminishedM, tetracotM]] (* <<4 4 -3]] - <<4 9 5]] = <<0 5 8]]*)
+matrixToMultivector[temperamentSum[diminishedM, dicotM]](* <<4 4 -3]] + <<2 1 -3]] = <<6 5 -6]]*)
+matrixToMultivector[temperamentDifference[diminishedM, dicotM]] (* <<4 4 -3]] - <<2 1 -3]] = <<2 3 0]]*)
+matrixToMultivector[temperamentSum[diminishedM, srutalM]] (* <<4 4 -3]] + <<2 -4 -11]] = <<6 0 -14]] \[RightArrow]<<3 0 -7]] *)
+matrixToMultivector[temperamentDifference[diminishedM, srutalM]] (* <<4 4 -3]] - <<2 -4 -11]] = <<2 8 8]] \[RightArrow] <<1 4 4]] *)
+matrixToMultivector[temperamentSum[tetracotM, dicotM]] (* <<4 9 5]] + <<2 1 -3]] = <<6 10 2]] \[RightArrow]<<3 5 1]] *)
+matrixToMultivector[temperamentDifference[tetracotM, dicotM]] (* <<4 9 5]] - <<2 1 -3]] = <<2 8 8]] \[RightArrow]<<1 4 4]] *)
+matrixToMultivector[temperamentSum[tetracotM, srutalM]] (* <<4 9 5]] + <<2 -4 -11]] = <<6 5 -6]] *)
+matrixToMultivector[temperamentDifference[tetracotM, srutalM]]  (* <<4 9 5]] - <<2 -4 -11]] = <<2 13 16]] *)
+matrixToMultivector[temperamentSum[dicotM, srutalM]] (* <<2 1 -3]] + <<2 -4 -11]] = <<4 -3 -14]] *)
+matrixToMultivector[temperamentDifference[dicotM, srutalM]] (* <<2 1 -3]] - <<2 -4 -11]] = <<0 5 8]] *)
+
+(*TODO: automated testing of thousands of random examples to make sure LA and EA agree *)
+
+Out[309]= {{4,9,5},2,co}
+Out[310]= {{2,1,-3},2,co}
+Out[313]= {{5,-9,4},1,contra}
+Out[314]= {{-3,-1,2},1,contra}
+Out[317]= {{12,19,28},1,co}
+Out[318]= {{2,3,4},1,co}
+Out[321]= {{28,-19,12},2,contra}
+Out[322]= {{4,-3,2},2,contra}
+Out[325]= Error
+Out[326]= Error
+Out[329]= Error
+Out[330]= Error
+Out[333]= {{31,49,72,87},1,co}
+Out[334]= {{7,11,16,19},1,co}
+Out[337]= {{-87,72,-49,31},3,contra}
+Out[338]= {{-19,16,-11,7},3,contra}
+Out[339]= {{{1,0,-4},{0,1,4}},co}
+Out[340]= Error
+Out[341]= {{{4,-4,1}},contra}
+Out[342]= Error
+Out[343]= {{{7,11,16}},co}
+Out[344]= Error
+Out[345]= {{{-11,7,0},{-7,3,1}},contra}
+Out[346]= Error
+Out[347]= Error
+Out[348]= Error
+Out[349]= Error
+Out[350]= Error
+Out[351]= Error
+Out[352]= Error
+Out[353]= Error
+Out[354]= Error
+Out[360]= {{7,4,-10},2,co}
+Out[361]= {{1,4,4},2,co}
+Out[362]= {{7,9,-2},2,co}
+Out[363]= {{1,9,12},2,co}
+Out[364]= {{5,1,-10},2,co}
+Out[365]= {{1,-1,-4},2,co}
+Out[366]= {{5,-4,-18},2,co}
+Out[367]= {{1,4,4},2,co}
+Out[368]= {{8,13,2},2,co}
+Out[369]= {{0,5,8},2,co}
+Out[370]= {{6,5,-6},2,co}
+Out[371]= {{2,3,0},2,co}
+Out[372]= {{3,0,-7},2,co}
+Out[373]= {{1,4,4},2,co}
+Out[374]= {{3,5,1},2,co}
+Out[375]= {{1,4,4},2,co}
+Out[376]= {{6,5,-6},2,co}
+Out[377]= {{2,13,16},2,co}
+Out[378]= {{4,-3,-14},2,co}
+Out[379]= {{0,5,8},2,co}
+
+
+In[380]:= eaTemperamentSum[w1_, w2_] := eaTemperamentArithmetic[w1, w2, True];
+eaTemperamentDifference[w1_, w2_] := eaTemperamentArithmetic[w1, w2, False];
+
+checkThing[w_] := Module[{},
+(*Print["AAAAAAA", w === Error];*)
+If[
+w === Error,
+Error,
+allZerosL[getMinors[w]]
+]
+]
+
+eaIsCollinear[w1_, w2_] := Module[{prog, reg},
+prog = progressiveProduct[w1, w2];
+reg = regressiveProduct[w1,w2];
+
+(*Print["huh", allZerosL[getMinors[regressiveProduct[w1,w2]]], allZerosL[getMinors[progressiveProduct[w1, w2]]], regressiveProduct[w1,w2], progressiveProduct[w1,w2]," condition1: ", getGrade[w1] + getGrade[w2] > eaGetD[w1], " copmdiotopm2: ", getGrade[eaDual[w1]] + getGrade[eaDual[w2]] > eaGetD[w1]];*)
+
+(*Print["prog", prog, "reg", reg];*)
+
+If[
+getGrade[w1] + getGrade[w2] > eaGetD[w1] || getGrade[eaDual[w1]] + getGrade[eaDual[w2]] > eaGetD[w1],
+True,
+If[
+prog === Error ||reg === Error,
+False,
+If[
+checkThing[prog] || checkThing[reg], (*WTF DO YOU WANT FROM ME!!!!! HOW DO I PREVENT THIS FROM TRYING TO GET MINORS OF AN ERROR?!?!?!*)
+True,
+False
+]
+]
+]
+];
+
+eaTemperamentArithmetic[w1_, w2_, isSum_] := Module[{answer},
+answer =  !eaIsCollinear[w1, w2];
+(*Print["ummm",eaGetR[w1] != eaGetR[w2], eaGetD[w1] != eaGetD[w2],answer, "isSum", isSum,getMinors[w1] + getMinors[w2], getGrade[w1],getV[w1] ];*)
+If[
+eaGetR[w1] != eaGetR[w2] || eaGetD[w1] != eaGetD[w2] || answer,
+Error,
+If[
+isSum,
+eaCanonicalForm[{getMinors[w1] + getMinors[w2], getGrade[w1],getV[w1]}],
+eaCanonicalForm[{getMinors[w1] - getMinors[w2], getGrade[w1],getV[w1]}]
+]
+]
+];
+
+(* all examples tested from both sides of duality *)
+
+(* collinear multimaps *)
+meantoneMultimap = {{1,4,4},2,"co"};
+porcupineMultimap = {{3,5,1},2,"co"};
+eaTemperamentSum[meantoneMultimap, porcupineMultimap]
+eaTemperamentDifference[meantoneMultimap, porcupineMultimap]
+meantoneMulticomma = {{4,-4,1},1,"contra"};
+porcupineMulticomma = {{1,-5,3},1,"contra"};
+eaTemperamentSum[meantoneMulticomma, porcupineMulticomma]
+eaTemperamentDifference[meantoneMulticomma, porcupineMulticomma]
+
+(*collinear multicommas *)
+et7Multimap = {{7,11,16},1,"co"};
+et5Multimap = {{5,8,12},1,"co"};
+eaTemperamentSum[et7Multimap, et5Multimap]
+eaTemperamentDifference[et7Multimap, et5Multimap]
+et7Multicomma = {{16, -11, 7}, 2, "contra"};
+et5Multicomma = {{12, -8, 5}, 2, "contra"};
+eaTemperamentSum[et7Multicomma, et5Multicomma]
+eaTemperamentDifference[et7Multicomma, et5Multicomma]
+
+(* noncollinear - error! *)
+septimalMeantoneMultimap = {{1,4,10,4,13,12},2,"co"};
+septimalBlackwoodMultimap ={{0,5,0,8,0,-14},2,"co"};
+eaTemperamentSum[septimalMeantoneMultimap,septimalBlackwoodMultimap ]
+eaTemperamentDifference[septimalMeantoneMultimap,septimalBlackwoodMultimap]
+septimalMeantoneMulticomma = eaDual[{{1,4,10,4,13,12},2,"co"}];
+septimalBlackwoodMulticomma =eaDual[{{0,5,0,8,0,-14},2,"co"}];
+eaTemperamentSum[septimalMeantoneMulticomma,septimalBlackwoodMulticomma ]
+eaTemperamentDifference[septimalMeantoneMulticomma,septimalBlackwoodMulticomma]
+
+(* doubly collinear (multicommas) *)
+et12Multimap = {{12,19,28,34},1, "co"};
+et19Multimap = {{19,30,44,53},1, "co"};
+eaTemperamentSum[et12Multimap, et19Multimap]
+eaTemperamentDifference[et12Multimap, et19Multimap]
+et12Multicomma =eaDual[et12Multimap];
+et19Multicomma = eaDual[et19Multimap];
+eaTemperamentSum[et12Multicomma, et19Multicomma]
+eaTemperamentDifference[et12Multicomma, et19Multicomma]
+
+(*examples with themselves *)
+eaTemperamentSum[meantoneMultimap, meantoneMultimap]
+eaTemperamentDifference[meantoneMultimap, meantoneMultimap]
+eaTemperamentSum[meantoneMulticomma, meantoneMulticomma]
+eaTemperamentDifference[meantoneMulticomma, meantoneMulticomma]
+eaTemperamentSum[et7Multimap, et7Multimap]
+eaTemperamentDifference[et7Multimap, et7Multimap]
+eaTemperamentSum[et7Multicomma, et7Multicomma]
+eaTemperamentDifference[et7Multicomma, et7Multicomma]
+
+(*some basic examples *)
+augmentedMultimap = {{3 , 0, -7},2, "co"};
+diminishedMultimap = {{4, 4, -3},2, "co"};
+tetracotMultimap = {{4, 9, 5}, 2,"co"};
+dicotMultimap = {{2, 1, -3}, 2,"co"};
+srutalMultimap = {{2, -4, -11}, 2,"co"};
+eaTemperamentSum[augmentedMultimap, diminishedMultimap](* <<3 0 -7]] + <<4 4 -3]] = <<7 4 -10]]*)
+eaTemperamentDifference[augmentedMultimap, diminishedMultimap](* <<3 0 -7]] - <<4 4 -3]] = <<1 4 4]]*)
+eaTemperamentSum[augmentedMultimap, tetracotMultimap](* <<3 0 -7]] + <<4 9 5]] = <<7 9 -2]]*)
+eaTemperamentDifference[augmentedMultimap, tetracotMultimap](* <<3 0 -7]] - <<4 9 5]] = <<1 9 12]]*)
+eaTemperamentSum[augmentedMultimap, dicotMultimap](* <<3 0 -7]] + <<2 1 -3]] = <<5 1 -10]]*)
+eaTemperamentDifference[augmentedMultimap, dicotMultimap](* <<3 0 -7]] - <<2 1 -3]] = <<1 -1 -4]]*)
+eaTemperamentSum[augmentedMultimap, srutalMultimap](* <<3 0 -7]] + <<2 -4 -11]] = <<5 -4 -18]]*)
+eaTemperamentDifference[augmentedMultimap, srutalMultimap](* <<3 0 -7]] - <<2 -4 -11]] = <<1 4 4]]*)
+eaTemperamentSum[diminishedMultimap, tetracotMultimap](* <<4 4 -3]] + <<4 9 5]] = <<8 13 2]]*)
+eaTemperamentDifference[diminishedMultimap, tetracotMultimap] (* <<4 4 -3]] - <<4 9 5]] = <<0 5 8]]*)
+eaTemperamentSum[diminishedMultimap, dicotMultimap](* <<4 4 -3]] + <<2 1 -3]] = <<6 5 -6]]*)
+eaTemperamentDifference[diminishedMultimap, dicotMultimap](* <<4 4 -3]] - <<2 1 -3]] = <<2 3 0]]*)
+eaTemperamentSum[diminishedMultimap, srutalMultimap](* <<4 4 -3]] + <<2 -4 -11]] = <<6 0 -14]] \[RightArrow]<<3 0 -7]] *)
+eaTemperamentDifference[diminishedMultimap, srutalMultimap](*<<4 4 -3]] - <<2 -4 -11]] = <<2 8 8]] \[RightArrow] <<1 4 4]]*)
+eaTemperamentSum[tetracotMultimap, dicotMultimap] (* <<4 9 5]] + <<2 1 -3]] = <<6 10 2]] \[RightArrow]<<3 5 1]] *)
+eaTemperamentDifference[tetracotMultimap, dicotMultimap](* <<4 9 5]] - <<2 1 -3]] = <<2 8 8]] \[RightArrow]<<1 4 4]] *)
+eaTemperamentSum[tetracotMultimap, srutalMultimap] (* <<4 9 5]] + <<2 -4 -11]] = <<6 5 -6]] *)
+eaTemperamentDifference[tetracotMultimap, srutalMultimap](* <<4 9 5]] - <<2 -4 -11]] = <<2 13 16]] *)
+eaTemperamentSum[dicotMultimap, srutalMultimap](* <<2 1 -3]] + <<2 -4 -11]] = <<4 -3 -14]] *)
+eaTemperamentDifference[dicotMultimap, srutalMultimap](* <<2 1 -3]] - <<2 -4 -11]] = <<0 5 8]] *)
+
+Out[387]= {{4,9,5},2,co}
+Out[388]= {{2,1,-3},2,co}
+Out[391]= {{5,-9,4},1,contra}
+Out[392]= {{-3,-1,2},1,contra}
+Out[395]= {{12,19,28},1,co}
+Out[396]= {{2,3,4},1,co}
+Out[399]= {{28,-19,12},2,contra}
+Out[400]= {{4,-3,2},2,contra}
+Out[403]= Error
+Out[404]= Error
+Out[407]= Error
+Out[408]= Error
+Out[411]= {{31,49,72,87},1,co}
+Out[412]= {{7,11,16,19},1,co}
+Out[415]= {{-87,72,-49,31},3,contra}
+Out[416]= {{-19,16,-11,7},3,contra}
+Out[417]= {{1,4,4},2,co}
+Out[418]= {{0,0,0},2,co}
+Out[419]= {{4,-4,1},1,contra}
+Out[420]= {{0,0,0},1,contra}
+Out[421]= {{7,11,16},1,co}
+Out[422]= {{0,0,0},1,co}
+Out[423]= {{16,-11,7},2,contra}
+Out[424]= {{0,0,0},2,contra}
+Out[430]= {{7,4,-10},2,co}
+Out[431]= {{1,4,4},2,co}
+Out[432]= {{7,9,-2},2,co}
+Out[433]= {{1,9,12},2,co}
+Out[434]= {{5,1,-10},2,co}
+Out[435]= {{1,-1,-4},2,co}
+Out[436]= {{5,-4,-18},2,co}
+Out[437]= {{1,4,4},2,co}
+Out[438]= {{8,13,2},2,co}
+Out[439]= {{0,5,8},2,co}
+Out[440]= {{6,5,-6},2,co}
+Out[441]= {{2,3,0},2,co}
+Out[442]= {{3,0,-7},2,co}
+Out[443]= {{1,4,4},2,co}
+Out[444]= {{3,5,1},2,co}
+Out[445]= {{1,4,4},2,co}
+Out[446]= {{6,5,-6},2,co}
+Out[447]= {{2,13,16},2,co}
+Out[448]= {{4,-3,-14},2,co}
+Out[449]= {{0,5,8},2,co}
