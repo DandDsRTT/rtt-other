@@ -15,6 +15,8 @@ sharedCovectors
 ]
 ];
 
+reportCommonFactor[m_] := Det[Transpose[Take[hnf[Transpose[m]], MatrixRank[m]]]];
+
 temperamentArithmetic[t1_, t2_, isSum_] := If[
 getR[t1] != getR[t2] || getD[t1] != getD[t2] ,
 Error,
@@ -69,6 +71,144 @@ isEnfactored[c],
 (*Print["latest c: ", c];*)
 c[[n]] = divideOutGcd[c[[n]]  + First[sharedVectors]]
 ];
+
+c
+];
+
+defactorWithSharedByC2[t_, n_, sharedVectors_] := Module[{c, i, gcd, newFinalVectorBeforeDefactoring,newFinalVector,  shared2},
+(*Print["here's what i really cget called wiht", t, n, sharedVectors];*)
+shared2 =  Join[sharedVectors, getC[t]];
+c = Take[shared2,n];
+
+(*Print["t: ", t, " n: ", n, " shared2: ", shared2, " c: ", c];*)
+
+i = 1;
+
+While[
+isEnfactored[c],
+newFinalVectorBeforeDefactoring = c[[n]]  + sharedVectors[[i]];
+newFinalVector =  divideOutGcd[newFinalVectorBeforeDefactoring];
+gcd =  Apply[GCD,newFinalVectorBeforeDefactoring] ;
+(*Print["this c is still enfactored: ", c," (by ", reportCommonFactor[c], ") and we're currently incrementing by the ", i, "st/nd/th out of ",Length[sharedVectors], " of the shared vectors, which is ",sharedVectors[[i]]," so the new vector we're going to try in the final position is ", newFinalVector, " which has had a GCD of ", gcd, " divided out of it (if >1, will cycle which shared svector we increment by)"];*)
+If[gcd > 1 ,i++];
+If[i > Length[sharedVectors], i = 1];
+c[[n]] = newFinalVector;
+];
+
+c
+];
+
+doThing[sharedVectorCount_, giveUpAt_] := Module[{activeIndex},
+sharedVectorMultiples = Table[0,sharedVectorCount];
+sharedVectorMultiples[[1]] = giveUpAt; (*TODO: it's not really "give up at" it's just what this tier is*)
+activeIndex = 2;
+
+things = {};
+
+While[
+activeIndex <= Length[sharedVectorMultiples],
+(*jim = sharedVectorMultiples[[activeIndex]];
+Print["this jim: ", jim, " active index: ", activeIndex];*)
+(*If[
+activeIndex == 1,
+
+Print["just incrementing the first one"];
+sharedVectorMultiples[[1]] =jim + 1;
+activeIndex++,
+*)
+(*things = Join[things, {sharedVectorMultiples}];*)
+If[
+ sharedVectorMultiples[[activeIndex]] < sharedVectorMultiples[[activeIndex - 1]],
+
+(*Print["just incrementing non-first one"];*)
+things = Join[things, {sharedVectorMultiples}];
+sharedVectorMultiples[[activeIndex]] = sharedVectorMultiples[[activeIndex]] + 1,
+
+activeIndex++;
+(*Print["here's the tricky part where we move to the next active index. active index is now ", activeIndex];*)
+If[
+activeIndex > Length[sharedVectorMultiples] && sharedVectorMultiples[[1]] < giveUpAt,
+(*Print["except no wait it's beyond the end and time to increment the first one"];*)
+activeIndex = 2;
+things = Join[things, {sharedVectorMultiples}];
+sharedVectorMultiples[[1]] =sharedVectorMultiples[[1]] + 1;
+
+]
+(*]*)
+];
+
+
+(*Print[sharedVectorMultiples];*)
+(*times++;*)
+];
+things = Join[things, {sharedVectorMultiples}];
+
+things
+];
+(*doThing[4, 5]
+things*)
+
+convertToPerms[things_] := Flatten[Map[Permutations, things],1];
+(*convertToPerms[things]*)
+
+computeThingsToCheck[sharedVectorCount_, tier_] := Module[{thingResults},
+thingResults = doThing[sharedVectorCount, tier];
+(*Print["trying to compute things to check. shared vector count: ", sharedVectorCount, " and tier: ", tier, "so thing results are ", thingResults];*)
+
+convertToPerms[thingResults]
+];
+
+computeSharedVectorOffset[sharedVectors_, combo_] := Module[{base, i},
+(*Print["computing the shared vector offset. the first of the shared vectors is , and folowed by its length", First[sharedVectors], Length[First[sharedVectors]]];*)
+base = Table[0, Length[First[sharedVectors]]];
+(*Print["and so our initial base is comptuer to be ", base];*)
+(* TODO: there's got to be a "reduce" like thing I could do instead here *)
+i = 1;
+
+Do[
+base = base + comb * sharedVectors[[i]];
+(*Print["base is now", base, " which makes sense because comb is ", comb, " and sharedvectors[i] ois ", sharedVectors[[i]], " and i is ", i];*)
+i++,
+{comb, combo}
+];
+
+base
+];
+
+defactorWithSharedByCExperimental[t_, n_, sharedVectors_] := Module[{shared2, c, thingsToCheck, index, tier, sharedVectorOffset,newFinalVectorBeforeDefactoring, newFinalVector, original},
+shared2 =  Join[sharedVectors, getC[t]];
+c = Take[shared2,n];
+original = c[[n]];
+
+thingsToCheck = {};
+index = 1;
+tier = 1;
+
+While[
+isEnfactored[c],
+
+(*Print["trying here. still on tier ", tier, " and checking index: ", index, " but c ", c, " was enfactored"];*)
+(*Print["still enfactored: ", c];*)
+If[
+index <= Length[thingsToCheck],
+
+(*Print["checking a new thing!",  thingsToCheck[[index]]];*)
+sharedVectorOffset = computeSharedVectorOffset[sharedVectors, thingsToCheck[[index]]];
+newFinalVectorBeforeDefactoring = original  + sharedVectorOffset;
+newFinalVector =  divideOutGcd[newFinalVectorBeforeDefactoring];
+index++;
+(*gcd =  Apply[GCD,newFinalVectorBeforeDefactoring] ;*)
+c[[n]] = newFinalVector,
+
+
+thingsToCheck= computeThingsToCheck[Length[sharedVectors], tier];
+(*Print["out of things to check for now, compute some more to check! now on tier ",tier," and new things are: ", thingsToCheck];*)
+tier++;
+index = 1;
+];
+];
+
+Print["holy shit we did it!!!!!!", thingsToCheck[[index]]];
 
 c
 ];
@@ -243,7 +383,8 @@ matrixToMultivector[temperamentDifference[tetracotM, srutalM]]  (* <<4 9 5]] - <
 matrixToMultivector[temperamentSum[dicotM, srutalM]] (* <<2 1 -3]] + <<2 -4 -11]] = <<4 -3 -14]] *)
 matrixToMultivector[temperamentDifference[dicotM, srutalM]] (* <<2 1 -3]] - <<2 -4 -11]] = <<0 5 8]] *)
 
-(*TODO: automated testing of thousands of random examples to make sure LA and EA agree *)
+(* example that requires the breadth-first search of linear combinations of multiple shared vectors *)
+temperamentSum[{{{-3,-8,4,6}}, "co"}, {{{9,2,-4,1}},"co"}]
 
 Out[309]= {{4,9,5},2,co}
 Out[310]= {{2,1,-3},2,co}
@@ -297,177 +438,3 @@ Out[376]= {{6,5,-6},2,co}
 Out[377]= {{2,13,16},2,co}
 Out[378]= {{4,-3,-14},2,co}
 Out[379]= {{0,5,8},2,co}
-
-
-In[380]:= eaTemperamentSum[w1_, w2_] := eaTemperamentArithmetic[w1, w2, True];
-eaTemperamentDifference[w1_, w2_] := eaTemperamentArithmetic[w1, w2, False];
-
-checkThing[w_] := Module[{},
-(*Print["AAAAAAA", w === Error];*)
-If[
-w === Error,
-Error,
-allZerosL[getMinors[w]]
-]
-]
-
-eaIsCollinear[w1_, w2_] := Module[{prog, reg},
-prog = progressiveProduct[w1, w2];
-reg = regressiveProduct[w1,w2];
-
-(*Print["huh", allZerosL[getMinors[regressiveProduct[w1,w2]]], allZerosL[getMinors[progressiveProduct[w1, w2]]], regressiveProduct[w1,w2], progressiveProduct[w1,w2]," condition1: ", getGrade[w1] + getGrade[w2] > eaGetD[w1], " copmdiotopm2: ", getGrade[eaDual[w1]] + getGrade[eaDual[w2]] > eaGetD[w1]];*)
-
-(*Print["prog", prog, "reg", reg];*)
-
-If[
-getGrade[w1] + getGrade[w2] > eaGetD[w1] || getGrade[eaDual[w1]] + getGrade[eaDual[w2]] > eaGetD[w1],
-True,
-If[
-prog === Error ||reg === Error,
-False,
-If[
-checkThing[prog] || checkThing[reg], (*WTF DO YOU WANT FROM ME!!!!! HOW DO I PREVENT THIS FROM TRYING TO GET MINORS OF AN ERROR?!?!?!*)
-True,
-False
-]
-]
-]
-];
-
-eaTemperamentArithmetic[w1_, w2_, isSum_] := Module[{answer},
-answer =  !eaIsCollinear[w1, w2];
-(*Print["ummm",eaGetR[w1] != eaGetR[w2], eaGetD[w1] != eaGetD[w2],answer, "isSum", isSum,getMinors[w1] + getMinors[w2], getGrade[w1],getV[w1] ];*)
-If[
-eaGetR[w1] != eaGetR[w2] || eaGetD[w1] != eaGetD[w2] || answer,
-Error,
-If[
-isSum,
-eaCanonicalForm[{getMinors[w1] + getMinors[w2], getGrade[w1],getV[w1]}],
-eaCanonicalForm[{getMinors[w1] - getMinors[w2], getGrade[w1],getV[w1]}]
-]
-]
-];
-
-(* all examples tested from both sides of duality *)
-
-(* collinear multimaps *)
-meantoneMultimap = {{1,4,4},2,"co"};
-porcupineMultimap = {{3,5,1},2,"co"};
-eaTemperamentSum[meantoneMultimap, porcupineMultimap]
-eaTemperamentDifference[meantoneMultimap, porcupineMultimap]
-meantoneMulticomma = {{4,-4,1},1,"contra"};
-porcupineMulticomma = {{1,-5,3},1,"contra"};
-eaTemperamentSum[meantoneMulticomma, porcupineMulticomma]
-eaTemperamentDifference[meantoneMulticomma, porcupineMulticomma]
-
-(*collinear multicommas *)
-et7Multimap = {{7,11,16},1,"co"};
-et5Multimap = {{5,8,12},1,"co"};
-eaTemperamentSum[et7Multimap, et5Multimap]
-eaTemperamentDifference[et7Multimap, et5Multimap]
-et7Multicomma = {{16, -11, 7}, 2, "contra"};
-et5Multicomma = {{12, -8, 5}, 2, "contra"};
-eaTemperamentSum[et7Multicomma, et5Multicomma]
-eaTemperamentDifference[et7Multicomma, et5Multicomma]
-
-(* noncollinear - error! *)
-septimalMeantoneMultimap = {{1,4,10,4,13,12},2,"co"};
-septimalBlackwoodMultimap ={{0,5,0,8,0,-14},2,"co"};
-eaTemperamentSum[septimalMeantoneMultimap,septimalBlackwoodMultimap ]
-eaTemperamentDifference[septimalMeantoneMultimap,septimalBlackwoodMultimap]
-septimalMeantoneMulticomma = eaDual[{{1,4,10,4,13,12},2,"co"}];
-septimalBlackwoodMulticomma =eaDual[{{0,5,0,8,0,-14},2,"co"}];
-eaTemperamentSum[septimalMeantoneMulticomma,septimalBlackwoodMulticomma ]
-eaTemperamentDifference[septimalMeantoneMulticomma,septimalBlackwoodMulticomma]
-
-(* doubly collinear (multicommas) *)
-et12Multimap = {{12,19,28,34},1, "co"};
-et19Multimap = {{19,30,44,53},1, "co"};
-eaTemperamentSum[et12Multimap, et19Multimap]
-eaTemperamentDifference[et12Multimap, et19Multimap]
-et12Multicomma =eaDual[et12Multimap];
-et19Multicomma = eaDual[et19Multimap];
-eaTemperamentSum[et12Multicomma, et19Multicomma]
-eaTemperamentDifference[et12Multicomma, et19Multicomma]
-
-(*examples with themselves *)
-eaTemperamentSum[meantoneMultimap, meantoneMultimap]
-eaTemperamentDifference[meantoneMultimap, meantoneMultimap]
-eaTemperamentSum[meantoneMulticomma, meantoneMulticomma]
-eaTemperamentDifference[meantoneMulticomma, meantoneMulticomma]
-eaTemperamentSum[et7Multimap, et7Multimap]
-eaTemperamentDifference[et7Multimap, et7Multimap]
-eaTemperamentSum[et7Multicomma, et7Multicomma]
-eaTemperamentDifference[et7Multicomma, et7Multicomma]
-
-(*some basic examples *)
-augmentedMultimap = {{3 , 0, -7},2, "co"};
-diminishedMultimap = {{4, 4, -3},2, "co"};
-tetracotMultimap = {{4, 9, 5}, 2,"co"};
-dicotMultimap = {{2, 1, -3}, 2,"co"};
-srutalMultimap = {{2, -4, -11}, 2,"co"};
-eaTemperamentSum[augmentedMultimap, diminishedMultimap](* <<3 0 -7]] + <<4 4 -3]] = <<7 4 -10]]*)
-eaTemperamentDifference[augmentedMultimap, diminishedMultimap](* <<3 0 -7]] - <<4 4 -3]] = <<1 4 4]]*)
-eaTemperamentSum[augmentedMultimap, tetracotMultimap](* <<3 0 -7]] + <<4 9 5]] = <<7 9 -2]]*)
-eaTemperamentDifference[augmentedMultimap, tetracotMultimap](* <<3 0 -7]] - <<4 9 5]] = <<1 9 12]]*)
-eaTemperamentSum[augmentedMultimap, dicotMultimap](* <<3 0 -7]] + <<2 1 -3]] = <<5 1 -10]]*)
-eaTemperamentDifference[augmentedMultimap, dicotMultimap](* <<3 0 -7]] - <<2 1 -3]] = <<1 -1 -4]]*)
-eaTemperamentSum[augmentedMultimap, srutalMultimap](* <<3 0 -7]] + <<2 -4 -11]] = <<5 -4 -18]]*)
-eaTemperamentDifference[augmentedMultimap, srutalMultimap](* <<3 0 -7]] - <<2 -4 -11]] = <<1 4 4]]*)
-eaTemperamentSum[diminishedMultimap, tetracotMultimap](* <<4 4 -3]] + <<4 9 5]] = <<8 13 2]]*)
-eaTemperamentDifference[diminishedMultimap, tetracotMultimap] (* <<4 4 -3]] - <<4 9 5]] = <<0 5 8]]*)
-eaTemperamentSum[diminishedMultimap, dicotMultimap](* <<4 4 -3]] + <<2 1 -3]] = <<6 5 -6]]*)
-eaTemperamentDifference[diminishedMultimap, dicotMultimap](* <<4 4 -3]] - <<2 1 -3]] = <<2 3 0]]*)
-eaTemperamentSum[diminishedMultimap, srutalMultimap](* <<4 4 -3]] + <<2 -4 -11]] = <<6 0 -14]] \[RightArrow]<<3 0 -7]] *)
-eaTemperamentDifference[diminishedMultimap, srutalMultimap](*<<4 4 -3]] - <<2 -4 -11]] = <<2 8 8]] \[RightArrow] <<1 4 4]]*)
-eaTemperamentSum[tetracotMultimap, dicotMultimap] (* <<4 9 5]] + <<2 1 -3]] = <<6 10 2]] \[RightArrow]<<3 5 1]] *)
-eaTemperamentDifference[tetracotMultimap, dicotMultimap](* <<4 9 5]] - <<2 1 -3]] = <<2 8 8]] \[RightArrow]<<1 4 4]] *)
-eaTemperamentSum[tetracotMultimap, srutalMultimap] (* <<4 9 5]] + <<2 -4 -11]] = <<6 5 -6]] *)
-eaTemperamentDifference[tetracotMultimap, srutalMultimap](* <<4 9 5]] - <<2 -4 -11]] = <<2 13 16]] *)
-eaTemperamentSum[dicotMultimap, srutalMultimap](* <<2 1 -3]] + <<2 -4 -11]] = <<4 -3 -14]] *)
-eaTemperamentDifference[dicotMultimap, srutalMultimap](* <<2 1 -3]] - <<2 -4 -11]] = <<0 5 8]] *)
-
-Out[387]= {{4,9,5},2,co}
-Out[388]= {{2,1,-3},2,co}
-Out[391]= {{5,-9,4},1,contra}
-Out[392]= {{-3,-1,2},1,contra}
-Out[395]= {{12,19,28},1,co}
-Out[396]= {{2,3,4},1,co}
-Out[399]= {{28,-19,12},2,contra}
-Out[400]= {{4,-3,2},2,contra}
-Out[403]= Error
-Out[404]= Error
-Out[407]= Error
-Out[408]= Error
-Out[411]= {{31,49,72,87},1,co}
-Out[412]= {{7,11,16,19},1,co}
-Out[415]= {{-87,72,-49,31},3,contra}
-Out[416]= {{-19,16,-11,7},3,contra}
-Out[417]= {{1,4,4},2,co}
-Out[418]= {{0,0,0},2,co}
-Out[419]= {{4,-4,1},1,contra}
-Out[420]= {{0,0,0},1,contra}
-Out[421]= {{7,11,16},1,co}
-Out[422]= {{0,0,0},1,co}
-Out[423]= {{16,-11,7},2,contra}
-Out[424]= {{0,0,0},2,contra}
-Out[430]= {{7,4,-10},2,co}
-Out[431]= {{1,4,4},2,co}
-Out[432]= {{7,9,-2},2,co}
-Out[433]= {{1,9,12},2,co}
-Out[434]= {{5,1,-10},2,co}
-Out[435]= {{1,-1,-4},2,co}
-Out[436]= {{5,-4,-18},2,co}
-Out[437]= {{1,4,4},2,co}
-Out[438]= {{8,13,2},2,co}
-Out[439]= {{0,5,8},2,co}
-Out[440]= {{6,5,-6},2,co}
-Out[441]= {{2,3,0},2,co}
-Out[442]= {{3,0,-7},2,co}
-Out[443]= {{1,4,4},2,co}
-Out[444]= {{3,5,1},2,co}
-Out[445]= {{1,4,4},2,co}
-Out[446]= {{6,5,-6},2,co}
-Out[447]= {{2,13,16},2,co}
-Out[448]= {{4,-3,-14},2,co}
-Out[449]= {{0,5,8},2,co}
