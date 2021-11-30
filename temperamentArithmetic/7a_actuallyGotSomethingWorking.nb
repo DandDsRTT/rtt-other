@@ -1,440 +1,326 @@
-getCollinearity[t1_, t2_] := Module[{sharedCovectors},
-sharedCovectors = dual[meet[t1, t2]];
-sharedVectors = dual[join[t1, t2]];
+getCollinearity[t1_, t2_] := Module[{collinearVectors, collinearCovectors},
+  collinearVectors = dual[join[t1, t2]];
+  collinearCovectors = dual[meet[t1, t2]];
 
-(*Print["sharedCovectors: ", sharedCovectors, "sharedVectors: ", sharedVectors];*)
-
-If[
-allZeros[getA[sharedCovectors]],
-If[
-allZeros[getA[sharedVectors]],
-Error,
-sharedVectors
-],
-sharedCovectors
-]
+  If[
+    allZeros[getA[collinearCovectors]],
+    If[
+      allZeros[getA[collinearVectors]],
+      Error,
+      collinearVectors
+    ],
+    collinearCovectors
+  ]
 ];
-
-reportCommonFactor[m_] := Det[Transpose[Take[hnf[Transpose[m]], MatrixRank[m]]]];
 
 temperamentArithmetic[t1_, t2_, isSum_] := If[
-getR[t1] != getR[t2] || getD[t1] != getD[t2] ,
-Error,
-Module[{collinearity},
-collinearity = getCollinearity[t1, t2]; (* TODO: naming vars definitely needs some cleanup, this should probably just be called "collinearity" and maybe replaced "shared" with "collinear" *)
+  getR[t1] != getR[t2] || getD[t1] != getD[t2] ,
+  Error,
+  Module[{collinearity},
+    collinearity = getCollinearity[t1, t2];
 
-(*Print["sharedVectors", sharedVectors, sharedVectors === Error, getR[t1] != getR[t2], getD[t1] != getD[t2], isContra[sharedVectors]];*)
-
-If[
-collinearity === Error,
-Error,
-If[
-isContra[collinearity],
-validTemperamentArithmeticByC[t1, t2, isSum, getA[collinearity]],
-validTemperamentArithmeticByM[t1, t2, isSum,getA[ collinearity]]
-]
-]
-]
+    If[
+      collinearity === Error,
+      Error,
+      If[
+        isContra[collinearity],
+        validTemperamentArithmeticByC[t1, t2, isSum, getA[collinearity]],
+        validTemperamentArithmeticByM[t1, t2, isSum, getA[collinearity]]
+      ]
+    ]
+  ]
 ];
 
-temperamentSum[t1_, t2_] :=If[
-canonicalForm[t1] == canonicalForm[t2],
-t1,
-temperamentArithmetic[t1, t2, True]
+temperamentSum[t1_, t2_] := If[
+  canonicalForm[t1] == canonicalForm[t2],
+  t1,
+  temperamentArithmetic[t1, t2, True]
 ];
+
 temperamentDifference[t1_, t2_] := If[
-canonicalForm[t1] == canonicalForm[t2],
-Error,
-temperamentArithmetic[t1, t2, False]
+  canonicalForm[t1] == canonicalForm[t2],
+  Error,
+  temperamentArithmetic[t1, t2, False]
 ];
 
 isEnfactored[a_] := hnf[a] != hnf[colHermiteDefactor[a]];
 
-(*TODO: definitely hope we can clean this up so that we don't need byM and byC versions of everything; like maybe just an antitranspose can solve the problem *)
-defactorWithSharedByM[t_, r_, sharedVectors_] := Module[{m},
-m = Take[Join[sharedVectors, getM[t]],r];
+(* TODO: definitely hope we can clean this up so that we don't need byM and byC versions of everything; like maybe just an anti-transpose can solve the problem *)
 
-While[
-isEnfactored[m],
-(*Print["latest m: ", m];*)
-m[[r]] = divideOutGcd[m[[r]]  + First[sharedVectors]]
+(* here's the comma basis version of everything *)
+
+getCollinearVectorMultiplesForMaxMultiple[n_, maxMultiple_] := Module[{collinearVectorMultiples, i, collinearVectorMultiplesForMaxMultiple},
+  collinearVectorMultiples = Table[0, n];
+  collinearVectorMultiples[[1]] = maxMultiple;
+  i = 2;
+  collinearVectorMultiplesForMaxMultiple = {};
+
+  While[
+    i <= Length[collinearVectorMultiples],
+    If[
+      collinearVectorMultiples[[i]] < collinearVectorMultiples[[i - 1]],
+
+      collinearVectorMultiplesForMaxMultiple = Join[collinearVectorMultiplesForMaxMultiple, {collinearVectorMultiples}];
+      collinearVectorMultiples[[i]] = collinearVectorMultiples[[i]] + 1,
+
+      i++;
+      If[
+        i > Length[collinearVectorMultiples] && collinearVectorMultiples[[1]] < maxMultiple,
+
+        i = 2;
+        collinearVectorMultiplesForMaxMultiple = Join[collinearVectorMultiplesForMaxMultiple, {collinearVectorMultiples}];
+        collinearVectorMultiples[[1]] = collinearVectorMultiples[[1]] + 1;
+      ]
+    ];
+  ];
+  collinearVectorMultiplesForMaxMultiple = Join[collinearVectorMultiplesForMaxMultiple, {collinearVectorMultiples}];
+
+  collinearVectorMultiplesForMaxMultiple
 ];
 
-m
-];
+getCollinearVectorMultiplePermutationsForMaxMultiple[n_, maxMultiple_] := Flatten[Map[
+  Permutations,
+  getCollinearVectorMultiplesForMaxMultiple[n, maxMultiple]
+], 1];
 
-defactorWithSharedByC[t_, n_, sharedVectors_] := Module[{m},
-c = Take[Join[sharedVectors, getC[t]],n];
-
-While[
-isEnfactored[c],
-(*Print["latest c: ", c];*)
-c[[n]] = divideOutGcd[c[[n]]  + First[sharedVectors]]
-];
-
-c
-];
-
-defactorWithSharedByC2[t_, n_, sharedVectors_] := Module[{c, i, gcd, newFinalVectorBeforeDefactoring,newFinalVector,  shared2},
-(*Print["here's what i really cget called wiht", t, n, sharedVectors];*)
-shared2 =  Join[sharedVectors, getC[t]];
-c = Take[shared2,n];
-
-(*Print["t: ", t, " n: ", n, " shared2: ", shared2, " c: ", c];*)
-
-i = 1;
-
-While[
-isEnfactored[c],
-newFinalVectorBeforeDefactoring = c[[n]]  + sharedVectors[[i]];
-newFinalVector =  divideOutGcd[newFinalVectorBeforeDefactoring];
-gcd =  Apply[GCD,newFinalVectorBeforeDefactoring] ;
-(*Print["this c is still enfactored: ", c," (by ", reportCommonFactor[c], ") and we're currently incrementing by the ", i, "st/nd/th out of ",Length[sharedVectors], " of the shared vectors, which is ",sharedVectors[[i]]," so the new vector we're going to try in the final position is ", newFinalVector, " which has had a GCD of ", gcd, " divided out of it (if >1, will cycle which shared svector we increment by)"];*)
-If[gcd > 1 ,i++];
-If[i > Length[sharedVectors], i = 1];
-c[[n]] = newFinalVector;
-];
-
-c
-];
-
-doThing[sharedVectorCount_, giveUpAt_] := Module[{activeIndex},
-sharedVectorMultiples = Table[0,sharedVectorCount];
-sharedVectorMultiples[[1]] = giveUpAt; (*TODO: it's not really "give up at" it's just what this tier is*)
-activeIndex = 2;
-
-things = {};
-
-While[
-activeIndex <= Length[sharedVectorMultiples],
-(*jim = sharedVectorMultiples[[activeIndex]];
-Print["this jim: ", jim, " active index: ", activeIndex];*)
-(*If[
-activeIndex == 1,
-
-Print["just incrementing the first one"];
-sharedVectorMultiples[[1]] =jim + 1;
-activeIndex++,
-*)
-(*things = Join[things, {sharedVectorMultiples}];*)
-If[
- sharedVectorMultiples[[activeIndex]] < sharedVectorMultiples[[activeIndex - 1]],
-
-(*Print["just incrementing non-first one"];*)
-things = Join[things, {sharedVectorMultiples}];
-sharedVectorMultiples[[activeIndex]] = sharedVectorMultiples[[activeIndex]] + 1,
-
-activeIndex++;
-(*Print["here's the tricky part where we move to the next active index. active index is now ", activeIndex];*)
-If[
-activeIndex > Length[sharedVectorMultiples] && sharedVectorMultiples[[1]] < giveUpAt,
-(*Print["except no wait it's beyond the end and time to increment the first one"];*)
-activeIndex = 2;
-things = Join[things, {sharedVectorMultiples}];
-sharedVectorMultiples[[1]] =sharedVectorMultiples[[1]] + 1;
-
-]
-(*]*)
-];
-
-
-(*Print[sharedVectorMultiples];*)
-(*times++;*)
-];
-things = Join[things, {sharedVectorMultiples}];
-
-things
-];
-(*doThing[4, 5]
-things*)
-
-convertToPerms[things_] := Flatten[Map[Permutations, things],1];
-(*convertToPerms[things]*)
-
-computeThingsToCheck[sharedVectorCount_, tier_] := Module[{thingResults},
-thingResults = doThing[sharedVectorCount, tier];
-(*Print["trying to compute things to check. shared vector count: ", sharedVectorCount, " and tier: ", tier, "so thing results are ", thingResults];*)
-
-convertToPerms[thingResults]
-];
-
-computeSharedVectorOffset[sharedVectors_, combo_] := Module[{base, i},
-(*Print["computing the shared vector offset. the first of the shared vectors is , and folowed by its length", First[sharedVectors], Length[First[sharedVectors]]];*)
-base = Table[0, Length[First[sharedVectors]]];
-(*Print["and so our initial base is comptuer to be ", base];*)
 (* TODO: there's got to be a "reduce" like thing I could do instead here *)
-i = 1;
+getCollinearVectorLinearCombination[collinearVectors_, collinearVectorMultiplePermutation_] := Module[{collinearVectorLinearCombination, i},
+  collinearVectorLinearCombination = Table[0, Length[First[collinearVectors]]];
+  i = 1;
 
-Do[
-base = base + comb * sharedVectors[[i]];
-(*Print["base is now", base, " which makes sense because comb is ", comb, " and sharedvectors[i] ois ", sharedVectors[[i]], " and i is ", i];*)
-i++,
-{comb, combo}
+  Do[
+    collinearVectorLinearCombination = collinearVectorLinearCombination + collinearVectorMultiplePermutationEntry * collinearVectors[[i]];
+    i++,
+    {collinearVectorMultiplePermutationEntry, collinearVectorMultiplePermutation}
+  ];
+
+  collinearVectorLinearCombination
 ];
 
-base
+defactorWhileLockingCollinearVectors[t_, n_, collinearVectors_] := Module[
+  {
+    c,
+    originalTerminalVector,
+    collinearVectorMultiplePermutations,
+    i,
+    maxMultiple,
+    collinearVectorLinearCombination,
+    candidateTerminalVector
+  },
+
+  c = Take[Join[collinearVectors, getC[t]], n];
+  originalTerminalVector = c[[n]];
+  collinearVectorMultiplePermutations = {};
+  i = 1;
+  maxMultiple = 1;
+
+  While[
+    isEnfactored[c],
+
+    If[
+      i <= Length[collinearVectorMultiplePermutations],
+
+      collinearVectorLinearCombination = getCollinearVectorLinearCombination[collinearVectors, collinearVectorMultiplePermutations[[i]]];
+      candidateTerminalVector = divideOutGcd[originalTerminalVector + collinearVectorLinearCombination];
+      i++;
+      c[[n]] = candidateTerminalVector,
+
+      collinearVectorMultiplePermutations = getCollinearVectorMultiplePermutationsForMaxMultiple[Length[collinearVectors], maxMultiple];
+      maxMultiple++;
+      i = 1;
+    ];
+  ];
+
+  c
 ];
 
-defactorWithSharedByCExperimental[t_, n_, sharedVectors_] := Module[{shared2, c, thingsToCheck, index, tier, sharedVectorOffset,newFinalVectorBeforeDefactoring, newFinalVector, original},
-shared2 =  Join[sharedVectors, getC[t]];
-c = Take[shared2,n];
-original = c[[n]];
+(* TODO: still sad that I need Minors[] to figure this out... figure out if there's any other way *)
+isNegativeOrientationOfTemperamentMatrixByC[c_, n_] := trailingEntry[First[Minors[c, n]]] < 0;
 
-thingsToCheck = {};
-index = 1;
-tier = 1;
+validTemperamentArithmeticByC[t1_, t2_, isSum_, collinearVectors_] := Module[{v, n, c1, c2},
+  v = getV[t1];
+  n = getN[t1];
 
-While[
-isEnfactored[c],
+  c1 = defactorWhileLockingCollinearVectors[t1, n, collinearVectors];
+  c2 = defactorWhileLockingCollinearVectors[t2, n, collinearVectors];
 
-(*Print["trying here. still on tier ", tier, " and checking index: ", index, " but c ", c, " was enfactored"];*)
-(*Print["still enfactored: ", c];*)
-If[
-index <= Length[thingsToCheck],
+  If[
+    isNegativeOrientationOfTemperamentMatrixByC[c1, n],
+    c1[[n]] = -c1[[n]]
+  ];
 
-(*Print["checking a new thing!",  thingsToCheck[[index]]];*)
-sharedVectorOffset = computeSharedVectorOffset[sharedVectors, thingsToCheck[[index]]];
-newFinalVectorBeforeDefactoring = original  + sharedVectorOffset;
-newFinalVector =  divideOutGcd[newFinalVectorBeforeDefactoring];
-index++;
-(*gcd =  Apply[GCD,newFinalVectorBeforeDefactoring] ;*)
-c[[n]] = newFinalVector,
+  If[
+    isSum,
+    If[
+      isNegativeOrientationOfTemperamentMatrixByC[c2, n],
+      c2[[n]] = -c2[[n]]
+    ],
+    If[
+      !isNegativeOrientationOfTemperamentMatrixByC[c2, n],
+      c2[[n]] = -c2[[n]]
+    ]
+  ];
 
-
-thingsToCheck= computeThingsToCheck[Length[sharedVectors], tier];
-(*Print["out of things to check for now, compute some more to check! now on tier ",tier," and new things are: ", thingsToCheck];*)
-tier++;
-index = 1;
-];
-];
-
-Print["holy shit we did it!!!!!!", thingsToCheck[[index]]];
-
-c
+  If[
+    isContra[t1],
+    canonicalForm[{c1 + c2, "contra"}],
+    dual[{c1 + c2, "contra"}]
+  ]
 ];
 
-(*TODO: still sad that I need minors to figure this out... figure out if there's any other way*)
-isNegativeByM[m_, r_] := leadingEntry[First[Minors[m, r]]] < 0;
-isNegativeByC[c_, n_] := Module[{},
-(*Print["what da dog doing", First[Minors[c, n]]];*)
-trailingEntry[First[Minors[c, n]]] < 0
+(* here's the mapping version of everything *)
+
+(* TODO: implement getCollinearCovectorMultiplesForMaxMultiple using breadth-first linear combination of multiple collinear vector pattern established for comma bases *)
+
+(* TODO: implement getCollinearCovectorMultiplePermutationsForMaxMultiple using breadth-first linear combination of multiple collinear vector pattern established for comma bases *)
+
+(* TODO: implement getCollinearCovectorLinearCombination using breadth-first linear combination of multiple collinear vector pattern established for comma bases *)
+
+(* TODO: reimplement this using breadth-first linear combination of multiple collinear vector pattern established for comma bases *)
+defactorWhileLockingCollinearCovectors[t_, r_, collinearCovectors_] := Module[{m},
+  m = Take[Join[collinearCovectors, getM[t]], r];
+
+  While[
+    isEnfactored[m],
+    m[[r]] = divideOutGcd[m[[r]] + First[collinearCovectors]]
+  ];
+
+  m
 ];
 
-validTemperamentArithmeticByM[t1_, t2_, isSum_, sharedVectors_] := Module[{v,r, m1,m2},
-(*Print["we make it here", t1, t2, isSum, sharedVectors];*)
-v = getV[t1];
-r = getR[t1];
+isNegativeOrientationOfTemperamentMatrixByM[m_, r_] := leadingEntry[First[Minors[m, r]]] < 0;
 
-m1 = defactorWithSharedByM[t1, r, sharedVectors];
-m2 = defactorWithSharedByM[t2, r, sharedVectors];
+validTemperamentArithmeticByM[t1_, t2_, isSum_, collinearCovectors_] := Module[{v, r, m1, m2},
+  v = getV[t1];
+  r = getR[t1];
 
-(*Print["befire correction, m1: ", m1, " m2: ", m2];*)
+  m1 = defactorWhileLockingCollinearCovectors[t1, r, collinearCovectors];
+  m2 = defactorWhileLockingCollinearCovectors[t2, r, collinearCovectors];
 
-If[
-isNegativeByM[m1,r],
-m1[[r]] = -m1[[r]]
+  If[
+    isNegativeOrientationOfTemperamentMatrixByM[m1, r],
+    m1[[r]] = -m1[[r]]
+  ];
+
+  If[
+    isSum,
+    If[
+      isNegativeOrientationOfTemperamentMatrixByM[m2, r],
+      m2[[r]] = -m2[[r]]
+    ],
+    If[
+      !isNegativeOrientationOfTemperamentMatrixByM[m2, r],
+      m2[[r]] = -m2[[r]]
+    ]
+  ];
+
+  If[
+    isContra[t1],
+    dual[{m1 + m2, "co"}],
+    canonicalForm[{m1 + m2, "co"}]
+  ]
 ];
 
-If[
-isSum,
-If[
-isNegativeByM[m2,r],
-m2[[r]] = -m2[[r]]
-],
-If[
-!isNegativeByM[m2,r],
-m2[[r]] = -m2[[r]]
-],
-];
 
-(*Print["AFTER SUM/DIFF CORRECTION! m1: ", m1, " m2: ", m2];*)
 
-If[
-isContra[t1],
-dual[{m1+m2, "co"}],
-canonicalForm[{m1 + m2, "co"}]
-]
-];
 
-validTemperamentArithmeticByC[t1_, t2_, isSum_, sharedVectors_] := Module[{v,n, c1,c2},
-(*Print["we go here instead", t1, t2, isSum, sharedVectors];*)
-v = getV[t1];
-n = getN[t1];
+(* most examples tested from both sides of duality *)
 
-c1 = defactorWithSharedByC[t1, n, sharedVectors];
-c2 = defactorWithSharedByC[t2, n, sharedVectors];
-
-(*Print["before, c1: ", c1, " c2: ",c2];*)
-
-If[
-isNegativeByC[c1,n],
-c1[[n]] = -c1[[n]]
-];
-
-If[
-isSum,
-If[
-isNegativeByC[c2,n],
-c2[[n]] = -c2[[n]]
-],
-If[
-!isNegativeByC[c2,n],
-c2[[n]] = -c2[[n]]
-],
-];
-
-(*Print["AFTER SUM/DIFF CORRECTION! c1: ", c1, " c2: ",c2, isSum, isNegativeByC[c1,n], isNegativeByC[c2,n]];*)
-
-If[
-isContra[t1],
-canonicalForm[{c1+c2, "contra"}],
-dual[{c1 + c2, "contra"}]
-]
-];
-
-(* all examples tested from both sides of duality *)
+f = 0;
 
 (* collinear mappings*)
-meantoneM = {{{1,0,-4},{0,1,4}},"co"};
-porcupineM = {{{1,2,3},{0,3,5}},"co"};
-matrixToMultivector[temperamentSum[meantoneM, porcupineM]]
-matrixToMultivector[temperamentDifference[meantoneM, porcupineM]]
-meantoneC = {{{4,-4,1}},"contra"};
+meantoneM = {{{1, 0, -4}, {0, 1, 4}}, "co"};
+porcupineM = {{{1, 2, 3}, {0, 3, 5}}, "co"};
+test2args[temperamentSum, meantoneM, porcupineM, {{{1, 1, 1}, {0, 4, 9}}, "co"}];
+test2args[temperamentDifference, meantoneM, porcupineM, {{{1, 1, 2}, {0, 2, 1}}, "co"}];
+meantoneC = {{{4, -4, 1}}, "contra"};
 porcupineC = {{{1, -5, 3}}, "contra"};
-matrixToMultivector[temperamentSum[meantoneC, porcupineC]]
-matrixToMultivector[temperamentDifference[meantoneC, porcupineC]]
+test2args[temperamentSum, meantoneC, porcupineC, {{{5, -9, 4}}, "contra"}];
+test2args[temperamentDifference, meantoneC, porcupineC, {{{-3, -1, 2}}, "contra"}];
 
-(*collinear comma bases *)
-et7M = {{{7,11,16}},"co"};
-et5M = {{{5,8,12}}, "co"};
-matrixToMultivector[temperamentSum[et7M, et5M]]
-matrixToMultivector[temperamentDifference[et7M, et5M]]
+(* collinear comma bases *)
+et7M = {{{7, 11, 16}}, "co"};
+et5M = {{{5, 8, 12}}, "co"};
+test2args[temperamentSum, et7M, et5M, {{{12, 19, 28}}, "co"}];
+test2args[temperamentDifference, et7M, et5M, {{{2, 3, 4}}, "co"}];
 et7C = dual[et7M];
 et5C = dual[et5M];
-matrixToMultivector[temperamentSum[et7C, et5C]]
-matrixToMultivector[temperamentDifference[et7C, et5C]]
+test2args[temperamentSum, et7C, et5C, {{{-19, 12, 0}, {-15, 8, 1}}, "contra"}];
+test2args[temperamentDifference, et7C, et5C, {{{-3, 2, 0}, {-2, 0, 1}}, "contra"}];
 
 (* noncollinear - error! *)
-septimalMeantoneM = {{{1,0,-4,-13},{0,1,4,10}}, "co"};
-septimalBlackwoodM = {{{5,8,0,14},{0,0,1,0}}, "co"};
-temperamentSum[septimalMeantoneM, septimalBlackwoodM]
-temperamentDifference[septimalMeantoneM, septimalBlackwoodM]
+septimalMeantoneM = {{{1, 0, -4, -13}, {0, 1, 4, 10}}, "co"};
+septimalBlackwoodM = {{{5, 8, 0, 14}, {0, 0, 1, 0}}, "co"};
+test2args[temperamentSum, septimalMeantoneM, septimalBlackwoodM, Error];
+test2args[temperamentDifference, septimalMeantoneM, septimalBlackwoodM, Error];
 septimalMeantoneC = dual[septimalMeantoneM];
 septimalBlackwoodC = dual[septimalBlackwoodM];
-temperamentSum[septimalMeantoneC, septimalBlackwoodC]
-temperamentDifference[septimalMeantoneC, septimalBlackwoodC]
+test2args[temperamentSum, septimalMeantoneC, septimalBlackwoodC, Error];
+test2args[temperamentDifference, septimalMeantoneC, septimalBlackwoodC, Error];
 
 (* doubly collinear (comma bases) *)
-et12M = {{{12,19,28,34}},"co"}; (*dual[{{{4,-4,1,0},{-10,-1,5,0},{-5,2,2,-1}},"contra"}]*)
-et19M = {{{19,30,44,53}},"co"}; (*dual[{{{4,-4,1,0},{6,-2,0,-1},{-5,2,2,-1}},"contra"}]*)
-matrixToMultivector[temperamentSum[et12M, et19M]]
-matrixToMultivector[temperamentDifference[et12M, et19M]]
-et12C =dual[et12M];
+et12M = {{{12, 19, 28, 34}}, "co"}; (* dual[{{{4, -4, 1, 0}, {-5, 2, 2, -1}, {-10, -1, 5, 0}}, "contra"}] *)
+et19M = {{{19, 30, 44, 53}}, "co"}; (* dual[{{{4, -4, 1, 0}, {-5, 2, 2, -1}, {6, -2, 0, -1}}, "contra"}] *)
+test2args[temperamentSum, et12M, et19M, {{{31, 49, 72, 87}}, "co"}];
+test2args[temperamentDifference, et12M, et19M, {{{7, 11, 16, 19}}, "co"}];
+et12C = dual[et12M];
 et19C = dual[et19M];
-matrixToMultivector[temperamentSum[et12C, et19C]]
-matrixToMultivector[temperamentDifference[et12C, et19C]]
+test2args[temperamentSum, et12C, et19C, {{{-49, 31, 0, 0}, {-45, 27, 1, 0}, {-36, 21, 0, 1}}, "contra"}];
+test2args[temperamentDifference, et12C, et19C, {{{-11, 7, 0, 0}, {-7, 3, 1, 0}, {-9, 4, 0, 1}}, "contra"}];
 
-(*examples with themselves *)
-temperamentSum[meantoneM, meantoneM]
-temperamentDifference[meantoneM, meantoneM]
-temperamentSum[meantoneC, meantoneC]
-temperamentDifference[meantoneC, meantoneC]
-temperamentSum[et7M, et7M]
-temperamentDifference[et7M, et7M]
-temperamentSum[et7C, et7C]
-temperamentDifference[et7C, et7C]
+(* examples with themselves *)
+test2args[temperamentSum, meantoneM, meantoneM, meantoneM];
+test2args[temperamentDifference, meantoneM, meantoneM, Error];
+test2args[temperamentSum, meantoneC, meantoneC, meantoneC];
+test2args[temperamentDifference, meantoneC, meantoneC, Error];
+test2args[temperamentSum, et7M, et7M, et7M];
+test2args[temperamentDifference, et7M, et7M, Error];
+test2args[temperamentSum, et7C, et7C, et7C];
+test2args[temperamentDifference, et7C, et7C, Error];
 
 (* mismatched r & n but matching d *)
-temperamentSum[et7M, meantoneM]
-temperamentDifference[et7M, meantoneM]
-temperamentSum[et7C, meantoneC]
-temperamentDifference[et7C, meantoneC]
+test2args[temperamentSum, et7M, meantoneM, Error];
+test2args[temperamentDifference, et7M, meantoneM, Error];
+test2args[temperamentSum, et7C, meantoneC, Error];
+test2args[temperamentDifference, et7C, meantoneC, Error];
 
 (* mismatched d but matching r or n *)
-temperamentSum[et7M, et12M]
-temperamentDifference[et7M, et12M]
-temperamentSum[et7C, et12C]
-temperamentDifference[et7C, et12C]
+test2args[temperamentSum, et7M, et12M, Error];
+test2args[temperamentDifference, et7M, et12M, Error];
+test2args[temperamentSum, et7C, et12C, Error];
+test2args[temperamentDifference, et7C, et12C, Error];
 
-(*some basic examples *)
-augmentedM = {{{3,0,7},{0,1,0}},"co"}; (* <<3 0 -7]] *)
-diminishedM = {{{4,0,3},{0,1,1}}, "co"}; (* <<4 4 -3]] *)
-tetracotM = {{{1,1,1},{0,4,9}},"co"}; (* <<4 9 5]] *)
-dicotM = {{{1,1,2},{0,2,1}},"co"}; (* <<2 1 -3]] *)
-srutalM = {{{2,0,11},{0,1,-2}},"co"}; (* <<2 -4 -11]] *)
-matrixToMultivector[temperamentSum[augmentedM, diminishedM]] (* <<3 0 -7]] + <<4 4 -3]] = <<7 4 -10]]*)
-matrixToMultivector[temperamentDifference[augmentedM, diminishedM]](* <<3 0 -7]] - <<4 4 -3]] = <<1 4 4]]*)
-matrixToMultivector[temperamentSum[augmentedM, tetracotM]] (* <<3 0 -7]] + <<4 9 5]] = <<7 9 -2]]*)
-matrixToMultivector[temperamentDifference[augmentedM, tetracotM]] (* <<3 0 -7]] - <<4 9 5]] = <<1 9 12]]*)
-matrixToMultivector[temperamentSum[augmentedM, dicotM]] (* <<3 0 -7]] + <<2 1 -3]] = <<5 1 -10]]*)
-matrixToMultivector[temperamentDifference[augmentedM, dicotM]] (* <<3 0 -7]] - <<2 1 -3]] = <<1 -1 -4]]*)
-matrixToMultivector[temperamentSum[augmentedM, srutalM]] (* <<3 0 -7]] + <<2 -4 -11]] = <<5 -4 -18]]*)
-matrixToMultivector[temperamentDifference[augmentedM, srutalM]] (* <<3 0 -7]] - <<2 -4 -11]] = <<1 4 4]]*)
-matrixToMultivector[temperamentSum[diminishedM, tetracotM]] (* <<4 4 -3]] + <<4 9 5]] = <<8 13 2]]*)
-matrixToMultivector[temperamentDifference[diminishedM, tetracotM]] (* <<4 4 -3]] - <<4 9 5]] = <<0 5 8]]*)
-matrixToMultivector[temperamentSum[diminishedM, dicotM]](* <<4 4 -3]] + <<2 1 -3]] = <<6 5 -6]]*)
-matrixToMultivector[temperamentDifference[diminishedM, dicotM]] (* <<4 4 -3]] - <<2 1 -3]] = <<2 3 0]]*)
-matrixToMultivector[temperamentSum[diminishedM, srutalM]] (* <<4 4 -3]] + <<2 -4 -11]] = <<6 0 -14]] \[RightArrow]<<3 0 -7]] *)
-matrixToMultivector[temperamentDifference[diminishedM, srutalM]] (* <<4 4 -3]] - <<2 -4 -11]] = <<2 8 8]] \[RightArrow] <<1 4 4]] *)
-matrixToMultivector[temperamentSum[tetracotM, dicotM]] (* <<4 9 5]] + <<2 1 -3]] = <<6 10 2]] \[RightArrow]<<3 5 1]] *)
-matrixToMultivector[temperamentDifference[tetracotM, dicotM]] (* <<4 9 5]] - <<2 1 -3]] = <<2 8 8]] \[RightArrow]<<1 4 4]] *)
-matrixToMultivector[temperamentSum[tetracotM, srutalM]] (* <<4 9 5]] + <<2 -4 -11]] = <<6 5 -6]] *)
-matrixToMultivector[temperamentDifference[tetracotM, srutalM]]  (* <<4 9 5]] - <<2 -4 -11]] = <<2 13 16]] *)
-matrixToMultivector[temperamentSum[dicotM, srutalM]] (* <<2 1 -3]] + <<2 -4 -11]] = <<4 -3 -14]] *)
-matrixToMultivector[temperamentDifference[dicotM, srutalM]] (* <<2 1 -3]] - <<2 -4 -11]] = <<0 5 8]] *)
+(* some basic examples *)
+augmentedM = {{{3, 0, 7}, {0, 1, 0}}, "co"}; (* ⟨⟨3 0 -7]] *)
+diminishedM = {{{4, 0, 3}, {0, 1, 1}}, "co"}; (* ⟨⟨4 4 -3]] *)
+tetracotM = {{{1, 1, 1}, {0, 4, 9}}, "co"}; (* ⟨⟨4 9 5]] *)
+dicotM = {{{1, 1, 2}, {0, 2, 1}}, "co"}; (* ⟨⟨2 1 -3]] *)
+srutalM = {{{2, 0, 11}, {0, 1, -2}}, "co"}; (* ⟨⟨2 -4 -11]] *)
+test2args[temperamentSum, augmentedM, diminishedM, {{{1, 1, 2}, {0, 7, 4}}, "co"}]; (* ⟨⟨3 0 -7]] + ⟨⟨4 4 -3]] = ⟨⟨7 4 -10]]*)
+test2args[temperamentDifference, augmentedM, diminishedM, {{{1, 0, -4}, {0, 1, 4}}, "co"} ];(* ⟨⟨3 0 -7]] - ⟨⟨4 4 -3]] = ⟨⟨1 4 4]]*)
+test2args[temperamentSum, augmentedM, tetracotM, {{{1, 6, 8}, {0, 7, 9}}, "co"} ] ;(* ⟨⟨3 0 -7]] + ⟨⟨4 9 5]] = ⟨⟨7 9 -2]]*)
+test2args[temperamentDifference, augmentedM, tetracotM, {{{1, 0, -12}, {0, 1, 9}}, "co"} ]; (* ⟨⟨3 0 -7]] - ⟨⟨4 9 5]] = ⟨⟨1 9 12]]*)
+test2args[temperamentSum, augmentedM, dicotM, {{{1, 0, 2}, {0, 5, 1}}, "co"} ] ;(* ⟨⟨3 0 -7]] + ⟨⟨2 1 -3]] = ⟨⟨5 1 -10]]*)
+test2args[temperamentDifference, augmentedM, dicotM, {{{1, 0, 4}, {0, 1, -1}}, "co"} ] ;(* ⟨⟨3 0 -7]] - ⟨⟨2 1 -3]] = ⟨⟨1 -1 -4]]*)
+test2args[temperamentSum, augmentedM, srutalM, {{{1, 2, 2}, {0, 5, -4}}, "co"} ] ;(* ⟨⟨3 0 -7]] + ⟨⟨2 -4 -11]] = ⟨⟨5 -4 -18]]*)
+test2args[temperamentDifference, augmentedM, srutalM, {{{1, 0, -4}, {0, 1, 4}}, "co"} ]; (* ⟨⟨3 0 -7]] - ⟨⟨2 -4 -11]] = ⟨⟨1 4 4]]*)
+test2args[temperamentSum, diminishedM, tetracotM, {{{1, 2, 3}, {0, 8, 13}}, "co"} ]; (* ⟨⟨4 4 -3]] + ⟨⟨4 9 5]] = ⟨⟨8 13 2]]*)
+test2args[temperamentDifference, diminishedM, tetracotM, {{{5, 8, 0}, {0, 0, 1}}, "co"} ]; (* ⟨⟨4 4 -3]] - ⟨⟨4 9 5]] = ⟨⟨0 5 8]]*)
+test2args[temperamentSum, diminishedM, dicotM, {{{1, 0, 1}, {0, 6, 5}}, "co"} ];(* ⟨⟨4 4 -3]] + ⟨⟨2 1 -3]] = ⟨⟨6 5 -6]]*)
+test2args[temperamentDifference, diminishedM, dicotM, {{{1, 0, 0}, {0, 2, 3}}, "co"} ]; (* ⟨⟨4 4 -3]] - ⟨⟨2 1 -3]] = ⟨⟨2 3 0]]*)
+test2args[temperamentSum, diminishedM, srutalM, {{{3, 0, 7}, {0, 1, 0}}, "co"} ]; (* ⟨⟨4 4 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨6 0 -14]] → ⟨⟨3 0 -7]] *)
+test2args[temperamentDifference, diminishedM, srutalM, {{{1, 0, -4}, {0, 1, 4}}, "co"} ]; (* ⟨⟨4 4 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨2 8 8]] → ⟨⟨1 4 4]] *)
+test2args[temperamentSum, tetracotM, dicotM, {{{1, 2, 3}, {0, 3, 5}}, "co"} ]; (* ⟨⟨4 9 5]] + ⟨⟨2 1 -3]] = ⟨⟨6 10 2]] → ⟨⟨3 5 1]] *)
+test2args[temperamentDifference, tetracotM, dicotM, {{{1, 0, -4}, {0, 1, 4}}, "co"}]; (* ⟨⟨4 9 5]] - ⟨⟨2 1 -3]] = ⟨⟨2 8 8]] → ⟨⟨1 4 4]] *)
+test2args[temperamentSum, tetracotM, srutalM, {{{1, 0, 1}, {0, 6, 5}}, "co"} ]; (* ⟨⟨4 9 5]] + ⟨⟨2 -4 -11]] = ⟨⟨6 5 -6]] *)
+test2args[temperamentDifference, tetracotM, srutalM, {{{1, 0, -8}, {0, 2, 13}}, "co"} ];  (* ⟨⟨4 9 5]] - ⟨⟨2 -4 -11]] = ⟨⟨2 13 16]] *)
+test2args[temperamentSum, dicotM, srutalM, {{{1, 2, 2}, {0, 4, -3}}, "co"} ]; (* ⟨⟨2 1 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨4 -3 -14]] *)
+test2args[temperamentDifference, dicotM, srutalM, {{{5, 8, 0}, {0, 0, 1}}, "co"} ]; (* ⟨⟨2 1 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨0 5 8]] *)
 
-(* example that requires the breadth-first search of linear combinations of multiple shared vectors *)
-temperamentSum[{{{-3,-8,4,6}}, "co"}, {{{9,2,-4,1}},"co"}]
+(* example that requires the breadth-first search of linear combinations of multiple collinear vectors *)
+test2args[temperamentSum, {{{-3, -8, 4, 6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];
 
-Out[309]= {{4,9,5},2,co}
-Out[310]= {{2,1,-3},2,co}
-Out[313]= {{5,-9,4},1,contra}
-Out[314]= {{-3,-1,2},1,contra}
-Out[317]= {{12,19,28},1,co}
-Out[318]= {{2,3,4},1,co}
-Out[321]= {{28,-19,12},2,contra}
-Out[322]= {{4,-3,2},2,contra}
-Out[325]= Error
-Out[326]= Error
-Out[329]= Error
-Out[330]= Error
-Out[333]= {{31,49,72,87},1,co}
-Out[334]= {{7,11,16,19},1,co}
-Out[337]= {{-87,72,-49,31},3,contra}
-Out[338]= {{-19,16,-11,7},3,contra}
-Out[339]= {{{1,0,-4},{0,1,4}},co}
-Out[340]= Error
-Out[341]= {{{4,-4,1}},contra}
-Out[342]= Error
-Out[343]= {{{7,11,16}},co}
-Out[344]= Error
-Out[345]= {{{-11,7,0},{-7,3,1}},contra}
-Out[346]= Error
-Out[347]= Error
-Out[348]= Error
-Out[349]= Error
-Out[350]= Error
-Out[351]= Error
-Out[352]= Error
-Out[353]= Error
-Out[354]= Error
-Out[360]= {{7,4,-10},2,co}
-Out[361]= {{1,4,4},2,co}
-Out[362]= {{7,9,-2},2,co}
-Out[363]= {{1,9,12},2,co}
-Out[364]= {{5,1,-10},2,co}
-Out[365]= {{1,-1,-4},2,co}
-Out[366]= {{5,-4,-18},2,co}
-Out[367]= {{1,4,4},2,co}
-Out[368]= {{8,13,2},2,co}
-Out[369]= {{0,5,8},2,co}
-Out[370]= {{6,5,-6},2,co}
-Out[371]= {{2,3,0},2,co}
-Out[372]= {{3,0,-7},2,co}
-Out[373]= {{1,4,4},2,co}
-Out[374]= {{3,5,1},2,co}
-Out[375]= {{1,4,4},2,co}
-Out[376]= {{6,5,-6},2,co}
-Out[377]= {{2,13,16},2,co}
-Out[378]= {{4,-3,-14},2,co}
-Out[379]= {{0,5,8},2,co}
+
+
+
+Print["TOTAL FAILURES: ", f];

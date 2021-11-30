@@ -1,172 +1,115 @@
 eaTemperamentSum[w1_, w2_] := eaTemperamentArithmetic[w1, w2, True];
 eaTemperamentDifference[w1_, w2_] := eaTemperamentArithmetic[w1, w2, False];
 
-checkThing[w_] := Module[{},
-(*Print["AAAAAAA", w === Error];*)
-If[
-w === Error,
-Error,
-allZerosL[getMinors[w]]
-]
-]
-
 eaIsCollinear[w1_, w2_] := Module[{prog, reg},
-prog = progressiveProduct[w1, w2];
-reg = regressiveProduct[w1,w2];
+  prog = progressiveProduct[w1, w2];
+  reg = regressiveProduct[w1, w2];
 
-(*Print["huh", allZerosL[getMinors[regressiveProduct[w1,w2]]], allZerosL[getMinors[progressiveProduct[w1, w2]]], regressiveProduct[w1,w2], progressiveProduct[w1,w2]," condition1: ", getGrade[w1] + getGrade[w2] > eaGetD[w1], " copmdiotopm2: ", getGrade[eaDual[w1]] + getGrade[eaDual[w2]] > eaGetD[w1]];*)
-
-(*Print["prog", prog, "reg", reg];*)
-
-If[
-getGrade[w1] + getGrade[w2] > eaGetD[w1] || getGrade[eaDual[w1]] + getGrade[eaDual[w2]] > eaGetD[w1],
-True,
-If[
-prog === Error ||reg === Error,
-False,
-If[
-checkThing[prog] || checkThing[reg], (*WTF DO YOU WANT FROM ME!!!!! HOW DO I PREVENT THIS FROM TRYING TO GET MINORS OF AN ERROR?!?!?!*)
-True,
-False
-]
-]
-]
+  If[
+    getGrade[w1] + getGrade[w2] > eaGetD[w1] || getGrade[eaDual[w1]] + getGrade[eaDual[w2]] > eaGetD[w1],
+    True,
+    prog === Error && reg === Error && (allZerosL[getMinors[prog]] || allZerosL[getMinors[reg]])
+  ]
 ];
 
-eaTemperamentArithmetic[w1_, w2_, isSum_] := Module[{answer},
-answer =  !eaIsCollinear[w1, w2];
-(*Print["ummm",eaGetR[w1] != eaGetR[w2], eaGetD[w1] != eaGetD[w2],answer, "isSum", isSum,getMinors[w1] + getMinors[w2], getGrade[w1],getV[w1] ];*)
-If[
-eaGetR[w1] != eaGetR[w2] || eaGetD[w1] != eaGetD[w2] || answer,
-Error,
-If[
-isSum,
-eaCanonicalForm[{getMinors[w1] + getMinors[w2], getGrade[w1],getV[w1]}],
-eaCanonicalForm[{getMinors[w1] - getMinors[w2], getGrade[w1],getV[w1]}]
-]
-]
+eaTemperamentArithmetic[w1_, w2_, isSum_] := If[
+  eaGetR[w1] != eaGetR[w2] || eaGetD[w1] != eaGetD[w2] || !eaIsCollinear[w1, w2],
+  Error,
+  If[
+    isSum,
+    eaCanonicalForm[{getMinors[w1] + getMinors[w2], getGrade[w1], getV[w1]}],
+    eaCanonicalForm[{getMinors[w1] - getMinors[w2], getGrade[w1], getV[w1]}]
+  ]
 ];
+
+
+
 
 (* all examples tested from both sides of duality *)
 
-(* collinear multimaps *)
-meantoneMultimap = {{1,4,4},2,"co"};
-porcupineMultimap = {{3,5,1},2,"co"};
-eaTemperamentSum[meantoneMultimap, porcupineMultimap]
-eaTemperamentDifference[meantoneMultimap, porcupineMultimap]
-meantoneMulticomma = {{4,-4,1},1,"contra"};
-porcupineMulticomma = {{1,-5,3},1,"contra"};
-eaTemperamentSum[meantoneMulticomma, porcupineMulticomma]
-eaTemperamentDifference[meantoneMulticomma, porcupineMulticomma]
+f = 0;
 
-(*collinear multicommas *)
-et7Multimap = {{7,11,16},1,"co"};
-et5Multimap = {{5,8,12},1,"co"};
-eaTemperamentSum[et7Multimap, et5Multimap]
-eaTemperamentDifference[et7Multimap, et5Multimap]
+(* collinear multimaps *)
+meantoneMultimap = {{1, 4, 4}, 2, "co"};
+porcupineMultimap = {{3, 5, 1}, 2, "co"};
+test2args[eaTemperamentSum, meantoneMultimap, porcupineMultimap, {{4, 9, 5}, 2, "co"}];
+test2args[eaTemperamentDifference, meantoneMultimap, porcupineMultimap, {{2, 1, -3}, 2, "co"}];
+meantoneMulticomma = {{4, -4, 1}, 1, "contra"};
+porcupineMulticomma = {{1, -5, 3}, 1, "contra"};
+test2args[eaTemperamentSum, meantoneMulticomma, porcupineMulticomma, {{5, -9, 4}, 1, "contra"}];
+test2args[eaTemperamentDifference, meantoneMulticomma, porcupineMulticomma, {{-3, -1, 2}, 1, "contra"}];
+
+(* collinear multicommas *)
+et7Multimap = {{7, 11, 16}, 1, "co"};
+et5Multimap = {{5, 8, 12}, 1, "co"};
+test2args[eaTemperamentSum, et7Multimap, et5Multimap, {{12, 19, 28}, 1, "co"}];
+test2args[eaTemperamentDifference, et7Multimap, et5Multimap, {{2, 3, 4}, 1, "co"}];
 et7Multicomma = {{16, -11, 7}, 2, "contra"};
 et5Multicomma = {{12, -8, 5}, 2, "contra"};
-eaTemperamentSum[et7Multicomma, et5Multicomma]
-eaTemperamentDifference[et7Multicomma, et5Multicomma]
+test2args[eaTemperamentSum, et7Multicomma, et5Multicomma, {{28, -19, 12}, 2, "contra"}];
+test2args[eaTemperamentDifference, et7Multicomma, et5Multicomma, {{4, -3, 2}, 2, "contra"}];
 
 (* noncollinear - error! *)
-septimalMeantoneMultimap = {{1,4,10,4,13,12},2,"co"};
-septimalBlackwoodMultimap ={{0,5,0,8,0,-14},2,"co"};
-eaTemperamentSum[septimalMeantoneMultimap,septimalBlackwoodMultimap ]
-eaTemperamentDifference[septimalMeantoneMultimap,septimalBlackwoodMultimap]
-septimalMeantoneMulticomma = eaDual[{{1,4,10,4,13,12},2,"co"}];
-septimalBlackwoodMulticomma =eaDual[{{0,5,0,8,0,-14},2,"co"}];
-eaTemperamentSum[septimalMeantoneMulticomma,septimalBlackwoodMulticomma ]
-eaTemperamentDifference[septimalMeantoneMulticomma,septimalBlackwoodMulticomma]
+septimalMeantoneMultimap = {{1, 4, 10, 4, 13, 12}, 2, "co"};
+septimalBlackwoodMultimap = {{0, 5, 0, 8, 0, -14}, 2, "co"};
+test2args[eaTemperamentSum, septimalMeantoneMultimap, septimalBlackwoodMultimap, Error];
+test2args[eaTemperamentDifference, septimalMeantoneMultimap, septimalBlackwoodMultimap, Error];
+septimalMeantoneMulticomma = eaDual[{{1, 4, 10, 4, 13, 12}, 2, "co"}];
+septimalBlackwoodMulticomma = eaDual[{{0, 5, 0, 8, 0, -14}, 2, "co"}];
+test2args[eaTemperamentSum, septimalMeantoneMulticomma, septimalBlackwoodMulticomma, Error];
+test2args[eaTemperamentDifference, septimalMeantoneMulticomma, septimalBlackwoodMulticomma, Error];
 
 (* doubly collinear (multicommas) *)
-et12Multimap = {{12,19,28,34},1, "co"};
-et19Multimap = {{19,30,44,53},1, "co"};
-eaTemperamentSum[et12Multimap, et19Multimap]
-eaTemperamentDifference[et12Multimap, et19Multimap]
-et12Multicomma =eaDual[et12Multimap];
+et12Multimap = {{12, 19, 28, 34}, 1, "co"};
+et19Multimap = {{19, 30, 44, 53}, 1, "co"};
+test2args[eaTemperamentSum, et12Multimap, et19Multimap, {{31, 49, 72, 87}, 1, "co"}];
+test2args[eaTemperamentDifference, et12Multimap, et19Multimap, {{7, 11, 16, 19}, 1, "co"}];
+et12Multicomma = eaDual[et12Multimap];
 et19Multicomma = eaDual[et19Multimap];
-eaTemperamentSum[et12Multicomma, et19Multicomma]
-eaTemperamentDifference[et12Multicomma, et19Multicomma]
+test2args[eaTemperamentSum, et12Multicomma, et19Multicomma, {{-87, 72, -49, 31}, 3, "contra"}];
+test2args[eaTemperamentDifference, et12Multicomma, et19Multicomma, {{-19, 16, -11, 7}, 3, "contra"}];
 
-(*examples with themselves *)
-eaTemperamentSum[meantoneMultimap, meantoneMultimap]
-eaTemperamentDifference[meantoneMultimap, meantoneMultimap]
-eaTemperamentSum[meantoneMulticomma, meantoneMulticomma]
-eaTemperamentDifference[meantoneMulticomma, meantoneMulticomma]
-eaTemperamentSum[et7Multimap, et7Multimap]
-eaTemperamentDifference[et7Multimap, et7Multimap]
-eaTemperamentSum[et7Multicomma, et7Multicomma]
-eaTemperamentDifference[et7Multicomma, et7Multicomma]
+(* examples with themselves *)
+test2args[eaTemperamentSum, meantoneMultimap, meantoneMultimap, {{1, 4, 4}, 2, "co"}];
+test2args[eaTemperamentDifference, meantoneMultimap, meantoneMultimap, {{0, 0, 0}, 2, "co"}];
+test2args[eaTemperamentSum, meantoneMulticomma, meantoneMulticomma, {{4, -4, 1}, 1, "contra"}];
+test2args[eaTemperamentDifference, meantoneMulticomma, meantoneMulticomma, {{0, 0, 0}, 1, "contra"}];
+test2args[eaTemperamentSum, et7Multimap, et7Multimap, {{7, 11, 16}, 1, "co"}];
+test2args[eaTemperamentDifference, et7Multimap, et7Multimap, {{0, 0, 0}, 1, "co"}];
+test2args[eaTemperamentSum, et7Multicomma, et7Multicomma, {{16, -11, 7}, 2, "contra"}];
+test2args[eaTemperamentDifference, et7Multicomma, et7Multicomma, {{0, 0, 0}, 2, "contra"}];
 
-(*some basic examples *)
-augmentedMultimap = {{3 , 0, -7},2, "co"};
-diminishedMultimap = {{4, 4, -3},2, "co"};
-tetracotMultimap = {{4, 9, 5}, 2,"co"};
-dicotMultimap = {{2, 1, -3}, 2,"co"};
-srutalMultimap = {{2, -4, -11}, 2,"co"};
-eaTemperamentSum[augmentedMultimap, diminishedMultimap](* <<3 0 -7]] + <<4 4 -3]] = <<7 4 -10]]*)
-eaTemperamentDifference[augmentedMultimap, diminishedMultimap](* <<3 0 -7]] - <<4 4 -3]] = <<1 4 4]]*)
-eaTemperamentSum[augmentedMultimap, tetracotMultimap](* <<3 0 -7]] + <<4 9 5]] = <<7 9 -2]]*)
-eaTemperamentDifference[augmentedMultimap, tetracotMultimap](* <<3 0 -7]] - <<4 9 5]] = <<1 9 12]]*)
-eaTemperamentSum[augmentedMultimap, dicotMultimap](* <<3 0 -7]] + <<2 1 -3]] = <<5 1 -10]]*)
-eaTemperamentDifference[augmentedMultimap, dicotMultimap](* <<3 0 -7]] - <<2 1 -3]] = <<1 -1 -4]]*)
-eaTemperamentSum[augmentedMultimap, srutalMultimap](* <<3 0 -7]] + <<2 -4 -11]] = <<5 -4 -18]]*)
-eaTemperamentDifference[augmentedMultimap, srutalMultimap](* <<3 0 -7]] - <<2 -4 -11]] = <<1 4 4]]*)
-eaTemperamentSum[diminishedMultimap, tetracotMultimap](* <<4 4 -3]] + <<4 9 5]] = <<8 13 2]]*)
-eaTemperamentDifference[diminishedMultimap, tetracotMultimap] (* <<4 4 -3]] - <<4 9 5]] = <<0 5 8]]*)
-eaTemperamentSum[diminishedMultimap, dicotMultimap](* <<4 4 -3]] + <<2 1 -3]] = <<6 5 -6]]*)
-eaTemperamentDifference[diminishedMultimap, dicotMultimap](* <<4 4 -3]] - <<2 1 -3]] = <<2 3 0]]*)
-eaTemperamentSum[diminishedMultimap, srutalMultimap](* <<4 4 -3]] + <<2 -4 -11]] = <<6 0 -14]] \[RightArrow]<<3 0 -7]] *)
-eaTemperamentDifference[diminishedMultimap, srutalMultimap](*<<4 4 -3]] - <<2 -4 -11]] = <<2 8 8]] \[RightArrow] <<1 4 4]]*)
-eaTemperamentSum[tetracotMultimap, dicotMultimap] (* <<4 9 5]] + <<2 1 -3]] = <<6 10 2]] \[RightArrow]<<3 5 1]] *)
-eaTemperamentDifference[tetracotMultimap, dicotMultimap](* <<4 9 5]] - <<2 1 -3]] = <<2 8 8]] \[RightArrow]<<1 4 4]] *)
-eaTemperamentSum[tetracotMultimap, srutalMultimap] (* <<4 9 5]] + <<2 -4 -11]] = <<6 5 -6]] *)
-eaTemperamentDifference[tetracotMultimap, srutalMultimap](* <<4 9 5]] - <<2 -4 -11]] = <<2 13 16]] *)
-eaTemperamentSum[dicotMultimap, srutalMultimap](* <<2 1 -3]] + <<2 -4 -11]] = <<4 -3 -14]] *)
-eaTemperamentDifference[dicotMultimap, srutalMultimap](* <<2 1 -3]] - <<2 -4 -11]] = <<0 5 8]] *)
+(* some basic examples *)
+augmentedMultimap = {{3 , 0, -7}, 2, "co"};
+diminishedMultimap = {{4, 4, -3}, 2, "co"};
+tetracotMultimap = {{4, 9, 5}, 2, "co"};
+dicotMultimap = {{2, 1, -3}, 2, "co"};
+srutalMultimap = {{2, -4, -11}, 2, "co"};
+test2args[eaTemperamentSum, augmentedMultimap, diminishedMultimap, {{7, 4, -10}, 2, "co"}]; (* ⟨⟨3 0 -7]] + ⟨⟨4 4 -3]] = ⟨⟨7 4 -10]] *)
+test2args[eaTemperamentDifference, augmentedMultimap, diminishedMultimap, {{1, 4, 4}, 2, "co"}]; (* ⟨⟨3 0 -7]] - ⟨⟨4 4 -3]] = ⟨⟨1 4 4]] *)
+test2args[eaTemperamentSum, augmentedMultimap, tetracotMultimap, {{7, 9, -2}, 2, "co"}]; (* ⟨⟨3 0 -7]] + ⟨⟨4 9 5]] = ⟨⟨7 9 -2]] *)
+test2args[eaTemperamentDifference, augmentedMultimap, tetracotMultimap, {{1, 9, 12}, 2, "co"}]; (* ⟨⟨3 0 -7]] - ⟨⟨4 9 5]] = ⟨⟨1 9 12]] *)
+test2args[eaTemperamentSum, augmentedMultimap, dicotMultimap, {{5, 1, -10}, 2, "co"}]; (* ⟨⟨3 0 -7]] + ⟨⟨2 1 -3]] = ⟨⟨5 1 -10]] *)
+test2args[eaTemperamentDifference, augmentedMultimap, dicotMultimap, {{1, -1, -4}, 2, "co"}]; (* ⟨⟨3 0 -7]] - ⟨⟨2 1 -3]] = ⟨⟨1 -1 -4]] *)
+test2args[eaTemperamentSum, augmentedMultimap, srutalMultimap, {{5, -4, -18}, 2, "co"}]; (* ⟨⟨3 0 -7]] + ⟨⟨2 -4 -11]] = ⟨⟨5 -4 -18]] *)
+test2args[eaTemperamentDifference, augmentedMultimap, srutalMultimap, {{1, 4, 4}, 2, "co"}]; (* ⟨⟨3 0 -7]] - ⟨⟨2 -4 -11]] = ⟨⟨1 4 4]] *)
+test2args[eaTemperamentSum, diminishedMultimap, tetracotMultimap, {{8, 13, 2}, 2, "co"}]; (* ⟨⟨4 4 -3]] + ⟨⟨4 9 5]] = ⟨⟨8 13 2]] *)
+test2args[eaTemperamentDifference, diminishedMultimap, tetracotMultimap, {{0, 5, 8}, 2, "co"}]; (* ⟨⟨4 4 -3]] - ⟨⟨4 9 5]] = ⟨⟨0 5 8]] *)
+test2args[eaTemperamentSum, diminishedMultimap, dicotMultimap, {{6, 5, -6}, 2, "co"}]; (* ⟨⟨4 4 -3]] + ⟨⟨2 1 -3]] = ⟨⟨6 5 -6]] *)
+test2args[eaTemperamentDifference, diminishedMultimap, dicotMultimap, {{2, 3, 0}, 2, "co"}]; (* ⟨⟨4 4 -3]] - ⟨⟨2 1 -3]] = ⟨⟨2 3 0]] *)
+test2args[eaTemperamentSum, diminishedMultimap, srutalMultimap, {{3, 0, -7}, 2, "co"}]; (* ⟨⟨4 4 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨6 0 -14]] → ⟨⟨3 0 -7]] *)
+test2args[eaTemperamentDifference, diminishedMultimap, srutalMultimap, {{1, 4, 4}, 2, "co"}]; (*⟨⟨4 4 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨2 8 8]] → ⟨⟨1 4 4]] *)
+test2args[eaTemperamentSum, tetracotMultimap, dicotMultimap, {{3, 5, 1}, 2, "co"}]; (* ⟨⟨4 9 5]] + ⟨⟨2 1 -3]] = ⟨⟨6 10 2]] → ⟨⟨3 5 1]] *)
+test2args[eaTemperamentDifference, tetracotMultimap, dicotMultimap, {{1, 4, 4}, 2, "co"}]; (* ⟨⟨4 9 5]] - ⟨⟨2 1 -3]] = ⟨⟨2 8 8]] → ⟨⟨1 4 4]] *)
+test2args[eaTemperamentSum, tetracotMultimap, srutalMultimap, {{6, 5, -6}, 2, "co"}]; (* ⟨⟨4 9 5]] + ⟨⟨2 -4 -11]] = ⟨⟨6 5 -6]] *)
+test2args[eaTemperamentDifference, tetracotMultimap, srutalMultimap, {{2, 13, 16}, 2, "co"}]; (* ⟨⟨4 9 5]] - ⟨⟨2 -4 -11]] = ⟨⟨2 13 16]] *)
+test2args[eaTemperamentSum, dicotMultimap, srutalMultimap, {{4, -3, -14}, 2, "co"}]; (* ⟨⟨2 1 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨4 -3 -14]] *)
+test2args[eaTemperamentDifference, dicotMultimap, srutalMultimap, {{0, 5, 8}, 2, "co"}]; (* ⟨⟨2 1 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨0 5 8]] *)
 
-Out[387]= {{4,9,5},2,co}
-Out[388]= {{2,1,-3},2,co}
-Out[391]= {{5,-9,4},1,contra}
-Out[392]= {{-3,-1,2},1,contra}
-Out[395]= {{12,19,28},1,co}
-Out[396]= {{2,3,4},1,co}
-Out[399]= {{28,-19,12},2,contra}
-Out[400]= {{4,-3,2},2,contra}
-Out[403]= Error
-Out[404]= Error
-Out[407]= Error
-Out[408]= Error
-Out[411]= {{31,49,72,87},1,co}
-Out[412]= {{7,11,16,19},1,co}
-Out[415]= {{-87,72,-49,31},3,contra}
-Out[416]= {{-19,16,-11,7},3,contra}
-Out[417]= {{1,4,4},2,co}
-Out[418]= {{0,0,0},2,co}
-Out[419]= {{4,-4,1},1,contra}
-Out[420]= {{0,0,0},1,contra}
-Out[421]= {{7,11,16},1,co}
-Out[422]= {{0,0,0},1,co}
-Out[423]= {{16,-11,7},2,contra}
-Out[424]= {{0,0,0},2,contra}
-Out[430]= {{7,4,-10},2,co}
-Out[431]= {{1,4,4},2,co}
-Out[432]= {{7,9,-2},2,co}
-Out[433]= {{1,9,12},2,co}
-Out[434]= {{5,1,-10},2,co}
-Out[435]= {{1,-1,-4},2,co}
-Out[436]= {{5,-4,-18},2,co}
-Out[437]= {{1,4,4},2,co}
-Out[438]= {{8,13,2},2,co}
-Out[439]= {{0,5,8},2,co}
-Out[440]= {{6,5,-6},2,co}
-Out[441]= {{2,3,0},2,co}
-Out[442]= {{3,0,-7},2,co}
-Out[443]= {{1,4,4},2,co}
-Out[444]= {{3,5,1},2,co}
-Out[445]= {{1,4,4},2,co}
-Out[446]= {{6,5,-6},2,co}
-Out[447]= {{2,13,16},2,co}
-Out[448]= {{4,-3,-14},2,co}
-Out[449]= {{0,5,8},2,co}
+(* TODO: EA version of this LA example that requires the breadth-first search of linear combinations of multiple collinear vectors *)
+(*test2args[temperamentSum, {{{-3, -8, 4, 6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];*)
+
+
+
+
+Print["TOTAL FAILURES: ", f];
