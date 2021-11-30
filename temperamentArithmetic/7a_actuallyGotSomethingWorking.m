@@ -22,11 +22,7 @@ temperamentArithmetic[t1_, t2_, isSum_] := If[
     If[
       collinearity === Error,
       Error,
-      If[
-        isContra[collinearity],
-        validTemperamentArithmeticByC[t1, t2, isSum, getA[collinearity]],
-        validTemperamentArithmeticByM[t1, t2, isSum, getA[collinearity]]
-      ]
+      validTemperamentArithmetic[t1, t2, isSum, collinearity]
     ]
   ]
 ];
@@ -45,12 +41,8 @@ temperamentDifference[t1_, t2_] := If[
 
 isEnfactored[a_] := hnf[a] != hnf[colHermiteDefactor[a]];
 
-(* TODO: definitely hope we can clean this up so that we don't need byM and byC versions of everything; like maybe just an anti-transpose can solve the problem *)
-
-(* here's the comma basis version of everything *)
-
-getCollinearVectorMultiplesForMaxMultiple[n_, maxMultiple_] := Module[{collinearVectorMultiples, i, collinearVectorMultiplesForMaxMultiple},
-  collinearVectorMultiples = Table[0, n];
+getCollinearVectorMultiplesForMaxMultiple[grade_, maxMultiple_] := Module[{collinearVectorMultiples, i, collinearVectorMultiplesForMaxMultiple},
+  collinearVectorMultiples = Table[0, grade];
   collinearVectorMultiples[[1]] = maxMultiple;
   i = 2;
   collinearVectorMultiplesForMaxMultiple = {};
@@ -78,9 +70,9 @@ getCollinearVectorMultiplesForMaxMultiple[n_, maxMultiple_] := Module[{collinear
   collinearVectorMultiplesForMaxMultiple
 ];
 
-getCollinearVectorMultiplePermutationsForMaxMultiple[n_, maxMultiple_] := Flatten[Map[
+getCollinearVectorMultiplePermutationsForMaxMultiple[grade_, maxMultiple_] := Flatten[Map[
   Permutations,
-  getCollinearVectorMultiplesForMaxMultiple[n, maxMultiple]
+  getCollinearVectorMultiplesForMaxMultiple[grade, maxMultiple]
 ], 1];
 
 (* TODO: there's got to be a "reduce" like thing I could do instead here *)
@@ -97,9 +89,13 @@ getCollinearVectorLinearCombination[collinearVectors_, collinearVectorMultiplePe
   collinearVectorLinearCombination
 ];
 
-defactorWhileLockingCollinearVectors[t_, n_, collinearVectors_] := Module[
+defactorWhileLockingCollinearVectors[t_, collinearity_] := Module[
   {
-    c,
+    tContra,
+    collinearityContra,
+    grade,
+    collinearVectors,
+    a,
     originalTerminalVector,
     collinearVectorMultiplePermutations,
     i,
@@ -108,14 +104,34 @@ defactorWhileLockingCollinearVectors[t_, n_, collinearVectors_] := Module[
     candidateTerminalVector
   },
 
-  c = Take[Join[collinearVectors, getC[t]], n];
-  originalTerminalVector = c[[n]];
+  tContra = isContra[t];
+  collinearityContra = isContra[collinearity];
+  grade = If[
+    tContra == collinearityContra,
+    If[
+      tContra,
+      getN[t],
+      getR[t]
+    ],
+    If[
+      tContra,
+      getR[t],
+      getN[t]
+    ]
+  ];
+  collinearVectors = getA[collinearity];
+  a = Take[Join[collinearVectors, If[collinearityContra, getC[t], getM[t]]], grade];
+  originalTerminalVector = a[[grade]];
   collinearVectorMultiplePermutations = {};
   i = 1;
   maxMultiple = 1;
 
+  (*Print["omfg! isContra[t]: ", isContra[t], " t: ", t, " getN[t]: ", getN[t], " getR[t]: ", getR[t]];*)
+
+
+
   While[
-    isEnfactored[c],
+    isEnfactored[a],
 
     If[
       i <= Length[collinearVectorMultiplePermutations],
@@ -123,7 +139,7 @@ defactorWhileLockingCollinearVectors[t_, n_, collinearVectors_] := Module[
       collinearVectorLinearCombination = getCollinearVectorLinearCombination[collinearVectors, collinearVectorMultiplePermutations[[i]]];
       candidateTerminalVector = divideOutGcd[originalTerminalVector + collinearVectorLinearCombination];
       i++;
-      c[[n]] = candidateTerminalVector,
+      a[[grade]] = candidateTerminalVector,
 
       collinearVectorMultiplePermutations = getCollinearVectorMultiplePermutationsForMaxMultiple[Length[collinearVectors], maxMultiple];
       maxMultiple++;
@@ -131,93 +147,68 @@ defactorWhileLockingCollinearVectors[t_, n_, collinearVectors_] := Module[
     ];
   ];
 
-  c
+  a
 ];
 
 (* TODO: still sad that I need Minors[] to figure this out... figure out if there's any other way *)
-isNegativeOrientationOfTemperamentMatrixByC[c_, n_] := trailingEntry[First[Minors[c, n]]] < 0;
+isNegativeOrientationOfTemperamentMatrix[t_] := Module[{contra, grade, minors, normalizingEntry},
+  contra = isContra[t];
+  grade = If[contra, getN[t], getR[t]];
+  minors = First[Minors[getA[t], grade]];
+  normalizingEntry = If[contra, trailingEntry[minors], leadingEntry[minors]]; (* TODO: variable functions? *)
 
-validTemperamentArithmeticByC[t1_, t2_, isSum_, collinearVectors_] := Module[{v, n, c1, c2},
-  v = getV[t1];
-  n = getN[t1];
+  normalizingEntry < 0
+];
 
-  c1 = defactorWhileLockingCollinearVectors[t1, n, collinearVectors];
-  c2 = defactorWhileLockingCollinearVectors[t2, n, collinearVectors];
+validTemperamentArithmetic[t1_, t2_, isSum_, collinearity_] := Module[{tContra, collinearityContra, contra, grade, a1, a2},
+  (* contra = isContra[t1];
+   grade = If[contra, getN[t1], getR[t1]];*)
+
+  tContra = isContra[t1];
+  collinearityContra = isContra[collinearity];
+  grade = If[
+    tContra == collinearityContra,
+    If[
+      tContra,
+      getN[t1],
+      getR[t1]
+    ],
+    If[
+      tContra,
+      getR[t1],
+      getN[t1]
+    ]
+  ];
+
+  a1 = defactorWhileLockingCollinearVectors[t1, collinearity];
+  a2 = defactorWhileLockingCollinearVectors[t2, collinearity];
+
+  (*Print["is it arleayd rworng here????", a1,a2,t1,t2,getA[collinearity]];*)
 
   If[
-    isNegativeOrientationOfTemperamentMatrixByC[c1, n],
-    c1[[n]] = -c1[[n]]
+    isNegativeOrientationOfTemperamentMatrix[{a1, getV[collinearity]}],
+    a1[[grade]] = -a1[[grade]]
   ];
 
   If[
     isSum,
     If[
-      isNegativeOrientationOfTemperamentMatrixByC[c2, n],
-      c2[[n]] = -c2[[n]]
+      isNegativeOrientationOfTemperamentMatrix[{a2, getV[collinearity]}],
+      a2[[grade]] = -a2[[grade]]
     ],
     If[
-      !isNegativeOrientationOfTemperamentMatrixByC[c2, n],
-      c2[[n]] = -c2[[n]]
+      !isNegativeOrientationOfTemperamentMatrix[{a2, getV[collinearity]}],
+      a2[[grade]] = -a2[[grade]]
     ]
   ];
 
-  If[
-    isContra[t1],
-    canonicalForm[{c1 + c2, "contra"}],
-    dual[{c1 + c2, "contra"}]
-  ]
-];
-
-(* here's the mapping version of everything *)
-
-(* TODO: implement getCollinearCovectorMultiplesForMaxMultiple using breadth-first linear combination of multiple collinear vector pattern established for comma bases *)
-
-(* TODO: implement getCollinearCovectorMultiplePermutationsForMaxMultiple using breadth-first linear combination of multiple collinear vector pattern established for comma bases *)
-
-(* TODO: implement getCollinearCovectorLinearCombination using breadth-first linear combination of multiple collinear vector pattern established for comma bases *)
-
-(* TODO: reimplement this using breadth-first linear combination of multiple collinear vector pattern established for comma bases *)
-defactorWhileLockingCollinearCovectors[t_, r_, collinearCovectors_] := Module[{m},
-  m = Take[Join[collinearCovectors, getM[t]], r];
-
-  While[
-    isEnfactored[m],
-    m[[r]] = divideOutGcd[m[[r]] + First[collinearCovectors]]
-  ];
-
-  m
-];
-
-isNegativeOrientationOfTemperamentMatrixByM[m_, r_] := leadingEntry[First[Minors[m, r]]] < 0;
-
-validTemperamentArithmeticByM[t1_, t2_, isSum_, collinearCovectors_] := Module[{v, r, m1, m2},
-  v = getV[t1];
-  r = getR[t1];
-
-  m1 = defactorWhileLockingCollinearCovectors[t1, r, collinearCovectors];
-  m2 = defactorWhileLockingCollinearCovectors[t2, r, collinearCovectors];
+  (* Print["what the f", a1, a2, contra, grade, a1 + a2];*)
+  (*Print["aw cmon! getV[t1]: ", getV[t1], " getV[collinearity]: ", getV[collinearity], " a1+a2: ", a1+a2, " a1: ", a1, " a2: ", a2, "and the collinearity is: ", collinearity];*)
 
   If[
-    isNegativeOrientationOfTemperamentMatrixByM[m1, r],
-    m1[[r]] = -m1[[r]]
-  ];
-
-  If[
-    isSum,
-    If[
-      isNegativeOrientationOfTemperamentMatrixByM[m2, r],
-      m2[[r]] = -m2[[r]]
-    ],
-    If[
-      !isNegativeOrientationOfTemperamentMatrixByM[m2, r],
-      m2[[r]] = -m2[[r]]
-    ]
-  ];
-
-  If[
-    isContra[t1],
-    dual[{m1 + m2, "co"}],
-    canonicalForm[{m1 + m2, "co"}]
+    getV[t1] == getV[collinearity],
+    canonicalForm[{a1 + a2, getV[collinearity]}] ,
+    dual[{a1 + a2, getV[collinearity]}]
   ]
 ];
 
@@ -308,10 +299,10 @@ test2args[temperamentSum, diminishedM, tetracotM, {{{1, 2, 3}, {0, 8, 13}}, "co"
 test2args[temperamentDifference, diminishedM, tetracotM, {{{5, 8, 0}, {0, 0, 1}}, "co"} ]; (* ⟨⟨4 4 -3]] - ⟨⟨4 9 5]] = ⟨⟨0 5 8]]*)
 test2args[temperamentSum, diminishedM, dicotM, {{{1, 0, 1}, {0, 6, 5}}, "co"} ];(* ⟨⟨4 4 -3]] + ⟨⟨2 1 -3]] = ⟨⟨6 5 -6]]*)
 test2args[temperamentDifference, diminishedM, dicotM, {{{1, 0, 0}, {0, 2, 3}}, "co"} ]; (* ⟨⟨4 4 -3]] - ⟨⟨2 1 -3]] = ⟨⟨2 3 0]]*)
-test2args[temperamentSum, diminishedM, srutalM, {{{3, 0, 7}, {0, 1, 0}}, "co"} ]; (* ⟨⟨4 4 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨6 0 -14]] → ⟨⟨3 0 -7]] *)
-test2args[temperamentDifference, diminishedM, srutalM, {{{1, 0, -4}, {0, 1, 4}}, "co"} ]; (* ⟨⟨4 4 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨2 8 8]] → ⟨⟨1 4 4]] *)
-test2args[temperamentSum, tetracotM, dicotM, {{{1, 2, 3}, {0, 3, 5}}, "co"} ]; (* ⟨⟨4 9 5]] + ⟨⟨2 1 -3]] = ⟨⟨6 10 2]] → ⟨⟨3 5 1]] *)
-test2args[temperamentDifference, tetracotM, dicotM, {{{1, 0, -4}, {0, 1, 4}}, "co"}]; (* ⟨⟨4 9 5]] - ⟨⟨2 1 -3]] = ⟨⟨2 8 8]] → ⟨⟨1 4 4]] *)
+test2args[temperamentSum, diminishedM, srutalM, {{{3, 0, 7}, {0, 1, 0}}, "co"} ]; (* ⟨⟨4 4 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨6 0 -14]] \[RightArrow] ⟨⟨3 0 -7]] *)
+test2args[temperamentDifference, diminishedM, srutalM, {{{1, 0, -4}, {0, 1, 4}}, "co"} ]; (* ⟨⟨4 4 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨2 8 8]] \[RightArrow] ⟨⟨1 4 4]] *)
+test2args[temperamentSum, tetracotM, dicotM, {{{1, 2, 3}, {0, 3, 5}}, "co"} ]; (* ⟨⟨4 9 5]] + ⟨⟨2 1 -3]] = ⟨⟨6 10 2]] \[RightArrow] ⟨⟨3 5 1]] *)
+test2args[temperamentDifference, tetracotM, dicotM, {{{1, 0, -4}, {0, 1, 4}}, "co"}]; (* ⟨⟨4 9 5]] - ⟨⟨2 1 -3]] = ⟨⟨2 8 8]] \[RightArrow] ⟨⟨1 4 4]] *)
 test2args[temperamentSum, tetracotM, srutalM, {{{1, 0, 1}, {0, 6, 5}}, "co"} ]; (* ⟨⟨4 9 5]] + ⟨⟨2 -4 -11]] = ⟨⟨6 5 -6]] *)
 test2args[temperamentDifference, tetracotM, srutalM, {{{1, 0, -8}, {0, 2, 13}}, "co"} ];  (* ⟨⟨4 9 5]] - ⟨⟨2 -4 -11]] = ⟨⟨2 13 16]] *)
 test2args[temperamentSum, dicotM, srutalM, {{{1, 2, 2}, {0, 4, -3}}, "co"} ]; (* ⟨⟨2 1 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨4 -3 -14]] *)
