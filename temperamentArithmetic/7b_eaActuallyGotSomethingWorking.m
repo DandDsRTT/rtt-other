@@ -1,15 +1,10 @@
 eaTemperamentSum[w1_, w2_] := eaTemperamentArithmetic[w1, w2, True];
 eaTemperamentDifference[w1_, w2_] := eaTemperamentArithmetic[w1, w2, False];
 
-eaIsCollinear[w1_, w2_] := Module[{prog, reg},
-  prog = progressiveProduct[w1, w2];
-  reg = regressiveProduct[w1, w2];
-
-  If[
-    getGrade[w1] + getGrade[w2] > eaGetD[w1] || getGrade[eaDual[w1]] + getGrade[eaDual[w2]] > eaGetD[w1],
-    True,
-    prog === Error && reg === Error && (allZerosL[getMinors[prog]] || allZerosL[getMinors[reg]])
-  ]
+eaIsCollinear[w1_, w2_] :=If[
+  getGrade[w1] + getGrade[w2] > eaGetD[w1] ||  getGrade[eaDual[w1]] + getGrade[eaDual[w2]] >eaGetD[w1],
+  True,
+  allZerosL[getMinors[progressiveProduct[w1, w2]]] || allZerosL[getMinors[regressiveProduct[w1, w2]]]
 ];
 
 eaTemperamentArithmetic[w1_, w2_, isSum_] := If[
@@ -28,6 +23,13 @@ eaTemperamentArithmetic[w1_, w2_, isSum_] := If[
 (* all examples tested from both sides of duality *)
 
 f = 0;
+
+(* preliminary helper functions *)
+septimalMeantone = {{1,4,10,4,13,12},2,"co"};
+flattone = {{1 ,4,-9,4,-17,-32},2,"co"};
+godzilla = {{2,8,1,8,-4,-20,2}, "co"};
+test2args[eaIsCollinear, septimalMeantone, flattone, True];
+test2args[eaIsCollinear, septimalMeantone, flattone, godzilla];
 
 (* collinear multimaps *)
 meantoneMultimap = {{1, 4, 4}, 2, "co"};
