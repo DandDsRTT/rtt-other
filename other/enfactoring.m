@@ -1,2 +1,2 @@
 (* closely related to pernetSteinDefactor *)
-getEnfactoring[m_] := Det[Transpose[Take[hnf[Transpose[m]], MatrixRank[m]]]];
+getEnfactoring[a_] := Det[Transpose[Take[hnf[Transpose[a]], MatrixRank[a]]]];

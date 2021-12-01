@@ -1,19 +1,26 @@
 eaTemperamentSum[w1_, w2_] := eaTemperamentArithmetic[w1, w2, True];
 eaTemperamentDifference[w1_, w2_] := eaTemperamentArithmetic[w1, w2, False];
 
-eaIsCollinear[w1_, w2_] :=If[
-  getGrade[w1] + getGrade[w2] > eaGetD[w1] ||  getGrade[eaDual[w1]] + getGrade[eaDual[w2]] >eaGetD[w1],
-  True,
-  allZerosL[getMinors[progressiveProduct[w1, w2]]] || allZerosL[getMinors[regressiveProduct[w1, w2]]]
+eaIsCollinear[w1_, w2_] := Module[{prog, reg},
+  prog = progressiveProduct[w1, w2];
+  reg = regressiveProduct[w1, w2];
+  If[
+    prog === Error || reg === Error,
+    True,
+    allZerosL[getMinors[prog]] || allZerosL[getMinors[reg]]
+  ]
 ];
 
-eaTemperamentArithmetic[w1_, w2_, isSum_] := If[
-  eaGetR[w1] != eaGetR[w2] || eaGetD[w1] != eaGetD[w2] || !eaIsCollinear[w1, w2],
-  Error,
+eaTemperamentArithmetic[w1_, w2_, isSum_] := Module[{w2local},
+  w2local = If[getV[w2] != getV[w1], eaDual[w2], w2]; (* TODO: switch local and input *)
   If[
-    isSum,
-    eaCanonicalForm[{getMinors[w1] + getMinors[w2], getGrade[w1], getV[w1]}],
-    eaCanonicalForm[{getMinors[w1] - getMinors[w2], getGrade[w1], getV[w1]}]
+    eaGetR[w1] != eaGetR[w2local] || eaGetD[w1] != eaGetD[w2local] || !eaIsCollinear[w1, w2local],
+    Error,
+    If[
+      isSum,
+      eaCanonicalForm[{getMinors[w1] + getMinors[w2local], getGrade[w1], getV[w1]}],
+      eaCanonicalForm[{getMinors[w1] - getMinors[w2local], getGrade[w1], getV[w1]}]
+    ]
   ]
 ];
 
@@ -25,11 +32,11 @@ eaTemperamentArithmetic[w1_, w2_, isSum_] := If[
 f = 0;
 
 (* preliminary helper functions *)
-septimalMeantone = {{1,4,10,4,13,12},2,"co"};
-flattone = {{1 ,4,-9,4,-17,-32},2,"co"};
-godzilla = {{2,8,1,8,-4,-20,2}, "co"};
+septimalMeantone = {{1, 4, 10, 4, 13, 12}, 2, "co"};
+flattone = {{1 , 4, -9, 4, -17, -32}, 2, "co"};
+godzilla = {{2, 8, 1, 8, -4, -20}, 2, "co"};
 test2args[eaIsCollinear, septimalMeantone, flattone, True];
-test2args[eaIsCollinear, septimalMeantone, flattone, godzilla];
+test2args[eaTemperamentSum, septimalMeantone, flattone, godzilla];
 
 (* collinear multimaps *)
 meantoneMultimap = {{1, 4, 4}, 2, "co"};
@@ -110,6 +117,12 @@ test2args[eaTemperamentDifference, dicotMultimap, srutalMultimap, {{0, 5, 8}, 2,
 
 (* TODO: EA version of this LA example that requires the breadth-first search of linear combinations of multiple collinear vectors *)
 (*test2args[temperamentSum, {{{-3, -8, 4, 6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];*)
+
+(* example that motivated a further simplication and correction of the EA collinearity condition *)
+test2args[eaTemperamentSum, {{1, -5, -14, 9, 23, 11}, 2, "co"}, {{25, -1, 2, -18, -14, 2}, 2, "contra"}, Error];
+
+(* example that motivated the possibility of inputs of different variances *)
+test2args[eaTemperamentSum, {{2, 3}, 1, "contra"}, {{4, -5}, 1, "co"}, Error];
 
 
 

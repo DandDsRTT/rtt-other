@@ -101,6 +101,7 @@ defactorWhileLockingCollinearVectors[t_, collinearity_] := Module[
     i,
     maxMultiple,
     collinearVectorLinearCombination,
+    candidateTerminalVectorBeforeDefactoring,
     candidateTerminalVector
   },
 
@@ -126,10 +127,6 @@ defactorWhileLockingCollinearVectors[t_, collinearity_] := Module[
   i = 1;
   maxMultiple = 1;
 
-  (*Print["omfg! isContra[t]: ", isContra[t], " t: ", t, " getN[t]: ", getN[t], " getR[t]: ", getR[t]];*)
-
-
-
   While[
     isEnfactored[a],
 
@@ -137,8 +134,19 @@ defactorWhileLockingCollinearVectors[t_, collinearity_] := Module[
       i <= Length[collinearVectorMultiplePermutations],
 
       collinearVectorLinearCombination = getCollinearVectorLinearCombination[collinearVectors, collinearVectorMultiplePermutations[[i]]];
-      candidateTerminalVector = divideOutGcd[originalTerminalVector + collinearVectorLinearCombination];
-      i++;
+
+      candidateTerminalVectorBeforeDefactoring = originalTerminalVector + collinearVectorLinearCombination;
+      candidateTerminalVector = divideOutGcd[candidateTerminalVectorBeforeDefactoring];
+      If[
+        candidateTerminalVectorBeforeDefactoring != candidateTerminalVector,
+
+        originalTerminalVector = candidateTerminalVector;
+        collinearVectorMultiplePermutations = {};
+        maxMultiple = 1;
+        i = 1,
+
+        i++;
+      ];
       a[[grade]] = candidateTerminalVector,
 
       collinearVectorMultiplePermutations = getCollinearVectorMultiplePermutationsForMaxMultiple[Length[collinearVectors], maxMultiple];
@@ -310,6 +318,9 @@ test2args[temperamentDifference, dicotM, srutalM, {{{5, 8, 0}, {0, 0, 1}}, "co"}
 
 (* example that requires the breadth-first search of linear combinations of multiple collinear vectors *)
 test2args[temperamentSum, {{{-3, -8, 4, 6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];
+
+(* example that was intractable unless I defactored piecemeal *)
+test2args[temperamentSum, {{{-97, 73, 45, 16}}, "contra"}, {{{-1, 8, 9, 3}}, "contra"}, {{{-98, 81, 54, 19}}, "contra"}];
 
 
 
