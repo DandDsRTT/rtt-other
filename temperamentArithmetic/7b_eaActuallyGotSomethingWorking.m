@@ -118,7 +118,7 @@ test2args[eaTemperamentDifference, dicotMultimap, srutalMultimap, {{0, 5, 8}, 2,
 (* TODO: EA version of this LA example that requires the breadth-first search of linear combinations of multiple collinear vectors *)
 (*test2args[temperamentSum, {{{-3, -8, 4, 6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];*)
 
-(* example that motivated a further simplication and correction of the EA collinearity condition *)
+(* example that motivated a further simplification and correction of the EA collinearity condition *)
 test2args[eaTemperamentSum, {{1, -5, -14, 9, 23, 11}, 2, "co"}, {{25, -1, 2, -18, -14, 2}, 2, "contra"}, Error];
 
 (* example that motivated the possibility of inputs of different variances *)
