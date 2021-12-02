@@ -39,7 +39,7 @@ temperamentDifference[t1_, t2_] := If[
   temperamentArithmetic[t1, t2, False]
 ];
 
-isEnfactored[a_] := hnf[a] != hnf[colHermiteDefactor[a]];
+isEnfactored[a_] := hnf[a] != hnf[colHermiteDefactor[a]]; (* TODO: or how about getEnfactoring > 1? might that be faster actually? *)
 
 getCollinearVectorMultiplesForMaxMultiple[grade_, maxMultiple_] := Module[{collinearVectorMultiples, i, collinearVectorMultiplesForMaxMultiple},
   collinearVectorMultiples = Table[0, grade];
