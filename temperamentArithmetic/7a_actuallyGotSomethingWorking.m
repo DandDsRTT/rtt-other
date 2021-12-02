@@ -2,6 +2,8 @@ getCollinearity[t1_, t2_] := Module[{collinearVectors, collinearCovectors},
   collinearVectors = dual[join[t1, t2]];
   collinearCovectors = dual[meet[t1, t2]];
 
+  (*Print[collinearVectors, collinearCovectors]; *)
+
   If[
     allZeros[getA[collinearCovectors]],
     If[
@@ -22,7 +24,11 @@ temperamentArithmetic[t1_, t2_, isSum_] := If[
     If[
       collinearity === Error,
       Error,
-      validTemperamentArithmetic[t1, t2, isSum, collinearity]
+      If[
+        getR[t1] == 1 || getN[t1] == 1,
+        validMinGradeOneTemperamentArithmetic[t1, t2, isSum],
+        validTemperamentArithmetic[t1, t2, isSum, collinearity]
+      ]
     ]
   ]
 ];
@@ -89,22 +95,7 @@ getCollinearVectorLinearCombination[collinearVectors_, collinearVectorMultiplePe
   collinearVectorLinearCombination
 ];
 
-defactorWhileLockingCollinearVectors[t_, collinearity_] := Module[
-  {
-    tContra,
-    collinearityContra,
-    grade,
-    collinearVectors,
-    a,
-    originalTerminalVector,
-    collinearVectorMultiplePermutations,
-    i,
-    maxMultiple,
-    collinearVectorLinearCombination,
-    candidateTerminalVectorBeforeDefactoring,
-    candidateTerminalVector
-  },
-
+defactorWhileLockingCollinearVectors[t_, collinearity_] := Module[{tContra, collinearityContra, grade, collinearVectors, a, d, multiples, equations, enfactoring, multiplesCount, result, answer},
   tContra = isContra[t];
   collinearityContra = isContra[collinearity];
   grade = If[
@@ -122,38 +113,36 @@ defactorWhileLockingCollinearVectors[t_, collinearity_] := Module[
   ];
   collinearVectors = getA[collinearity];
   a = Take[Join[collinearVectors, If[collinearityContra, getC[t], getM[t]]], grade];
-  originalTerminalVector = a[[grade]];
-  collinearVectorMultiplePermutations = {};
-  i = 1;
-  maxMultiple = 1;
 
-  While[
-    isEnfactored[a],
+  (*Print["a: ", a];*)
 
-    If[
-      i <= Length[collinearVectorMultiplePermutations],
-
-      collinearVectorLinearCombination = getCollinearVectorLinearCombination[collinearVectors, collinearVectorMultiplePermutations[[i]]];
-
-      candidateTerminalVectorBeforeDefactoring = originalTerminalVector + collinearVectorLinearCombination;
-      candidateTerminalVector = divideOutGcd[candidateTerminalVectorBeforeDefactoring];
-      If[
-        candidateTerminalVectorBeforeDefactoring != candidateTerminalVector,
-
-        originalTerminalVector = candidateTerminalVector;
-        collinearVectorMultiplePermutations = {};
-        maxMultiple = 1;
-        i = 1,
-
-        i++;
-      ];
-      a[[grade]] = candidateTerminalVector,
-
-      collinearVectorMultiplePermutations = getCollinearVectorMultiplePermutationsForMaxMultiple[Length[collinearVectors], maxMultiple];
-      maxMultiple++;
-      i = 1;
-    ];
+  d = getD[t];
+  multiplesCount = Length[collinearVectors] ;(* Length[a] - 1 BAPPLES*);
+  enfactoring = getEnfactoring[a];
+  multiples = Table[Subscript[x, i], {i, multiplesCount}];
+  equations = Map[
+    Function[
+      dIndex,
+      Mod[a[[grade]][[dIndex]] + Total[Map[
+        Function[multiplesIndex, multiples[[multiplesIndex]] * collinearVectors[[multiplesIndex]][[dIndex]]],
+        (*Function[multiplesIndex, multiples[[multiplesIndex]]* a[[multiplesIndex]][[dIndex]]],BAPPLES*)
+        Range[multiplesCount]
+      ]], enfactoring] == 0
+    ],
+    Range[d]
   ];
+
+  (*Print["equations", equations,multiples,"WWWWW", a, "WHAT", a[[grade]],"WHATWHATWHAT", a[[grade]][[1]], "mulitples count", multiplesCount];*)
+
+  result = FindInstance[equations, multiples, Integers];
+
+  answer = Values[Association[result]];
+  a[[grade]] = a[[grade]] + getCollinearVectorLinearCombination[a, answer];
+  (*Print[a[[grade]]];*)
+  a[[grade]] = divideOutGcd[a[[grade]]];
+  (*Print[a[[grade]]];*)
+
+  (*Print["enfactoring of whole thing: ", getEnfactoring[a]];*)
 
   a
 ];
@@ -165,12 +154,13 @@ isNegativeOrientationOfTemperamentMatrix[t_] := Module[{contra, grade, minors, n
   minors = First[Minors[getA[t], grade]];
   normalizingEntry = If[contra, trailingEntry[minors], leadingEntry[minors]]; (* TODO: variable functions? *)
 
+  (*Print["need to audit this. t: ", t," contra: " ,contra," minors: ", minors, " grade: ", grade, "normalizing entry: ", normalizingEntry];  *)
   normalizingEntry < 0
 ];
 
 validTemperamentArithmetic[t1_, t2_, isSum_, collinearity_] := Module[{tContra, collinearityContra, contra, grade, a1, a2},
   (* contra = isContra[t1];
-   grade = If[contra, getN[t1], getR[t1]];*)
+  grade = If[contra, getN[t1], getR[t1]];*)
 
   tContra = isContra[t1];
   collinearityContra = isContra[collinearity];
@@ -191,7 +181,8 @@ validTemperamentArithmetic[t1_, t2_, isSum_, collinearity_] := Module[{tContra, 
   a1 = defactorWhileLockingCollinearVectors[t1, collinearity];
   a2 = defactorWhileLockingCollinearVectors[t2, collinearity];
 
-  (*Print["is it arleayd rworng here????", a1,a2,t1,t2,getA[collinearity]];*)
+  (*Print["is it arleayd rworng here????", a1,a2, isNegativeOrientationOfTemperamentMatrix[{a1, getV[collinearity]}], isNegativeOrientationOfTemperamentMatrix[{a2, getV[collinearity]}],isNegativeOrientationOfTemperamentMatrix[t1], isNegativeOrientationOfTemperamentMatrix[t2] ];*)
+  (* Print["i haven't been albe to understand what these deubg messages are telling me so far. this should be fairly straightforward, though. this is a temperament sum so first, isSum: ", isSum, " and second, what are the orientations of the two results? the first result is negative?: ", isNegativeOrientationOfTemperamentMatrix[{a1, getV[collinearity]}], " the second says is negatve? ", isNegativeOrientationOfTemperamentMatrix[{a2, getV[collinearity]}]];*)
 
   If[
     isNegativeOrientationOfTemperamentMatrix[{a1, getV[collinearity]}],
@@ -210,13 +201,36 @@ validTemperamentArithmetic[t1_, t2_, isSum_, collinearity_] := Module[{tContra, 
     ]
   ];
 
+  (* Print["after correction", a1, a2, a1+a2];*)
   (* Print["what the f", a1, a2, contra, grade, a1 + a2];*)
-  (*Print["aw cmon! getV[t1]: ", getV[t1], " getV[collinearity]: ", getV[collinearity], " a1+a2: ", a1+a2, " a1: ", a1, " a2: ", a2, "and the collinearity is: ", collinearity];*)
+  (* Print["aw cmon! getV[t1]: ", getV[t1], " getV[collinearity]: ", getV[collinearity], " a1+a2: ", a1+a2, " a1: ", a1,Minors[a1,2], " a2: ", a2,Minors[a2,2], "and the collinearity is: ", collinearity];*)
 
   If[
     getV[t1] == getV[collinearity],
     canonicalForm[{a1 + a2, getV[collinearity]}] ,
     dual[{a1 + a2, getV[collinearity]}]
+  ]
+];
+
+validMinGradeOneTemperamentArithmetic[t1_, t2_, isSum_] := Module[{thing},
+  thing = If[
+    isSum,
+    If[
+      getR[t1] == 1,
+      {getM[t1] + getM[t2], "co"},
+      {getC[t1] + getC[t2], "contra"},
+    ],
+    If[
+      getR[t1] == 1,
+      {getM[t1] - getM[t2], "co"},
+      {getC[t1] - getC[t2], "contra"},
+    ]
+  ];
+
+  If[
+    getV[thing] == getV[t1],
+    canonicalForm[thing],
+    dual[thing]
   ]
 ];
 
@@ -317,10 +331,30 @@ test2args[temperamentSum, dicotM, srutalM, {{{1, 2, 2}, {0, 4, -3}}, "co"} ]; (*
 test2args[temperamentDifference, dicotM, srutalM, {{{5, 8, 0}, {0, 0, 1}}, "co"} ]; (* ⟨⟨2 1 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨0 5 8]] *)
 
 (* example that requires the breadth-first search of linear combinations of multiple collinear vectors *)
-test2args[temperamentSum, {{{-3, -8, 4, 6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];
+test2args[temperamentSum, {{{-3, -8, 4, 6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{6, -6, 0, 7}}, "co"}];
 
 (* example that was intractable unless I defactored piecemeal *)
 test2args[temperamentSum, {{{-97, 73, 45, 16}}, "contra"}, {{{-1, 8, 9, 3}}, "contra"}, {{{-98, 81, 54, 19}}, "contra"}];
+
+(* example that illuminated how sometimes the matrix approach can't pick which is the sum and which is the difference correctly, although it actually is able to in this case because this is a min-grade-1 temperament; I just needed to rework the code to take a specialized simpler approach in that case which doesn't trigger the problem whereby if the collineairty is on the other side of duality and also the EA dual of the multimap is not equal to the multicomma (before normalizing, that is) or vice versa, then you can't determine (without bringing in significant material from the EA part of the library re: the sign change patterns for the EA dual, which would compromise the entire point of this exercise in accomplishing temperament arithmetic using only LA) what the correct negativity orientation for the summed matrices should be *)
+test2args[temperamentSum, {{{2, 0, 3}}, "contra"}, {{{5, 4, 0}}, "contra"}, {{{7, 4, 3}}, "contra"}];
+test2args[temperamentDifference, {{{2, 0, 3}}, "contra"}, {{{5, 4, 0}}, "contra"}, {{{-3, -4, 3}}, "contra"}];
+
+(* an example that actually exercises the non-min-grade-1 code! *)
+septimalMeantoneM = {{{1, 0, -4, -13}, {0, 1, 4, 10}}, "co"};
+flattoneM = {{{1, 0, -4, 17}, {0, 1, 4, -9}}, "co"};
+godzillaM = {{{1, 0, -4, 2}, {0, 2, 8, 1}}, "co"};
+test2args[temperamentSum, septimalMeantoneM, flattoneM, godzillaM];
+test2args[temperamentDifference, septimalMeantoneM, flattoneM, {{{19, 30, 44, 0}, {0, 0, 0, 1}}, "co"}];
+
+(*TODO: SEE BAPPLES need an example that demonstrates how it's necessary to include all the vectors, not just the collinear ones *)
+
+(*
+(*example that was intractable with the breadth-first search of linear combinations code the first way I wrote it, but is tractable using my fancier style essentially using a Wolfram Solve[] *)
+bigRandom1 =  {{{-89,-46,61,0,0},{-85,-44,59,1,0},{-39,-21,26,0,1}},"contra"};
+bigRandom2 = {{{-16,-9,1,0,0},{10,4,0,1,0},{16,8,0,0,1}},"contra"};
+test2args[temperamentSum, bigRandom1, bigRandom2, {}];
+*)
 
 
 

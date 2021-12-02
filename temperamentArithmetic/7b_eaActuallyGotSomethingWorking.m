@@ -13,6 +13,8 @@ eaIsCollinear[w1_, w2_] := Module[{prog, reg},
 
 eaTemperamentArithmetic[w1_, w2_, isSum_] := Module[{w2local},
   w2local = If[getV[w2] != getV[w1], eaDual[w2], w2]; (* TODO: switch local and input *)
+  (*Print[eaGetR[w1] != eaGetR[w2local],  eaGetD[w1] != eaGetD[w2local], !eaIsCollinear[w1, w2local], getMinors[w1] + getMinors[w2local], getGrade[w1], getV[w1]];*)
+  (*Print["before canoniclaization: ", {getMinors[w1] + getMinors[w2local], getGrade[w1], getV[w1]}];*)
   If[
     eaGetR[w1] != eaGetR[w2local] || eaGetD[w1] != eaGetD[w2local] || !eaIsCollinear[w1, w2local],
     Error,
@@ -124,7 +126,11 @@ test2args[eaTemperamentSum, {{1, -5, -14, 9, 23, 11}, 2, "co"}, {{25, -1, 2, -18
 (* example that motivated the possibility of inputs of different variances *)
 test2args[eaTemperamentSum, {{2, 3}, 1, "contra"}, {{4, -5}, 1, "co"}, Error];
 
-
-
+(*
+(* example that came up randomly but I'm not really sure what's going on with it... maybe it's collinear but that's not enough, it has to be collinear up to the grade minus 1 *)
+w1 = {{0,0,0,41,-27,2,41,-27,2,31},3,"co"}
+w2 = {{48,140,46,20,10,10,-250,-53,85,30},3,"co"}
+test2args[eaTemperamentSum, w1,w2, {{3731,-55621,36587,503105,-248194,-1233531,613243,-318180,-1270231,-2110618},3,"co"}]
+*)
 
 Print["TOTAL FAILURES: ", f];
