@@ -1,7 +1,7 @@
 eaTemperamentSum[w1_, w2_] := eaTemperamentArithmetic[w1, w2, True];
 eaTemperamentDifference[w1_, w2_] := eaTemperamentArithmetic[w1, w2, False];
 
-eaIsCollinear[w1_, w2_] := Module[{prog, reg},
+(*eaIsCollinear[w1_, w2_] := Module[{prog, reg},
   prog = progressiveProduct[w1, w2];
   reg = regressiveProduct[w1, w2];
   If[
@@ -9,14 +9,14 @@ eaIsCollinear[w1_, w2_] := Module[{prog, reg},
     True,
     allZerosL[getMinors[prog]] || allZerosL[getMinors[reg]]
   ]
-];
+];*)
 
 eaTemperamentArithmetic[w1_, w2_, isSum_] := Module[{w2local},
   w2local = If[getV[w2] != getV[w1], eaDual[w2], w2]; (* TODO: switch local and input *)
   (*Print[eaGetR[w1] != eaGetR[w2local],  eaGetD[w1] != eaGetD[w2local], !eaIsCollinear[w1, w2local], getMinors[w1] + getMinors[w2local], getGrade[w1], getV[w1]];*)
   (*Print["before canoniclaization: ", {getMinors[w1] + getMinors[w2local], getGrade[w1], getV[w1]}];*)
   If[
-    eaGetR[w1] != eaGetR[w2local] || eaGetD[w1] != eaGetD[w2local] || !eaIsCollinear[w1, w2local],
+    eaGetR[w1] != eaGetR[w2local] || eaGetD[w1] != eaGetD[w2local] (*|| !eaIsCollinear[w1, w2local]*),
     Error,
     If[
       isSum,
@@ -33,11 +33,10 @@ eaTemperamentArithmetic[w1_, w2_, isSum_] := Module[{w2local},
 
 f = 0;
 
-(* preliminary helper functions *)
+(* now just a stray example I feel like keeping around*)
 septimalMeantone = {{1, 4, 10, 4, 13, 12}, 2, "co"};
 flattone = {{1 , 4, -9, 4, -17, -32}, 2, "co"};
 godzilla = {{2, 8, 1, 8, -4, -20}, 2, "co"};
-test2args[eaIsCollinear, septimalMeantone, flattone, True];
 test2args[eaTemperamentSum, septimalMeantone, flattone, godzilla];
 
 (* collinear multimaps *)
@@ -123,14 +122,11 @@ test2args[eaTemperamentDifference, dicotMultimap, srutalMultimap, {{0, 5, 8}, 2,
 (* example that motivated a further simplification and correction of the EA collinearity condition *)
 test2args[eaTemperamentSum, {{1, -5, -14, 9, 23, 11}, 2, "co"}, {{25, -1, 2, -18, -14, 2}, 2, "contra"}, Error];
 
-(* example that motivated the possibility of inputs of different variances *)
-test2args[eaTemperamentSum, {{2, 3}, 1, "contra"}, {{4, -5}, 1, "co"}, Error];
+(* example that motivated the possibility of inputs of different variances ... oh wait whoa crazy! here's a case where they are non-collinear, but mono-non-collinear, so it's still valid !!!! *)
+test2args[eaTemperamentSum, {{2, 3}, 1, "contra"}, {{4, -7}, 1, "co"}, {{9, 7}, 1, "contra"}];
 
-(*
-(* example that came up randomly but I'm not really sure what's going on with it... maybe it's collinear but that's not enough, it has to be collinear up to the grade minus 1 *)
-w1 = {{0,0,0,41,-27,2,41,-27,2,31},3,"co"}
-w2 = {{48,140,46,20,10,10,-250,-53,85,30},3,"co"}
-test2args[eaTemperamentSum, w1,w2, {{3731,-55621,36587,503105,-248194,-1233531,613243,-318180,-1270231,-2110618},3,"co"}]
-*)
+(* an example of a d=5 min-grade=2 noncolinearity=2 example that should error even though it's collinear *)
+test2args[eaTemperamentSum, {{0, 0, 0, 41, -27, 2, 41, -27, 2, 31}, 3, "co"}, {{48, 140, 46, 20, 10, 10, -250, -53, 85, 30}, 3, "co"}, Error];
+
 
 Print["TOTAL FAILURES: ", f];

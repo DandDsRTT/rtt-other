@@ -5,9 +5,9 @@ getCollinearity[t1_, t2_] := Module[{collinearVectors, collinearCovectors},
   (*Print[collinearVectors, collinearCovectors]; *)
 
   If[
-    allZeros[getA[collinearCovectors]],
+    allZeros[getA[collinearCovectors]] || Length[getA[collinearCovectors]] < Length[getM[t1]] - 1,
     If[
-      allZeros[getA[collinearVectors]],
+      allZeros[getA[collinearVectors]] || Length[getA[collinearVectors]] < Length[getC[t1]] - 1,
       Error,
       collinearVectors
     ],
@@ -94,6 +94,9 @@ getCollinearVectorLinearCombination[collinearVectors_, collinearVectorMultiplePe
 
   collinearVectorLinearCombination
 ];
+
+(* TODO: closely related to pernetSteinDefactor; perhaps clean this up *)
+getEnfactoring[a_] := Det[Transpose[Take[hnf[Transpose[a]], MatrixRank[a]]]];
 
 defactorWhileLockingCollinearVectors[t_, collinearity_] := Module[{tContra, collinearityContra, grade, collinearVectors, a, d, multiples, equations, enfactoring, multiplesCount, result, answer},
   tContra = isContra[t];
@@ -349,14 +352,10 @@ test2args[temperamentDifference, septimalMeantoneM, flattoneM, {{{19, 30, 44, 0}
 
 (*TODO: SEE BAPPLES need an example that demonstrates how it's necessary to include all the vectors, not just the collinear ones *)
 
-(*
-(*example that was intractable with the breadth-first search of linear combinations code the first way I wrote it, but is tractable using my fancier style essentially using a Wolfram Solve[] *)
-bigRandom1 =  {{{-89,-46,61,0,0},{-85,-44,59,1,0},{-39,-21,26,0,1}},"contra"};
-bigRandom2 = {{{-16,-9,1,0,0},{10,4,0,1,0},{16,8,0,0,1}},"contra"};
-test2args[temperamentSum, bigRandom1, bigRandom2, {}];
-*)
+(*TODO: need an example that was intractable with the breadth-first search of linear combinations code the first way I wrote it, but is tractable using my fancier style essentially using a Wolfram Solve[] *)
 
-
+(* an example of a d=5 min-grade=2 noncolinearity=2 example that should error even though it's collinear *)
+test2args[temperamentSum, {{{1, 1, 0, 30, -19}, {0, 0, 1, 6, -4}, {0, 0, 0, 41, -27}}, "co"}, {{{2, 0, 19, 45, 16}, {0, 1, 19, 55, 18}, {0, 0, 24, 70, 23}}, "co"}, Error];
 
 
 Print["TOTAL FAILURES: ", f];
