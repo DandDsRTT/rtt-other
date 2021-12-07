@@ -1,27 +1,16 @@
 eaTemperamentSum[w1_, w2_] := eaTemperamentArithmetic[w1, w2, True];
 eaTemperamentDifference[w1_, w2_] := eaTemperamentArithmetic[w1, w2, False];
 
-(*eaIsCollinear[w1_, w2_] := Module[{prog, reg},
-  prog = progressiveProduct[w1, w2];
-  reg = regressiveProduct[w1, w2];
-  If[
-    prog === Error || reg === Error,
-    True,
-    allZerosL[getMinors[prog]] || allZerosL[getMinors[reg]]
-  ]
-];*)
+eaTemperamentArithmetic[w1_, w2input_, isSum_] := Module[{w2},
+  w2 = If[getV[w2input] != getV[w1], eaDual[w2input], w2input];
 
-eaTemperamentArithmetic[w1_, w2_, isSum_] := Module[{w2local},
-  w2local = If[getV[w2] != getV[w1], eaDual[w2], w2]; (* TODO: switch local and input *)
-  (*Print[eaGetR[w1] != eaGetR[w2local],  eaGetD[w1] != eaGetD[w2local], !eaIsCollinear[w1, w2local], getMinors[w1] + getMinors[w2local], getGrade[w1], getV[w1]];*)
-  (*Print["before canoniclaization: ", {getMinors[w1] + getMinors[w2local], getGrade[w1], getV[w1]}];*)
   If[
-    eaGetR[w1] != eaGetR[w2local] || eaGetD[w1] != eaGetD[w2local] (*|| !eaIsCollinear[w1, w2local]*),
+    eaGetR[w1] != eaGetR[w2] || eaGetD[w1] != eaGetD[w2],
     Error,
     If[
       isSum,
-      eaCanonicalForm[{getMinors[w1] + getMinors[w2local], getGrade[w1], getV[w1]}],
-      eaCanonicalForm[{getMinors[w1] - getMinors[w2local], getGrade[w1], getV[w1]}]
+      eaCanonicalForm[{getMinors[w1] + getMinors[w2], getGrade[w1], getV[w1]}],
+      eaCanonicalForm[{getMinors[w1] - getMinors[w2], getGrade[w1], getV[w1]}]
     ]
   ]
 ];
@@ -107,10 +96,10 @@ test2args[eaTemperamentSum, diminishedMultimap, tetracotMultimap, {{8, 13, 2}, 2
 test2args[eaTemperamentDifference, diminishedMultimap, tetracotMultimap, {{0, 5, 8}, 2, "co"}]; (* ⟨⟨4 4 -3]] - ⟨⟨4 9 5]] = ⟨⟨0 5 8]] *)
 test2args[eaTemperamentSum, diminishedMultimap, dicotMultimap, {{6, 5, -6}, 2, "co"}]; (* ⟨⟨4 4 -3]] + ⟨⟨2 1 -3]] = ⟨⟨6 5 -6]] *)
 test2args[eaTemperamentDifference, diminishedMultimap, dicotMultimap, {{2, 3, 0}, 2, "co"}]; (* ⟨⟨4 4 -3]] - ⟨⟨2 1 -3]] = ⟨⟨2 3 0]] *)
-test2args[eaTemperamentSum, diminishedMultimap, srutalMultimap, {{3, 0, -7}, 2, "co"}]; (* ⟨⟨4 4 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨6 0 -14]] → ⟨⟨3 0 -7]] *)
-test2args[eaTemperamentDifference, diminishedMultimap, srutalMultimap, {{1, 4, 4}, 2, "co"}]; (*⟨⟨4 4 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨2 8 8]] → ⟨⟨1 4 4]] *)
-test2args[eaTemperamentSum, tetracotMultimap, dicotMultimap, {{3, 5, 1}, 2, "co"}]; (* ⟨⟨4 9 5]] + ⟨⟨2 1 -3]] = ⟨⟨6 10 2]] → ⟨⟨3 5 1]] *)
-test2args[eaTemperamentDifference, tetracotMultimap, dicotMultimap, {{1, 4, 4}, 2, "co"}]; (* ⟨⟨4 9 5]] - ⟨⟨2 1 -3]] = ⟨⟨2 8 8]] → ⟨⟨1 4 4]] *)
+test2args[eaTemperamentSum, diminishedMultimap, srutalMultimap, {{3, 0, -7}, 2, "co"}]; (* ⟨⟨4 4 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨6 0 -14]] \[RightArrow] ⟨⟨3 0 -7]] *)
+test2args[eaTemperamentDifference, diminishedMultimap, srutalMultimap, {{1, 4, 4}, 2, "co"}]; (*⟨⟨4 4 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨2 8 8]] \[RightArrow] ⟨⟨1 4 4]] *)
+test2args[eaTemperamentSum, tetracotMultimap, dicotMultimap, {{3, 5, 1}, 2, "co"}]; (* ⟨⟨4 9 5]] + ⟨⟨2 1 -3]] = ⟨⟨6 10 2]] \[RightArrow] ⟨⟨3 5 1]] *)
+test2args[eaTemperamentDifference, tetracotMultimap, dicotMultimap, {{1, 4, 4}, 2, "co"}]; (* ⟨⟨4 9 5]] - ⟨⟨2 1 -3]] = ⟨⟨2 8 8]] \[RightArrow] ⟨⟨1 4 4]] *)
 test2args[eaTemperamentSum, tetracotMultimap, srutalMultimap, {{6, 5, -6}, 2, "co"}]; (* ⟨⟨4 9 5]] + ⟨⟨2 -4 -11]] = ⟨⟨6 5 -6]] *)
 test2args[eaTemperamentDifference, tetracotMultimap, srutalMultimap, {{2, 13, 16}, 2, "co"}]; (* ⟨⟨4 9 5]] - ⟨⟨2 -4 -11]] = ⟨⟨2 13 16]] *)
 test2args[eaTemperamentSum, dicotMultimap, srutalMultimap, {{4, -3, -14}, 2, "co"}]; (* ⟨⟨2 1 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨4 -3 -14]] *)

@@ -15,6 +15,8 @@ Print[eaTemperamentSum[matrixToMultivector[t1],matrixToMultivector[t2]], " contr
 ]
 *)
 
+randomVectors[d_, r_] := RandomInteger[{-9, 9}, {r, d}];
+
 randomMatrixAndMultivector2[d_, r_] := Module[{v, a, t, w},
   v = If[RandomInteger[] == 1, "contra", "co"];
   a = RandomInteger[{-5, 5}, {If[v == "contra", d - r, r], d}];
@@ -28,18 +30,30 @@ matrixToMultivector2[a_] := If[a === Error, Error, matrixToMultivector[a]];
 
 f = 0;
 Do[
-  d = RandomInteger[{3, 5}];
-  r = RandomInteger[{1, d - 1}];
+  d = RandomInteger[{4, 4}];
+  r = RandomInteger[{2, 2}];
+  n = d - r;
+  minGrade = Min[r, n];
+  nonCollinearity = RandomInteger[{1, minGrade}];
+  collinearityR = r - nonCollinearity;
 
-  tAndW1 = randomMatrixAndMultivector2[d, r];
-  t1 = First[tAndW1];
-  w1 = Last[tAndW1];
+  sharedVectors = randomVectors[d, collinearityR];
+  t1 = canonicalForm[{Join[sharedVectors, randomVectors[d, nonCollinearity]], "co"}]; (*TODO: canonical forming for now just to avoid the bug I mentioned *)
+  t2 = canonicalForm[{Join[sharedVectors, randomVectors[d, nonCollinearity]], "co"}];
+  (*
+    tAndW1 = randomMatrixAndMultivector2[d, r];
+    t1 = First[tAndW1];
+    w1 = Last[tAndW1];
 
-  tAndW2 = randomMatrixAndMultivector2[d, r];
-  t2 = First[tAndW2];
-  w2 = Last[tAndW2];
+    tAndW2 = randomMatrixAndMultivector2[d, r];
+    t2 = First[tAndW2];
+    w2 = Last[tAndW2];
+  *)
 
-  Print[w1, " + ", w2, " = "];
+  w1 = matrixToMultivector[t1];
+  w2 = matrixToMultivector[t2];
+
+  Print["\n", w1, " + ", w2, " = (OR ", t1, " + ", t2, " = )"];
   (* Print[t1];
    Print[t2];*)
   sumByMultivectors = eaTemperamentSum[w1, w2];
@@ -47,19 +61,23 @@ Do[
 
   differenceByMultivectors = eaTemperamentDifference[w1, w2];
   differenceByMatrices = matrixToMultivector2[temperamentDifference[t1, t2]];
+  (*Print["what", sumByMultivectors, sumByMatrices];*)
 
   If[
-    Sort[{sumByMultivectors, differenceByMultivectors}] == Sort[{sumByMatrices, differenceByMatrices}],
+    (* Sort[{sumByMultivectors, differenceByMultivectors}] == Sort[{sumByMatrices, differenceByMatrices}],*)
+    sumByMultivectors == sumByMatrices && differenceByMultivectors == differenceByMatrices,
     Print["match!"],
     f += 1;
-    Print["BAD BAD BAD!!!!!!!!!!!!!!!!!"];
+    (*Print["BAD BAD BAD!!!!!!!!!!!!!!!!!"];*)
     Print[sumByMultivectors, " (by multivectors)"];
     Print[sumByMatrices, " (by matrices)"];
-    Print[w1, " - ", w2, " = "];
+    Print[w1, " - ", w2, " = (OR ", t1, " - ", t2, " = )"];
     Print[differenceByMultivectors, " (by multivectors)"];
-    Print[differenceByMatrices, " (by matrices)"];
+    Print[differenceByMatrices, " (by matrices)\n"];
   ],
-  100
+  50
 ];
+
+(*TODO: eventually you should run a hundred, say, for each of the forms you document in that google sheet *)
 
 Print["TOTAL FAILURES: ", f];
