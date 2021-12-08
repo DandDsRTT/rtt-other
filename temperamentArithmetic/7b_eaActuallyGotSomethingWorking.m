@@ -22,12 +22,6 @@ eaTemperamentArithmetic[w1_, w2input_, isSum_] := Module[{w2},
 
 f = 0;
 
-(* now just a stray example I feel like keeping around*)
-septimalMeantone = {{1, 4, 10, 4, 13, 12}, 2, "co"};
-flattone = {{1 , 4, -9, 4, -17, -32}, 2, "co"};
-godzilla = {{2, 8, 1, 8, -4, -20}, 2, "co"};
-test2args[eaTemperamentSum, septimalMeantone, flattone, godzilla];
-
 (* collinear multimaps *)
 meantoneMultimap = {{1, 4, 4}, 2, "co"};
 porcupineMultimap = {{3, 5, 1}, 2, "co"};
@@ -78,6 +72,18 @@ test2args[eaTemperamentDifference, et7Multimap, et7Multimap, {{0, 0, 0}, 1, "co"
 test2args[eaTemperamentSum, et7Multicomma, et7Multicomma, {{16, -11, 7}, 2, "contra"}];
 test2args[eaTemperamentDifference, et7Multicomma, et7Multicomma, {{0, 0, 0}, 2, "contra"}];
 
+(* mismatched r & n but matching d *)
+test2args[eaTemperamentSum, et7Multimap, meantoneMultimap, Error];
+test2args[eaTemperamentDifference, et7Multimap, meantoneMultimap, Error];
+test2args[eaTemperamentSum, et7Multicomma, meantoneMulticomma, Error];
+test2args[eaTemperamentDifference, et7Multicomma, meantoneMulticomma, Error];
+
+(* mismatched d but matching r or n *)
+test2args[eaTemperamentSum, et7Multimap, et12Multimap, Error];
+test2args[eaTemperamentDifference, et7Multimap, et12Multimap, Error];
+test2args[eaTemperamentSum, et7Multicomma, et12Multicomma, Error];
+test2args[eaTemperamentDifference, et7Multicomma, et12Multicomma, Error];
+
 (* some basic examples *)
 augmentedMultimap = {{3 , 0, -7}, 2, "co"};
 diminishedMultimap = {{4, 4, -3}, 2, "co"};
@@ -105,17 +111,43 @@ test2args[eaTemperamentDifference, tetracotMultimap, srutalMultimap, {{2, 13, 16
 test2args[eaTemperamentSum, dicotMultimap, srutalMultimap, {{4, -3, -14}, 2, "co"}]; (* ⟨⟨2 1 -3]] + ⟨⟨2 -4 -11]] = ⟨⟨4 -3 -14]] *)
 test2args[eaTemperamentDifference, dicotMultimap, srutalMultimap, {{0, 5, 8}, 2, "co"}]; (* ⟨⟨2 1 -3]] - ⟨⟨2 -4 -11]] = ⟨⟨0 5 8]] *)
 
-(* TODO: EA version of this LA example that requires the breadth-first search of linear combinations of multiple collinear vectors *)
-(*test2args[temperamentSum, {{{-3, -8, 4, 6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];*)
+(* example of collinear, but not monononcollinear: d = 5, min-grade = 2, noncollinearity = 2 *)
+w1 = {{0, 0, 0, 41, -27, 2, 41, -27, 2, 31}, 3, "co"};
+w2 = {{48, 140, 46, 20, 10, 10, -250, -53, 85, 30}, 3, "co"};
+test2args[eaTemperamentSum, w1, w2, Error];
+test2args[eaTemperamentDifference, w1, w2, Error];
 
-(* example that motivated a further simplification and correction of the EA collinearity condition *)
+(* example of monononcollinear, but not collinear: d = 2, min-grade = 1, noncollinearity = 1 *)
+w1 = {{2, 3}, 1, "contra"};
+w2 = {{4, -7}, 1, "co"};
+w1plus2 = {{9, 7}, 1, "contra"};
+w1minus2 = {{5, 1}, 1, "contra"};
+test2args[eaTemperamentSum, w1, w2, w1plus2];
+test2args[eaTemperamentDifference, w1, w2, w1minus2];
+
+(* EA only: example that motivated a further simplification and correction of the EA collinearity condition *)
 test2args[eaTemperamentSum, {{1, -5, -14, 9, 23, 11}, 2, "co"}, {{25, -1, 2, -18, -14, 2}, 2, "contra"}, Error];
 
-(* example that motivated the possibility of inputs of different variances ... oh wait whoa crazy! here's a case where they are non-collinear, but mono-non-collinear, so it's still valid !!!! *)
-test2args[eaTemperamentSum, {{2, 3}, 1, "contra"}, {{4, -7}, 1, "co"}, {{9, 7}, 1, "contra"}];
+(* LA only checks example that required the breadth-first search of linear combinations of multiple collinear vectors, but I think it's okay to check it here too*)
+test2args[eaTemperamentSum, {{-3, -8, 4, 6}, 1, "co"}, {{9, 2, -4, 1}, 1 "co"}, {{12, 10, -8, -5}, 1, "co"}];
 
-(* an example of a d=5 min-grade=2 noncolinearity=2 example that should error even though it's collinear *)
-test2args[eaTemperamentSum, {{0, 0, 0, 41, -27, 2, 41, -27, 2, 31}, 3, "co"}, {{48, 140, 46, 20, 10, 10, -250, -53, 85, 30}, 3, "co"}, Error];
+(* LA only checks this example that would exercise the non-min-grade-1 code, but I think it's okay to check it here too *)
+septimalMeantoneW = {{1, 4, 10, 4, 13, 12}, 2, "co"};
+flattoneW = {{1 , 4, -9, 4, -17, -32}, 2, "co"};
+godzillaW = {{2, 8, 1, 8, -4, -20}, 2, "co"};
+et19MwithIndependent7W = {{0, 0, 19, 0, 30, 44}, 2, "co"};
+test2args[eaTemperamentSum, septimalMeantoneW, flattoneW, godzillaW];
+test2args[eaTemperamentDifference, septimalMeantoneW, flattoneW, et19MwithIndependent7W];
+
+(* LA only ensures the minors are consulted so that the sum and difference are identified correctly, but I think it's okay to check it here too *)
+(* this also verifies that for the min-grade-1 case, I think *)
+w1 = {{0, 1, -1, 0}, 3, "co"};
+w2 = {{20, -144, 87, -59}, 3, "co"};
+w1plus2 = {{20, -143, 86, -59}, 3, "co"};
+w1minus2 = {{20, -145, 88, -59}, 3, "co"};
+test2args[eaTemperamentSum, w1, w2, w1plus2];
+test2args[eaTemperamentDifference, w1, w2, w1minus2];
+
 
 
 Print["TOTAL FAILURES: ", f];
