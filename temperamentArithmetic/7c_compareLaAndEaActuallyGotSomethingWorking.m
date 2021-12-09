@@ -2,20 +2,19 @@ randomVectors[d_, r_] := RandomInteger[{-9, 9}, {r, d}];
 
 matrixToMultivectorWithPossibleError[a_] := If[a === Error, Error, matrixToMultivector[a]];
 
-(*TODO: still rename difference to diff here and everywhere *)
-match[sumByMultivectors_, sumByMatrices_, differenceByMultivectors_, differenceByMatrices_] := Module[{sumsMatch, differencesMatch},
+match[sumByMultivectors_, sumByMatrices_, diffByMultivectors_, diffByMatrices_] := Module[{sumsMatch, diffsMatch},
   sumsMatch = sumByMultivectors === sumByMatrices;
-  differencesMatch = If[
-    differenceByMatrices === Error,
+  diffsMatch = If[
+    diffByMatrices === Error,
     If[
-      differenceByMultivectors === Error,
+      diffByMultivectors === Error,
       True,
-      allZeros[eaGetMinors[differenceByMultivectors]]
+      allZeros[eaGetMinors[diffByMultivectors]]
     ],
-    differenceByMultivectors == differenceByMatrices
+    diffByMultivectors == diffByMatrices
   ];
 
-  sumsMatch && differencesMatch
+  sumsMatch && diffsMatch
 ];
 
 f = 0;
@@ -31,8 +30,8 @@ testTemperamentArithmetic[d_, r_, nonCollinearity_, testCount_] := Module[
     w2,
     sumByMatrices,
     sumByMultivectors,
-    differenceByMultivectors,
-    differenceByMatrices
+    diffByMultivectors,
+    diffByMatrices
   },
 
   Do[
@@ -51,11 +50,11 @@ testTemperamentArithmetic[d_, r_, nonCollinearity_, testCount_] := Module[
     sumByMultivectors = eaTemperamentSum[w1, w2];
     sumByMatrices = matrixToMultivectorWithPossibleError[temperamentSum[t1, t2]];
 
-    differenceByMultivectors = eaTemperamentDiff[w1, w2];
-    differenceByMatrices = matrixToMultivectorWithPossibleError[temperamentDiff[t1, t2]];
+    diffByMultivectors = eaTemperamentDiff[w1, w2];
+    diffByMatrices = matrixToMultivectorWithPossibleError[temperamentDiff[t1, t2]];
 
     If[
-      match[sumByMultivectors, sumByMatrices, differenceByMultivectors, differenceByMatrices],
+      match[sumByMultivectors, sumByMatrices, diffByMultivectors, diffByMatrices],
       p += 1,
       f += 1;
       Print["failure: "];
@@ -63,8 +62,8 @@ testTemperamentArithmetic[d_, r_, nonCollinearity_, testCount_] := Module[
       Print[sumByMultivectors, " (by multivectors)"];
       Print[sumByMatrices, " (by matrices)"];
       Print[w1, " - ", w2, " = (OR ", t1, " - ", t2, " = )"];
-      Print[differenceByMultivectors, " (by multivectors)"];
-      Print[differenceByMatrices, " (by matrices)\n"];
+      Print[diffByMultivectors, " (by multivectors)"];
+      Print[diffByMatrices, " (by matrices)\n"];
     ],
     testCount
   ]

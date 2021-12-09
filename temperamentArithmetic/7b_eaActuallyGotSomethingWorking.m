@@ -158,7 +158,7 @@ et19MwithIndependent7W = {{0, 0, 19, 0, 30, 44}, 2, "co"};
 test2args[eaTemperamentSum, septimalMeantoneW, flattoneW, godzillaW];
 test2args[eaTemperamentDiff, septimalMeantoneW, flattoneW, et19MwithIndependent7W];
 
-(* LA only ensures the minors are consulted so that the sum and difference are identified correctly, but I think it's okay to check it here too *)
+(* LA only ensures the minors are consulted so that the sum and diff are identified correctly, but I think it's okay to check it here too *)
 (* this also verifies that for the min-grade-1 case, I think *)
 w1 = {{0, 1, -1, 0}, 3, "co"};
 w2 = {{20, -144, 87, -59}, 3, "co"};
