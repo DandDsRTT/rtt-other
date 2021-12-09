@@ -1,16 +1,17 @@
 eaTemperamentSum[w1_, w2_] := eaTemperamentArithmetic[w1, w2, True];
 eaTemperamentDifference[w1_, w2_] := eaTemperamentArithmetic[w1, w2, False];
 
-eaTemperamentArithmetic[w1_, w2input_, isSum_] := Module[{w2},
-  w2 = If[getV[w2input] != getV[w1], eaDual[w2input], w2input];
+eaTemperamentArithmetic[w1input_, w2input_, isSum_] := Module[{w1, w2},
+  w1 = eaCanonicalForm[w1input];
+  w2 = If[eaGetV[w2input] != eaGetV[w1], eaDual[w2input], eaCanonicalForm[w2input]];
 
   If[
     eaGetR[w1] != eaGetR[w2] || eaGetD[w1] != eaGetD[w2],
     Error,
     If[
       isSum,
-      eaCanonicalForm[{getMinors[w1] + getMinors[w2], getGrade[w1], getV[w1]}],
-      eaCanonicalForm[{getMinors[w1] - getMinors[w2], getGrade[w1], getV[w1]}]
+      eaCanonicalForm[{eaGetMinors[w1] + eaGetMinors[w2], eaGetGrade[w1], eaGetV[w1]}],
+      eaCanonicalForm[{eaGetMinors[w1] - eaGetMinors[w2], eaGetGrade[w1], eaGetV[w1]}]
     ]
   ]
 ];
@@ -21,6 +22,7 @@ eaTemperamentArithmetic[w1_, w2input_, isSum_] := Module[{w2},
 (* all examples tested from both sides of duality *)
 
 f = 0;
+p = 0;
 
 (* collinear multimaps *)
 meantoneMultimap = {{1, 4, 4}, 2, "co"};
@@ -120,16 +122,24 @@ test2args[eaTemperamentDifference, w1, w2, Error];
 (* example of monononcollinear, but not collinear: d = 2, min-grade = 1, noncollinearity = 1 *)
 w1 = {{2, 3}, 1, "contra"};
 w2 = {{4, -7}, 1, "co"};
-w1plus2 = {{9, 7}, 1, "contra"};
-w1minus2 = {{5, 1}, 1, "contra"};
-test2args[eaTemperamentSum, w1, w2, w1plus2];
-test2args[eaTemperamentDifference, w1, w2, w1minus2];
+wSum = {{9, 7}, 1, "contra"};
+wDiff = {{5, 1}, 1, "contra"};
+test2args[eaTemperamentSum, w1, w2, wSum];
+test2args[eaTemperamentDifference, w1, w2, wDiff];
+
+(* example demonstrating how it's important to canonicalize *)
+w1 = {{-2, 4, -2}, 1, "co"};
+w2 = {{7, 7, 0}, 1, "co"};
+wSum = {{2, -1, 1}, 1, "co"};
+wDiff = {{0, 3, -1}, 1, "co"};
+test2args[eaTemperamentSum, w1, w2, wSum];
+test2args[eaTemperamentDifference, w1, w2, wDiff];
 
 (* EA only: example that motivated a further simplification and correction of the EA collinearity condition *)
 test2args[eaTemperamentSum, {{1, -5, -14, 9, 23, 11}, 2, "co"}, {{25, -1, 2, -18, -14, 2}, 2, "contra"}, Error];
 
-(* LA only checks example that required the breadth-first search of linear combinations of multiple collinear vectors, but I think it's okay to check it here too*)
-test2args[eaTemperamentSum, {{-3, -8, 4, 6}, 1, "co"}, {{9, 2, -4, 1}, 1 "co"}, {{12, 10, -8, -5}, 1, "co"}];
+(* LA only checks example that required the breadth-first search of linear combinations of multiple collinear vectors, but I think it's okay to check it here too *)
+test2args[eaTemperamentSum, {{3, 8, -4, -6}, 1, "co"}, {{9, 2, -4, 1}, 1 , "co"}, {{12, 10, -8, -5}, 1, "co"}];
 
 (* LA only checks this example that would exercise the non-min-grade-1 code, but I think it's okay to check it here too *)
 septimalMeantoneW = {{1, 4, 10, 4, 13, 12}, 2, "co"};
@@ -143,11 +153,12 @@ test2args[eaTemperamentDifference, septimalMeantoneW, flattoneW, et19MwithIndepe
 (* this also verifies that for the min-grade-1 case, I think *)
 w1 = {{0, 1, -1, 0}, 3, "co"};
 w2 = {{20, -144, 87, -59}, 3, "co"};
-w1plus2 = {{20, -143, 86, -59}, 3, "co"};
-w1minus2 = {{20, -145, 88, -59}, 3, "co"};
-test2args[eaTemperamentSum, w1, w2, w1plus2];
-test2args[eaTemperamentDifference, w1, w2, w1minus2];
+wSum = {{20, -143, 86, -59}, 3, "co"};
+wDiff = {{20, -145, 88, -59}, 3, "co"};
+test2args[eaTemperamentSum, w1, w2, wSum];
+test2args[eaTemperamentDifference, w1, w2, wDiff];
 
 
 
 Print["TOTAL FAILURES: ", f];
+Print["TOTAL PASSES: ", p];
