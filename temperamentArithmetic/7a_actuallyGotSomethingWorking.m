@@ -1,4 +1,6 @@
-getCollinearity[collinearityVariancedMatrix_] := Length[removeAllZeroRows[getA[collinearityVariancedMatrix]]];
+getCollinearity[collinearityVariancedMatrix_] := Length[getA[collinearityVariancedMatrix]];
+
+isCollinear[collinearityVariancedMatrix_] := getCollinearity[collinearityVariancedMatrix] > 0;
 
 isMonononcollinear[collinearityVariancedMatrix_, t_] := If[
   isContra[collinearityVariancedMatrix],
@@ -10,8 +12,11 @@ getCollinearityVariancedMatrix[t1_, t2_] := Module[{collinearityCovariantMatrix,
   collinearityCovariantMatrix = dual[join[t1, t2]];
   collinearityContravariantMatrix = dual[meet[t1, t2]];
 
+  collinearityCovariantMatrix[[1]] = removeAllZeroRows[collinearityCovariantMatrix[[1]]];
+  collinearityContravariantMatrix[[1]] = removeAllZeroRows[collinearityContravariantMatrix[[1]]];
+
   If[
-    isMonononcollinear[collinearityContravariantMatrix, t1],
+    isMonononcollinear[collinearityContravariantMatrix, t1] && isCollinear[collinearityContravariantMatrix],
     collinearityContravariantMatrix,
     If[
       isMonononcollinear[collinearityCovariantMatrix, t1],
@@ -31,23 +36,24 @@ temperamentArithmetic[t1_, t2_, isSum_] := If[
     tSumAndDiff = If[
       collinearityVariancedMatrix === Error,
       Error,
-      If[
-        getR[t1] == 1 || getN[t1] == 1,
-        (* TODO: consider renaming these now that validity is more complicated, this doesn't match "valid" from the EA library anymore, and it returns to you both the sum and the diff *)
-        validMinGradeOneTemperamentArithmetic[t1, t2],
-        validTemperamentArithmetic[t1, t2, collinearityVariancedMatrix]
-      ]
+      getSumAndDiff[t1, t2, collinearityVariancedMatrix]
     ];
 
     If[
       tSumAndDiff === Error,
       Error,
-      chooseCorrectAnswerBetweenSumAndDiff[t1, t2, isSum, tSumAndDiff]
+      chooseCorrectlyBetweenSumAndDiff[t1, t2, isSum, tSumAndDiff]
     ]
   ]
 ];
 
-chooseCorrectAnswerBetweenSumAndDiff[t1_, t2_, isSum_, tSumAndDiff_] := Module[
+getSumMinorsChecker[t1_, t2_] := Module[{t2sameVariance},
+  t2sameVariance = If[getV[t1] != getV[t2], dual[t2], t2];
+
+  divideOutGcd[getMinors[t1] + getMinors[t2sameVariance]]
+];
+
+chooseCorrectlyBetweenSumAndDiff[t1_, t2_, isSum_, tSumAndDiff_] := Module[
   {
     tSum,
     tDiff,
@@ -59,7 +65,7 @@ chooseCorrectAnswerBetweenSumAndDiff[t1_, t2_, isSum_, tSumAndDiff_] := Module[
   tSum = First[tSumAndDiff];
   tDiff = Last[tSumAndDiff];
   tSumMinors = getMinors[tSum];
-  tSumMinorsChecker = divideOutGcd[getMinors[t1] + getMinors[t2]];
+  tSumMinorsChecker = getSumMinorsChecker[t1, t2];
   tSumMinorsMatch = tSumMinors == tSumMinorsChecker;
 
   If[
@@ -90,64 +96,41 @@ getGradeMatchingCollinearity[t_, collinearityVariancedMatrix_] := Module[{tContr
   ]
 ];
 
-validTemperamentArithmetic[t1_, t2_, collinearityVariancedMatrix_] := Module[
+getSumAndDiff[t1_, t2_, collinearityVariancedMatrix_] := Module[
   {
     grade,
+    collinearVectors,
     a1,
     a2,
     tSum,
     tDiff,
-    a1final,
-    a2final
+    a1noncollinearVector,
+    a2noncollinearVector,
+    noncollinearVectorSum,
+    noncollinearVectorDiff,
+    v,
+    collinearityV
   },
 
   grade = getGradeMatchingCollinearity[t1, collinearityVariancedMatrix];
+  collinearVectors = getA[collinearityVariancedMatrix];
 
   a1 = defactorWhileLockingCollinearVectors[t1, collinearityVariancedMatrix];
   a2 = defactorWhileLockingCollinearVectors[t2, collinearityVariancedMatrix];
 
-  (* TODO: rename *)
-  a1final = Last[a1];
-  a2final = Last[a2];
+  a1noncollinearVector = Last[a1];
+  a2noncollinearVector = Last[a2];
+  noncollinearVectorSum = a1noncollinearVector + a2noncollinearVector;
+  noncollinearVectorDiff = a1noncollinearVector - a2noncollinearVector;
 
-  tSum = If[
-    getV[t1] == getV[collinearityVariancedMatrix],
-    canonicalForm[{Join[getA[collinearityVariancedMatrix], {a1final + a2final}], getV[collinearityVariancedMatrix]}],
-    dual[{Join[getA[collinearityVariancedMatrix], { a1final + a2final}], getV[collinearityVariancedMatrix]}]
-  ];
-  tDiff = If[
-    getV[t1] == getV[collinearityVariancedMatrix],
-    canonicalForm[{Join[getA[collinearityVariancedMatrix], {a1final - a2final}], getV[collinearityVariancedMatrix]}],
-    dual[{Join[getA[collinearityVariancedMatrix], {a1final - a2final}], getV[collinearityVariancedMatrix]}]
-  ];
+  v = getV[t1];
+  collinearityV = getV[collinearityVariancedMatrix];
 
-  {tSum, tDiff}
-];
+  tSum = {Join[collinearVectors, {noncollinearVectorSum}], collinearityV};
+  tSum = If[v == collinearityV, canonicalForm[tSum], dual[tSum]];
 
-validMinGradeOneTemperamentArithmetic[t1_, t2_] := Module[{minGradeIsR, tSum, tDiff},
-  minGradeIsR = getR[t1] == 1;
-  tSum = If[
-    minGradeIsR,
-    {getM[t1] + getM[t2], "co"},
-    {getC[t1] + getC[t2], "contra"}
-  ];
-  tDiff = If[
-    minGradeIsR,
-    {getM[t1] - getM[t2], "co"},
-    {getC[t1] - getC[t2], "contra"}
-  ];
-
-  (* TODO: can this be consolidated with the same type of thing from the non-min-grade-1 approach? *)
-  tSum = If[
-    getV[tSum] == getV[t1],
-    canonicalForm[tSum],
-    dual[tSum]
-  ];
-  tDiff = If[
-    getV[tDiff] == getV[t1],
-    canonicalForm[tDiff],
-    dual[tDiff]
-  ];
+  tDiff = {Join[collinearVectors, {noncollinearVectorDiff}], collinearityV};
+  tDiff = If[v == collinearityV, canonicalForm[tDiff], dual[tDiff]];
 
   {tSum, tDiff}
 ];
@@ -224,7 +207,7 @@ defactorWhileLockingCollinearVectors[t_, collinearityVariancedMatrix_] := Module
     collinearVectors,
     lockedCollinearVectorsFormOfA,
     d,
-    multiplesCount,
+    collinearity,
     enfactoring,
     multiples,
     equations,
@@ -235,25 +218,33 @@ defactorWhileLockingCollinearVectors[t_, collinearityVariancedMatrix_] := Module
   grade = getGradeMatchingCollinearity[t, collinearityVariancedMatrix];
   collinearVectors = getA[collinearityVariancedMatrix];
   lockedCollinearVectorsFormOfA = getInitialLockedCollinearVectorsFormOfA[t, collinearityVariancedMatrix, grade, collinearVectors];
-  d = getD[t];
-  multiplesCount = Length[collinearVectors];
-  enfactoring = getEnfactoring[lockedCollinearVectorsFormOfA];
-  multiples = Table[Subscript[x, i], {i, multiplesCount}];
-  equations = Map[
-    Function[
-      dIndex,
-      Mod[lockedCollinearVectorsFormOfA[[grade]][[dIndex]] + Total[Map[
-        Function[multiplesIndex, multiples[[multiplesIndex]] * collinearVectors[[multiplesIndex]][[dIndex]]],
-        Range[multiplesCount]
-      ]], enfactoring] == 0
-    ],
-    Range[d]
-  ];
-  answer = FindInstance[equations, multiples, Integers];
-  result = Values[Association[answer]];
-  lockedCollinearVectorsFormOfA[[grade]] = divideOutGcd[lockedCollinearVectorsFormOfA[[grade]] + getCollinearVectorLinearCombination[lockedCollinearVectorsFormOfA, result]];
 
-  lockedCollinearVectorsFormOfA
+  If[
+    isCollinear[ collinearityVariancedMatrix],
+
+    collinearity = getCollinearity[collinearityVariancedMatrix];
+    d = getD[t];
+
+    enfactoring = getEnfactoring[lockedCollinearVectorsFormOfA];
+    multiples = Table[Subscript[x, i], {i, collinearity}];
+    equations = Map[
+      Function[
+        dIndex,
+        Mod[lockedCollinearVectorsFormOfA[[grade]][[dIndex]] + Total[Map[
+          Function[multiplesIndex, multiples[[multiplesIndex]] * collinearVectors[[multiplesIndex]][[dIndex]]],
+          Range[collinearity]
+        ]], enfactoring] == 0
+      ],
+      Range[d]
+    ];
+    answer = FindInstance[equations, multiples, Integers];
+    result = Values[Association[answer]];
+    lockedCollinearVectorsFormOfA[[grade]] = divideOutGcd[lockedCollinearVectorsFormOfA[[grade]] + getCollinearVectorLinearCombination[lockedCollinearVectorsFormOfA, result]];
+
+    lockedCollinearVectorsFormOfA,
+
+    lockedCollinearVectorsFormOfA
+  ]
 ];
 
 
