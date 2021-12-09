@@ -30,6 +30,8 @@ getCollinearityT[t1_, t2_] := Module[{collinearityM, collinearityC},
 
 tShapesDoNotMatch[t1_, t2_] := getR[t1] != getR[t2] || getD[t1] != getD[t2];
 
+variancesMatch[t1_, t2_] := getV[t1] == getV[t2];
+
 arithmetic[t1_, t2_, isSum_] := If[
   tShapesDoNotMatch[t1, t2],
   Error,
@@ -87,15 +89,10 @@ getMinors[t_] := Module[{contra, grade, minors, entryFn, normalizingEntry},
   If[normalizingEntry < 0, -minors, minors]
 ];
 
-getGradeMatchingCollinearity[t_, collinearityT_] := Module[{tContra, collinearityContra},
-  tContra = isContra[t];
-  collinearityContra = isContra[collinearityT];
-
-  If[
-    tContra == collinearityContra,
-    If[tContra, getN[t], getR[t]],
-    If[tContra, getR[t], getN[t]]
-  ]
+getGradeMatchingCollinearity[t_, collinearityT_] := If[
+  variancesMatch[t, collinearityT],
+  If[isContra[t], getN[t], getR[t]],
+  If[isContra[t], getR[t], getN[t]]
 ];
 
 getSumAndDiff[t1_, t2_, collinearityT_] := Module[
@@ -109,9 +106,7 @@ getSumAndDiff[t1_, t2_, collinearityT_] := Module[
     a1noncollinearVector,
     a2noncollinearVector,
     noncollinearVectorSum,
-    noncollinearVectorDiff,
-    v,
-    collinearityV
+    noncollinearVectorDiff
   },
 
   grade = getGradeMatchingCollinearity[t1, collinearityT];
@@ -125,22 +120,18 @@ getSumAndDiff[t1_, t2_, collinearityT_] := Module[
   noncollinearVectorSum = a1noncollinearVector + a2noncollinearVector;
   noncollinearVectorDiff = a1noncollinearVector - a2noncollinearVector;
 
-  v = getV[t1];
-  collinearityV = getV[collinearityT];
+  tSum = {Join[collinearUnvariancedVectors, {noncollinearVectorSum}], getV[collinearityT]};
+  tSum = If[variancesMatch[t1, collinearityT], canonicalForm[tSum], dual[tSum]];
 
-  tSum = {Join[collinearUnvariancedVectors, {noncollinearVectorSum}], collinearityV};
-  tSum = If[v == collinearityV, canonicalForm[tSum], dual[tSum]];
-
-  tDiff = {Join[collinearUnvariancedVectors, {noncollinearVectorDiff}], collinearityV};
-  tDiff = If[v == collinearityV, canonicalForm[tDiff], dual[tDiff]];
+  tDiff = {Join[collinearUnvariancedVectors, {noncollinearVectorDiff}], getV[collinearityT]};
+  tDiff = If[variancesMatch[t1, collinearityT], canonicalForm[tDiff], dual[tDiff]];
 
   {tSum, tDiff}
 ];
 
 sum[t1input_, t2input_] := Module[{t1, t2},
   t1 = canonicalForm[t1input];
-  (* TODO: I now feel like I'm suing this in a few places, and also I need to test drive this, with an example where I add a temperatment or diff it but its with itself but its mapping form and its comma basis form *)
-  t2 = If[getV[t1input] == getV[t2input], canonicalForm[t2input], dual[t2input]];
+  t2 = If[variancesMatch[t1input, t2input], canonicalForm[t2input], dual[t2input]];
 
   If[
     t1 == t2,
@@ -151,7 +142,7 @@ sum[t1input_, t2input_] := Module[{t1, t2},
 
 diff[t1input_, t2input_] := Module[{t1, t2},
   t1 = canonicalForm[t1input];
-  t2 = If[getV[t1input] == getV[t2input], canonicalForm[t2input], dual[t2input]];
+  t2 = If[variancesMatch[t1input, t2input], canonicalForm[t2input], dual[t2input]];
 
   If[
     t1 == t2,
@@ -410,7 +401,7 @@ test2args[sum, t1, t2, {{{5, 7, -11, 23, -13}, {0, 8, -7, 14, -10}}, "co"}];
 test2args[diff, t1, t2, {{{5, 5, 5, 11, 11}, {0, 6, 9, 2, 14}}, "co"}];
 
 (* LA only: example where the first vectors of the input were not actually noncollinear with the collinear vectors, things would fail, so now we actually test each one to ensure it's noncollinear before adding it into the initial matrix to be defactored *)
-test2args[sum,{{{-17,-55,24,34}},"contra"}, {{{-1,-7,0,2}},"contra"}, {{{-9,-31,12,18}},"contra"}];
+test2args[sum, {{{-17, -55, 24, 34}}, "contra"}, {{{-1, -7, 0, 2}}, "contra"}, {{{-9, -31, 12, 18}}, "contra"}];
 
 
 
