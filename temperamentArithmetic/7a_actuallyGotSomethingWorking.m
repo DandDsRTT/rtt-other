@@ -172,11 +172,6 @@ getEnfactoredDetA[a_] := Transpose[Take[hnf[Transpose[a]], MatrixRank[a]]];
 
 getEnfactoring[a_] := Det[getEnfactoredDetA[a]];
 
-filterCollinearVectorCopies[noncollinearVectors_, collinearVectors_] := Module[{filtered},
-  filtered = Select[noncollinearVectors, !MemberQ[collinearVectors, #]&];
-
-  Select[filtered, !MemberQ[collinearVectors, -#]&]
-];
 
 getInitialLockedCollinearVectorsFormOfA[t_, collinearityVariancedMatrix_, grade_, collinearVectors_] := Module[
   {
@@ -184,18 +179,20 @@ getInitialLockedCollinearVectorsFormOfA[t_, collinearityVariancedMatrix_, grade_
     lockedCollinearVectorsFormOfA
   },
 
+  (* TODO: only potentially noncollinear, we NEED them to be noncollinear but sometimes they aren't *)
   noncollinearVectors = If[isContra[collinearityVariancedMatrix], getC[t], getM[t]];
-  noncollinearVectors = filterCollinearVectorCopies[noncollinearVectors, collinearVectors];
-  lockedCollinearVectorsFormOfA = Join[collinearVectors, noncollinearVectors];
+  lockedCollinearVectorsFormOfA = collinearVectors;
 
-  (* TODO: maybe it would be even more secure and not even required this throw if you could do something like
-  multiply each vector in the latter thing if necessary by consecutive prime numbers
-  to ensure no enfactoring or something but also ensure no matches *)
-  If[
-    Length[lockedCollinearVectorsFormOfA] < grade,
-    Throw["were not enough vectors to perform temperament arithmetic"],
-    Take[lockedCollinearVectorsFormOfA, grade]
-  ]
+  Do[
+    candidate = hnf[Join[collinearVectors,{ noncollinearVector}]];
+    If[
+      Length[lockedCollinearVectorsFormOfA] < grade && MatrixRank[candidate] > Length[collinearVectors]  ,
+      lockedCollinearVectorsFormOfA = Join[lockedCollinearVectorsFormOfA, {noncollinearVector}]
+    ],
+    {noncollinearVector, noncollinearVectors}
+  ];
+
+  Take[lockedCollinearVectorsFormOfA, grade]
 ];
 
 defactorWhileLockingAtLeastOneCollinearVector[t_, collinearityVariancedMatrix_, grade_, collinearVectors_, lockedCollinearVectorsFormOfAInput_] := Module[
@@ -232,6 +229,8 @@ defactorWhileLockingAtLeastOneCollinearVector[t_, collinearityVariancedMatrix_, 
 
   lockedCollinearVectorsFormOfA
 ];
+
+(* TODO: a lot of these are varianced vectors, not just vectors *)
 
 defactorWhileLockingCollinearVectors[t_, collinearityVariancedMatrix_] := Module[
   {
@@ -416,6 +415,9 @@ t1 = {{{5, -1, -4, 9, -3}, {0, -7, -1, -8, -2}}, "co"};
 t2 = {{{5, -1, -4, 9, -3}, {-5, 2, -4, -3, -9}}, "co"};
 test2args[temperamentSum, t1, t2, {{{5, 7, -11, 23, -13}, {0, 8, -7, 14, -10}}, "co"}];
 test2args[temperamentDiff, t1, t2, {{{5, 5, 5, 11, 11}, {0, 6, 9, 2, 14}}, "co"}];
+
+(* LA only: example where the first vectors of the input were not actually noncollinear with the collinear vectors, things would fail, so now we actually test each one to ensure it's noncollinear before adding it into the initial matrix to be defactored *)
+test2args[temperamentSum,{{{-17,-55,24,34}},"contra"}, {{{-1,-7,0,2}},"contra"}, {{{-9,-31,12,18}},"contra"}];
 
 
 
