@@ -1,36 +1,24 @@
-(* TODO: sort these functions in a more logical order *)
-
-getCollinearity[collinearityT_] := Length[getA[collinearityT]];
-
-isCollinear[collinearityT_] := getCollinearity[collinearityT] > 0;
-
-isMonononcollinear[collinearityT_, t_] := If[
-  isContra[collinearityT],
-  getCollinearity[collinearityT] === getN[t] - 1,
-  getCollinearity[collinearityT] === getR[t] - 1
-];
-
-getCollinearityT[t1_, t2_] := Module[{collinearityM, collinearityC},
-  collinearityM = dual[join[t1, t2]];
-  collinearityC = dual[meet[t1, t2]];
-
-  collinearityM[[1]] = removeAllZeroRows[collinearityM[[1]]];
-  collinearityC[[1]] = removeAllZeroRows[collinearityC[[1]]];
+sum[t1input_, t2input_] := Module[{t1, t2},
+  t1 = canonicalForm[t1input];
+  t2 = If[variancesMatch[t1input, t2input], canonicalForm[t2input], dual[t2input]];
 
   If[
-    isMonononcollinear[collinearityC, t1] && isCollinear[collinearityC],
-    collinearityC,
-    If[
-      isMonononcollinear[collinearityM, t1],
-      collinearityM,
-      Error
-    ]
+    t1 == t2,
+    t1,
+    arithmetic[t1, t2, True]
   ]
 ];
 
-tShapesDoNotMatch[t1_, t2_] := getR[t1] != getR[t2] || getD[t1] != getD[t2];
+diff[t1input_, t2input_] := Module[{t1, t2},
+  t1 = canonicalForm[t1input];
+  t2 = If[variancesMatch[t1input, t2input], canonicalForm[t2input], dual[t2input]];
 
-variancesMatch[t1_, t2_] := getV[t1] == getV[t2];
+  If[
+    t1 == t2,
+    Error,
+    arithmetic[t1, t2, False]
+  ]
+];
 
 arithmetic[t1_, t2_, isSum_] := If[
   tShapesDoNotMatch[t1, t2],
@@ -49,50 +37,6 @@ arithmetic[t1_, t2_, isSum_] := If[
       chooseCorrectlyBetweenSumAndDiff[t1, t2, isSum, tSumAndDiff]
     ]
   ]
-];
-
-getSumMinorsChecker[t1_, t2_] := Module[{t2sameVariance},
-  t2sameVariance = If[getV[t1] != getV[t2], dual[t2], t2];
-
-  divideOutGcd[getMinors[t1] + getMinors[t2sameVariance]]
-];
-
-chooseCorrectlyBetweenSumAndDiff[t1_, t2_, isSum_, tSumAndDiff_] := Module[
-  {
-    tSum,
-    tDiff,
-    tSumMinors,
-    tSumMinorsChecker,
-    tSumMinorsMatch
-  },
-
-  tSum = First[tSumAndDiff];
-  tDiff = Last[tSumAndDiff];
-  tSumMinors = getMinors[tSum];
-  tSumMinorsChecker = getSumMinorsChecker[t1, t2];
-  tSumMinorsMatch = tSumMinors == tSumMinorsChecker;
-
-  If[
-    isSum,
-    If[tSumMinorsMatch, tSum, tDiff],
-    If[tSumMinorsMatch, tDiff, tSum]
-  ]
-];
-
-getMinors[t_] := Module[{contra, grade, minors, entryFn, normalizingEntry},
-  contra = isContra[t];
-  grade = If[contra, getN[t], getR[t]];
-  minors = divideOutGcd[First[Minors[getA[t], grade]]];
-  entryFn = If[contra, trailingEntry, leadingEntry];
-  normalizingEntry = entryFn[minors];
-
-  If[normalizingEntry < 0, -minors, minors]
-];
-
-getGradeMatchingCollinearity[t_, collinearityT_] := If[
-  variancesMatch[t, collinearityT],
-  If[isContra[t], getN[t], getR[t]],
-  If[isContra[t], getR[t], getN[t]]
 ];
 
 getSumAndDiff[t1_, t2_, collinearityT_] := Module[
@@ -129,56 +73,22 @@ getSumAndDiff[t1_, t2_, collinearityT_] := Module[
   {tSum, tDiff}
 ];
 
-sum[t1input_, t2input_] := Module[{t1, t2},
-  t1 = canonicalForm[t1input];
-  t2 = If[variancesMatch[t1input, t2input], canonicalForm[t2input], dual[t2input]];
-
-  If[
-    t1 == t2,
-    t1,
-    arithmetic[t1, t2, True]
-  ]
-];
-
-diff[t1input_, t2input_] := Module[{t1, t2},
-  t1 = canonicalForm[t1input];
-  t2 = If[variancesMatch[t1input, t2input], canonicalForm[t2input], dual[t2input]];
-
-  If[
-    t1 == t2,
-    Error,
-    arithmetic[t1, t2, False]
-  ]
-];
-
-getCollinearUnvariancedVectorLinearCombination[collinearUnvariancedVectors_, collinearVectorMultiplePermutation_] := Total[MapThread[
-  #1 * #2&,
-  {collinearUnvariancedVectors, collinearVectorMultiplePermutation}
-]];
-
-getEnfactoredDetA[a_] := Transpose[Take[hnf[Transpose[a]], MatrixRank[a]]];
-
-getEnfactoring[a_] := Det[getEnfactoredDetA[a]];
-
-getInitialLockedCollinearUnvariancedVectorsFormOfA[t_, collinearityT_, grade_, collinearUnvariancedVectors_] := Module[
+defactorWhileLockingCollinearUnvariancedVectors[t_, collinearityT_] := Module[
   {
-    potentiallyNoncollinearUnvariancedVectors,
+    grade,
+    collinearUnvariancedVectors,
     lockedCollinearUnvariancedVectorsFormOfA
   },
 
-  potentiallyNoncollinearUnvariancedVectors = If[isContra[collinearityT], getC[t], getM[t]];
-  lockedCollinearUnvariancedVectorsFormOfA = collinearUnvariancedVectors;
+  grade = getGradeMatchingCollinearity[t, collinearityT];
+  collinearUnvariancedVectors = getA[collinearityT];
+  lockedCollinearUnvariancedVectorsFormOfA = getInitialLockedCollinearUnvariancedVectorsFormOfA[t, collinearityT, grade, collinearUnvariancedVectors];
 
-  Do[
-    candidate = hnf[Join[collinearUnvariancedVectors, {potentiallyNoncollinearVector}]];
-    If[
-      Length[lockedCollinearUnvariancedVectorsFormOfA] < grade && MatrixRank[candidate] > Length[collinearUnvariancedVectors],
-      lockedCollinearUnvariancedVectorsFormOfA = Join[lockedCollinearUnvariancedVectorsFormOfA, {potentiallyNoncollinearVector}]
-    ],
-    {potentiallyNoncollinearVector, potentiallyNoncollinearUnvariancedVectors}
-  ];
-
-  Take[lockedCollinearUnvariancedVectorsFormOfA, grade]
+  If[
+    isCollinear[collinearityT],
+    defactorWhileLockingAtLeastOneCollinearUnvariancedVector[t, collinearityT, grade, collinearUnvariancedVectors, lockedCollinearUnvariancedVectorsFormOfA],
+    lockedCollinearUnvariancedVectorsFormOfA
+  ]
 ];
 
 defactorWhileLockingAtLeastOneCollinearUnvariancedVector[t_, collinearityT_, grade_, collinearUnvariancedVectors_, lockedCollinearUnvariancedVectorsFormOfAInput_] := Module[
@@ -216,22 +126,110 @@ defactorWhileLockingAtLeastOneCollinearUnvariancedVector[t_, collinearityT_, gra
   lockedCollinearUnvariancedVectorsFormOfA
 ];
 
-defactorWhileLockingCollinearUnvariancedVectors[t_, collinearityT_] := Module[
+variancesMatch[t1_, t2_] := getV[t1] == getV[t2];
+
+getCollinearityT[t1_, t2_] := Module[{collinearityM, collinearityC},
+  collinearityM = dual[join[t1, t2]];
+  collinearityC = dual[meet[t1, t2]];
+
+  collinearityM[[1]] = removeAllZeroRows[collinearityM[[1]]];
+  collinearityC[[1]] = removeAllZeroRows[collinearityC[[1]]];
+
+  If[
+    isMonononcollinear[collinearityC, t1] && isCollinear[collinearityC],
+    collinearityC,
+    If[
+      isMonononcollinear[collinearityM, t1],
+      collinearityM,
+      Error
+    ]
+  ]
+];
+
+isMonononcollinear[collinearityT_, t_] := If[
+  isContra[collinearityT],
+  getCollinearity[collinearityT] === getN[t] - 1,
+  getCollinearity[collinearityT] === getR[t] - 1
+];
+
+getCollinearity[collinearityT_] := Length[getA[collinearityT]];
+
+tShapesDoNotMatch[t1_, t2_] := getR[t1] != getR[t2] || getD[t1] != getD[t2];
+
+getGradeMatchingCollinearity[t_, collinearityT_] := If[
+  variancesMatch[t, collinearityT],
+  If[isContra[t], getN[t], getR[t]],
+  If[isContra[t], getR[t], getN[t]]
+];
+
+isCollinear[collinearityT_] := getCollinearity[collinearityT] > 0;
+
+getInitialLockedCollinearUnvariancedVectorsFormOfA[t_, collinearityT_, grade_, collinearUnvariancedVectors_] := Module[
   {
-    grade,
-    collinearUnvariancedVectors,
+    potentiallyNoncollinearUnvariancedVectors,
     lockedCollinearUnvariancedVectorsFormOfA
   },
 
-  grade = getGradeMatchingCollinearity[t, collinearityT];
-  collinearUnvariancedVectors = getA[collinearityT];
-  lockedCollinearUnvariancedVectorsFormOfA = getInitialLockedCollinearUnvariancedVectorsFormOfA[t, collinearityT, grade, collinearUnvariancedVectors];
+  potentiallyNoncollinearUnvariancedVectors = If[isContra[collinearityT], getC[t], getM[t]];
+  lockedCollinearUnvariancedVectorsFormOfA = collinearUnvariancedVectors;
+
+  Do[
+    candidate = hnf[Join[collinearUnvariancedVectors, {potentiallyNoncollinearVector}]];
+    If[
+      Length[lockedCollinearUnvariancedVectorsFormOfA] < grade && MatrixRank[candidate] > Length[collinearUnvariancedVectors],
+      lockedCollinearUnvariancedVectorsFormOfA = Join[lockedCollinearUnvariancedVectorsFormOfA, {potentiallyNoncollinearVector}]
+    ],
+    {potentiallyNoncollinearVector, potentiallyNoncollinearUnvariancedVectors}
+  ];
+
+  Take[lockedCollinearUnvariancedVectorsFormOfA, grade]
+];
+
+getEnfactoring[a_] := Det[getEnfactoredDetA[a]];
+
+getEnfactoredDetA[a_] := Transpose[Take[hnf[Transpose[a]], MatrixRank[a]]];
+
+getCollinearUnvariancedVectorLinearCombination[collinearUnvariancedVectors_, collinearVectorMultiplePermutation_] := Total[MapThread[
+  #1 * #2&,
+  {collinearUnvariancedVectors, collinearVectorMultiplePermutation}
+]];
+
+chooseCorrectlyBetweenSumAndDiff[t1_, t2_, isSum_, tSumAndDiff_] := Module[
+  {
+    tSum,
+    tDiff,
+    tSumMinors,
+    tSumMinorsChecker,
+    tSumMinorsMatch
+  },
+
+  tSum = First[tSumAndDiff];
+  tDiff = Last[tSumAndDiff];
+  tSumMinors = getMinors[tSum];
+  tSumMinorsChecker = getSumMinorsChecker[t1, t2];
+  tSumMinorsMatch = tSumMinors == tSumMinorsChecker;
 
   If[
-    isCollinear[collinearityT],
-    defactorWhileLockingAtLeastOneCollinearUnvariancedVector[t, collinearityT, grade, collinearUnvariancedVectors, lockedCollinearUnvariancedVectorsFormOfA],
-    lockedCollinearUnvariancedVectorsFormOfA
+    isSum,
+    If[tSumMinorsMatch, tSum, tDiff],
+    If[tSumMinorsMatch, tDiff, tSum]
   ]
+];
+
+getMinors[t_] := Module[{contra, grade, minors, entryFn, normalizingEntry},
+  contra = isContra[t];
+  grade = If[contra, getN[t], getR[t]];
+  minors = divideOutGcd[First[Minors[getA[t], grade]]];
+  entryFn = If[contra, trailingEntry, leadingEntry];
+  normalizingEntry = entryFn[minors];
+
+  If[normalizingEntry < 0, -minors, minors]
+];
+
+getSumMinorsChecker[t1_, t2_] := Module[{t2sameVariance},
+  t2sameVariance = If[getV[t1] != getV[t2], dual[t2], t2];
+
+  divideOutGcd[getMinors[t1] + getMinors[t2sameVariance]]
 ];
 
 
