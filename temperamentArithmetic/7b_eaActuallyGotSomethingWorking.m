@@ -24,7 +24,7 @@ eaArithmetic[w1input_, w2input_, isSum_] := Module[{w1, w2},
 f = 0;
 p = 0;
 
-(* collinear multimaps *)
+(* monononcollinear multimaps *)
 meantoneMultimap = {{1, 4, 4}, 2, "co"};
 porcupineMultimap = {{3, 5, 1}, 2, "co"};
 test2args[eaSum, meantoneMultimap, porcupineMultimap, {{4, 9, 5}, 2, "co"}];
@@ -34,7 +34,7 @@ porcupineMulticomma = {{1, -5, 3}, 1, "contra"};
 test2args[eaSum, meantoneMulticomma, porcupineMulticomma, {{5, -9, 4}, 1, "contra"}];
 test2args[eaDiff, meantoneMulticomma, porcupineMulticomma, {{-3, -1, 2}, 1, "contra"}];
 
-(* collinear multicommas *)
+(* monononcollinear multicommas *)
 et7Multimap = {{7, 11, 16}, 1, "co"};
 et5Multimap = {{5, 8, 12}, 1, "co"};
 test2args[eaSum, et7Multimap, et5Multimap, {{12, 19, 28}, 1, "co"}];
@@ -44,7 +44,7 @@ et5Multicomma = {{12, -8, 5}, 2, "contra"};
 test2args[eaSum, et7Multicomma, et5Multicomma, {{28, -19, 12}, 2, "contra"}];
 test2args[eaDiff, et7Multicomma, et5Multicomma, {{4, -3, 2}, 2, "contra"}];
 
-(* noncollinear - error! *)
+(* not monononcollinear - error! *)
 septimalMeantoneMultimap = {{1, 4, 10, 4, 13, 12}, 2, "co"};
 septimalBlackwoodMultimap = {{0, 5, 0, 8, 0, -14}, 2, "co"};
 test2args[eaSum, septimalMeantoneMultimap, septimalBlackwoodMultimap, Error];
@@ -54,7 +54,7 @@ septimalBlackwoodMulticomma = eaDual[{{0, 5, 0, 8, 0, -14}, 2, "co"}];
 test2args[eaSum, septimalMeantoneMulticomma, septimalBlackwoodMulticomma, Error];
 test2args[eaDiff, septimalMeantoneMulticomma, septimalBlackwoodMulticomma, Error];
 
-(* doubly collinear (multicommas) *)
+(* monononcollinear - doubly collinear (multicommas) *)
 et12Multimap = {{12, 19, 28, 34}, 1, "co"};
 et19Multimap = {{19, 30, 44, 53}, 1, "co"};
 test2args[eaSum, et12Multimap, et19Multimap, {{31, 49, 72, 87}, 1, "co"}];
@@ -143,6 +143,15 @@ test2args[eaSum, w1, w2, wSum];
 test2args[eaSum, eaDual[w1], w2, eaDual[wSum]];
 test2args[eaSum, w1, eaDual[w2], wSum];
 test2args[eaSum, eaDual[w1], eaDual[w2], eaDual[wSum]];
+
+(* an example that used to fail for whatever reason, "some problem" *)
+test2args[eaSum,{{18,-2,-1,14,-20,3},2,"co"} , {{6,-2,8,6,-15,-3},2,"co"}, {{24,-4,7,20,-35,0},2,"co"}];
+
+(* another example that used to fail for whatever reason, "goddam failing mysteries" *)
+test2args[eaSum, {{15,93,30,22,10,18},2,"co"}, {{32,44,-1,-56,-22,-32},2,"co"}, {{47,137,29,-34,-12,-14},2,"co"}];
+
+(* another example that used to fail for whatever reason, "more stuff to sort out" *)
+test2args[eaSum, {{5,16,15,-1,0,3},2,"contra"}, {{4,3,12,-1,0,3},2,"contra"}, {{9,19,27,-2,0,6},2,"contra"}];
 
 (* EA only: example that motivated a further simplification and correction of the EA collinearity condition *)
 test2args[eaSum, {{1, -5, -14, 9, 23, 11}, 2, "co"}, {{25, -1, 2, -18, -14, 2}, 2, "contra"}, Error];

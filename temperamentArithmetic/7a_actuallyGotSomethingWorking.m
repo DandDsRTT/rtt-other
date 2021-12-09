@@ -240,7 +240,7 @@ getSumMinorsChecker[t1_, t2_] := Module[{t2sameVariance},
 f = 0;
 p = 0;
 
-(* collinear mappings*)
+(* monononcollinear mappings*)
 meantoneM = {{{1, 0, -4}, {0, 1, 4}}, "co"};
 porcupineM = {{{1, 2, 3}, {0, 3, 5}}, "co"};
 test2args[sum, meantoneM, porcupineM, {{{1, 1, 1}, {0, 4, 9}}, "co"}];
@@ -250,7 +250,7 @@ porcupineC = {{{1, -5, 3}}, "contra"};
 test2args[sum, meantoneC, porcupineC, {{{5, -9, 4}}, "contra"}];
 test2args[diff, meantoneC, porcupineC, {{{-3, -1, 2}}, "contra"}];
 
-(* collinear comma bases *)
+(* monononcollinear comma bases *)
 et7M = {{{7, 11, 16}}, "co"};
 et5M = {{{5, 8, 12}}, "co"};
 test2args[sum, et7M, et5M, {{{12, 19, 28}}, "co"}];
@@ -260,7 +260,7 @@ et5C = dual[et5M];
 test2args[sum, et7C, et5C, {{{-19, 12, 0}, {-15, 8, 1}}, "contra"}];
 test2args[diff, et7C, et5C, {{{-3, 2, 0}, {-2, 0, 1}}, "contra"}];
 
-(* noncollinear - error! *)
+(* not monononcollinear - error! *)
 septimalMeantoneM = {{{1, 0, -4, -13}, {0, 1, 4, 10}}, "co"};
 septimalBlackwoodM = {{{5, 8, 0, 14}, {0, 0, 1, 0}}, "co"};
 test2args[sum, septimalMeantoneM, septimalBlackwoodM, Error];
@@ -270,7 +270,7 @@ septimalBlackwoodC = dual[septimalBlackwoodM];
 test2args[sum, septimalMeantoneC, septimalBlackwoodC, Error];
 test2args[diff, septimalMeantoneC, septimalBlackwoodC, Error];
 
-(* doubly collinear (comma bases) *)
+(* monononcollinear - doubly collinear (comma bases) *)
 et12M = {{{12, 19, 28, 34}}, "co"};
 et19M = {{{19, 30, 44, 53}}, "co"};
 test2args[sum, et12M, et19M, {{{31, 49, 72, 87}}, "co"}];
@@ -360,6 +360,15 @@ test2args[sum, dual[t1], t2, dual[tSum]];
 test2args[sum, t1, dual[t2], tSum];
 test2args[sum, dual[t1], dual[t2], dual[tSum]];
 
+(* an example that used to fail for whatever reason, "some problem" *)
+test2args[sum, {{{1,2,-1,1},{0,18,-2,-1}},"co"}, {{{2,0,-2,5},{0,3,-1,4}},"co"}, {{{1,19,-4,7},{0,24,-4,7}},"co"}];
+
+(* another example that used to fail for whatever reason, "goddam failing mysteries" *)
+test2args[sum, {{{3,2,8,2},{0,5,31,10}},"co"}, {{{1,22,32,0},{0,32,44,-1}},"co"} ];
+
+(* another example that used to fail for whatever reason, "more stuff to sort out" *)
+test2args[sum, {{{5,0,1,0},{-16,1,0,3}},"contra"}, {{{4,0,1,0},{-3,1,0,3}},"contra"}, {{{9,0,2,0},{-5,1,1,3}},"contra"}];
+
 (* LA only: example that required the breadth-first search of linear combinations of multiple collinear vectors *)
 test2args[sum, {{{3, 8, -4, -6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];
 
@@ -400,6 +409,12 @@ test2args[diff, t1, t2, {{{5, 5, 5, 11, 11}, {0, 6, 9, 2, 14}}, "co"}];
 
 (* LA only: example where the first vectors of the input were not actually noncollinear with the collinear vectors, things would fail, so now we actually test each one to ensure it's noncollinear before adding it into the initial matrix to be defactored *)
 test2args[sum, {{{-17, -55, 24, 34}}, "contra"}, {{{-1, -7, 0, 2}}, "contra"}, {{{-9, -31, 12, 18}}, "contra"}];
+
+(* LA only: an example that used to fail for whatever reason, the "languisher" *)
+test2args[sum, {{{23,-14,3,0},{9,-5,1,1}},"contra"}, {{{1,7,3,-1},{0,25,14,-1}},"co"}, {{{23,-14,14,0},{9,-5,5,1}},"contra"}];
+
+(* LA only: an example that used to fail for whatever reason, the "big random" *)
+test2args[sum,  {{{-89,-46,61,0,0},{-85,-44,59,1,0},{-39,-21,26,0,1}},"contra"}, {{{-16,-9,1,0,0},{10,4,0,1,0},{16,8,0,0,1}},"contra"}, Error];
 
 
 
