@@ -157,19 +157,11 @@ temperamentDiff[t1input_, t2input_] := Module[{t1, t2},
   ]
 ];
 
-(* TODO: there's got to be a "reduce" like thing I could do instead here *)
-getCollinearVectorLinearCombination[collinearVectors_, collinearVectorMultiplePermutation_] := Module[{collinearVectorLinearCombination, i},
-  collinearVectorLinearCombination = Table[0, Length[First[collinearVectors]]];
-  i = 1;
 
-  Do[
-    collinearVectorLinearCombination = collinearVectorLinearCombination + collinearVectorMultiplePermutationEntry * collinearVectors[[i]];
-    i++,
-    {collinearVectorMultiplePermutationEntry, collinearVectorMultiplePermutation}
-  ];
-
-  collinearVectorLinearCombination
-];
+getCollinearVectorLinearCombination[collinearVectors_, collinearVectorMultiplePermutation_] := Total[MapThread[
+  #1*#2&,
+  {collinearVectors, collinearVectorMultiplePermutation}
+]];
 
 getEnfactoredDetA[a_] := Transpose[Take[hnf[Transpose[a]], MatrixRank[a]]];
 
@@ -220,11 +212,11 @@ defactorWhileLockingCollinearVectors[t_, collinearityVariancedMatrix_] := Module
   lockedCollinearVectorsFormOfA = getInitialLockedCollinearVectorsFormOfA[t, collinearityVariancedMatrix, grade, collinearVectors];
 
   If[
-    isCollinear[ collinearityVariancedMatrix],
+    isCollinear[collinearityVariancedMatrix],
 
+    (* TODO: consider separate function *)
     collinearity = getCollinearity[collinearityVariancedMatrix];
     d = getD[t];
-
     enfactoring = getEnfactoring[lockedCollinearVectorsFormOfA];
     multiples = Table[Subscript[x, i], {i, collinearity}];
     equations = Map[
@@ -239,7 +231,7 @@ defactorWhileLockingCollinearVectors[t_, collinearityVariancedMatrix_] := Module
     ];
     answer = FindInstance[equations, multiples, Integers];
     result = Values[Association[answer]];
-    lockedCollinearVectorsFormOfA[[grade]] = divideOutGcd[lockedCollinearVectorsFormOfA[[grade]] + getCollinearVectorLinearCombination[lockedCollinearVectorsFormOfA, result]];
+    lockedCollinearVectorsFormOfA[[grade]] = divideOutGcd[lockedCollinearVectorsFormOfA[[grade]] + getCollinearVectorLinearCombination[collinearVectors, result]];
 
     lockedCollinearVectorsFormOfA,
 
