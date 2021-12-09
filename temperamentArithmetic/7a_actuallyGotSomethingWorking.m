@@ -1,5 +1,7 @@
 (* TODO: sort these functions in a more logical order *)
 
+(* TODO: actually shouldn't "temperament" be abbreviated to "T" in the fn names? or maybe actually it should just be "sum" and "diff"... t should be assumed? *)
+
 getCollinearity[collinearityVariancedMatrix_] := Length[getA[collinearityVariancedMatrix]];
 
 isCollinear[collinearityVariancedMatrix_] := getCollinearity[collinearityVariancedMatrix] > 0;
@@ -154,7 +156,7 @@ temperamentDiff[t1input_, t2input_] := Module[{t1, t2},
 
   If[
     t1 == t2,
-    Error,
+    {{Table[0, getD[t1]]}, getV[t1]},
     temperamentArithmetic[t1, t2, False]
   ]
 ];
@@ -298,13 +300,13 @@ test2args[temperamentDiff, et12C, et19C, {{{-11, 7, 0, 0}, {-7, 3, 1, 0}, {-9, 4
 
 (* examples with themselves *)
 test2args[temperamentSum, meantoneM, meantoneM, meantoneM];
-test2args[temperamentDiff, meantoneM, meantoneM, Error];
+test2args[temperamentDiff, meantoneM, meantoneM, {{{0, 0, 0}}, "co"}];
 test2args[temperamentSum, meantoneC, meantoneC, meantoneC];
-test2args[temperamentDiff, meantoneC, meantoneC, Error];
+test2args[temperamentDiff, meantoneC, meantoneC, {{{0, 0, 0}}, "contra"}];
 test2args[temperamentSum, et7M, et7M, et7M];
-test2args[temperamentDiff, et7M, et7M, Error];
+test2args[temperamentDiff, et7M, et7M, {{{0, 0, 0}}, "co"}];
 test2args[temperamentSum, et7C, et7C, et7C];
-test2args[temperamentDiff, et7C, et7C, Error];
+test2args[temperamentDiff, et7C, et7C, {{{0, 0, 0}}, "contra"}];
 
 (* mismatched r & n but matching d *)
 test2args[temperamentSum, et7M, meantoneM, Error];
