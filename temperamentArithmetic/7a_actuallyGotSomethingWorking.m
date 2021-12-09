@@ -1,3 +1,5 @@
+(* TODO: sort these functions in a more logical order *)
+
 getCollinearity[collinearityVariancedMatrix_] := Length[getA[collinearityVariancedMatrix]];
 
 isCollinear[collinearityVariancedMatrix_] := getCollinearity[collinearityVariancedMatrix] > 0;
@@ -370,9 +372,9 @@ t1 = {{{1, 0, -4, -13}, {0, 1, 4, 10}}, "co"};
 t2 = {{{1, 0, -4, 17}, {0, 1, 4, -9}}, "co"};
 tSum = {{{1, 0, -4, 2}, {0, 2, 8, 1}}, "co"};
 test2args[temperamentSum, t1, t2, tSum];
-test2args[temperamentSum, dual[t1], t2, tSum];
+test2args[temperamentSum, dual[t1], t2, dual[tSum]];
 test2args[temperamentSum, t1, dual[t2], tSum];
-test2args[temperamentSum, dual[t1], dual[t2], tSum];
+test2args[temperamentSum, dual[t1], dual[t2], dual[tSum]];
 
 (* LA only: example that required the breadth-first search of linear combinations of multiple collinear vectors *)
 test2args[temperamentSum, {{{3, 8, -4, -6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];
