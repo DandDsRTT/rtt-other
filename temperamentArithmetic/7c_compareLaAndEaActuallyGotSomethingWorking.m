@@ -20,7 +20,7 @@ match[sumByMultivectors_, sumByMatrices_, diffByMultivectors_, diffByMatrices_] 
 f = 0;
 p = 0;
 
-testTemperamentArithmetic[d_, r_, nonCollinearity_, testCount_] := Module[
+testArithmetic[d_, r_, nonCollinearity_, testCount_] := Module[
   {
     collinearity,
     sharedVectors,
@@ -47,11 +47,11 @@ testTemperamentArithmetic[d_, r_, nonCollinearity_, testCount_] := Module[
     w1 = matrixToMultivector[t1];
     w2 = matrixToMultivector[t2];
 
-    sumByMultivectors = eaTemperamentSum[w1, w2];
-    sumByMatrices = matrixToMultivectorWithPossibleError[temperamentSum[t1, t2]];
+    sumByMultivectors = eaSum[w1, w2];
+    sumByMatrices = matrixToMultivectorWithPossibleError[sum[t1, t2]];
 
-    diffByMultivectors = eaTemperamentDiff[w1, w2];
-    diffByMatrices = matrixToMultivectorWithPossibleError[temperamentDiff[t1, t2]];
+    diffByMultivectors = eaDiff[w1, w2];
+    diffByMatrices = matrixToMultivectorWithPossibleError[diff[t1, t2]];
 
     If[
       match[sumByMultivectors, sumByMatrices, diffByMultivectors, diffByMatrices],
@@ -71,32 +71,32 @@ testTemperamentArithmetic[d_, r_, nonCollinearity_, testCount_] := Module[
 
 
 
-testTemperamentArithmetic[2, 1, 1, 32];
+testArithmetic[2, 1, 1, 16];
 
-testTemperamentArithmetic[3, 1, 1, 16];
-testTemperamentArithmetic[3, 2, 1, 16];
+testArithmetic[3, 1, 1, 8];
+testArithmetic[3, 2, 1, 8];
 
-testTemperamentArithmetic[4, 1, 1, 8];
-testTemperamentArithmetic[4, 2, 1, 8];
-testTemperamentArithmetic[4, 3, 1, 8];
-testTemperamentArithmetic[4, 2, 2, 8];
+testArithmetic[4, 1, 1, 4];
+testArithmetic[4, 2, 1, 4];
+testArithmetic[4, 3, 1, 4];
+testArithmetic[4, 2, 2, 4];
 
-testTemperamentArithmetic[5, 1, 1, 4];
-testTemperamentArithmetic[5, 2, 1, 4];
-testTemperamentArithmetic[5, 3, 1, 4];
-testTemperamentArithmetic[5, 4, 1, 4];
-testTemperamentArithmetic[5, 2, 2, 4];
-testTemperamentArithmetic[5, 3, 2, 4];
+testArithmetic[5, 1, 1, 2];
+testArithmetic[5, 2, 1, 2];
+testArithmetic[5, 3, 1, 2];
+testArithmetic[5, 4, 1, 2];
+testArithmetic[5, 2, 2, 2];
+testArithmetic[5, 3, 2, 2];
 
-testTemperamentArithmetic[6, 1, 1, 2];
-testTemperamentArithmetic[6, 2, 1, 2];
-testTemperamentArithmetic[6, 3, 1, 2];
-testTemperamentArithmetic[6, 4, 1, 2];
-testTemperamentArithmetic[6, 5, 1, 2];
-testTemperamentArithmetic[6, 2, 2, 2];
-testTemperamentArithmetic[6, 3, 2, 2];
-testTemperamentArithmetic[6, 4, 2, 2];
-testTemperamentArithmetic[6, 3, 3, 2];
+testArithmetic[6, 1, 1, 1];
+testArithmetic[6, 2, 1, 1];
+testArithmetic[6, 3, 1, 1];
+testArithmetic[6, 4, 1, 1];
+testArithmetic[6, 5, 1, 1];
+testArithmetic[6, 2, 2, 1];
+testArithmetic[6, 3, 2, 1];
+testArithmetic[6, 4, 2, 1];
+testArithmetic[6, 3, 3, 1];
 
 
 
