@@ -4,10 +4,14 @@ matrixToMultivectorWithPossibleError[a_] := If[a === Error, Error, matrixToMulti
 
 (*TODO: still rename difference to diff here and everywhere *)
 match[sumByMultivectors_, sumByMatrices_, differenceByMultivectors_, differenceByMatrices_] := Module[{sumsMatch, differencesMatch},
-  sumsMatch = sumByMultivectors == sumByMatrices ;
-  differencesMatch =If[
+  sumsMatch = sumByMultivectors === sumByMatrices;
+  differencesMatch = If[
     differenceByMatrices === Error,
-    allZeros[eaGetMinors[differenceByMultivectors]],
+    If[
+      differenceByMultivectors === Error,
+      True,
+      allZeros[eaGetMinors[differenceByMultivectors]]
+    ],
     differenceByMultivectors == differenceByMatrices
   ];
 
@@ -17,7 +21,7 @@ match[sumByMultivectors_, sumByMatrices_, differenceByMultivectors_, differenceB
 f = 0;
 p = 0;
 
-testTemperamentArithmetic[d_, r_, nonCollinearity_] := Module[
+testTemperamentArithmetic[d_, r_, nonCollinearity_, testCount_] := Module[
   {
     collinearity,
     sharedVectors,
@@ -44,8 +48,6 @@ testTemperamentArithmetic[d_, r_, nonCollinearity_] := Module[
     w1 = matrixToMultivector[t1];
     w2 = matrixToMultivector[t2];
 
-    Print[ w1, " + ", w2, " = (OR ", t1, " + ", t2, " = )"];
-
     sumByMultivectors = eaTemperamentSum[w1, w2];
     sumByMatrices = matrixToMultivectorWithPossibleError[temperamentSum[t1, t2]];
 
@@ -54,49 +56,48 @@ testTemperamentArithmetic[d_, r_, nonCollinearity_] := Module[
 
     If[
       match[sumByMultivectors, sumByMatrices, differenceByMultivectors, differenceByMatrices],
-      (*Print["match!"];*)
       p += 1,
       f += 1;
-      (*Print[ w1, " + ", w2, " = (OR ", t1, " + ", t2, " = )"];*)
+      Print["failure: "];
+      Print[w1, " + ", w2, " = (OR ", t1, " + ", t2, " = )"];
       Print[sumByMultivectors, " (by multivectors)"];
       Print[sumByMatrices, " (by matrices)"];
       Print[w1, " - ", w2, " = (OR ", t1, " - ", t2, " = )"];
       Print[differenceByMultivectors, " (by multivectors)"];
       Print[differenceByMatrices, " (by matrices)\n"];
     ],
-    15
+    testCount
   ]
 ];
 
-(* TODO: actually I think it would be better to test this by taking min-grade and sometimes flipping variance, so there wouldn't be e.g. [4,3,1] here because that'd already be covered by [4,1,1] *)
 
 
-(*testTemperamentArithmetic[2, 1, 1];
+testTemperamentArithmetic[2, 1, 1, 32];
 
-testTemperamentArithmetic[3, 1, 1];
-testTemperamentArithmetic[3, 2, 1];
+testTemperamentArithmetic[3, 1, 1, 16];
+testTemperamentArithmetic[3, 2, 1, 16];
 
-testTemperamentArithmetic[4, 1, 1];
-testTemperamentArithmetic[4, 2, 1]; *)
-testTemperamentArithmetic[4, 3, 1];
-(*testTemperamentArithmetic[4, 2, 2]; *)
+testTemperamentArithmetic[4, 1, 1, 8];
+testTemperamentArithmetic[4, 2, 1, 8];
+testTemperamentArithmetic[4, 3, 1, 8];
+testTemperamentArithmetic[4, 2, 2, 8];
 
-(* testTemperamentArithmetic[5, 1, 1]; *)
-(* testTemperamentArithmetic[5, 2, 1]; *)
-(* testTemperamentArithmetic[5, 3, 1]; *)
-(* testTemperamentArithmetic[5, 4, 1]; *)
-(* testTemperamentArithmetic[5, 2, 2]; *)
-(* testTemperamentArithmetic[5, 3, 2]; *)
+testTemperamentArithmetic[5, 1, 1, 4];
+testTemperamentArithmetic[5, 2, 1, 4];
+testTemperamentArithmetic[5, 3, 1, 4];
+testTemperamentArithmetic[5, 4, 1, 4];
+testTemperamentArithmetic[5, 2, 2, 4];
+testTemperamentArithmetic[5, 3, 2, 4];
 
-(* testTemperamentArithmetic[6, 1, 1]; *)
-(* testTemperamentArithmetic[6, 2, 1]; *)
-(* testTemperamentArithmetic[6, 3, 1]; *)
-(* testTemperamentArithmetic[6, 4, 1]; *)
-(* testTemperamentArithmetic[6, 5, 1]; *)
-(* testTemperamentArithmetic[6, 2, 2]; *)
-(* testTemperamentArithmetic[6, 3, 2]; *)
-(* testTemperamentArithmetic[6, 4, 2]; *)
-(* testTemperamentArithmetic[6, 3, 3]; *)
+testTemperamentArithmetic[6, 1, 1, 2];
+testTemperamentArithmetic[6, 2, 1, 2];
+testTemperamentArithmetic[6, 3, 1, 2];
+testTemperamentArithmetic[6, 4, 1, 2];
+testTemperamentArithmetic[6, 5, 1, 2];
+testTemperamentArithmetic[6, 2, 2, 2];
+testTemperamentArithmetic[6, 3, 2, 2];
+testTemperamentArithmetic[6, 4, 2, 2];
+testTemperamentArithmetic[6, 3, 3, 2];
 
 
 
