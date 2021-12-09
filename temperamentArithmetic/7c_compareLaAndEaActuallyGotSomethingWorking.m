@@ -29,24 +29,24 @@ testTemperamentArithmetic[d_, r_, nonCollinearity_] := Module[
     w1 = matrixToMultivector[t1];
     w2 = matrixToMultivector[t2];
 
-    (*Print["\n", w1, " + ", w2, " = (OR ", t1, " + ", t2, " = )"];*)
+    Print["\n", w1, " + ", w2, " = (OR ", t1, " + ", t2, " = )"];
 
     sumByMultivectors = eaTemperamentSum[w1, w2];
     sumByMatrices = matrixToMultivectorWithPossibleError[temperamentSum[t1, t2]];
 
-    differenceByMultivectors = eaTemperamentDifference[w1, w2];
+    differenceByMultivectors = eaTemperamentDiff[w1, w2];
     differenceByMatrices = matrixToMultivectorWithPossibleError[temperamentDiff[t1, t2]];
 
     If[
       sumByMultivectors == sumByMatrices && differenceByMultivectors == differenceByMatrices,
-      (*Print["match!"];*)
+      Print["match!"];
       p += 1,
       f += 1;
-      (* Print[sumByMultivectors, " (by multivectors)"];
-       Print[sumByMatrices, " (by matrices)"];
-       Print[w1, " - ", w2, " = (OR ", t1, " - ", t2, " = )"];
-       Print[differenceByMultivectors, " (by multivectors)"];
-       Print[differenceByMatrices, " (by matrices)\n"];*)
+      Print[sumByMultivectors, " (by multivectors)"];
+      Print[sumByMatrices, " (by matrices)"];
+      Print[w1, " - ", w2, " = (OR ", t1, " - ", t2, " = )"];
+      Print[differenceByMultivectors, " (by multivectors)"];
+      Print[differenceByMatrices, " (by matrices)\n"];
     ],
     20
   ]
@@ -55,9 +55,9 @@ testTemperamentArithmetic[d_, r_, nonCollinearity_] := Module[
 (* TODO: actually I think it would be better to test this by taking min-grade and sometimes flipping variance, so there wouldn't be e.g. [4,3,1] here because that'd already be covered by [4,1,1] *)
 
 
-(* testTemperamentArithmetic[2, 1, 1]; *)
+testTemperamentArithmetic[2, 1, 1];
 
-(* testTemperamentArithmetic[3, 1, 1]; *)
+testTemperamentArithmetic[3, 1, 1];
 (* testTemperamentArithmetic[3, 2, 1]; *)
 
 (* testTemperamentArithmetic[4, 1, 1]; *)
