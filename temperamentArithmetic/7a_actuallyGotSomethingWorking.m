@@ -75,12 +75,12 @@ chooseCorrectlyBetweenSumAndDiff[t1_, t2_, isSum_, tSumAndDiff_] := Module[
   ]
 ];
 
-getMinors[t_] := Module[{contra, grade, minors, normalizingEntry},
+getMinors[t_] := Module[{contra, grade, minors, entryFn, normalizingEntry},
   contra = isContra[t];
   grade = If[contra, getN[t], getR[t]];
   minors = divideOutGcd[First[Minors[getA[t], grade]]];
-  (* TODO: variable functions? then I could rewrite this to call the variable function on minors always *)
-  normalizingEntry = If[contra, trailingEntry[minors], leadingEntry[minors]];
+  entryFn = If[contra, trailingEntry, leadingEntry];
+  normalizingEntry = entryFn[minors];
 
   If[normalizingEntry < 0, -minors, minors]
 ];
