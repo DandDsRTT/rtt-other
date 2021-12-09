@@ -141,7 +141,8 @@ getSumAndDiff[t1_, t2_, collinearityVariancedMatrix_] := Module[
 
 temperamentSum[t1input_, t2input_] := Module[{t1, t2},
   t1 = canonicalForm[t1input];
-  t2 = canonicalForm[t2input];
+  (* TODO: I now feel like I'm suing this in a few places, and also I need to test drive this, with an example where I add a temperatment or diff it but its with itself but its mapping form and its comma basis form *)
+  t2 = If[getV[t1input] == getV[t2input], canonicalForm[t2input], dual[t2input]];
 
   If[
     t1 == t2,
@@ -152,7 +153,7 @@ temperamentSum[t1input_, t2input_] := Module[{t1, t2},
 
 temperamentDiff[t1input_, t2input_] := Module[{t1, t2},
   t1 = canonicalForm[t1input];
-  t2 = canonicalForm[t2input];
+  t2 = If[getV[t1input] == getV[t2input], canonicalForm[t2input], dual[t2input]];
 
   If[
     t1 == t2,
