@@ -159,7 +159,7 @@ temperamentDiff[t1input_, t2input_] := Module[{t1, t2},
 
 
 getCollinearVectorLinearCombination[collinearVectors_, collinearVectorMultiplePermutation_] := Total[MapThread[
-  #1*#2&,
+  #1 * #2&,
   {collinearVectors, collinearVectorMultiplePermutation}
 ]];
 
@@ -371,7 +371,7 @@ test2args[temperamentSum, {{{3, 8, -4, -6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{
 (* LA only: example that was intractable unless I defactored piecemeal *)
 test2args[temperamentSum, {{{-97, 73, 45, 16}}, "contra"}, {{{-1, 8, 9, 3}}, "contra"}, {{{-98, 81, 54, 19}}, "contra"}];
 
-(* LA only: example that motivated the existence of the special min-grade-1 path *)
+(* LA only: example that motivated the existence of the special min-grade-1 path... which no longer exists, but I'll keep this around anyway *)
 test2args[temperamentSum, {{{2, 0, 3}}, "contra"}, {{{5, 4, 0}}, "contra"}, {{{7, 4, 3}}, "contra"}];
 test2args[temperamentDiff, {{{2, 0, 3}}, "contra"}, {{{5, 4, 0}}, "contra"}, {{{-3, -4, 3}}, "contra"}];
 
@@ -384,21 +384,12 @@ test2args[temperamentSum, septimalMeantoneM, flattoneM, godzillaM];
 test2args[temperamentDiff, septimalMeantoneM, flattoneM, et19MwithIndependent7];
 
 (* LA only: ensure the minors are consulted so that the sum and difference are identified correctly *)
-(* this verifies that for the min-grade-1 case *)
-t1 = {{{-25, 28, 0}, {-18, 20, 1}}, "contra"};
-t2 = {{{-5, 4, 0}, {4, 1, 5}}, "contra"};
-tSum = {{{-25, 24, 0}, {-17, 17, 2}}, "contra"};
-tDiff = {{{0, 1, 0}, {-25, 0, 8}}, "contra"};
+t1 = {{{0, 1, 4}}, "co"};
+t2 = {{{5, -6, -2}}, "co"};
+tSum = {{{5, -5, 2}}, "co"};
+tDiff = {{{5, -7, -6}}, "co"};
 test2args[temperamentSum, t1, t2, tSum];
 test2args[temperamentDiff, t1, t2, tDiff];
-(* this also verifies that for the min-grade-1 case, I think *)
-t1 = {{{1, 0, 0, 0}, {0, 1, -1, 0}, {0, 0, 0, 1}}, "co"};
-t2 = {{{1, 3, 0, -16}, {0, 4, 3, -39}, {0, 0, 5, -36}}, "co"};
-tSum = {{{1, 0, 7, -53}, {0, 1, 18, -133}, {0, 0, 20, -143}}, "co"};
-tDiff = {{{1, 2, 1, -19}, {0, 5, 0, -22}, {0, 0, 4, -29}}, "co"};
-test2args[temperamentSum, t1, t2, tSum];
-test2args[temperamentDiff, t1, t2, tDiff];
-(* TODO: verify that these actually fail when you remove the orientation correction code, then find a non-min-grade-1 case... I feel like I did this before but stuff got lost in the mix *)
 
 (* LA only: an example that makes sure that even if the input matrices explicitly share the vector, it still works *)
 t1 = {{{-3, 2, 0, 0}, {-2, 0, 0, 1}}, "contra"};
