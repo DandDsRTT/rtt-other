@@ -141,7 +141,7 @@ test2args[eaTemperamentSum, {{1, -5, -14, 9, 23, 11}, 2, "co"}, {{25, -1, 2, -18
 (* LA only checks example that required the breadth-first search of linear combinations of multiple collinear vectors, but I think it's okay to check it here too *)
 test2args[eaTemperamentSum, {{3, 8, -4, -6}, 1, "co"}, {{9, 2, -4, 1}, 1 , "co"}, {{12, 10, -8, -5}, 1, "co"}];
 
-(* LA only checks this example that would exercise the non-min-grade-1 code, but I think it's okay to check it here too *)
+(* LA only checks this non-min-grade-1 example, but I think it's okay to check it here too *)
 septimalMeantoneW = {{1, 4, 10, 4, 13, 12}, 2, "co"};
 flattoneW = {{1 , 4, -9, 4, -17, -32}, 2, "co"};
 godzillaW = {{2, 8, 1, 8, -4, -20}, 2, "co"};
@@ -155,6 +155,14 @@ w1 = {{0, 1, -1, 0}, 3, "co"};
 w2 = {{20, -144, 87, -59}, 3, "co"};
 wSum = {{20, -143, 86, -59}, 3, "co"};
 wDiff = {{20, -145, 88, -59}, 3, "co"};
+test2args[eaTemperamentSum, w1, w2, wSum];
+test2args[eaTemperamentDifference, w1, w2, wDiff];
+
+(* LA only ensures intractability beyond the breadth-first search of linear combinations code the first way I wrote it, i.e. using my fancier style essentially using a Wolfram Solve[]... but let's check it here too *)
+w1 = {{35, 5, 40, 10, 27, -71, 19, -41, -5, 42}, 2, "co"};
+w2 = {{5, -40, 30, -60, 12, -15, 15, 48, 24, -90}, 2, "co"};
+wSum = {{40, -35, 70, -50, 39, -86, 34, 7, 19, -48}, 2, "co"};
+wDiff = {{30, 45, 10, 70, 15, -56, 4, -89, -29, 132}, 2, "co"};
 test2args[eaTemperamentSum, w1, w2, wSum];
 test2args[eaTemperamentDifference, w1, w2, wDiff];
 

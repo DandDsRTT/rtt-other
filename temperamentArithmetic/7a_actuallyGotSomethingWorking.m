@@ -193,10 +193,8 @@ getInitialLockedCollinearVectorsFormOfA[t_, collinearityVariancedMatrix_, grade_
   ]
 ];
 
-defactorWhileLockingCollinearVectors[t_, collinearityVariancedMatrix_] := Module[
+defactorWhileLockingAtLeastOneCollinearVector[t_, collinearityVariancedMatrix_, grade_, collinearVectors_, lockedCollinearVectorsFormOfAInput_] := Module[
   {
-    grade,
-    collinearVectors,
     lockedCollinearVectorsFormOfA,
     d,
     collinearity,
@@ -204,7 +202,37 @@ defactorWhileLockingCollinearVectors[t_, collinearityVariancedMatrix_] := Module
     multiples,
     equations,
     answer,
-    result
+    result,
+  },
+
+  lockedCollinearVectorsFormOfA = lockedCollinearVectorsFormOfAInput;
+  d = getD[t];
+  collinearity = getCollinearity[collinearityVariancedMatrix];
+  enfactoring = getEnfactoring[lockedCollinearVectorsFormOfA];
+  multiples = Table[Subscript[x, i], {i, collinearity}];
+  equations = Map[
+    Function[
+      dIndex,
+      Mod[lockedCollinearVectorsFormOfA[[grade]][[dIndex]] + Total[Map[
+        Function[multiplesIndex, multiples[[multiplesIndex]] * collinearVectors[[multiplesIndex]][[dIndex]]],
+        Range[collinearity]
+      ]], enfactoring] == 0
+    ],
+    Range[d]
+  ];
+  answer = FindInstance[equations, multiples, Integers];
+  result = Values[Association[answer]];
+
+  lockedCollinearVectorsFormOfA[[grade]] = divideOutGcd[lockedCollinearVectorsFormOfA[[grade]] + getCollinearVectorLinearCombination[collinearVectors, result]];
+
+  lockedCollinearVectorsFormOfA
+];
+
+defactorWhileLockingCollinearVectors[t_, collinearityVariancedMatrix_] := Module[
+  {
+    grade,
+    collinearVectors,
+    lockedCollinearVectorsFormOfA
   },
 
   grade = getGradeMatchingCollinearity[t, collinearityVariancedMatrix];
@@ -213,28 +241,7 @@ defactorWhileLockingCollinearVectors[t_, collinearityVariancedMatrix_] := Module
 
   If[
     isCollinear[collinearityVariancedMatrix],
-
-    (* TODO: consider separate function *)
-    collinearity = getCollinearity[collinearityVariancedMatrix];
-    d = getD[t];
-    enfactoring = getEnfactoring[lockedCollinearVectorsFormOfA];
-    multiples = Table[Subscript[x, i], {i, collinearity}];
-    equations = Map[
-      Function[
-        dIndex,
-        Mod[lockedCollinearVectorsFormOfA[[grade]][[dIndex]] + Total[Map[
-          Function[multiplesIndex, multiples[[multiplesIndex]] * collinearVectors[[multiplesIndex]][[dIndex]]],
-          Range[collinearity]
-        ]], enfactoring] == 0
-      ],
-      Range[d]
-    ];
-    answer = FindInstance[equations, multiples, Integers];
-    result = Values[Association[answer]];
-    lockedCollinearVectorsFormOfA[[grade]] = divideOutGcd[lockedCollinearVectorsFormOfA[[grade]] + getCollinearVectorLinearCombination[collinearVectors, result]];
-
-    lockedCollinearVectorsFormOfA,
-
+    defactorWhileLockingAtLeastOneCollinearVector[t, collinearityVariancedMatrix, grade, collinearVectors, lockedCollinearVectorsFormOfA],
     lockedCollinearVectorsFormOfA
   ]
 ];
@@ -368,7 +375,7 @@ test2args[temperamentSum, {{{-97, 73, 45, 16}}, "contra"}, {{{-1, 8, 9, 3}}, "co
 test2args[temperamentSum, {{{2, 0, 3}}, "contra"}, {{{5, 4, 0}}, "contra"}, {{{7, 4, 3}}, "contra"}];
 test2args[temperamentDiff, {{{2, 0, 3}}, "contra"}, {{{5, 4, 0}}, "contra"}, {{{-3, -4, 3}}, "contra"}];
 
-(* LA only: an example that actually exercises the non-min-grade-1 code! *)
+(* LA only: non-min-grade-1 *)
 septimalMeantoneM = {{{1, 0, -4, -13}, {0, 1, 4, 10}}, "co"};
 flattoneM = {{{1, 0, -4, 17}, {0, 1, 4, -9}}, "co"};
 godzillaM = {{{1, 0, -4, 2}, {0, 2, 8, 1}}, "co"};
@@ -403,7 +410,7 @@ test2args[temperamentDiff, t1, t2, {{{-3, 2, 0, 0}, {-1, 1, -1, 1}}, "contra"}];
 t1 = {{{5, -1, -4, 9, -3}, {0, -7, -1, -8, -2}}, "co"};
 t2 = {{{5, -1, -4, 9, -3}, {-5, 2, -4, -3, -9}}, "co"};
 test2args[temperamentSum, t1, t2, {{{5, 7, -11, 23, -13}, {0, 8, -7, 14, -10}}, "co"}];
-test2args[temperamentDiff, t1, t2, {{{5, 5, 5, 11, 11}, {0, 6, 9, 2, 14}}, "co"}]; (*TODO: test multivector these *)
+test2args[temperamentDiff, t1, t2, {{{5, 5, 5, 11, 11}, {0, 6, 9, 2, 14}}, "co"}];
 
 
 
