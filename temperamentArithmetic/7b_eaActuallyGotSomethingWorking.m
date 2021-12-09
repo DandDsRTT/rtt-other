@@ -135,6 +135,15 @@ wDiff = {{0, 3, -1}, 1, "co"};
 test2args[eaTemperamentSum, w1, w2, wSum];
 test2args[eaTemperamentDifference, w1, w2, wDiff];
 
+(* example demonstrating how mixed variance inputs are accepted, but the first variance matches the output *)
+w1 = {{1, 4, 10, 4, 13, 12}, 2, "co"};
+w2 = {{1 , 4, -9, 4, -17, -32}, 2, "co"};
+wSum = {{2, 8, 1, 8, -4, -20}, 2, "co"};
+test2args[eaTemperamentSum, w1, w2, wSum];
+test2args[eaTemperamentSum, eaDual[w1], w2, eaDual[wSum]];
+test2args[eaTemperamentSum, w1, eaDual[w2], wSum];
+test2args[eaTemperamentSum, eaDual[w1], eaDual[w2], eaDual[wSum]];
+
 (* EA only: example that motivated a further simplification and correction of the EA collinearity condition *)
 test2args[eaTemperamentSum, {{1, -5, -14, 9, 23, 11}, 2, "co"}, {{25, -1, 2, -18, -14, 2}, 2, "contra"}, Error];
 

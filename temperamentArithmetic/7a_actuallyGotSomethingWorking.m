@@ -365,6 +365,15 @@ tDiff = {{{0, 3, -1}}, "co"};
 test2args[temperamentSum, t1, t2, tSum];
 test2args[temperamentDiff, t1, t2, tDiff];
 
+(* example demonstrating how mixed variance inputs are accepted, but the first variance matches the output *)
+t1 = {{{1, 0, -4, -13}, {0, 1, 4, 10}}, "co"};
+t2 = {{{1, 0, -4, 17}, {0, 1, 4, -9}}, "co"};
+tSum = {{{1, 0, -4, 2}, {0, 2, 8, 1}}, "co"};
+test2args[temperamentSum, t1, t2, tSum];
+test2args[temperamentSum, dual[t1], t2, tSum];
+test2args[temperamentSum, t1, dual[t2], tSum];
+test2args[temperamentSum, dual[t1], dual[t2], tSum];
+
 (* LA only: example that required the breadth-first search of linear combinations of multiple collinear vectors *)
 test2args[temperamentSum, {{{3, 8, -4, -6}}, "co"}, {{{9, 2, -4, 1}}, "co"}, {{{12, 10, -8, -5}}, "co"}];
 
