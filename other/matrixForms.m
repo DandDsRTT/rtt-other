@@ -7,7 +7,7 @@ irref[a_] := Map[multByLcd, rref[a]];
 rightReducingMatrix[a_] := Last[SmithDecomposition[a]];
 smithDefactor[a_] := Take[Inverse[rightReducingMatrix[a]], MatrixRank[a]];
 
-pernetSteinDefactor[m_] := Inverse[getEnfactoredDetA[m]].m;
+pernetSteinDefactor[m_] := Inverse[getGreatestFactorA[m]].m;
 
 
 
