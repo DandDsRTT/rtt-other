@@ -53,7 +53,7 @@ test[canonicalB, {2, 7, 9}, {2, 3, 7}];
 
 (*their union-like thing, a superset or equal set to both of them; if doing comma-merge, would be what we want *)
 bSumset[bSequence___] := Module[{d, factorizedBSequence},
-  d = getDofB[Apply[Join, { bSequence}]];
+  d = getDforB[Apply[Join, {bSequence}]];
   factorizedBSequence = Map[padD[Map[rationalToI, #], d]&, {bSequence}];
   
   canonicalB[Map[iToRational, Flatten[factorizedBSequence, 1]]]
@@ -180,7 +180,7 @@ repletesOkay2[baseV_, candidateVToAdd_] := Module[{ifWeAdded, okay, index},
 
 (* express the target formal primes in terms of the initial formal primes*)
 getRforM[initialB_, targetB_] := Module[{d, result, row, thing, depletingTargetBEntry},
-  d = getDofB[Join[initialB, targetB]];
+  d = getDforB[Join[initialB, targetB]];
   factorizedTargetB = padD[Map[rationalToI, targetB], d];
   factorizedInitialB = padD[ Map[rationalToI, initialB], d];
   
@@ -260,7 +260,7 @@ test2args[changeBforC, t, targetB, expectedT];
 mapMergeWithB[tSequence___] := Module[{bSequence, intersectedB, tSequenceWithIntersectedB},
   bSequence = Map[getB, {tSequence}];
   intersectedB = Apply[bIntersection, bSequence];
-  tSequenceWithIntersectedB = Map[changeBforM[#, intersectedB]&, { tSequence}];
+  tSequenceWithIntersectedB = Map[changeBforM[#, intersectedB]&, {tSequence}];
   
   canonicalFormWithB[{Apply[Join, Map[getM, tSequenceWithIntersectedB]], "co", intersectedB}]
 ];
@@ -272,7 +272,7 @@ test2args[mapMergeWithB, t1, t2, expectedT];
 commaMergeWithB[tSequence___] := Module[{bSequence, mergedB, tSequenceWithMergedB},
   bSequence = Map[getB, {tSequence}];
   mergedB = Apply[bSumset, bSequence];
-  tSequenceWithMergedB = Map[changeBforC[#, mergedB]&, { tSequence}];
+  tSequenceWithMergedB = Map[changeBforC[#, mergedB]&, {tSequence}];
   
   canonicalFormWithB[{Apply[Join, Map[getC, tSequenceWithMergedB]], "contra", mergedB}]
 ];
