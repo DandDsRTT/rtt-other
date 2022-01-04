@@ -47,20 +47,17 @@ test2args[padD, {{1, 2, 3}, {4, 5, 6}}, 5, {{1, 2, 3, 0, 0}, {4, 5, 6, 0, 0}}];
 normalB[b_] := Map[iToRational, removeAllZeroRows[hnf[padD[Map[rationalToI, b], getDforB[b]]]]];
 test[normalB, {2, 7, 9}, {2, 9, 7}];
 
-(* TODO: DRY up with normalB *)
-canonicalB[b_] := Map[iToRational, removeAllZeroRows[hnf[colHermiteDefactor[padD[Map[rationalToI, b], getDforB[b]]]]]];
-test[canonicalB, {2, 7, 9}, {2, 3, 7}];
-
 (*their union-like thing, a superset or equal set to both of them; if doing comma-merge, would be what we want *)
 bSumset[bSequence___] := Module[{d, factorizedBSequence},
   d = getDforB[Apply[Join, {bSequence}]];
   factorizedBSequence = Map[padD[Map[rationalToI, #], d]&, {bSequence}];
   
-  canonicalB[Map[iToRational, Flatten[factorizedBSequence, 1]]]
+  normalB[Map[iToRational, Flatten[factorizedBSequence, 1]]]
 ];
 test2args[bSumset, {2, 3, 5}, {2, 9, 5}, {2, 3, 5}];
 test2args[bSumset, {2, 3, 5}, {2, 9, 7}, {2, 3, 5, 7}];
 test3args[bSumset, {2, 3, 5}, {2, 9, 7}, {2, 5 / 7, 11}, {2, 3, 5, 7, 11}];
+test2args[bSumset, {4}, {16}, {4}];
 
 (*TODO: is there no way to do this, like, with duals and merging? because this seems pretty overwrought *)
 (*their intersection; if doing map-merge, would be what we want; we only care about mapping stuff relevant to both of the input t's commas *)
@@ -98,7 +95,7 @@ bIntersectionTwoBs[b1_, b2_] := Module[{result},
     {b1entry, b1}
   ];
   
-  normalB[result]
+  result
 ];
 bIntersection[bSequence___] := Module[{result, i},
   result = First[{bSequence}];
@@ -108,17 +105,21 @@ bIntersection[bSequence___] := Module[{result, i},
     {b, Drop[{bSequence}, 1]}
   ];
   
-  result
+  normalB[result]
 ];
 test2args[bIntersection, {2, 3, 5}, {2, 9, 5}, {2, 9, 5}];
 test2args[bIntersection, {2, 9 / 7, 5 / 3}, {2, 9, 5}, {2}];
 test3args[bIntersection, {2, 3, 5, 7}, {2, 3, 5}, {2, 5, 7}, {2, 5}];
 
 isSubspaceOf[b_, otherB_] := bSumset[b, otherB] == otherB;
-test[isSubspaceOf, {2, 9, 5}, {2, 3, 5}, True];
-test[isSubspaceOf, {2, 3, 5}, {2, 3, 5, 7}, True];
-test[isSubspaceOf, {2, 3, 5}, {2, 9, 5}, False];
-test[isSubspaceOf, {2, 3, 5, 7}, {2, 3, 5}, False];
+test2args[isSubspaceOf, {2, 9, 5}, {2, 3, 5}, True];
+test2args[isSubspaceOf, {2, 3, 5}, {2, 3, 5, 7}, True];
+test2args[isSubspaceOf, {2, 3, 5}, {2, 9, 5}, False];
+test2args[isSubspaceOf, {2, 3, 5, 7}, {2, 3, 5}, False];
+test2args[isSubspaceOf, {4}, {2}, True];
+test2args[isSubspaceOf, {8}, {4}, False];
+test2args[isSubspaceOf, {16}, {4}, True];
+test2args[isSubspaceOf, {3, 5, 7}, {2, 11, 13}, False];
 
 getStandardPrimeLimitB[t_] := getPrimes[getD[t]];
 test[getStandardPrimeLimitB, {{{1, 0, -4}, {0, 1, 4}}, "co"}, {2, 3, 5}];
@@ -182,7 +183,7 @@ repletesOkay2[baseV_, candidateVToAdd_] := Module[{ifWeAdded, okay, index},
 getRforM[initialB_, targetB_] := Module[{d, result, row, thing, depletingTargetBEntry},
   d = getDforB[Join[initialB, targetB]];
   factorizedTargetB = padD[Map[rationalToI, targetB], d];
-  factorizedInitialB = padD[ Map[rationalToI, initialB], d];
+  factorizedInitialB = padD[Map[rationalToI, initialB], d];
   
   result = {};
   
@@ -256,6 +257,8 @@ t = {{{0, 1, 0}, {0, -2, 1}}, "contra", {2, 9 / 7, 5 / 3}};
 targetB = {2, 3, 5, 7};
 expectedT = {{{0, -1, 1, 0}, {0, -2, 0, 1}}, "contra"}; (*{{{0,2,0,-1},{0,-5,1,2}},"contra"}, before canonicalization *)
 test2args[changeBforC, t, targetB, expectedT];
+test2args[changeBforC, {{{1}}, "contra", {27}}, {9}, Error];
+test2args[changeBforC, {{{1}}, "contra", {81}}, {9}, {{{1}}, "contra", {9}}];
 
 mapMergeWithB[tSequence___] := Module[{bSequence, intersectedB, tSequenceWithIntersectedB},
   bSequence = Map[getB, {tSequence}];
