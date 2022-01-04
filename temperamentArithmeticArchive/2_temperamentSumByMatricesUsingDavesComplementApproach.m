@@ -26,16 +26,14 @@ c1and2JoinedN < c1and2SeparatelyN
 
 addWedgies[w1_,w2_] := {eaGetMinors[w1]+eaGetMinors[w2],eaGetGrade[w1],getV[w1]};
 
-getGcd[l_] := Apply[GCD, l];
-
 (*
 I'm not sure this is right at all...
-eaAreCollinear[w1_, w2_] := Module[{w1and2, gcd},
+eaAreCollinear[w1_, w2_] := Module[{w1and2, gcf},
 w1and2 = addWedgies[w1, w2];
-gcd = getGcd[eaGetMinors[w1and2]];
-Print["eaAreCollinear, w1and2: ", w1and2, " gcd: ", gcd];
+gcf = getGcf[eaGetMinors[w1and2]];
+Print["eaAreCollinear, w1and2: ", w1and2, " gcf: ", gcf];
 
-gcd===1
+gcf===1
 ];
 *)
 

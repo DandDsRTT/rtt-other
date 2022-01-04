@@ -12,7 +12,7 @@ m2 = Last[getA[m]];
 Do[
   Do[
     Do[
-      mWithShared = {shared, extractGcd[(i-1)*shared + (j-1)*m1 + (k-1)*m2]};
+      mWithShared = {shared, extractGcf[(i-1)*shared + (j-1)*m1 + (k-1)*m2]};
       d = hnf[colHermiteDefactor[mWithShared]];
       h = hnf[mWithShared];
       If[d == h, Print[i-1,",",j-1,",",k-1,": ",mWithShared]],

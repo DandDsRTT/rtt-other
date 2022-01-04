@@ -61,13 +61,13 @@ test2args[bSumset, {4}, {16}, {4}];
 
 (*TODO: is there no way to do this, like, with duals and merging? because this seems pretty overwrought *)
 (*their intersection; if doing map-merge, would be what we want; we only care about mapping stuff relevant to both of the input t's commas *)
-shareRoot[rational1_, rational2_] := Module[{gcd},
-  gcd = GCD[rational1, rational2];
+shareRoot[rational1_, rational2_] := Module[{gcf},
+  gcf = getGcf[{rational1, rational2}];
   
   If[
-    gcd == 1,
+    gcf == 1,
     False,
-    IntegerQ[Log[gcd, rational1]] && IntegerQ[Log[gcd, rational2]]
+    IntegerQ[Log[gcf, rational1]] && IntegerQ[Log[gcf, rational2]]
   ]
 ];
 matchFound[b1entry_, b2_] := Module[{result},

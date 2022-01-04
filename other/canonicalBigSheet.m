@@ -20,7 +20,7 @@ sadDefactorThenHnf[m_] := hnf[sadDefactor[m]];
 confirmEnfactoredRowReplaced[m_] := Module[{i, enfactoredRowReplaced},
   enfactoredRowReplaced = True;
   For[i = 1, i <= Length[m], i++,
-    If[Apply[GCD, m[[i]]] > 1, enfactoredRowReplaced = False]
+    If[getGcf[m[[i]]] > 1, enfactoredRowReplaced = False]
   ];
   enfactoredRowReplaced
 ];
