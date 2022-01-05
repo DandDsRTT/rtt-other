@@ -44,8 +44,17 @@ test[getDforB, {2, 9, 7}, 4];
 padD[a_, d_] := Map[PadRight[#, d]&, a];
 test2args[padD, {{1, 2, 3}, {4, 5, 6}}, 5, {{1, 2, 3, 0, 0}, {4, 5, 6, 0, 0}}];
 
-normalB[b_] := Map[iToRational, removeAllZeroRows[hnf[padD[Map[rationalToI, b], getDforB[b]]]]];
+super[rational_] := If[rational < 1, Denominator[rational] / Numerator[rational], rational];
+test[super, 5 / 3, 5 / 3];
+test[super, 3 / 5, 5 / 3];
+
+normalB[b_] := Map[super, Map[iToRational, removeAllZeroRows[hnf[padD[Map[rationalToI, b], getDforB[b]]]]]];
 test[normalB, {2, 7, 9}, {2, 9, 7}];
+test[normalB, {2, 9 / 7, 5}, {2, 9 / 7, 5}];
+test[normalB, {2, 3, 9}, {2, 3}];
+test[normalB, {2, 3, 15}, {2, 3, 5}];
+test[normalB, {2, 3, 5 / 3}, {2, 3, 5}];
+test[normalB, {5 / 3}, {5 / 3}];
 
 (*their union-like thing, a superset or equal set to both of them; if doing comma-merge, would be what we want *)
 bSumset[bSequence___] := Module[{d, factorizedBSequence},
@@ -58,6 +67,7 @@ test2args[bSumset, {2, 3, 5}, {2, 9, 5}, {2, 3, 5}];
 test2args[bSumset, {2, 3, 5}, {2, 9, 7}, {2, 3, 5, 7}];
 test3args[bSumset, {2, 3, 5}, {2, 9, 7}, {2, 5 / 7, 11}, {2, 3, 5, 7, 11}];
 test2args[bSumset, {4}, {16}, {4}];
+test2args[bSumset, {25 / 9}, {5 / 3}, {5 / 3}];
 
 (*TODO: is there no way to do this, like, with duals and merging? because this seems pretty overwrought *)
 (*their intersection; if doing map-merge, would be what we want; we only care about mapping stuff relevant to both of the input t's commas *)
@@ -120,6 +130,15 @@ test2args[isSubspaceOf, {4}, {2}, True];
 test2args[isSubspaceOf, {8}, {4}, False];
 test2args[isSubspaceOf, {16}, {4}, True];
 test2args[isSubspaceOf, {3, 5, 7}, {2, 11, 13}, False];
+test2args[isSubspaceOf, {2, 3, 5}, {2, 3, 7}, False];
+test2args[isSubspaceOf, {2, 3, 7}, {2, 3, 5}, False];
+test2args[isSubspaceOf, {2, 5 / 3, 7}, {2, 3, 5, 7}, True];
+test2args[isSubspaceOf, {2, 5 / 3, 7 / 5}, {2, 3, 5, 7}, True];
+test2args[isSubspaceOf, {2, 7 / 5}, {2, 5, 7}, True];
+test2args[isSubspaceOf, {2, 5, 7}, {2, 7 / 5}, False];
+test2args[isSubspaceOf, {2, 105, 11}, {2, 15, 7, 11}, True];
+test2args[isSubspaceOf, {2, 25 / 18, 11 / 7}, {2, 5 / 3, 7, 11}, True];
+test2args[isSubspaceOf, {2, 3 / 2, 5 / 2, 5 / 3}, {2, 3, 5}, True];
 
 getStandardPrimeLimitB[t_] := getPrimes[getD[t]];
 test[getStandardPrimeLimitB, {{{1, 0, -4}, {0, 1, 4}}, "co"}, {2, 3, 5}];
