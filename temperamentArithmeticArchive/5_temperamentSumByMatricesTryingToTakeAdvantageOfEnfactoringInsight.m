@@ -10,7 +10,7 @@ temperamentSum[M1_, M2_] := Module[{ commonRow, m1extraRow, m2extraRow, extraRow
   m2extraRow= extractGcf[11*commonRow + m2row1 + m2row2];
   Print[TensorWedge[commonRow, m1extraRow] // MatrixForm, TensorWedge[commonRow, m2extraRow] // MatrixForm];
   extraRow = extractGcf[m1extraRow + m2extraRow];
-  Print["commonRow: ", commonRow, " m1extraRow: ", m1extraRow, " m2extraRow: ", m2extraRow, " extraRow: ", extraRow, " m1extraRowBeforeGcf: ", commonRow +m1row1  +m1row2 , " m2extraRowBeforeGcf: ", commonRow + m2row1 + m2row2, " extraRowBeforeGcf: ", m1extraRow + m2extraRow];
+  Print["commonRow: ", commonRow, " m1extraRow: ", m1extraRow, " m2extraRow: ", m2extraRow, " extraRow: ", extraRow, " m1extraRowBeforeGcf: ", commonRow +m1row1  +m1row2, " m2extraRowBeforeGcf: ", commonRow + m2row1 + m2row2, " extraRowBeforeGcf: ", m1extraRow + m2extraRow];
 
     canonicalForm[{Join[{commonRow}, {extraRow}], "co"}]
 ];

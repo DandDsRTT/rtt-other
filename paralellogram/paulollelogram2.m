@@ -128,7 +128,7 @@ Graphics3D[{
   (*vector labels *)
   Black,
   Text[Style[Rotate["C₂ = [4 -4 1⟩", 30 Degree], FontSize -> 24, FontFamily -> "Cambria Math"], {0, -1, -0.2}],
-  Text[Style[Rotate["C₁ = [7 0 -3⟩", -59 Degree], FontSize -> 24, FontFamily -> "Cambria Math"], {3.5, 0 , -1.15 }],
+  Text[Style[Rotate["C₁ = [7 0 -3⟩", -59 Degree], FontSize -> 24, FontFamily -> "Cambria Math"], {3.5, 0, -1.15 }],
 
   (*main label*)
   Text[Style["C₁\[And]C₂ =\n[[28 -19 12⟩⟩", FontSize -> 24, TextAlignment -> Center, FontFamily -> "Cambria Math"], {4, -4, -0.7}],

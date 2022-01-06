@@ -14,7 +14,7 @@ trueW = {{4, 4, -3}}; (* [3 4 -4⟩*)(* meantone + augmented = diminished *)*)
 (*shared  = {7,11,16};
 a = {17,27,40}; (* [4 -4 1> *)
 b = {10, 16, 23}; (* [-3 -1 2> *)
-trueW = {{3 , 5, 1}};  (* [1 -5 3> *)*) (*meantone + dicot = porcupine *)
+trueW = {{3, 5, 1}};  (* [1 -5 3> *)*) (*meantone + dicot = porcupine *)
 
 hnf[a_] := Last[HermiteDecomposition[a]];
 extractGcf[l_] := l / getGcf[l];
