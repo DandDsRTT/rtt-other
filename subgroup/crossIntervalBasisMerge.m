@@ -48,20 +48,47 @@ super[rational_] := If[rational < 1, Denominator[rational] / Numerator[rational]
 test[super, 5 / 3, 5 / 3];
 test[super, 3 / 5, 5 / 3];
 
-normalB[b_] := Map[super, Map[iToRational, removeAllZeroRows[hnf[padD[Map[rationalToI, b], getDforB[b]]]]]];
-test[normalB, {2, 7, 9}, {2, 9, 7}];
-test[normalB, {2, 9 / 7, 5}, {2, 9 / 7, 5}];
-test[normalB, {2, 3, 9}, {2, 3}];
-test[normalB, {2, 3, 15}, {2, 3, 5}];
-test[normalB, {2, 3, 5 / 3}, {2, 3, 5}];
-test[normalB, {5 / 3}, {5 / 3}];
+canonicalB[b_] := Map[super, Map[iToRational, antiTranspose[removeAllZeroRows[hnf[antiTranspose[padD[Map[rationalToI, b], getDforB[b]]]]]]]];
+test[canonicalB, {2, 7, 9}, {2, 9, 7}];
+test[canonicalB, {2, 9 / 7, 5}, {2, 5, 9 / 7}];
+test[canonicalB, {2, 3, 9}, {2, 3}];
+test[canonicalB, {2, 3, 15}, {2, 3, 5}];
+test[canonicalB, {2, 3, 5 / 3}, {2, 3, 5}];
+test[canonicalB, {5 / 3}, {5 / 3}];
+test[canonicalB, {2, 5 / 3, 7 / 5}, {2, 5 / 3, 7 / 3}];
+test[canonicalB, {2, 9 / 7, 5 / 3}, {2, 5 / 3, 9 / 7}];
+(* all the subgroups on the wiki page if they are canonical according to this *)
+test[canonicalB, {2, 3, 7}, {2, 3, 7}];
+test[canonicalB, {2, 5, 7}, {2, 5, 7}];
+test[canonicalB, {2, 3, 7 / 5}, {2, 3, 7 / 5}];
+test[canonicalB, {2, 5 / 3, 7}, {2, 5 / 3, 7}];
+test[canonicalB, {2, 5, 7 / 3}, {2, 5, 7 / 3}];
+test[canonicalB, {2, 5 / 3, 7 / 3}, {2, 5 / 3, 7 / 3}];
+test[canonicalB, {2, 27 / 25, 7 / 3}, {2, 27 / 25, 7 / 3}];
+test[canonicalB, {2, 9 / 5, 9 / 7}, {2, 9 / 5, 9 / 7}];
+test[canonicalB, {2, 3, 11}, {2, 3, 11}];
+test[canonicalB, {2, 5, 11}, {2, 5, 11}];
+test[canonicalB, {2, 7, 11}, {2, 7, 11}];
+test[canonicalB, {2, 3, 5, 11}, {2, 3, 5, 11}];
+test[canonicalB, {2, 3, 7, 11}, {2, 3, 7, 11}];
+test[canonicalB, {2, 5, 7, 11}, {2, 5, 7, 11}];
+test[canonicalB, {2, 5 / 3, 7 / 3, 11 / 3}, {2, 5 / 3, 7 / 3, 11 / 3}];
+test[canonicalB, {2, 3, 13}, {2, 3, 13}];
+test[canonicalB, {2, 3, 5, 13}, {2, 3, 5, 13}];
+test[canonicalB, {2, 3, 7, 13}, {2, 3, 7, 13}];
+test[canonicalB, {2, 5, 7, 13}, {2, 5, 7, 13}];
+test[canonicalB, {2, 5, 7, 11, 13}, {2, 5, 7, 11, 13}];
+test[canonicalB, {2, 3, 13 / 5}, {2, 3, 13 / 5}];
+test[canonicalB, {2, 3, 11 / 5, 13 / 5}, {2, 3, 11 / 5, 13 / 5}];
+test[canonicalB, {2, 3, 11 / 7, 13 / 7}, {2, 3, 11 / 7, 13 / 7}];
+test[canonicalB, {2, 7 / 5, 11 / 5, 13 / 5}, {2, 7 / 5, 11 / 5, 13 / 5}];
 
 (*their union-like thing, a superset or equal set to both of them; if doing comma-merge, would be what we want *)
 bSumset[bSequence___] := Module[{d, factorizedBSequence},
   d = getDforB[Apply[Join, {bSequence}]];
   factorizedBSequence = Map[padD[Map[rationalToI, #], d]&, {bSequence}];
   
-  normalB[Map[iToRational, Flatten[factorizedBSequence, 1]]]
+  canonicalB[Map[iToRational, Flatten[factorizedBSequence, 1]]]
 ];
 test2args[bSumset, {2, 3, 5}, {2, 9, 5}, {2, 3, 5}];
 test2args[bSumset, {2, 3, 5}, {2, 9, 7}, {2, 3, 5, 7}];
@@ -105,7 +132,7 @@ bIntersectionTwoBs[b1_, b2_] := Module[{result},
     {b1entry, b1}
   ];
   
-  result
+  normalB[result]
 ];
 bIntersection[bSequence___] := Module[{result, i},
   result = First[{bSequence}];
@@ -115,7 +142,7 @@ bIntersection[bSequence___] := Module[{result, i},
     {b, Drop[{bSequence}, 1]}
   ];
   
-  normalB[result]
+  canonicalB[result]
 ];
 test2args[bIntersection, {2, 3, 5}, {2, 9, 5}, {2, 9, 5}];
 test2args[bIntersection, {2, 9 / 7, 5 / 3}, {2, 9, 5}, {2}];
@@ -137,13 +164,14 @@ test2args[isSubspaceOf, {2, 5 / 3, 7 / 5}, {2, 3, 5, 7}, True];
 test2args[isSubspaceOf, {2, 7 / 5}, {2, 5, 7}, True];
 test2args[isSubspaceOf, {2, 5, 7}, {2, 7 / 5}, False];
 test2args[isSubspaceOf, {2, 105, 11}, {2, 15, 7, 11}, True];
-test2args[isSubspaceOf, {2, 25 / 18, 11 / 7}, {2, 5 / 3, 7, 11}, True];
+test2args[isSubspaceOf, {2, 25 / 9, 11 / 7}, {2, 5 / 3, 7, 11}, True];
 test2args[isSubspaceOf, {2, 3 / 2, 5 / 2, 5 / 3}, {2, 3, 5}, True];
+test2args[isSubspaceOf, {2, 9 / 5, 3}, {2, 3, 5}, True];
 
 getStandardPrimeLimitB[t_] := getPrimes[getD[t]];
 test[getStandardPrimeLimitB, {{{1, 0, -4}, {0, 1, 4}}, "co"}, {2, 3, 5}];
 
-isStandardPrimeLimitB[b_] := normalB[b] == getPrimes[Length[b]];
+isStandardPrimeLimitB[b_] := canonicalB[b] == getPrimes[Length[b]];
 test[isStandardPrimeLimitB, {2, 3, 5, 7, 11}, True];
 test[isStandardPrimeLimitB, {2, 3, 7, 5, 11}, True];
 test[isStandardPrimeLimitB, {2, 3, 5, 9, 11}, False];
