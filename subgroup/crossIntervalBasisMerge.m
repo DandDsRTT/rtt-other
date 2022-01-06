@@ -29,7 +29,7 @@ iToRational[v_] := Module[{rational, primeIndex},
   rational = 1;
   primeIndex = 1;
   Do[
-    rational = rational * Prime[primeIndex]^vEntry;
+    rational = rational * Prime[primeIndex]^vEntry; (* TODO: var name *)
     primeIndex += 1,
     {vEntry, v}
   ];
@@ -42,7 +42,7 @@ getDforB[l_] := PrimePi[Max[Map[First, Map[Last, Map[FactorInteger, l]]]]];
 test[getDforB, {2, 9, 7}, 4];
 
 padD[a_, d_] := Map[PadRight[#, d]&, a];
-test2args[padD, {{1, 2, 3}, {4, 5, 6}}, 5, {{1, 2, 3, 0, 0}, {4, 5, 6, 0, 0}}];
+test[padD, {{1, 2, 3}, {4, 5, 6}}, 5, {{1, 2, 3, 0, 0}, {4, 5, 6, 0, 0}}];
 
 super[rational_] := If[rational < 1, Denominator[rational] / Numerator[rational], rational];
 test[super, 5 / 3, 5 / 3];
@@ -97,15 +97,15 @@ bMerge[bl___] := Module[{concatedB, factorizedConcatedB},
 ];
 
 (* returns the supergroup, when one is a subgroup of the other *)
-test2args[bMerge, {2, 3, 5}, {2, 9, 5}, {2, 3, 5}];
+test[bMerge, {2, 3, 5}, {2, 9, 5}, {2, 3, 5}];
 
 (* basically works *)
-test2args[bMerge, {2, 3, 5}, {2, 9, 7}, {2, 3, 5, 7}];
+test[bMerge, {2, 3, 5}, {2, 9, 7}, {2, 3, 5, 7}];
 
 (* can handle more than two interval bases at once *)
-test3args[bMerge, {2, 3, 5}, {2, 9, 7}, {2, 5 / 7, 11}, {2, 3, 5, 7, 11}];
-test2args[bMerge, {4}, {16}, {4}];
-test2args[bMerge, {25 / 9}, {5 / 3}, {5 / 3}];
+test[bMerge, {2, 3, 5}, {2, 9, 7}, {2, 5 / 7, 11}, {2, 3, 5, 7, 11}];
+test[bMerge, {4}, {16}, {4}];
+test[bMerge, {25 / 9}, {5 / 3}, {5 / 3}];
 
 (*their intersection; if doing map-merge, would be what we want; we only care about mapping stuff relevant to both of the input t's commas *)
 rationalsShareRoot[rational1_, rational2_] := Module[{gcf},
@@ -154,29 +154,29 @@ bIntersection[bl___] := Module[{intersectedB},
   
   canonicalB[intersectedB]
 ];
-test2args[bIntersection, {2, 3, 5}, {2, 9, 5}, {2, 9, 5}];
-test2args[bIntersection, {2, 9 / 7, 5 / 3}, {2, 9, 5}, {2}];
-test3args[bIntersection, {2, 3, 5, 7}, {2, 3, 5}, {2, 5, 7}, {2, 5}];
+test[bIntersection, {2, 3, 5}, {2, 9, 5}, {2, 9, 5}];
+test[bIntersection, {2, 9 / 7, 5 / 3}, {2, 9, 5}, {2}];
+test[bIntersection, {2, 3, 5, 7}, {2, 3, 5}, {2, 5, 7}, {2, 5}];
 
 isSubspaceOf[candidateSubspaceB_, candidateSuperspaceB_] := bMerge[candidateSubspaceB, candidateSuperspaceB] == candidateSuperspaceB;
-test2args[isSubspaceOf, {2, 9, 5}, {2, 3, 5}, True];
-test2args[isSubspaceOf, {2, 3, 5}, {2, 3, 5, 7}, True];
-test2args[isSubspaceOf, {2, 3, 5}, {2, 9, 5}, False];
-test2args[isSubspaceOf, {2, 3, 5, 7}, {2, 3, 5}, False];
-test2args[isSubspaceOf, {4}, {2}, True];
-test2args[isSubspaceOf, {8}, {4}, False];
-test2args[isSubspaceOf, {16}, {4}, True];
-test2args[isSubspaceOf, {3, 5, 7}, {2, 11, 13}, False];
-test2args[isSubspaceOf, {2, 3, 5}, {2, 3, 7}, False];
-test2args[isSubspaceOf, {2, 3, 7}, {2, 3, 5}, False];
-test2args[isSubspaceOf, {2, 5 / 3, 7}, {2, 3, 5, 7}, True];
-test2args[isSubspaceOf, {2, 5 / 3, 7 / 5}, {2, 3, 5, 7}, True];
-test2args[isSubspaceOf, {2, 7 / 5}, {2, 5, 7}, True];
-test2args[isSubspaceOf, {2, 5, 7}, {2, 7 / 5}, False];
-test2args[isSubspaceOf, {2, 105, 11}, {2, 15, 7, 11}, True];
-test2args[isSubspaceOf, {2, 25 / 9, 11 / 7}, {2, 5 / 3, 7, 11}, True];
-test2args[isSubspaceOf, {2, 3 / 2, 5 / 2, 5 / 3}, {2, 3, 5}, True];
-test2args[isSubspaceOf, {2, 9 / 5, 3}, {2, 3, 5}, True];
+test[isSubspaceOf, {2, 9, 5}, {2, 3, 5}, True];
+test[isSubspaceOf, {2, 3, 5}, {2, 3, 5, 7}, True];
+test[isSubspaceOf, {2, 3, 5}, {2, 9, 5}, False];
+test[isSubspaceOf, {2, 3, 5, 7}, {2, 3, 5}, False];
+test[isSubspaceOf, {4}, {2}, True];
+test[isSubspaceOf, {8}, {4}, False];
+test[isSubspaceOf, {16}, {4}, True];
+test[isSubspaceOf, {3, 5, 7}, {2, 11, 13}, False];
+test[isSubspaceOf, {2, 3, 5}, {2, 3, 7}, False];
+test[isSubspaceOf, {2, 3, 7}, {2, 3, 5}, False];
+test[isSubspaceOf, {2, 5 / 3, 7}, {2, 3, 5, 7}, True];
+test[isSubspaceOf, {2, 5 / 3, 7 / 5}, {2, 3, 5, 7}, True];
+test[isSubspaceOf, {2, 7 / 5}, {2, 5, 7}, True];
+test[isSubspaceOf, {2, 5, 7}, {2, 7 / 5}, False];
+test[isSubspaceOf, {2, 105, 11}, {2, 15, 7, 11}, True];
+test[isSubspaceOf, {2, 25 / 9, 11 / 7}, {2, 5 / 3, 7, 11}, True];
+test[isSubspaceOf, {2, 3 / 2, 5 / 2, 5 / 3}, {2, 3, 5}, True];
+test[isSubspaceOf, {2, 9 / 5, 3}, {2, 3, 5}, True];
 
 getStandardPrimeLimitB[t_] := getPrimes[getD[t]];
 test[getStandardPrimeLimitB, {{{1, 0, -4}, {0, 1, 4}}, "co"}, {2, 3, 5}];
@@ -195,31 +195,31 @@ test[getB, {{{1, 0, -4}, {0, 1, 4}}, "co"}, {2, 3, 5}];
 test[getB, {{{11, 35, 31}}, "co", {2, 9, 7}}, {2, 9, 7}];
 
 signsMatch[integer1_, integer2_] := Sign[integer1] == 0 || Sign[integer2] == 0 || Sign[integer1] == Sign[integer2];
-test2args[signsMatch, 3, 5, True];
-test2args[signsMatch, -3, -5, True];
-test2args[signsMatch, -3, 5, False];
-test2args[signsMatch, 3, -5, False];
-test2args[signsMatch, 3, 0, True];
-test2args[signsMatch, 0, 5, True];
-test2args[signsMatch, -3, 0, True];
-test2args[signsMatch, 0, - 5, True];
+test[signsMatch, 3, 5, True];
+test[signsMatch, -3, -5, True];
+test[signsMatch, -3, 5, False];
+test[signsMatch, 3, -5, False];
+test[signsMatch, 3, 0, True];
+test[signsMatch, 0, 5, True];
+test[signsMatch, -3, 0, True];
+test[signsMatch, 0, - 5, True];
 
 factorizationIsAcceptableForThisPrimesCounts[integer1_, integer2_] := Abs[integer1] >= Abs[integer2] && signsMatch[integer1, integer2];
 
 (*TODO: DRY this up with isDenominatorFactor *)
 isNumeratorFactor[factorizedSubspaceF_, factorizedSuperspaceF_] := !MemberQ[MapThread[factorizationIsAcceptableForThisPrimesCounts, {factorizedSubspaceF, factorizedSubspaceF - factorizedSuperspaceF}], False];
-test2args[isNumeratorFactor, {1, 0, 0}, {1, 0, 0}, True];
-test2args[isNumeratorFactor, {2, 0, 0}, {1, 0, 0}, True];
-test2args[isNumeratorFactor, {1, 1, 0}, {1, 0, 0}, True];
-test2args[isNumeratorFactor, {1, 1, 0}, {1, 1, 0}, True];
-test2args[isNumeratorFactor, {2, 1, 0}, {1, 1, 0}, True];
-test2args[isNumeratorFactor, {1, 1, 0}, {1, 2, 0}, False];
-test2args[isNumeratorFactor, {1, 0, 0}, {0, 0, 1}, False];
+test[isNumeratorFactor, {1, 0, 0}, {1, 0, 0}, True];
+test[isNumeratorFactor, {2, 0, 0}, {1, 0, 0}, True];
+test[isNumeratorFactor, {1, 1, 0}, {1, 0, 0}, True];
+test[isNumeratorFactor, {1, 1, 0}, {1, 1, 0}, True];
+test[isNumeratorFactor, {2, 1, 0}, {1, 1, 0}, True];
+test[isNumeratorFactor, {1, 1, 0}, {1, 2, 0}, False];
+test[isNumeratorFactor, {1, 0, 0}, {0, 0, 1}, False];
 
 isDenominatorFactor[factorizedSubspaceF_, factorizedSuperspaceF_] := !MemberQ[MapThread[factorizationIsAcceptableForThisPrimesCounts, {factorizedSubspaceF, factorizedSubspaceF + factorizedSuperspaceF}], False];
-test2args[isDenominatorFactor, {1, 0, 0}, {1, 0, 0}, False];
-test2args[isDenominatorFactor, {1, -1, 0}, {1, 0, 0}, False];
-test2args[isDenominatorFactor, {1, -1, 0}, {0, 1, 0}, True];
+test[isDenominatorFactor, {1, 0, 0}, {1, 0, 0}, False];
+test[isDenominatorFactor, {1, -1, 0}, {1, 0, 0}, False];
+test[isDenominatorFactor, {1, -1, 0}, {0, 1, 0}, True];
 
 (* express the target formal primes in terms of the initial formal primes*)
 getRforM[originalSuperspaceB_, targetSubspaceB_] := Module[
@@ -266,14 +266,14 @@ getRforM[originalSuperspaceB_, targetSubspaceB_] := Module[
   
   Transpose[r] (* TODO: I don't think this should be transposed, and dealt with accordingly in the few places where it's used *)
 ];
-test2args[getRforM, {2, 3, 5, 7}, {2, 3, 5}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
-test2args[getRforM, {2, 3, 7}, {2, 9, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
-test2args[getRforM, {2, 3, 5, 7}, {2, 9 / 7, 5 / 3}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
+test[getRforM, {2, 3, 5, 7}, {2, 3, 5}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
+test[getRforM, {2, 3, 7}, {2, 9, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
+test[getRforM, {2, 3, 5, 7}, {2, 9 / 7, 5 / 3}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
 
 getRforC[originalSubspaceB_, targetSuperspaceB_] := getRforM[targetSuperspaceB, originalSubspaceB]; (* yes, just swapping initial and target, that's all! *)
-test2args[getRforC, {2, 3, 5}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
-test2args[getRforC, {2, 9, 7}, {2, 3, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
-test2args[getRforC, {2, 9 / 7, 5 / 3}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
+test[getRforC, {2, 3, 5}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
+test[getRforC, {2, 9, 7}, {2, 3, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
+test[getRforC, {2, 9 / 7, 5 / 3}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
 
 canonicalFormWithB[t_] := Module[{b, canonicalT},
   b = getB[t];
@@ -293,24 +293,24 @@ changeBforM[m_, targetSubspaceB_] := If[
   Error,
   canonicalFormWithB[{getA[m].getRforM[getB[m], targetSubspaceB], "co", targetSubspaceB}]
 ];
-test2args[changeBforM, {{{12, 19, 28}}, "co"}, {2, 3, 5, 7}, Error];
+test[changeBforM, {{{12, 19, 28}}, "co"}, {2, 3, 5, 7}, Error];
 t = {{{22, 35, 51, 76}}, "co", {2, 3, 5, 11}};
 targetSubspaceB = {2, 9, 11};
 expectedT = {{{11, 35, 38}}, "co", {2, 9, 11}};
-test2args[changeBforM, t, targetSubspaceB, expectedT];
+test[changeBforM, t, targetSubspaceB, expectedT];
 
 changeBforC[c_, targetSuperspaceB_] := If[
   isSubspaceOf[getB[c], targetSuperspaceB],
   canonicalFormWithB[{Transpose[getRforC[getB[c], targetSuperspaceB].Transpose[getA[c]]], "contra", targetSuperspaceB}],
   Error
 ];
-test2args[changeBforC, {{{4, -4, 1}}, "contra"}, {2, 9, 7}, Error];
+test[changeBforC, {{{4, -4, 1}}, "contra"}, {2, 9, 7}, Error];
 t = {{{0, 1, 0}, {0, -2, 1}}, "contra", {2, 9 / 7, 5 / 3}};
 targetB = {2, 3, 5, 7};
 expectedT = {{{0, -1, 1, 0}, {0, -2, 0, 1}}, "contra"}; (*{{{0,2,0,-1},{0,-5,1,2}},"contra"}, before canonicalization *)
-test2args[changeBforC, t, targetB, expectedT];
-test2args[changeBforC, {{{1}}, "contra", {27}}, {9}, Error];
-test2args[changeBforC, {{{1}}, "contra", {81}}, {9}, {{{1}}, "contra", {9}}];
+test[changeBforC, t, targetB, expectedT];
+test[changeBforC, {{{1}}, "contra", {27}}, {9}, Error];
+test[changeBforC, {{{1}}, "contra", {81}}, {9}, {{{1}}, "contra", {9}}];
 
 mapMergeWithB[tl___] := Module[{bl, intersectedB, tlWithIntersectedB},
   bl = Map[getB, {tl}];
@@ -322,7 +322,7 @@ mapMergeWithB[tl___] := Module[{bl, intersectedB, tlWithIntersectedB},
 t1 = {{{22, 35, 51, 76}}, "co", {2, 3, 5, 11}};
 t2 = {{{17, 54, 48, 59}}, "co", {2, 9, 7, 11}};
 expectedT = {{{1, 0, 13}, {0, 1, -3}}, "co", {2, 9, 11}};(* {{{22,70,76},{17,54,59}},"co",{2,9,11}}; before canonicalization *)
-test2args[mapMergeWithB, t1, t2, expectedT];
+test[mapMergeWithB, t1, t2, expectedT];
 
 commaMergeWithB[tl___] := Module[{bl, mergedB, tlWithMergedB},
   bl = Map[getB, {tl}];
@@ -334,7 +334,7 @@ commaMergeWithB[tl___] := Module[{bl, mergedB, tlWithMergedB},
 t1 = {{{4, -4, 1}}, "contra"};
 t2 = {{{6, -1, -1}}, "contra", {2, 9, 7}};
 expectedT = {{{4, -4, 1, 0}, {-6, 2, 0, 1}}, "contra"};
-test2args[commaMergeWithB, t1, t2, expectedT];
+test[commaMergeWithB, t1, t2, expectedT];
 
 Print["TOTAL FAILURES: ", failures];
 Print["TOTAL PASSES: ", passes];
