@@ -29,7 +29,7 @@ iToRational[v_] := Module[{rational, primeIndex},
   rational = 1;
   primeIndex = 1;
   Do[
-    rational = rational * Prime[primeIndex]^vEntry; (* TODO: var name *)
+    rational = rational * Prime[primeIndex]^vEntry;
     primeIndex += 1,
     {vEntry, v}
   ];
@@ -142,7 +142,7 @@ bIntersectionBinary[b1_, b2_] := Module[{intersectedB},
     {b1f, b1}
   ];
   
-  canonicalB[intersectedB] (* TODO: is this necessary to canonicalize too? *)
+  canonicalB[intersectedB]
 ];
 bIntersection[bl___] := Module[{intersectedB},
   intersectedB = First[{bl}];
@@ -206,7 +206,6 @@ test[signsMatch, 0, - 5, True];
 
 factorizationIsAcceptableForThisPrimesCounts[integer1_, integer2_] := Abs[integer1] >= Abs[integer2] && signsMatch[integer1, integer2];
 
-(*TODO: DRY this up with isDenominatorFactor *)
 isNumeratorFactor[factorizedSubspaceF_, factorizedSuperspaceF_] := !MemberQ[MapThread[factorizationIsAcceptableForThisPrimesCounts, {factorizedSubspaceF, factorizedSubspaceF - factorizedSuperspaceF}], False];
 test[isNumeratorFactor, {1, 0, 0}, {1, 0, 0}, True];
 test[isNumeratorFactor, {2, 0, 0}, {1, 0, 0}, True];
@@ -264,7 +263,7 @@ getRforM[originalSuperspaceB_, targetSubspaceB_] := Module[
     {factorizedTargetSubspaceF, factorizedTargetSubspaceB}
   ];
   
-  Transpose[r] (* TODO: I don't think this should be transposed, and dealt with accordingly in the few places where it's used *)
+  Transpose[r]
 ];
 test[getRforM, {2, 3, 5, 7}, {2, 3, 5}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
 test[getRforM, {2, 3, 7}, {2, 9, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
