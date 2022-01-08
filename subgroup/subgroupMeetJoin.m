@@ -48,13 +48,13 @@ sUnion[s1_, s2_] := Module[{d, factorizedS1, factorizedS2},
   canonicalS[Map[vToRational, Join[factorizedS1, factorizedS2]]]
 ];
 
-shareRoot[rational1_, rational2_] := Module[{gcf},
-  gcf = getGcf[rational1, rational2];
+shareRoot[rational1_, rational2_] := Module[{gcd},
+  gcd = getGcd[rational1, rational2];
 
   If[
-    gcf == 1,
+    gcd == 1,
     False,
-    IntegerQ[Log[gcf, rational1]] && IntegerQ[Log[gcf, rational2]]
+    IntegerQ[Log[gcd, rational1]] && IntegerQ[Log[gcd, rational2]]
   ]
 ];
 

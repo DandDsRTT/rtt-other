@@ -6,11 +6,11 @@ temperamentSum[M1_, M2_] := Module[{ commonRow, m1extraRow, m2extraRow, extraRow
     m2row1 = First[getA[M2]];
     m2row2 = Last[getA[M2]];
 
-  m1extraRow = extractGcf[4*commonRow +m1row1  +m1row2 ];
-  m2extraRow= extractGcf[11*commonRow + m2row1 + m2row2];
+  m1extraRow = extractGcd[4*commonRow +m1row1  +m1row2 ];
+  m2extraRow= extractGcd[11*commonRow + m2row1 + m2row2];
   Print[TensorWedge[commonRow, m1extraRow] // MatrixForm, TensorWedge[commonRow, m2extraRow] // MatrixForm];
-  extraRow = extractGcf[m1extraRow + m2extraRow];
-  Print["commonRow: ", commonRow, " m1extraRow: ", m1extraRow, " m2extraRow: ", m2extraRow, " extraRow: ", extraRow, " m1extraRowBeforeGcf: ", commonRow +m1row1  +m1row2, " m2extraRowBeforeGcf: ", commonRow + m2row1 + m2row2, " extraRowBeforeGcf: ", m1extraRow + m2extraRow];
+  extraRow = extractGcd[m1extraRow + m2extraRow];
+  Print["commonRow: ", commonRow, " m1extraRow: ", m1extraRow, " m2extraRow: ", m2extraRow, " extraRow: ", extraRow, " m1extraRowBeforeGcd: ", commonRow +m1row1  +m1row2, " m2extraRowBeforeGcd: ", commonRow + m2row1 + m2row2, " extraRowBeforeGcd: ", m1extraRow + m2extraRow];
 
     canonicalForm[{Join[{commonRow}, {extraRow}], "co"}]
 ];

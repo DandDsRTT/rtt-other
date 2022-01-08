@@ -10,7 +10,7 @@ signPattern[n_] := Drop[Tuples[{1, 0, -1}, n], -Ceiling[(3 ^ n) / 2]];
 linCombsToCheck[m_] := Map[Total[m * #, {1}] &, signPattern[Length[m]]];
 sadDefactor[m_] := Module[{reduced, linCombs, linCombsDisarmed, maybeDisarmedRow},
   linCombs = linCombsToCheck[m];
-  linCombsDisarmed = Map[divideOutGcf, linCombs];
+  linCombsDisarmed = Map[divideOutGcd, linCombs];
   maybeDisarmedRow = Complement[linCombsDisarmed, linCombs];
   If[Length[maybeDisarmedRow] == 0, m, sadDefactor[Prepend[Drop[m, 1], First[maybeDisarmedRow]]]]
 ];
@@ -20,7 +20,7 @@ sadDefactorThenHnf[m_] := hnf[sadDefactor[m]];
 confirmEnfactoredRowReplaced[m_] := Module[{i, enfactoredRowReplaced},
   enfactoredRowReplaced = True;
   For[i = 1, i <= Length[m], i++,
-    If[getGcf[m[[i]]] > 1, enfactoredRowReplaced = False]
+    If[getGcd[m[[i]]] > 1, enfactoredRowReplaced = False]
   ];
   enfactoredRowReplaced
 ];
@@ -37,7 +37,7 @@ handleEnfactored[m_, maybeDisarmedRow_] := Module[{defactored, attemptedReplacem
 enhancedSadDefactor[m_] := Module[{mNoAllZeros, reduced, linCombs, linCombsDisarmed, maybeDisarmedRow},
   mNoAllZeros = removeUnneededZeroRows[m];
   linCombs = linCombsToCheck[mNoAllZeros];
-  linCombsDisarmed = Map[divideOutGcf, linCombs];
+  linCombsDisarmed = Map[divideOutGcd, linCombs];
   maybeDisarmedRow = Complement[linCombsDisarmed, linCombs];
   If[Length[maybeDisarmedRow] == 0, mNoAllZeros, handleEnfactored[mNoAllZeros, maybeDisarmedRow]]
 ];

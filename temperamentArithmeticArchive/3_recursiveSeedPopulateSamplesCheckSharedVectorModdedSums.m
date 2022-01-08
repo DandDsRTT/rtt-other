@@ -17,7 +17,7 @@ b = {10, 16, 23}; (* [-3 -1 2> *)
 trueW = {{3, 5, 1}};  (* [1 -5 3> *)*) (*meantone + dicot = porcupine *)
 
 hnf[a_] := Last[HermiteDecomposition[a]];
-extractGcf[l_] := l / getGcf[l];
+extractGcd[l_] := l / getGcd[l];
 
 populateSamples[v_] := Module[{samples},
   samples = {v, shared};
@@ -40,8 +40,8 @@ modRow[l_] := l - Floor[First[l] / First[shared]]*shared;
 modCounts = Association[];
 
 Do[
-  s =extractGcf[First[pair]] + extractGcf[Last[pair]];
-  (*s = extractGcf[Last[pair]] - extractGcf[First[pair]]; (* b - a *)*)
+  s =extractGcd[First[pair]] + extractGcd[Last[pair]];
+  (*s = extractGcd[Last[pair]] - extractGcd[First[pair]]; (* b - a *)*)
 
   mod = modRow[s];
 
@@ -55,7 +55,7 @@ Do[
   w = Minors[h, 2] ;
 
   (*If[First[pair]=={31,49,72},Print["w: ", w, " pair: ", pair]];*)
-  Print["hnf: ", h, " w: ",w, " pair: ", pair, " s: ", s, " mod: ", mod, " t1: ", TensorWedge[shared, extractGcf[First[pair]]] // MatrixForm, " t2: ", TensorWedge[shared, extractGcf[Last[pair]]] // MatrixForm];
+  Print["hnf: ", h, " w: ",w, " pair: ", pair, " s: ", s, " mod: ", mod, " t1: ", TensorWedge[shared, extractGcd[First[pair]]] // MatrixForm, " t2: ", TensorWedge[shared, extractGcd[Last[pair]]] // MatrixForm];
 
   If[
     w == trueW,

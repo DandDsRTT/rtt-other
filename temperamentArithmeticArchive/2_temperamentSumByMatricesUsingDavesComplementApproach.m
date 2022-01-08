@@ -28,12 +28,12 @@ addWedgies[w1_,w2_] := {eaGetMinors[w1]+eaGetMinors[w2],eaGetGrade[w1],getV[w1]}
 
 (*
 I'm not sure this is right at all...
-eaAreCollinear[w1_, w2_] := Module[{w1and2, gcf},
+eaAreCollinear[w1_, w2_] := Module[{w1and2, gcd},
 w1and2 = addWedgies[w1, w2];
-gcf = getGcf[eaGetMinors[w1and2]];
-Print["eaAreCollinear, w1and2: ", w1and2, " gcf: ", gcf];
+gcd = getGcd[eaGetMinors[w1and2]];
+Print["eaAreCollinear, w1and2: ", w1and2, " gcd: ", gcd];
 
-gcf===1
+gcd===1
 ];
 *)
 

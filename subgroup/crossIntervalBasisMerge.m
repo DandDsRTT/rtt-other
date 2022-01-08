@@ -108,13 +108,13 @@ test[bMerge, {4}, {16}, {4}];
 test[bMerge, {25 / 9}, {5 / 3}, {5 / 3}];
 
 (*their intersection; if doing map-merge, would be what we want; we only care about mapping stuff relevant to both of the input t's commas *)
-rationalsShareRoot[rational1_, rational2_] := Module[{gcf},
-  gcf = getGcf[{rational1, rational2}];
+rationalsShareRoot[rational1_, rational2_] := Module[{gcd},
+  gcd = getGcd[{rational1, rational2}];
   
   If[
-    gcf == 1,
+    gcd == 1,
     False,
-    IntegerQ[Log[gcf, rational1]] && IntegerQ[Log[gcf, rational2]]
+    IntegerQ[Log[gcd, rational1]] && IntegerQ[Log[gcd, rational2]]
   ]
 ];
 findFIfAnyInOtherIntervalBasisThatSharesRoot[b1f_, b2_] := Module[{fSharingRoot},
