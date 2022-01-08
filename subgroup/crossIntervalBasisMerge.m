@@ -221,7 +221,7 @@ test[isDenominatorFactor, {1, -1, 0}, {1, 0, 0}, False];
 test[isDenominatorFactor, {1, -1, 0}, {0, 1, 0}, True];
 
 (* express the target formal primes in terms of the initial formal primes*)
-getRforM[originalSuperspaceB_, targetSubspaceB_] := Module[
+getRForM[originalSuperspaceB_, targetSubspaceB_] := Module[
   {
     d,
     factorizedTargetSubspaceB,
@@ -265,14 +265,14 @@ getRforM[originalSuperspaceB_, targetSubspaceB_] := Module[
   
   Transpose[r]
 ];
-test[getRforM, {2, 3, 5, 7}, {2, 3, 5}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
-test[getRforM, {2, 3, 7}, {2, 9, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
-test[getRforM, {2, 3, 5, 7}, {2, 9 / 7, 5 / 3}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
+test[getRForM, {2, 3, 5, 7}, {2, 3, 5}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
+test[getRForM, {2, 3, 7}, {2, 9, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
+test[getRForM, {2, 3, 5, 7}, {2, 9 / 7, 5 / 3}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
 
-getRforC[originalSubspaceB_, targetSuperspaceB_] := getRforM[targetSuperspaceB, originalSubspaceB]; (* yes, just swapping initial and target, that's all! *)
-test[getRforC, {2, 3, 5}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
-test[getRforC, {2, 9, 7}, {2, 3, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
-test[getRforC, {2, 9 / 7, 5 / 3}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
+getRForC[originalSubspaceB_, targetSuperspaceB_] := getRForM[targetSuperspaceB, originalSubspaceB]; (* yes, just swapping initial and target, that's all! *)
+test[getRForC, {2, 3, 5}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
+test[getRForC, {2, 9, 7}, {2, 3, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
+test[getRForC, {2, 9 / 7, 5 / 3}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
 
 canonicalFormWithB[t_] := Module[{b, canonicalT},
   b = getB[t];
@@ -287,34 +287,34 @@ canonicalFormWithB[t_] := Module[{b, canonicalT},
 test[canonicalFormWithB, {{{24, 38, 56}}, "co", {2, 3, 5}}, {{{12, 19, 28}}, "co"}];
 test[canonicalFormWithB, {{{22, 70, 62}}, "co", {2, 9, 7}}, {{{11, 35, 31}}, "co", {2, 9, 7}}];
 
-changeBforM[m_, targetSubspaceB_] := If[
+changeBForM[m_, targetSubspaceB_] := If[
   isSubspaceOf[getB[m], targetSubspaceB],
   Error,
-  canonicalFormWithB[{getA[m].getRforM[getB[m], targetSubspaceB], "co", targetSubspaceB}]
+  canonicalFormWithB[{getA[m].getRForM[getB[m], targetSubspaceB], "co", targetSubspaceB}]
 ];
-test[changeBforM, {{{12, 19, 28}}, "co"}, {2, 3, 5, 7}, Error];
+test[changeBForM, {{{12, 19, 28}}, "co"}, {2, 3, 5, 7}, Error];
 t = {{{22, 35, 51, 76}}, "co", {2, 3, 5, 11}};
 targetSubspaceB = {2, 9, 11};
 expectedT = {{{11, 35, 38}}, "co", {2, 9, 11}};
-test[changeBforM, t, targetSubspaceB, expectedT];
+test[changeBForM, t, targetSubspaceB, expectedT];
 
-changeBforC[c_, targetSuperspaceB_] := If[
+changeBForC[c_, targetSuperspaceB_] := If[
   isSubspaceOf[getB[c], targetSuperspaceB],
-  canonicalFormWithB[{Transpose[getRforC[getB[c], targetSuperspaceB].Transpose[getA[c]]], "contra", targetSuperspaceB}],
+  canonicalFormWithB[{Transpose[getRForC[getB[c], targetSuperspaceB].Transpose[getA[c]]], "contra", targetSuperspaceB}],
   Error
 ];
-test[changeBforC, {{{4, -4, 1}}, "contra"}, {2, 9, 7}, Error];
+test[changeBForC, {{{4, -4, 1}}, "contra"}, {2, 9, 7}, Error];
 t = {{{0, 1, 0}, {0, -2, 1}}, "contra", {2, 9 / 7, 5 / 3}};
 targetB = {2, 3, 5, 7};
 expectedT = {{{0, -1, 1, 0}, {0, -2, 0, 1}}, "contra"}; (*{{{0,2,0,-1},{0,-5,1,2}},"contra"}, before canonicalization *)
-test[changeBforC, t, targetB, expectedT];
-test[changeBforC, {{{1}}, "contra", {27}}, {9}, Error];
-test[changeBforC, {{{1}}, "contra", {81}}, {9}, {{{1}}, "contra", {9}}];
+test[changeBForC, t, targetB, expectedT];
+test[changeBForC, {{{1}}, "contra", {27}}, {9}, Error];
+test[changeBForC, {{{1}}, "contra", {81}}, {9}, {{{1}}, "contra", {9}}];
 
 mapMergeWithB[tl___] := Module[{bl, intersectedB, tlWithIntersectedB},
   bl = Map[getB, {tl}];
   intersectedB = Apply[bIntersection, bl];
-  tlWithIntersectedB = Map[changeBforM[#, intersectedB]&, {tl}];
+  tlWithIntersectedB = Map[changeBForM[#, intersectedB]&, {tl}];
   
   canonicalFormWithB[{Apply[Join, Map[getM, tlWithIntersectedB]], "co", intersectedB}]
 ];
@@ -326,7 +326,7 @@ test[mapMergeWithB, t1, t2, expectedT];
 commaMergeWithB[tl___] := Module[{bl, mergedB, tlWithMergedB},
   bl = Map[getB, {tl}];
   mergedB = Apply[bMerge, bl];
-  tlWithMergedB = Map[changeBforC[#, mergedB]&, {tl}];
+  tlWithMergedB = Map[changeBForC[#, mergedB]&, {tl}];
   
   canonicalFormWithB[{Apply[Join, Map[getC, tlWithMergedB]], "contra", mergedB}]
 ];
