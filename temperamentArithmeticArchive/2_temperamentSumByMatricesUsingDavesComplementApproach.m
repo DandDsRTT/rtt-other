@@ -24,13 +24,13 @@ Print["c1and2: ", c1and2, " c1and2JoinedN: ", c1and2JoinedN, " c1and2SeparatelyN
 c1and2JoinedN < c1and2SeparatelyN
 ];
 
-addWedgies[w1_,w2_] := {eaGetMinors[w1]+eaGetMinors[w2],eaGetGrade[w1],getV[w1]};
+addWedgies[w1_,w2_] := {eaGetLm[w1]+eaGetLm[w2],eaGetGrade[w1],getV[w1]};
 
 (*
 I'm not sure this is right at all...
 eaAreCollinear[w1_, w2_] := Module[{w1and2, gcd},
 w1and2 = addWedgies[w1, w2];
-gcd = getGcd[eaGetMinors[w1and2]];
+gcd = getGcd[eaGetLm[w1and2]];
 Print["eaAreCollinear, w1and2: ", w1and2, " gcd: ", gcd];
 
 gcd===1
