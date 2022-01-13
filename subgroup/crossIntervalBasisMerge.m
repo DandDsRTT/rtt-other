@@ -316,7 +316,7 @@ mapMergeWithB[tl___] := Module[{bl, intersectedB, tlWithIntersectedB},
   intersectedB = Apply[bIntersection, bl];
   tlWithIntersectedB = Map[changeBForM[#, intersectedB]&, {tl}];
   
-  canonicalFormWithB[{Apply[Join, Map[getM, tlWithIntersectedB]], "co", intersectedB}]
+  canonicalFormWithB[{Apply[Join, Map[getA, Map[getM, tlWithIntersectedB]]], "co", intersectedB}]
 ];
 t1 = {{{22, 35, 51, 76}}, "co", {2, 3, 5, 11}};
 t2 = {{{17, 54, 48, 59}}, "co", {2, 9, 7, 11}};
@@ -328,7 +328,7 @@ commaMergeWithB[tl___] := Module[{bl, mergedB, tlWithMergedB},
   mergedB = Apply[bMerge, bl];
   tlWithMergedB = Map[changeBForC[#, mergedB]&, {tl}];
   
-  canonicalFormWithB[{Apply[Join, Map[getC, tlWithMergedB]], "contra", mergedB}]
+  canonicalFormWithB[{Apply[Join, Map[getA, Map[getC, tlWithMergedB]]], "contra", mergedB}]
 ];
 t1 = {{{4, -4, 1}}, "contra"};
 t2 = {{{6, -1, -1}}, "contra", {2, 9, 7}};

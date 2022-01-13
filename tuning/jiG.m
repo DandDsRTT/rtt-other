@@ -13,9 +13,9 @@ In    meantoneMapping = {{{1, 0, -4}, {0, 1, 4}}, "co"};
 Out   {{{1, 0, 0}, {2, -1, 0}}, "contra"}
 
 *)
-jiG[t_] := Module[{m, c, g, preclearedGenesU},
-  m = getM[t];
-  c = nullSpaceBasis[m];
+jiG[t_] := Module[{ma, ca, g, preclearedGenesU},
+  ma = getA[getM[t]];
+  ca = nullSpaceBasis[ma];
   g = getG[t];
   preclearedGenesU = Map[multByLcd, getA[g]];
 
@@ -27,7 +27,7 @@ jiG[t_] := Module[{m, c, g, preclearedGenesU},
 
 (* ___ PRIVATE ___ *)
 
-getG[t_] := {Transpose[PseudoInverse[getM[t]]], "contra"};
+getG[t_] := {Transpose[PseudoInverse[getA[getM[t]]]], "contra"};
 
 jiGenerator[preclearedGenesUEl_, mEl_, c_] := Module[{base},
   base = Transpose[colHermiteDefactor[Join[{preclearedGenesUEl}, c]]];
