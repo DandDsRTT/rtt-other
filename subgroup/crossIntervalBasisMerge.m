@@ -221,7 +221,7 @@ test[isDenominatorFactor, {1, -1, 0}, {1, 0, 0}, False];
 test[isDenominatorFactor, {1, -1, 0}, {0, 1, 0}, True];
 
 (* express the target formal primes in terms of the initial formal primes*)
-getRForM[originalSuperspaceB_, targetSubspaceB_] := Module[
+getIrForM[originalSuperspaceB_, targetSubspaceB_] := Module[
   {
     d,
     factorizedTargetSubspaceB,
@@ -265,14 +265,14 @@ getRForM[originalSuperspaceB_, targetSubspaceB_] := Module[
   
   Transpose[r]
 ];
-test[getRForM, {2, 3, 5, 7}, {2, 3, 5}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
-test[getRForM, {2, 3, 7}, {2, 9, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
-test[getRForM, {2, 3, 5, 7}, {2, 9 / 7, 5 / 3}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
+test[getIrForM, {2, 3, 5, 7}, {2, 3, 5}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
+test[getIrForM, {2, 3, 7}, {2, 9, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
+test[getIrForM, {2, 3, 5, 7}, {2, 9 / 7, 5 / 3}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
 
-getRForC[originalSubspaceB_, targetSuperspaceB_] := getRForM[targetSuperspaceB, originalSubspaceB]; (* yes, just swapping initial and target, that's all! *)
-test[getRForC, {2, 3, 5}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
-test[getRForC, {2, 9, 7}, {2, 3, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
-test[getRForC, {2, 9 / 7, 5 / 3}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
+getIrForC[originalSubspaceB_, targetSuperspaceB_] := getIrForM[targetSuperspaceB, originalSubspaceB]; (* yes, just swapping initial and target, that's all! *)
+test[getIrForC, {2, 3, 5}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}}]];
+test[getIrForC, {2, 9, 7}, {2, 3, 7}, Transpose[{{1, 0, 0}, {0, 2, 0}, {0, 0, 1}}]];
+test[getIrForC, {2, 9 / 7, 5 / 3}, {2, 3, 5, 7}, Transpose[{{1, 0, 0, 0}, {0, 2, 0, -1}, {0, -1, 1, 0}}]];
 
 canonicalFormWithB[t_] := Module[{b, canonicalT},
   b = getB[t];
@@ -290,7 +290,7 @@ test[canonicalFormWithB, {{{22, 70, 62}}, "co", {2, 9, 7}}, {{{11, 35, 31}}, "co
 changeBForM[m_, targetSubspaceB_] := If[
   isSubspaceOf[getB[m], targetSubspaceB],
   Error,
-  canonicalFormWithB[{getA[m].getRForM[getB[m], targetSubspaceB], "co", targetSubspaceB}]
+  canonicalFormWithB[{getA[m].getIrForM[getB[m], targetSubspaceB], "co", targetSubspaceB}]
 ];
 test[changeBForM, {{{12, 19, 28}}, "co"}, {2, 3, 5, 7}, Error];
 t = {{{22, 35, 51, 76}}, "co", {2, 3, 5, 11}};
@@ -300,7 +300,7 @@ test[changeBForM, t, targetSubspaceB, expectedT];
 
 changeBForC[c_, targetSuperspaceB_] := If[
   isSubspaceOf[getB[c], targetSuperspaceB],
-  canonicalFormWithB[{Transpose[getRForC[getB[c], targetSuperspaceB].Transpose[getA[c]]], "contra", targetSuperspaceB}],
+  canonicalFormWithB[{Transpose[getIrForC[getB[c], targetSuperspaceB].Transpose[getA[c]]], "contra", targetSuperspaceB}],
   Error
 ];
 test[changeBForC, {{{4, -4, 1}}, "contra"}, {2, 9, 7}, Error];
