@@ -12,7 +12,7 @@ colHermiteDefactor[a_] := Take[Inverse[hermiteRightUnimodular[a]], MatrixRank[a]
 ms = {};
 Do[
   d = RandomInteger[{3, 6}];
-  r = RandomInteger[{2, d-1}];
+  r = RandomInteger[{2, d - 1}];
   m = RandomInteger[{-9, 9}, {r, d}];
   ms = Join[ms, {m}],
   100
@@ -21,7 +21,7 @@ Do[
 Do[
   t = irref[colHermiteDefactor[m]];
   c = hnf[colHermiteDefactor[m]];
-
-  Print[m // MatrixForm," \[RightArrow] DIRREF: ", t // MatrixForm, " DHNF: ",  c // MatrixForm, "\n"],
+  
+  Print[m // MatrixForm, " \[RightArrow] DIRREF: ", t // MatrixForm, " DHNF: ", c // MatrixForm, "\n"],
   {m, ms}
 ]

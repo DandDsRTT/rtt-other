@@ -5,11 +5,11 @@ fixM[m_, i_] := Module[{localM, rp, rg, mGens, p, g, fixedRpRg, fixedM},
   localM = m;
   rp = m[[i]];
   rg = m[[i + 1]];
-
+  
   mGens = gens[m];
   p = mGens[[i]];
   g = mGens[[i + 1]];
-
+  
   fixedRpRg = Which[
     g < -p, {rp - 2 * rg, rg},
     -p <= g < -p / 2, {rp - rg, rg},
@@ -18,9 +18,9 @@ fixM[m_, i_] := Module[{localM, rp, rg, mGens, p, g, fixedRpRg, fixedM},
     p / 2 < g <= p, {rp + rg, -rg},
     p < g, {rp + 2 * rg, -rg}
   ];
-
+  
   fixedM = Take[localM, i - 1] ~ Join ~ fixedRpRg ~ Join ~ Drop[localM, i + 1];
-
+  
   If[
     g < -p || p < g,
     fixM[fixedM, i],
@@ -30,11 +30,11 @@ fixM[m_, i_] := Module[{localM, rp, rg, mGens, p, g, fixedRpRg, fixedM},
 
 mingen[m_] := Module[{localM, rp, rg, fixedM},
   localM = m;
-
+  
   For[i = 1, i < Length[localM], i++,
     localM = fixM[localM, i];
   ];
-
+  
   localM
 ];
 

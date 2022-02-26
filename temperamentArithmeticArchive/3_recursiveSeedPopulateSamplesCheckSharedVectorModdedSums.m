@@ -1,9 +1,9 @@
 depth = 3;
 
-shared = { 7, 11, 16};
+shared = {7, 11, 16};
 a = {5, 8, 12}; (* [4 -4 1> *)
 b = {15, 24, 35}; (* [1 -5 3> *)
-trueW = {{4,9,5}};(* [5 -9 4> *) (*meantone + porcupine = tetracot *)
+trueW = {{4, 9, 5}};(* [5 -9 4> *) (*meantone + porcupine = tetracot *)
 
 (*shared = {12,19,28};
 a = {7, 11, 16}; (* <<1 4 4]] [4 -4 1> *)
@@ -23,8 +23,8 @@ populateSamples[v_] := Module[{samples},
   samples = {v, shared};
   Do[
     next = {};
-    For[i=1,i < Length[samples],i++,next = Join[next, {samples[[i]], samples[[i]] + samples[[i+1]] }]];
-    next = Join[next,{ Last[samples]}];
+    For[i = 1, i < Length[samples], i++, next = Join[next, {samples[[i]], samples[[i]] + samples[[i + 1]]}]];
+    next = Join[next, {Last[samples]}];
     samples = next,
     depth
   ];
@@ -35,28 +35,28 @@ aSamples = populateSamples[a];
 bSamples = populateSamples[b];
 pairs = Tuples[{aSamples, bSamples}];
 
-modRow[l_] := l - Floor[First[l] / First[shared]]*shared;
+modRow[l_] := l - Floor[First[l] / First[shared]] * shared;
 
 modCounts = Association[];
 
 Do[
-  s =extractGcd[First[pair]] + extractGcd[Last[pair]];
+  s = extractGcd[First[pair]] + extractGcd[Last[pair]];
   (*s = extractGcd[Last[pair]] - extractGcd[First[pair]]; (* b - a *)*)
-
+  
   mod = modRow[s];
-
+  
   If[
     KeyExistsQ[modCounts, mod],
     modCounts[mod] = modCounts[mod] + 1,
     modCounts[mod] = 1
   ];
-
+  
   h = hnf[{s, shared}];
   w = Minors[h, 2] ;
-
+  
   (*If[First[pair]=={31,49,72},Print["w: ", w, " pair: ", pair]];*)
-  Print["hnf: ", h, " w: ",w, " pair: ", pair, " s: ", s, " mod: ", mod, " t1: ", TensorWedge[shared, extractGcd[First[pair]]] // MatrixForm, " t2: ", TensorWedge[shared, extractGcd[Last[pair]]] // MatrixForm];
-
+  Print["hnf: ", h, " w: ", w, " pair: ", pair, " s: ", s, " mod: ", mod, " t1: ", TensorWedge[shared, extractGcd[First[pair]]] // MatrixForm, " t2: ", TensorWedge[shared, extractGcd[Last[pair]]] // MatrixForm];
+  
   If[
     w == trueW,
     Print["###########match: ", mod],

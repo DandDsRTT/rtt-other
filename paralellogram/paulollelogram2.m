@@ -70,14 +70,14 @@ Graphics3D[{
   Text[Style[Subscript["-\[Pi]", 2], FontSize -> 24], {oppX - 3 - 1.5 * axisLabelOffset, 0, 0}],
   Text[Style[Subscript["-\[Pi]", 3], FontSize -> 24], {0, oppY - 2 - axisLabelOffset, 0}],
   Text[Style[Subscript["-\[Pi]", 5], FontSize -> 24], {0, 0, oppZ - 3 - axisLabelOffset}],
-
-
+  
+  
   (*mulitvector area *)
   FaceForm[Opacity[0.82]],
   EdgeForm[Directive[Yellow, Thin, Dashed]],
   White,
   Parallelepiped[origin, {A, B}],
-
+  
   (*projections *)
   FaceForm[Opacity[0.18]],
   EdgeForm[Directive[Red, Thin, Dashed]],
@@ -89,7 +89,7 @@ Graphics3D[{
   EdgeForm[Directive[Blue, Thin, Dashed]],
   Blue,
   Parallelepiped[{0, 0, projZ}, {replace[A, "z", 0], replace[B, "z", 0]}],
-
+  
   (*projection connecter lines *)
   Dashed,
   Thickness[Small],
@@ -108,7 +108,7 @@ Graphics3D[{
   Line[{A, replace[A, "z", projZ]}],
   Line[{B, replace[B, "z", projZ]}],
   Line[{AB, replace[AB, "z", projZ]}],
-
+  
   (*projection area labels*)
   FaceForm[Opacity[1]],
   Red,
@@ -117,22 +117,22 @@ Graphics3D[{
   text3D["19", centerProjectedYfinal, {0.045, 0.045}, 0, 0, \[Pi] / 2], (*area(2,5) = *)
   Blue,
   text3D["28", centerProjectedZfinal, {0.045, 0.045}, \[Pi] / 2], (*area(2,3) = *)
-
+  
   (*vectors *)
   Black,
   Dashing[{}], (*solid again *)
   Thickness[Large],
   Arrow[Tube[{origin, A}, 0.03]],
   Arrow[Tube[{origin, B}, 0.03]],
-
+  
   (*vector labels *)
   Black,
   Text[Style[Rotate["C₂ = [4 -4 1⟩", 30 Degree], FontSize -> 24, FontFamily -> "Cambria Math"], {0, -1, -0.2}],
-  Text[Style[Rotate["C₁ = [7 0 -3⟩", -59 Degree], FontSize -> 24, FontFamily -> "Cambria Math"], {3.5, 0, -1.15 }],
-
+  Text[Style[Rotate["C₁ = [7 0 -3⟩", -59 Degree], FontSize -> 24, FontFamily -> "Cambria Math"], {3.5, 0, -1.15}],
+  
   (*main label*)
   Text[Style["C₁\[And]C₂ =\n[[28 -19 12⟩⟩", FontSize -> 24, TextAlignment -> Center, FontFamily -> "Cambria Math"], {4, -4, -0.7}],
-
+  
   (* pitch points inside blocks *)
   PointSize[Medium],
   Red,
@@ -197,7 +197,7 @@ Graphics3D[{
   Point[{9, -4, projZ}],
   Point[{10, -4, projZ}],
   Point[{11, -4, projZ}],
-
+  
   (*projections of the main vectors*)
   Red,
   Arrow[Tube[{replace[origin, "x", projX], replace[A, "x", projX]}, 0.02]],
@@ -208,7 +208,7 @@ Graphics3D[{
   Blue,
   Arrow[Tube[{replace[origin, "z", projZ], replace[A, "z", projZ]}, 0.02]],
   Arrow[Tube[{replace[origin, "z", projZ], replace[B, "z", projZ]}, 0.02]],
-
+  
   (*hints of tilings of periodicity blocks*)
   (*FaceForm[Opacity[0.0]],
   EdgeForm[Directive[Red, Thin,Dashed]],

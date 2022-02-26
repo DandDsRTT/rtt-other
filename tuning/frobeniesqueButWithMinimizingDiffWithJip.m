@@ -3,9 +3,9 @@ Frobeniesque[mapping_, power_] := Module[{mappingRowCount, mappingColCount, gene
   mappingColCount = Length[First[mapping]];
   generatorRowCount = mappingColCount;
   generatorColCount = mappingRowCount;
-
+  
   (* generators = Table[Symbol["g" <> ToString@i],{i,1,Length[mapping]}];*)
-
+  
   generators = Table[
     Table[
       Symbol["x" <> ToString@i <> ToString@j],
@@ -13,12 +13,12 @@ Frobeniesque[mapping_, power_] := Module[{mappingRowCount, mappingColCount, gene
     ],
     {i, 1, generatorRowCount}
   ];
-
+  
   thing[g_] := Module[{},
     Print[g];
     octaves[g].mapping - just
   ];
-
+  
   just = jip[mappingColCount];
   result = Minimize[
     Norm[thing[generators], power],
@@ -51,9 +51,9 @@ Frobeniesque[mapping_, power_] := Module[{mappingRowCount, mappingColCount, gene
   mappingColCount = Length[First[mapping]];
   generatorRowCount = mappingColCount;
   generatorColCount = mappingRowCount;
-
+  
   (* generators = Table[Symbol["g" <> ToString@i],{i,1,Length[mapping]}];*)
-
+  
   (* generators = Table[
   Table[
   Symbol["x" <> ToString@i <> ToString@j],
@@ -61,12 +61,12 @@ Frobeniesque[mapping_, power_] := Module[{mappingRowCount, mappingColCount, gene
   ],
   {i,1,generatorRowCount}
   ];*)
-
+  
   (* thing[g_] := Module[{},
   Print[g];
   octaves[g].mapping -  just
   ];*)
-
+  
   just = jip[mappingColCount];
   result = Minimize[
     Norm[octaves[{{x11, x21}, {x12, x22}, {x13, x23}}].mapping - just, power],

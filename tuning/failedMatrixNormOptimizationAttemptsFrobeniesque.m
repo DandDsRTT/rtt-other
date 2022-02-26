@@ -3,7 +3,7 @@ Frobeniesque[mapping_, power_] := Module[{mappingRowCount, mappingColCount, gene
   mappingColCount = Length[First[mapping]];
   generatorRowCount = mappingColCount;
   generatorColCount = mappingRowCount;
-
+  
   generators = Table[
     Table[
       Symbol["x" <> ToString@i <> ToString@j],
@@ -11,9 +11,9 @@ Frobeniesque[mapping_, power_] := Module[{mappingRowCount, mappingColCount, gene
     ],
     {i, 1, generatorRowCount}
   ];
-
+  
   elements = Flatten[generators];
-  result = Minimize[{Norm[elements, power], mapping.generators == IdentityMatrix[Length[mapping]] }, elements, Reals];
+  result = Minimize[{Norm[elements, power], mapping.generators == IdentityMatrix[Length[mapping]]}, elements, Reals];
   generators /. Last[result]
 ];
 
@@ -58,7 +58,7 @@ Nonfrobeniesque[mapping_, power_] := Module[{mappingRowCount, mappingColCount, g
   mappingColCount = Length[First[mapping]];
   generatorRowCount = mappingColCount;
   generatorColCount = mappingRowCount;
-
+  
   generators = Table[
     Table[
       Symbol["x" <> ToString@i <> ToString@j],
@@ -66,9 +66,9 @@ Nonfrobeniesque[mapping_, power_] := Module[{mappingRowCount, mappingColCount, g
     ],
     {i, 1, generatorRowCount}
   ];
-
+  
   elements = Flatten[generators];
-  result = Minimize[{Norm[generators, power], mapping.generators == IdentityMatrix[Length[mapping]] }, elements];
+  result = Minimize[{Norm[generators, power], mapping.generators == IdentityMatrix[Length[mapping]]}, elements];
   generators /. Last[result]
 ]
 n1 = Nonfrobeniesque[m, 1]
@@ -96,13 +96,13 @@ top[mapping_] := Module[{mappingRowCount, mappingColCount, generatorRowCount, ge
   mappingColCount = Length[First[mapping]];
   generatorRowCount = mappingColCount;
   generatorColCount = mappingRowCount;
-
+  
   commaBasis = nullSpaceBasis[mapping]; (* only works for nullity-1 temperaments *)
   commaScale = Abs[First[octaves[commaBasis]]] / Abs[First[absOctaves[commaBasis]]];
   signs = Map[Sign, commaBasis];
-
+  
   primeApproxs = MapThread[#2 * (1 + #1 * commaScale)&, {signs, jip[Length[commaBasis]]}];
-
+  
   generators = Table[
     Table[
       Symbol["x" <> ToString@i <> ToString@j],
@@ -110,9 +110,9 @@ top[mapping_] := Module[{mappingRowCount, mappingColCount, generatorRowCount, ge
     ],
     {i, 1, generatorRowCount}
   ];
-
+  
   projectionMapping = octaves[generators.mapping];
-
+  
   elements = Flatten[generators];
   result = Solve[
     {
@@ -125,7 +125,7 @@ top[mapping_] := Module[{mappingRowCount, mappingColCount, generatorRowCount, ge
     },
     elements
   ];
-
+  
   (* Print["commaBasis: ", commaBasis];
   Print["commaScale: ", commaScale," (", commaScale // N, ")"];
   Print["signs: ", signs];
@@ -134,7 +134,7 @@ top[mapping_] := Module[{mappingRowCount, mappingColCount, generatorRowCount, ge
   Print["result: ", result];
   Print["mapping.generators: ", mapping.generators];
   Print["generators.mapping: ", generators.mapping];*)
-
+  
   generators /. Last[result] // N
 ];
 

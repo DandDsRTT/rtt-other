@@ -4,42 +4,42 @@ Do[
   d = RandomInteger[{2, 6}];
   r = RandomInteger[{1, d}];
   m = RandomInteger[{-9, 9}, {r, d}];
-
+  
   snfM = snf[m];
   If[Max[Flatten[snfM]] > 1, Continue[]];
   If[getR[m] != r, Continue[]];
-
+  
   (* turn on for enfactored examples *)
   (* c = RandomInteger[{2,9}];
   s = RandomInteger[];
   If[s==0, s=-1];
   m1 = First[c*s*m];
   First[m] = m1; *)
-
+  
   val = 0;
-
+  
   hnfM = hnf[m];
   rrefM = rref[m];
   irrefM = irref[m];
   dcfM = colHermiteDefactorThenHnf[m];
-
+  
   If[hnfM == dcfM, val = val + 1];
   If[hnfM == rrefM, val = val + 10];
   If[hnfM == irrefM, val = val + 100];
   If[rrefM == dcfM, val = val + 1000];
   If[rrefM == irrefM, val = val + 10000];
   If[irrefM == dcfM, val = val + 100000];
-
+  
   (* If[val == 100,Print["case 100",m,c,hnfM,rrefM,irrefM,dcfM]]; *)
   (* If[val == 10000,Print["case 10000",m,c,hnfM,rrefM,irrefM,dcfM]]; *)
   (* If[val == 10110,Print["case 10110",m,c,hnfM,rrefM,irrefM,dcfM]]; *)
   (* If[val == 111000,Print["case 111000",m,c,hnfM,rrefM,irrefM,dcfM]]; *)
   (* If[val == 0, Print["whoa case 0",m,c,hnfM,rrefM,irrefM,dcfM]]; *)
-
+  
   If[val == 0, val = 2];
-
+  
   If[results[[val]] === Null, results[[val]] = 0];
-
+  
   results[[val]] = results[[val]] + 1,
   2000
 ];

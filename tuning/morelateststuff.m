@@ -2,7 +2,7 @@ dualNorm[norm_] := If[norm == 1, Infinity, 1 / (1 - 1 / norm)];
 
 jip[d_] := Map[Log2, Map[Prime, Range[d]]];
 
-getW[d_, weight_] := If[
+getWeightingMatrix[d_, weight_] := If[
   weight == "Partch",
   DiagonalMatrix[jip[d]],
   If[
@@ -27,7 +27,7 @@ optimizeGtm[m_, norm_, weight_ : "unweighted"] := If[
 optimizeGtmWithPseudoinverse[m_, weight_] := Module[{d, ma, w, g, ptm, gtm, tm, e},
   d = getD[m];
   ma = getA[getM[m]];
-  w = getW[d, weight];
+  w = getWeightingMatrix[d, weight];
   g = PseudoInverse[ma.w];
   ptm = w.Log[2, getPrimes[d]];
   gtm = ptm.g;
@@ -49,7 +49,7 @@ optimizeGtmWithMinimizer[m_, norm_, weight_] := Module[{r, d, ma, gtm, ptm, tm, 
   ptm = Log[2, getPrimes[d]];
   tm = gtm.ma;
   e = tm - ptm;
-  w = getW[d, weight];
+  w = getWeightingMatrix[d, weight];
   
   (*Print["about to minimize! here's e.w: ", e.w," and the dual norm is: ", dualNorm[norm]];*)
   optimalGtmSolution = NMinimize[Norm[e.w, dualNorm[norm]], gtm, Method -> "NelderMead"];

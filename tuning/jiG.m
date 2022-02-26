@@ -18,7 +18,7 @@ jiG[t_] := Module[{ma, ca, g, preclearedGenesU},
   ca = nullSpaceBasis[ma];
   g = getG[t];
   preclearedGenesU = Map[multByLcd, getA[g]];
-
+  
   {MapThread[jiGenerator[#1, #2, c]&, {preclearedGenesU, m}], "contra"}
 ];
 
@@ -31,7 +31,7 @@ getG[t_] := {Transpose[PseudoInverse[getA[getM[t]]]], "contra"};
 
 jiGenerator[preclearedGenesUEl_, mEl_, c_] := Module[{base},
   base = Transpose[colHermiteDefactor[Join[{preclearedGenesUEl}, c]]];
-
+  
   Drop[First[Take[hnf[Transpose[Join[{mEl}.base, base]]], 1]], 1]
 ];
 

@@ -3,15 +3,15 @@ top[mapping_] := Module[{mappingRowCount, mappingColCount, generatorRowCount, ge
   mappingColCount = Length[First[mapping]];
   generatorRowCount = mappingColCount;
   generatorColCount = mappingRowCount;
-
+  
   commaBasis = nullSpaceBasis[mapping]; (* only works for nullity-1 temperaments *)
   (* commaScale = Abs[First[octaves[commaBasis]]]/Abs[First[absOctaves[commaBasis]]];*)
   signs = Map[Sign, commaBasis];
-
+  
   commaDetunings = Table[Symbol["c" <> ToString@k], {k, 1, mappingColCount - mappingRowCount}]
-
+      
       primeApproxs = MapThread[#2 * (1 + #1 * #3)&, {signs, jip[Length[commaBasis]], commaDetunings}];
-
+  
   generators = Table[
     Table[
       Symbol["x" <> ToString@i <> ToString@j],
@@ -19,9 +19,9 @@ top[mapping_] := Module[{mappingRowCount, mappingColCount, generatorRowCount, ge
     ],
     {i, 1, generatorRowCount}
   ];
-
+  
   projectionMapping = octaves[generators.mapping];
-
+  
   elements = Flatten[generators];
   result = Solve[
     {
@@ -34,7 +34,7 @@ top[mapping_] := Module[{mappingRowCount, mappingColCount, generatorRowCount, ge
     },
     elements
   ];
-
+  
   (* Print["commaBasis: ", commaBasis];
   Print["commaScale: ", commaScale," (", commaScale // N, ")"];
   Print["signs: ", signs];
@@ -43,7 +43,7 @@ top[mapping_] := Module[{mappingRowCount, mappingColCount, generatorRowCount, ge
   Print["result: ", result];
   Print["mapping.generators: ", mapping.generators];
   Print["generators.mapping: ", generators.mapping]; *)
-
+  
   generators /. Last[result] // N
 ];
 

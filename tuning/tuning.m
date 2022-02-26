@@ -8,9 +8,9 @@ unchangedIntervalsMG[m_, g_] := unchangedIntervals[projectionMapping[m, g]];
 unchangedIntervals[p_] := Module[{eigenvalues, eigenvectors, pairedEigens},
   eigenvalues = Eigenvalues[p];
   eigenvectors = Eigenvectors[p];
-
+  
   pairedEigens = MapThread[List, {eigenvalues, eigenvectors}];
-
+  
   Map[Transpose, Map[List, Map[Last, Select[pairedEigens, isUnchangedInterval]]]] (* perhaps I should have this return them as a matrix? *)
 ];
 
