@@ -1,6 +1,6 @@
-optimizeGtmHolistic[m_, meanPower_, weighted_ : False, weightingDirection_ : "regressive", complexityWeighting_ : "P", complexityPower_ : 1, tim_ : Null] := Module[{},
+optimizeGtm[m_, meanPower_, weighted_ : False, weightingDirection_ : "regressive", complexityWeighting_ : "P", complexityPower_ : 1, tim_ : Null] := Module[{},
   Print[meanPower, " ", weighted, " ", weightingDirection, " ", complexityWeighting, " ", complexityPower, " ", tim];
-  If[
+  1200 * If[
     meanPower == \[Infinity],
     optimizeGtmMinimax[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
     If[
@@ -274,45 +274,45 @@ m = {{{1, 2, 3}, {0, -3, -5}}, "co"}; (*porcupine*)
 m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)*)
 
 
-1200 * optimizeGtmHolistic[m, \[Infinity]]
+optimizeGtm[m, \[Infinity]]
 
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "regressive", "F", 1, {}]
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "regressive", "F", 2, {}]
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "regressive", "P", 1, {}]
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "regressive", "P", 2, {}]
+optimizeGtm[m, \[Infinity], True, "regressive", "F", 1, {}]
+optimizeGtm[m, \[Infinity], True, "regressive", "F", 2, {}]
+optimizeGtm[m, \[Infinity], True, "regressive", "P", 1, {}]
+optimizeGtm[m, \[Infinity], True, "regressive", "P", 2, {}]
 
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "regressive", "F"]
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "regressive", "F", 2]
-1200 * optimizeGtmHolistic[m, \[Infinity], True]
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "regressive", "P", 2]
+optimizeGtm[m, \[Infinity], True, "regressive", "F"]
+optimizeGtm[m, \[Infinity], True, "regressive", "F", 2]
+optimizeGtm[m, \[Infinity], True]
+optimizeGtm[m, \[Infinity], True, "regressive", "P", 2]
 
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "progressive", "F"]
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "progressive", "F", 2]
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "progressive"]
-1200 * optimizeGtmHolistic[m, \[Infinity], True, "progressive", "P", 2]
-
-
-1200 * optimizeGtmHolistic[m, 2]
-
-1200 * optimizeGtmHolistic[m, 2, True, "regressive", "F"]
-1200 * optimizeGtmHolistic[m, 2, True, "regressive", "F", 2]
-1200 * optimizeGtmHolistic[m, 2, True]
-1200 * optimizeGtmHolistic[m, 2, True, "regressive", "P", 2]
-
-1200 * optimizeGtmHolistic[m, 2, True, "progressive", "F"]
-1200 * optimizeGtmHolistic[m, 2, True, "progressive", "F", 2]
-1200 * optimizeGtmHolistic[m, 2, True, "progressive"]
-1200 * optimizeGtmHolistic[m, 2, True, "progressive", "P", 2]
+optimizeGtm[m, \[Infinity], True, "progressive", "F"]
+optimizeGtm[m, \[Infinity], True, "progressive", "F", 2]
+optimizeGtm[m, \[Infinity], True, "progressive"]
+optimizeGtm[m, \[Infinity], True, "progressive", "P", 2]
 
 
-1200 * optimizeGtmHolistic[m, 1]
+optimizeGtm[m, 2]
 
-1200 * optimizeGtmHolistic[m, 1, True, "regressive", "F"]
-1200 * optimizeGtmHolistic[m, 1, True, "regressive", "F", 2]
-1200 * optimizeGtmHolistic[m, 1, True]
-1200 * optimizeGtmHolistic[m, 1, True, "regressive", "P", 2]
+optimizeGtm[m, 2, True, "regressive", "F"]
+optimizeGtm[m, 2, True, "regressive", "F", 2]
+optimizeGtm[m, 2, True]
+optimizeGtm[m, 2, True, "regressive", "P", 2]
 
-1200 * optimizeGtmHolistic[m, 1, True, "progressive", "F"]
-1200 * optimizeGtmHolistic[m, 1, True, "progressive", "F", 2]
-1200 * optimizeGtmHolistic[m, 1, True, "progressive"]
-1200 * optimizeGtmHolistic[m, 1, True, "progressive", "P", 2]
+optimizeGtm[m, 2, True, "progressive", "F"]
+optimizeGtm[m, 2, True, "progressive", "F", 2]
+optimizeGtm[m, 2, True, "progressive"]
+optimizeGtm[m, 2, True, "progressive", "P", 2]
+
+
+optimizeGtm[m, 1]
+
+optimizeGtm[m, 1, True, "regressive", "F"]
+optimizeGtm[m, 1, True, "regressive", "F", 2]
+optimizeGtm[m, 1, True]
+optimizeGtm[m, 1, True, "regressive", "P", 2]
+
+optimizeGtm[m, 1, True, "progressive", "F"]
+optimizeGtm[m, 1, True, "progressive", "F", 2]
+optimizeGtm[m, 1, True, "progressive"]
+optimizeGtm[m, 1, True, "progressive", "P", 2]
