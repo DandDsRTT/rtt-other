@@ -5,10 +5,11 @@ Options[optimizeGtm] = {
   "complexityWeighting" -> "P",
   "complexityPower" -> 1,
   "tim" -> Null,
-  "damage" -> ""
+  "damage" -> "",
+  "mean" -> ""
 };
 
-optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tima, damageParts, d, ma, ptm},
+optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tima, damageParts, mean, d, ma, ptm},
   meanPower = OptionValue["meanPower"];
   weighted = OptionValue["weighted"];
   weightingDirection = OptionValue["weightingDirection"];
@@ -18,17 +19,31 @@ optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirec
   
   damageParts = StringPartition[OptionValue["damage"], 1];
   If[
-    Length[damageParts] == 3,
+    Length[damageParts] === 3,
     weighted = True;
     weightingDirection = "progressive";
     complexityWeighting = damageParts[[2]];
     complexityPower = ToExpression[damageParts[[3]]],
     If[
-      Length[damageParts] == 2,
+      Length[damageParts] === 2,
       weighted = True;
       weightingDirection = "regressive";
       complexityWeighting = damageParts[[1]];
       complexityPower = ToExpression[damageParts[[2]]];
+    ]
+  ];
+  
+  mean = OptionValue["mean"];
+  If[
+    mean === "AAV",
+    meanPower = 1,
+    If[
+      mean === "RMS",
+      meanPower = 2,
+      If[
+        mean === "MAV",
+        meanPower = \[Infinity]
+      ]
     ]
   ];
   
