@@ -192,26 +192,23 @@ optimizeGtmSimplex[m_, tima_, weighted_, weightingDirection_ , complexityWeighti
 optimizeGtmLeastAbsolutes[m_, tima_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_ ] :=
     optimizeGtmSimplex[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower, getSumOfAbsolutesDamage];
 
-getSumOfAbsolutesDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] := Module[{e, w},
+getTid[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] := Module[{e, w},
   e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
   w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   
-  Total[Map[Abs, e * w]]
+  e * w
 ];
 
-getSumOfSquaresDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] := Module[{e, w},
-  e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
-  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower]; (* TODO: DRY up with getSumOfAbsolutesDamage *)
-  
-  Total[Map[#^2&, e * w]]
-];
+Square[n_] := n^2;
 
-getMaxDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] := Module[{e, w},
-  e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
-  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower]; (* TODO: DRY up with getSumOfAbsolutesDamage *)
-  
-  Max[Map[Abs, e * w]]
-];
+getSumOfAbsolutesDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] :=
+    Total[Map[Abs, getTid[p, tima, ptm, weighted, weightingDirection , complexityWeighting , complexityPower]]];
+
+getSumOfSquaresDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] :=
+    Total[Map[Square, getTid[p, tima, ptm, weighted, weightingDirection , complexityWeighting , complexityPower]]];
+
+getMaxDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] :=
+    Max[Map[Abs, getTid[p, tima, ptm, weighted, weightingDirection , complexityWeighting , complexityPower]]];
 
 getPFromMAndUnchangedIntervals[m_, unchangedIntervalEigenvectors_] := Module[{commaEigenvectors, eigenvectors, diagonalEigenvalueMatrix},
   commaEigenvectors = getA[getC[m]];
