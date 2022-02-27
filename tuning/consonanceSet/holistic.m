@@ -1,10 +1,28 @@
-optimizeGtm[m_, meanPower_ : \[Infinity], weighted_ : False, weightingDirection_ : "regressive", complexityWeighting_ : "P", complexityPower_ : 1, tim_ : Null] := 1200 * If[
-  meanPower == \[Infinity],
-  optimizeGtmMinimax[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
-  If[
-    meanPower == 2,
-    optimizeGtmLeastSquares[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
-    optimizeGtmLeastAbsolutes[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower]
+Options[optimizeGtm] = {
+  "meanPower" -> \[Infinity],
+  "weighted" -> False,
+  "weightingDirection" -> "regressive",
+  "complexityWeighting" -> "P",
+  "complexityPower" -> 1,
+  "tim" -> Null
+};
+
+optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim},
+  meanPower = OptionValue["meanPower"];
+  weighted = OptionValue["weighted"];
+  weightingDirection = OptionValue["weightingDirection"];
+  complexityWeighting = OptionValue["complexityWeighting"];
+  complexityPower = OptionValue["complexityPower"];
+  tim = OptionValue["tim"];
+  
+  1200 * If[
+    meanPower == \[Infinity],
+    optimizeGtmMinimax[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
+    If[
+      meanPower == 2,
+      optimizeGtmLeastSquares[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
+      optimizeGtmLeastAbsolutes[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower]
+    ]
   ]
 ];
 
