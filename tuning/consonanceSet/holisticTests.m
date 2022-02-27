@@ -49,7 +49,7 @@ test[optimizeGtm, m, 1, True, "progressive", "P", 2, {1195.7, 693.352}];
 
 m = {{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"}; (* pajara *)
 
-test[optimizeGtm, m, \[Infinity], {600., 108.009}];
+test[optimizeGtm, m, \[Infinity], SetPrecision[{600., 106.84},4]];
 
 test[optimizeGtm, m, \[Infinity], True, "regressive", "F", 1, {597.119, 103.293}];
 test[optimizeGtm, m, \[Infinity], True, "regressive", "F", 2, {598.345, 106.693}];

@@ -1,20 +1,21 @@
-optimizeGtm[m_, meanPower_, weighted_ : False, weightingDirection_ : "regressive", complexityWeighting_ : "P", complexityPower_ : 1, tim_ : Null] := Module[{},
-  Print[meanPower, " ", weighted, " ", weightingDirection, " ", complexityWeighting, " ", complexityPower, " ", tim];
-  1200 * If[
-    meanPower == \[Infinity],
-    optimizeGtmMinimax[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
-    If[
-      meanPower == 2,
-      optimizeGtmLeastSquares[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
-      optimizeGtmLeastAbsolutes[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower]
-    ]
+optimizeGtm[m_, meanPower_, weighted_ : False, weightingDirection_ : "regressive", complexityWeighting_ : "P", complexityPower_ : 1, tim_ : Null] := 1200 * If[
+  meanPower == \[Infinity],
+  optimizeGtmMinimax[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
+  If[
+    meanPower == 2,
+    optimizeGtmLeastSquares[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
+    optimizeGtmLeastAbsolutes[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower]
   ]
 ];
 
 optimizeGtmMinimax[m_, tim_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := If[
   weighted == True && weightingDirection == "regressive" && Length[tim] == 0,
   optimizeGtmMinimaxPLimit[m, complexityWeighting, complexityPower],
-  optimizeGtmMinimaxConsonanceSet[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower]
+  If[
+    weighted == False,
+    optimizeGtmMinimaxConsonanceSetAnalytical[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
+    optimizeGtmMinimaxConsonanceSetNumerical[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower]
+  ]
 ];
 
 optimizeGtmMinimaxPLimit[m_, complexityWeighting_ , complexityPower_] := If[
@@ -61,7 +62,55 @@ getWeightingMatrix[d_, complexityWeighting_] := If[
 
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
-optimizeGtmMinimaxConsonanceSet[m_, tim_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
+optimizeGtmMinimaxConsonanceSetAnalytical[m_, tim_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
+  (* TODO: DRY up with optimizeGtmLeastAbsolutes *)
+  {
+    r,
+    d,
+    ptm,
+    tima,
+    unchangedIntervalSetIndices,
+    potentialUnchangedIntervalSets,
+    normalizedPotentialUnchangedIntervalSets,
+    filteredNormalizedPotentialUnchangedIntervalSets,
+    potentialPs,
+    meanOfDamages,
+    minMeanIndices,
+    minMeanIndex,
+    tiedPs,
+    minMeanP,
+    gpt,
+    projectedGenerators
+  },
+  
+  r = getR[m]; (*TODO: since we use r here maybe use it elsewhere too even though not stictly necessary *)
+  d = getD[m];
+  ptm = getPtm[d];
+  
+  tima = If[tim === Null, getDiamond[d], getA[tim]];
+  
+  unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
+  potentialUnchangedIntervalSets = Map[Map[tima[[#]]&, #]&, unchangedIntervalSetIndices];
+  normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, potentialUnchangedIntervalSets];
+  filteredNormalizedPotentialUnchangedIntervalSets = Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&];
+  potentialPs = Select[Map[getPFromMAndUnchangedIntervals[m, #]&, filteredNormalizedPotentialUnchangedIntervalSets], Not[# === Null]&];
+  meanOfDamages = Map[getMaxDamage[#, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]&, potentialPs];
+  
+  minMeanIndices = Position[meanOfDamages, Min[meanOfDamages]];
+  If[
+    Length[minMeanIndices] == 1,
+    minMeanIndex = First[First[Position[meanOfDamages, Min[meanOfDamages]]]];
+    minMeanP = potentialPs[[minMeanIndex]],
+    tiedPs = Part[potentialPs, Flatten[minMeanIndices]];
+    minMeanP = tieBreak[tiedPs, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]
+  ];
+  
+  gpt = getGpt[m];
+  projectedGenerators = minMeanP.gpt;
+  ptm.projectedGenerators // N
+];
+
+optimizeGtmMinimaxConsonanceSetNumerical[m_, tim_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
   {
     d,
     ma,
@@ -187,6 +236,13 @@ getSumOfSquaresDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexi
   Total[Map[#^2&, e * w]]
 ];
 
+getMaxDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] := Module[{e, w},
+  e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
+  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower]; (* TODO: DRY up with getSumOfAbsolutesDamage *)
+  
+  Max[Map[Abs, e * w]]
+];
+
 getPFromMAndUnchangedIntervals[m_, unchangedIntervalEigenvectors_] := Module[{commaEigenvectors, eigenvectors, diagonalEigenvalueMatrix},
   commaEigenvectors = getA[getC[m]];
   eigenvectors = Transpose[Join[unchangedIntervalEigenvectors, commaEigenvectors]];
@@ -262,57 +318,3 @@ getW[tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPowe
   
   If[weightingDirection == "regressive", 1 / w, w]
 ];
-
-
-(* TODO: these can begin to become the tests *)
-
-m = {{{1, 1, 0}, {0, 1, 4}}, "co"}; (* meantone *)
-m = {{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"}; (* pajara *)
-(*m = {{{1, 1, 3, 3}, {0, 6, -7, -2}}, "co"}; (*miracle *)
-m = {{{1, 2, 1,1}, {0, -1, 3, 4}}, "co"}; (*pelogic *)
-m = {{{1, 2, 3}, {0, -3, -5}}, "co"}; (*porcupine*)
-m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)*)
-
-
-optimizeGtm[m, \[Infinity]]
-
-optimizeGtm[m, \[Infinity], True, "regressive", "F", 1, {}]
-optimizeGtm[m, \[Infinity], True, "regressive", "F", 2, {}]
-optimizeGtm[m, \[Infinity], True, "regressive", "P", 1, {}]
-optimizeGtm[m, \[Infinity], True, "regressive", "P", 2, {}]
-
-optimizeGtm[m, \[Infinity], True, "regressive", "F"]
-optimizeGtm[m, \[Infinity], True, "regressive", "F", 2]
-optimizeGtm[m, \[Infinity], True]
-optimizeGtm[m, \[Infinity], True, "regressive", "P", 2]
-
-optimizeGtm[m, \[Infinity], True, "progressive", "F"]
-optimizeGtm[m, \[Infinity], True, "progressive", "F", 2]
-optimizeGtm[m, \[Infinity], True, "progressive"]
-optimizeGtm[m, \[Infinity], True, "progressive", "P", 2]
-
-
-optimizeGtm[m, 2]
-
-optimizeGtm[m, 2, True, "regressive", "F"]
-optimizeGtm[m, 2, True, "regressive", "F", 2]
-optimizeGtm[m, 2, True]
-optimizeGtm[m, 2, True, "regressive", "P", 2]
-
-optimizeGtm[m, 2, True, "progressive", "F"]
-optimizeGtm[m, 2, True, "progressive", "F", 2]
-optimizeGtm[m, 2, True, "progressive"]
-optimizeGtm[m, 2, True, "progressive", "P", 2]
-
-
-optimizeGtm[m, 1]
-
-optimizeGtm[m, 1, True, "regressive", "F"]
-optimizeGtm[m, 1, True, "regressive", "F", 2]
-optimizeGtm[m, 1, True]
-optimizeGtm[m, 1, True, "regressive", "P", 2]
-
-optimizeGtm[m, 1, True, "progressive", "F"]
-optimizeGtm[m, 1, True, "progressive", "F", 2]
-optimizeGtm[m, 1, True, "progressive"]
-optimizeGtm[m, 1, True, "progressive", "P", 2]
