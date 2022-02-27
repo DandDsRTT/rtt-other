@@ -170,7 +170,7 @@ optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, d_, ma_, ptm_, weighted_, we
   
   mappedTima = Transpose[ma.Transpose[tima]];
   pureTimaSizes = Map[ptm.#&, tima];
-  w = getW[tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   
   solution = NMinimize[
     Max[
@@ -201,7 +201,7 @@ optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, d_, ma_, ptm_, weighted_, we
 ];
 
 optimizeGtmLeastSquares[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w, weightedTima, unchangedIntervals},
-  w = getW[tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   weightedTima = tima * w;
   unchangedIntervals = ma.Transpose[weightedTima].weightedTima;
   
@@ -252,7 +252,7 @@ optimizeGtmLeastAbsolutes[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirectio
 
 getTid[p_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{e, w},
   e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
-  w = getW[tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   
   e * w
 ];
@@ -320,16 +320,15 @@ octaveReduce[inputI_] := Module[{i},
 
 oddLimitFromD[d_] := Prime[d + 1] - 2;
 
-getComplexity[pcv_, ptm_, complexityWeighting_, complexityPower_] := Module[{weightedPcv},
-  weightedPcv = If[complexityWeighting == "P", pcv * ptm, pcv];
-  
+getComplexity[pcv_, complexityWeighting_, complexityPower_] := Module[{weightedPcv},
+  weightedPcv = If[complexityWeighting == "P", pcv * getPtm[Length[pcv]], pcv];
   Norm[weightedPcv, complexityPower]
 ];
 
-getW[tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w},
+getW[tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w},
   w = If[
     weighted,
-    Map[getComplexity[#, ptm, complexityWeighting, complexityPower]&, tima],
+    Map[getComplexity[#, complexityWeighting, complexityPower]&, tima],
     Map[1&, tima]
   ];
   
