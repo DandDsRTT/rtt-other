@@ -182,10 +182,10 @@ test[getComplexity, {1, 1, -1}, "F", 2, \[Sqrt]3];
 test[getComplexity, {1, 1, -1}, "P", 1, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
 
 
-testClose[getDamage,{{{1,1,0},{0,1,4}},"co"},  {1200., 696.578},"tuning" -> "least absolutes", 0.0179233];
-testClose[getDamage,{{{1,1,0},{0,1,4}},"co"},  {1201.7, 697.564},"tuning" -> "Tenney", 0.00141545];
-testClose[getDamage,{{{1,1,0},{0,1,4}},"co"},  {1199.02, 695.601},"tuning" -> "least squares", 0.000072999];
-testClose[getDamage,{{{1,1,0},{0,1,4}},"co"},  {1200., 696.578},"tuning" -> "minimax", 0.0044808];
+testClose[getDamage, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {1200., 696.578}, "tuning" -> "least absolutes", 0.0179233];
+testClose[getDamage, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {1201.7, 697.564}, "tuning" -> "Tenney", 0.00141545];
+testClose[getDamage, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {1199.02, 695.601}, "tuning" -> "least squares", 0.000072999];
+testClose[getDamage, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {1200., 696.578}, "tuning" -> "minimax", 0.0044808];
 
 
 

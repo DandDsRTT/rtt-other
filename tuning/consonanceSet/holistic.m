@@ -19,14 +19,10 @@ optimizeGtm[m_, OptionsPattern[]] := Module[
     complexityWeighting,
     complexityPower,
     tim,
-    tima,
     damage,
-    damageParts,
     tuning,
     mean,
-    d,
-    ma,
-    ptm
+    tuningParams
   },
   
   meanPower = OptionValue["meanPower"];
@@ -37,6 +33,42 @@ optimizeGtm[m_, OptionsPattern[]] := Module[
   tim = OptionValue["tim"];
   damage = OptionValue["damage"];
   tuning = OptionValue["tuning"];
+  mean = OptionValue["mean"];
+  
+  tuningParams = processTuningParams[m, meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, damage, tuning, mean];
+  meanPower = First[tuningParams];
+  
+  1200 * If[
+    meanPower == \[Infinity],
+    optimizeGtmMinimax[m, tuningParams],
+    If[
+      meanPower == 2,
+      optimizeGtmLeastSquares[m, tuningParams],
+      optimizeGtmLeastAbsolutes[m, tuningParams]
+    ]
+  ]
+];
+
+processTuningParams[m_, inputMeanPower_, inputWeighted_, inputWeightingDirection_, inputComplexityWeighting_, inputComplexityPower_, inputTim_, inputDamage_, inputTuning_, inputMean_, forDamage_ : False] := Module[
+  {
+    tima,
+    damageParts,
+    d,
+    ma,
+    ptm,
+    
+    meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, damage, tuning, mean
+  },
+  
+  meanPower = inputMeanPower;
+  weighted = inputWeighted;
+  weightingDirection = inputWeightingDirection;
+  complexityWeighting = inputComplexityWeighting;
+  complexityPower = inputComplexityPower;
+  tim = inputTim;
+  damage = inputDamage;
+  tuning = inputTuning;
+  mean = inputMean;
   
   If[
     tuning === "Tenney",
@@ -83,7 +115,6 @@ optimizeGtm[m_, OptionsPattern[]] := Module[
     ]
   ];
   
-  mean = OptionValue["mean"];
   If[
     mean === "AAV",
     meanPower = 1,
@@ -97,29 +128,21 @@ optimizeGtm[m_, OptionsPattern[]] := Module[
     ]
   ];
   
-  tima = If[tim === Null, getDiamond[getD[m]], If[Length[tim] == 0, {}, getA[tim]]];
+  tima = If[tim === Null, getDiamond[getD[m]], If[Length[tim] == 0, If[forDamage, getA[getC[m]], {}], getA[tim]]];
   
   d = getD[m];
   ma = getA[m];
   ptm = getPtm[d];
   
-  1200 * If[
-    meanPower == \[Infinity],
-    optimizeGtmMinimax[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
-    If[
-      meanPower == 2,
-      optimizeGtmLeastSquares[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
-      optimizeGtmLeastAbsolutes[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]
-    ]
-  ]
+  {meanPower, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}
 ];
 
-optimizeGtmMinimax[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := If[
+optimizeGtmMinimax[m_, {meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := If[
   weighted == True && weightingDirection == "regressive" && Length[tima] == 0,
   optimizeGtmMinimaxPLimit[m, d, ma, ptm, complexityWeighting, complexityPower],
   If[
     weighted == False,
-    optimizeGtmMinimaxConsonanceSetAnalytical[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
+    optimizeGtmMinimaxConsonanceSetAnalytical[m, meanPower, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
     optimizeGtmMinimaxConsonanceSetNumerical[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]
   ]
 ];
@@ -155,8 +178,8 @@ getWeightingMatrix[d_, complexityWeighting_] := If[
 
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
-optimizeGtmMinimaxConsonanceSetAnalytical[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
-    optimizeGtmSimplex[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower, getMaxDamage];
+optimizeGtmMinimaxConsonanceSetAnalytical[m_, meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
+    optimizeGtmSimplex[m, meanPower, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower, getMaxDamage];
 
 optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[
   {
@@ -201,7 +224,7 @@ optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, d_, ma_, ptm_, weighted_, we
   gtm /. Last[solution] // N
 ];
 
-optimizeGtmLeastSquares[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w, weightedTima, unchangedIntervals},
+optimizeGtmLeastSquares[m_, {meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[{w, weightedTima, unchangedIntervals},
   w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   weightedTima = tima * w;
   unchangedIntervals = ma.Transpose[weightedTima].weightedTima;
@@ -209,7 +232,7 @@ optimizeGtmLeastSquares[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_
   ptm.Transpose[unchangedIntervals].Inverse[unchangedIntervals.Transpose[ma]] // N
 ];
 
-optimizeGtmSimplex[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_, damageMean_] := Module[
+optimizeGtmSimplex[m_, meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_, damageMean_] := Module[
   {
     r,
     unchangedIntervalSetIndices,
@@ -235,7 +258,7 @@ optimizeGtmSimplex[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, com
   filteredNormalizedPotentialUnchangedIntervalSets = Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&];
   potentialPs = Select[Map[getPFromMAndUnchangedIntervals[m, #]&, filteredNormalizedPotentialUnchangedIntervalSets], Not[# === Null]&];
   potentialTms = Map[ptm.#&, potentialPs];
-  meanOfDamages = Map[damageMean[tima, #, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]&, potentialTms];
+  meanOfDamages = Map[damageMean[#, {meanPower, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}]&, potentialTms];
   
   minMeanIndices = Position[meanOfDamages, Min[meanOfDamages]];
   If[
@@ -246,21 +269,19 @@ optimizeGtmSimplex[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, com
     
     tiedTms = Part[potentialTms, Flatten[minMeanIndices]];
     tiedPs = Part[potentialPs, Flatten[minMeanIndices]];
-    minMeanIndex = tieBreak[tiedTms, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
+    minMeanIndex = tieBreak[tiedTms, meanPower, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
     minMeanP = tiedPs[[minMeanIndex]]
   ];
-  
-  (*  Print["minMeanP", minMeanP, minMeanIndex];*)
   
   gpt = getGpt[m];
   projectedGenerators = minMeanP.gpt;
   ptm.projectedGenerators // N
 ];
 
-optimizeGtmLeastAbsolutes[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
-    optimizeGtmSimplex[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower, getSumOfAbsolutesDamage];
+optimizeGtmLeastAbsolutes[m_, {meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
+    optimizeGtmSimplex[m, meanPower, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower, getSumOfAbsolutesDamage];
 
-getTid[tima_, tm_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{e, w},
+getTid[tm_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{e, w},
   e = N[tm.Transpose[tima]] - N[ptm.Transpose[tima]];
   w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   
@@ -269,14 +290,14 @@ getTid[tima_, tm_, ptm_, weighted_, weightingDirection_, complexityWeighting_, c
 
 Square[n_] := n^2;
 
-getSumOfAbsolutesDamage[tima_, tm_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
-    Total[Map[Abs, getTid[tima, tm, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+getSumOfAbsolutesDamage[tm_, {meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
+    Total[Map[Abs, getTid[tm, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
 
-getSumOfSquaresDamage[tima_, tm_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
-    Total[Map[Square, getTid[tima, tm, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+getSumOfSquaresDamage[tm_, {meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
+    Total[Map[Square, getTid[tm, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
 
-getMaxDamage[tima_, tm_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
-    Max[Map[Abs, getTid[tima, tm, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+getMaxDamage[tm_, {meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
+    Max[Map[Abs, getTid[tm, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
 
 getPFromMAndUnchangedIntervals[m_, unchangedIntervalEigenvectors_] := Module[{commaEigenvectors, eigenvectors, diagonalEigenvalueMatrix},
   commaEigenvectors = getA[getC[m]];
@@ -292,8 +313,8 @@ getDiagonalEigenvalueMatrix[unchangedIntervalEigenvectors_, commaEigenvectors_] 
   Table[0, Length[commaEigenvectors]]
 ]];
 
-tieBreak[tiedTms_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{meanOfDamages},
-  meanOfDamages = Map[getSumOfSquaresDamage[tima, #, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]&, tiedTms];
+tieBreak[tiedTms_, meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{meanOfDamages},
+  meanOfDamages = Map[getSumOfSquaresDamage[#, {meanPower, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}]&, tiedTms];
   
   First[First[Position[meanOfDamages, Min[meanOfDamages]]]]
 ];
@@ -354,15 +375,12 @@ getDamage[m_, gtm_, OptionsPattern[]] := Module[
     complexityWeighting,
     complexityPower,
     tim,
-    tima,
     damage,
-    damageParts,
     tuning,
     mean,
-    d,
     ma,
-    ptm,
-    tm
+    tm,
+    tuningParams
   },
   
   meanPower = OptionValue["meanPower"];
@@ -373,81 +391,21 @@ getDamage[m_, gtm_, OptionsPattern[]] := Module[
   tim = OptionValue["tim"];
   damage = OptionValue["damage"];
   tuning = OptionValue["tuning"];
-  
-  If[
-    tuning === "Tenney",
-    damage = "P1"; tim = {},
-    If[
-      tuning === "Breed",
-      damage = "P2"; tim = {},
-      If[
-        tuning === "Partch",
-        damage = "pP1",
-        If[
-          tuning === "Euclidean",
-          damage = "F2"; tim = {},
-          If[
-            tuning === "least squares",
-            meanPower = 2,
-            If[
-              tuning === "least absolutes",
-              meanPower = 1,
-              If[
-                tuning === "Tenney least squares",
-                meanPower = 2; damage = "P1"
-              ]
-            ]
-          ]
-        ]
-      ]
-    ]
-  ];
-  
-  damageParts = StringPartition[damage, 1];
-  If[
-    Length[damageParts] === 3,
-    weighted = True;
-    weightingDirection = "progressive";
-    complexityWeighting = damageParts[[2]];
-    complexityPower = ToExpression[damageParts[[3]]],
-    If[
-      Length[damageParts] === 2,
-      weighted = True;
-      weightingDirection = "regressive";
-      complexityWeighting = damageParts[[1]];
-      complexityPower = ToExpression[damageParts[[2]]];
-    ]
-  ];
-  
   mean = OptionValue["mean"];
-  If[
-    mean === "AAV",
-    meanPower = 1,
-    If[
-      mean === "RMS",
-      meanPower = 2,
-      If[
-        mean === "MAV",
-        meanPower = \[Infinity]
-      ]
-    ]
-  ];
   
-  tima = If[tim === Null, getDiamond[getD[m]], If[Length[tim] == 0, getA[getC[m]], getA[tim]]];
-  
-  d = getD[m];
-  ma = getA[m];
-  ptm = getPtm[d];
+  tuningParams = processTuningParams[m, meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, damage, tuning, mean, True];
+  meanPower = First[tuningParams];
+  ma = Part[tuningParams, 4];
   
   tm = (gtm / 1200).ma;
   
   If[
-    meanPower == 1,
-    getSumOfAbsolutesDamage[tima, tm, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
+    meanPower == \[Infinity],
+    getMaxDamage[tm, tuningParams],
     If[
       meanPower == 2,
-      getSumOfSquaresDamage[tima, tm, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
-      getMaxDamage[tima, tm, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]
+      getSumOfSquaresDamage[tm, tuningParams],
+      getSumOfAbsolutesDamage[tm, tuningParams]
     ]
   ]
 ];
