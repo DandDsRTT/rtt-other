@@ -92,5 +92,51 @@ test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "pF2", {601.397, 106.145}];
 test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "pP1", {600., 106.843}];
 test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "pP2", {600., 106.843}];
 
+
+
+
+test[optimizeGtm, m, "tuning" -> "minimax", {600., 106.843}];
+
+(*test[optimizeGtm, m, "mean" -> "MAV", "damage" -> "F1", {596.502, 106.767}];*)
+(*test[optimizeGtm, m, "mean" -> "MAV", "damage" -> "F2", {598.233, 104.469}];*)
+(*test[optimizeGtm, m, "mean" -> "MAV", "damage" -> "P1", {598.447, 107.09}];*)
+(*test[optimizeGtm, m, "mean" -> "MAV", "damage" -> "P2", {599.682, 107.988}];*)
+
+(*test[optimizeGtm, m, "mean" -> "MAV", "damage" -> "F1", "tim" -> {}, {597.119, 103.293}];*)
+test[optimizeGtm, m, "tuning" -> "Euclidean", {598.345, 106.693}];
+test[optimizeGtm, m, "tuning" -> "Tenney", {598.447, 106.567}];
+test[optimizeGtm, m, "tuning" -> "Breed", {598.859, 106.844}];
+
+(*test[optimizeGtm, m, "mean" -> "MAV", "damage" -> "pF1", {601.897, 108.014}];*)
+(*test[optimizeGtm, m, "mean" -> "MAV", "damage" -> "pF2", {601.99, 108.325}];*)
+test[optimizeGtm, m, "tuning" -> "Partch", {601.553, 107.922}];
+(*test[optimizeGtm, m, "mean" -> "MAV", "damage" -> "pP2", {600.318, 108.159}];*)
+
+
+test[optimizeGtm, m, "tuning" -> "least squares", {599.45, 107.15}];
+
+(*test[optimizeGtm, m, "mean" -> "RMS", "damage" -> "F1", {597.851, 106.643}];*)
+(*test[optimizeGtm, m, "mean" -> "RMS", "damage" -> "F2", {598.31, 106.798}];*)
+test[optimizeGtm, m, "tuning" -> "Tenney least squares", {598.436, 106.672}];
+(*test[optimizeGtm, m, "mean" -> "RMS", "damage" -> "P2", {598.762, 106.835}];*)
+
+(*test[optimizeGtm, m, "mean" -> "RMS", "damage" -> "pF1", {601.653, 107.288}];*)
+(*test[optimizeGtm, m, "mean" -> "RMS", "damage" -> "pF2", {601.522, 107.178}];*)
+(*test[optimizeGtm, m, "mean" -> "RMS", "damage" -> "pP1", {600.655, 107.426}];*)
+(*test[optimizeGtm, m, "mean" -> "RMS", "damage" -> "pP2", {600.263, 107.259}];*)
+
+
+test[optimizeGtm, m, "tuning" -> "least absolutes", {600., 106.843}];
+
+(*test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "F1", {596.741, 105.214}];*)
+(*test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "F2", {596.741, 105.214}];*)
+(*test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "P1", {596.741, 105.214}];*)
+(*test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "P2", {596.741, 105.214}];*)
+
+(*test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "pF1", {601.397, 106.145}];*)
+(*test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "pF2", {601.397, 106.145}];*)
+(*test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "pP1", {600., 106.843}];*)
+(*test[optimizeGtm, m, "mean" -> "AAV", "damage" -> "pP2", {600., 106.843}];*)
+
 Print["TOTAL FAILURES: ", failures];
 Print["TOTAL PASSES: ", passes];

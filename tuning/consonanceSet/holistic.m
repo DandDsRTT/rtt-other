@@ -6,18 +6,67 @@ Options[optimizeGtm] = {
   "complexityPower" -> 1,
   "tim" -> Null,
   "damage" -> "",
-  "mean" -> ""
+  "mean" -> "",
+  "tuning" -> ""
 };
 
-optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tima, damageParts, mean, d, ma, ptm},
+optimizeGtm[m_, OptionsPattern[]] := Module[
+  {
+    meanPower,
+    weighted,
+    weightingDirection,
+    complexityWeighting,
+    complexityPower,
+    tim,
+    tima,
+    damage,
+    damageParts,
+    tuning,
+    mean,
+    d,
+    ma,
+    ptm
+  },
+  
   meanPower = OptionValue["meanPower"];
   weighted = OptionValue["weighted"];
   weightingDirection = OptionValue["weightingDirection"];
   complexityWeighting = OptionValue["complexityWeighting"];
   complexityPower = OptionValue["complexityPower"];
-  tima = If[OptionValue["tim"] === Null, getDiamond[getD[m]], If[Length[OptionValue["tim"]] == 0, {}, getA[OptionValue["tim"]]]];
+  tim = OptionValue["tim"];
+  damage = OptionValue["damage"];
+  tuning = OptionValue["tuning"];
   
-  damageParts = StringPartition[OptionValue["damage"], 1];
+  If[
+    tuning === "Tenney",
+    damage = "P1"; tim = {},
+    If[
+      tuning === "Breed",
+      damage = "P2"; tim = {},
+      If[
+        tuning === "Partch",
+        damage = "pP1",
+        If[
+          tuning === "Euclidean",
+          damage = "F2"; tim = {},
+          If[
+            tuning === "least squares",
+            meanPower = 2,
+            If[
+              tuning === "least absolutes",
+              meanPower = 1,
+              If[
+                tuning === "Tenney least squares",
+                meanPower = 2; damage = "P1"
+              ]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ];
+  
+  damageParts = StringPartition[damage, 1];
   If[
     Length[damageParts] === 3,
     weighted = True;
@@ -46,6 +95,8 @@ optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirec
       ]
     ]
   ];
+  
+  tima = If[tim === Null, getDiamond[getD[m]], If[Length[tim] == 0, {}, getA[tim]]];
   
   d = getD[m];
   ma = getA[getM[m]];
