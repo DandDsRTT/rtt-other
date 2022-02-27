@@ -3,7 +3,7 @@ passes = 0;
 
 m = {{{1, 1, 0}, {0, 1, 4}}, "co"}; (* meantone *)
 
-test[optimizeGtm, m, \[Infinity], {1200., 696.578}];
+test[optimizeGtm, m, {1200., 696.578}];
 
 test[optimizeGtm, m, \[Infinity], True, "regressive", "F", 1, {1202.39, 697.176}];
 test[optimizeGtm, m, \[Infinity], True, "regressive", "F", 2, {1202.61, 696.741}];
@@ -49,7 +49,7 @@ test[optimizeGtm, m, 1, True, "progressive", "P", 2, {1195.7, 693.352}];
 
 m = {{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"}; (* pajara *)
 
-test[optimizeGtm, m, \[Infinity], SetPrecision[{600., 106.84},4]];
+test[optimizeGtm, m, SetPrecision[{600., 106.84},4]];
 
 test[optimizeGtm, m, \[Infinity], True, "regressive", "F", 1, {597.119, 103.293}];
 test[optimizeGtm, m, \[Infinity], True, "regressive", "F", 2, {598.345, 106.693}];

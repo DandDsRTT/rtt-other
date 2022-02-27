@@ -1,4 +1,4 @@
-optimizeGtm[m_, meanPower_, weighted_ : False, weightingDirection_ : "regressive", complexityWeighting_ : "P", complexityPower_ : 1, tim_ : Null] := 1200 * If[
+optimizeGtm[m_, meanPower_ : \[Infinity], weighted_ : False, weightingDirection_ : "regressive", complexityWeighting_ : "P", complexityPower_ : 1, tim_ : Null] := 1200 * If[
   meanPower == \[Infinity],
   optimizeGtmMinimax[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
   If[
