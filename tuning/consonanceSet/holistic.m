@@ -7,7 +7,7 @@ Options[optimizeGtm] = {
   "tim" -> Null
 };
 
-optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tima},
+optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tima, d, ma, ptm},
   meanPower = OptionValue["meanPower"];
   weighted = OptionValue["weighted"];
   weightingDirection = OptionValue["weightingDirection"];
@@ -15,79 +15,67 @@ optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirec
   complexityPower = OptionValue["complexityPower"];
   tima = If[OptionValue["tim"] === Null, getDiamond[getD[m]], If[Length[OptionValue["tim"]] == 0, {}, getA[OptionValue["tim"]]]];
   
+  d = getD[m];
+  ma = getA[getM[m]];
+  ptm = getPtm[d];
+  
   1200 * If[
     meanPower == \[Infinity],
-    optimizeGtmMinimax[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower],
+    optimizeGtmMinimax[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
     If[
       meanPower == 2,
-      optimizeGtmLeastSquares[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower],
-      optimizeGtmLeastAbsolutes[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower]
+      optimizeGtmLeastSquares[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
+      optimizeGtmLeastAbsolutes[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]
     ]
   ]
 ];
 
-optimizeGtmMinimax[m_, tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := If[
+optimizeGtmMinimax[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := If[
   weighted == True && weightingDirection == "regressive" && Length[tima] == 0,
-  optimizeGtmMinimaxPLimit[m, complexityWeighting, complexityPower],
+  optimizeGtmMinimaxPLimit[m, d, ma, ptm, complexityWeighting, complexityPower],
   If[
     weighted == False,
-    optimizeGtmMinimaxConsonanceSetAnalytical[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower],
-    optimizeGtmMinimaxConsonanceSetNumerical[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower]
+    optimizeGtmMinimaxConsonanceSetAnalytical[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
+    optimizeGtmMinimaxConsonanceSetNumerical[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]
   ]
 ];
 
-optimizeGtmMinimaxPLimit[m_, complexityWeighting_ , complexityPower_] := If[
+optimizeGtmMinimaxPLimit[m_, d_, ma_, ptm_, complexityWeighting_, complexityPower_] := If[
   complexityPower == 2,
-  optimizeGtmMinimaxPLimitAnalyticalPseudoInverse[m, complexityWeighting],
-  optimizeGtmMinimaxPLimitNumericalLinearProgramming[m, complexityWeighting , complexityPower]
+  optimizeGtmMinimaxPLimitPseudoInverseAnalytical[m, d, ma, ptm, complexityWeighting],
+  optimizeGtmMinimaxPLimitLinearProgrammingNumerical[m, d, ma, ptm, complexityWeighting, complexityPower]
 ];
 
-optimizeGtmMinimaxPLimitAnalyticalPseudoInverse[m_, complexityWeighting_] := Module[{d, ma, weightingMatrix, ptm, gtm, g},
-  d = getD[m];
-  ma = getA[getM[m]];
-  weightingMatrix = getWeightingMatrix[d, complexityWeighting]; (*TODO: maybe consider replacing this with p⨀ if possible, like as is done in `getComplexity` below *)
-  ptm = weightingMatrix.Log[2, getPrimes[d]];
-  
-  g = PseudoInverse[ma.weightingMatrix];
+optimizeGtmMinimaxPLimitPseudoInverseAnalytical[m_, d_, ma_, ptm_, complexityWeighting_] := Module[{weightingMatrix, g, gtm},
+  weightingMatrix = getWeightingMatrix[d, complexityWeighting];
+  g = weightingMatrix.PseudoInverse[ma.weightingMatrix];
   gtm = ptm.g;
   
   gtm // N
 ];
 
-optimizeGtmMinimaxPLimitNumericalLinearProgramming[m_, complexityWeighting_, complexityPower_] := Module[{d, ma, weightingMatrix, ptm, gtm, tm, e, solution},
-  d = getD[m];
-  ma = getA[m];
-  weightingMatrix = getWeightingMatrix[d, complexityWeighting];
-  ptm = Log[2, getPrimes[d]];
-  
+optimizeGtmMinimaxPLimitLinearProgrammingNumerical[m_, d_, ma_, ptm_, complexityWeighting_, complexityPower_] := Module[{gtm, tm, e, solution},
   gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[m]}];
-  
   tm = gtm.ma;
-  e = tm - ptm;
-  solution = NMinimize[Norm[e.weightingMatrix, dualPower[complexityPower]], gtm, Method -> "NelderMead", WorkingPrecision -> 15];
+  e = If[complexityWeighting == "P", tm / ptm - Table[1, d], tm - ptm];
+  
+  solution = NMinimize[Norm[e, dualPower[complexityPower]], gtm, Method -> "NelderMead", WorkingPrecision -> 15];
   gtm /. Last[solution] // N
 ];
 
 getWeightingMatrix[d_, complexityWeighting_] := If[
   complexityWeighting == "P",
   DiagonalMatrix[1 / getPtm[d]],
-  If[
-    complexityWeighting == "F",
-    DiagonalMatrix[Table[1, d]],
-    Error
-  ]
+  IdentityMatrix[d]
 ];
 
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
-optimizeGtmMinimaxConsonanceSetAnalytical[m_, tima_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] :=
-    optimizeGtmSimplex[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower, getMaxDamage];
+optimizeGtmMinimaxConsonanceSetAnalytical[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
+    optimizeGtmSimplex[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower, getMaxDamage];
 
-optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
+optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[
   {
-    d,
-    ma,
-    ptm,
     gtm,
     mappedTima,
     pureTimaSizes,
@@ -95,15 +83,11 @@ optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, weighted_, weightingDirectio
     solution
   },
   
-  d = getD[m];
-  ma = getA[m];
-  ptm = getPtm[d];
-  
   gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[m]}];
   
-  mappedTima = Transpose[ ma.Transpose[tima]];
+  mappedTima = Transpose[ma.Transpose[tima]];
   pureTimaSizes = Map[ptm.#&, tima];
-  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
   
   solution = NMinimize[
     Max[
@@ -133,23 +117,17 @@ optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, weighted_, weightingDirectio
   gtm /. Last[solution] // N
 ];
 
-optimizeGtmLeastSquares[m_, inputTima_, weighted_, weightingDirection_ , complexityWeighting_, complexityPower_] := Module[{d, ma, ptm, tima, w, unchangedIntervals},
-  d = getD[m];
-  ma = getA[m];
-  ptm = getPtm[d]; (* TODO these three recur a lot, perhaps DRY up their computation *)
-  
-  w = getW[inputTima, weighted, weightingDirection, complexityWeighting, complexityPower];
-  tima = inputTima * w;
-  unchangedIntervals = ma.Transpose[tima].tima;
+optimizeGtmLeastSquares[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w, weightedTima, unchangedIntervals},
+  w = getW[tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
+  weightedTima = tima * w;
+  unchangedIntervals = ma.Transpose[weightedTima].weightedTima;
   
   ptm.Transpose[unchangedIntervals].Inverse[unchangedIntervals.Transpose[ma]] // N
 ];
 
-optimizeGtmSimplex[m_, tima_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_, damageMean_] := Module[
+optimizeGtmSimplex[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_, damageMean_] := Module[
   {
     r,
-    d,
-    ptm,
     unchangedIntervalSetIndices,
     potentialUnchangedIntervalSets,
     normalizedPotentialUnchangedIntervalSets,
@@ -164,10 +142,7 @@ optimizeGtmSimplex[m_, tima_, weighted_, weightingDirection_ , complexityWeighti
     projectedGenerators
   },
   
-  r = getR[m]; (*TODO: since we use r here maybe use it elsewhere too even though not strictly necessary *)
-  d = getD[m];
-  ptm = getPtm[d];
-  
+  r = getR[m];
   unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
   potentialUnchangedIntervalSets = Map[Map[tima[[#]]&, #]&, unchangedIntervalSetIndices];
   normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, potentialUnchangedIntervalSets];
@@ -189,26 +164,26 @@ optimizeGtmSimplex[m_, tima_, weighted_, weightingDirection_ , complexityWeighti
   ptm.projectedGenerators // N
 ];
 
-optimizeGtmLeastAbsolutes[m_, tima_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_ ] :=
-    optimizeGtmSimplex[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower, getSumOfAbsolutesDamage];
+optimizeGtmLeastAbsolutes[m_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
+    optimizeGtmSimplex[m, tima, d, ma, ptm, weighted, weightingDirection, complexityWeighting, complexityPower, getSumOfAbsolutesDamage];
 
-getTid[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] := Module[{e, w},
+getTid[p_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{e, w},
   e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
-  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
   
   e * w
 ];
 
 Square[n_] := n^2;
 
-getSumOfAbsolutesDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] :=
-    Total[Map[Abs, getTid[p, tima, ptm, weighted, weightingDirection , complexityWeighting , complexityPower]]];
+getSumOfAbsolutesDamage[p_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
+    Total[Map[Abs, getTid[p, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
 
-getSumOfSquaresDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] :=
-    Total[Map[Square, getTid[p, tima, ptm, weighted, weightingDirection , complexityWeighting , complexityPower]]];
+getSumOfSquaresDamage[p_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
+    Total[Map[Square, getTid[p, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
 
-getMaxDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] :=
-    Max[Map[Abs, getTid[p, tima, ptm, weighted, weightingDirection , complexityWeighting , complexityPower]]];
+getMaxDamage[p_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
+    Max[Map[Abs, getTid[p, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
 
 getPFromMAndUnchangedIntervals[m_, unchangedIntervalEigenvectors_] := Module[{commaEigenvectors, eigenvectors, diagonalEigenvalueMatrix},
   commaEigenvectors = getA[getC[m]];
@@ -224,7 +199,7 @@ getDiagonalEigenvalueMatrix[unchangedIntervalEigenvectors_, commaEigenvectors_] 
   Table[0, Length[commaEigenvectors]]
 ]];
 
-tieBreak[tiedPs_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_ ] := Module[{meanOfDamages},
+tieBreak[tiedPs_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{meanOfDamages},
   meanOfDamages = Map[getSumOfSquaresDamage[#, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]&, tiedPs];
   
   tiedPs[[First[First[Position[meanOfDamages, Min[meanOfDamages]]]]]]
@@ -242,7 +217,7 @@ getGpt[m_] := Module[{ma, decomp, left, snf, right, gpt},
   gpt
 ];
 
-getPtm[d_] := Map[Log2, Map[Prime, Range[d]]];
+getPtm[d_] := Log[2, getPrimes[d]];
 
 getDiamond[d_] := Module[{oddLimit, oddsWithinLimit, rawDiamond},
   oddLimit = oddLimitFromD[d];
@@ -262,24 +237,16 @@ octaveReduce[inputI_] := Module[{i},
 
 oddLimitFromD[d_] := Prime[d + 1] - 2;
 
-getComplexity[pcv_, complexityWeighting_ , complexityPower_ ] := Module[{d, weightedPcv},
-  d = Length[pcv];
-  weightedPcv = If[
-    complexityWeighting == "F",
-    pcv,
-    If[
-      complexityWeighting == "P",
-      pcv * getPtm[d]
-    ]
-  ];
+getComplexity[pcv_, ptm_, complexityWeighting_, complexityPower_] := Module[{weightedPcv},
+  weightedPcv = If[complexityWeighting == "P", pcv * ptm, pcv];
   
   Norm[weightedPcv, complexityPower]
 ];
 
-getW[tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w},
+getW[tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w},
   w = If[
     weighted,
-    Map[getComplexity[#, complexityWeighting, complexityPower]&, tima],
+    Map[getComplexity[#, ptm, complexityWeighting, complexityPower]&, tima],
     Map[1&, tima]
   ];
   
