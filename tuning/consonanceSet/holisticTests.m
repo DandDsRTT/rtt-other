@@ -6,14 +6,14 @@ m = {{{1, 1, 0}, {0, 1, 4}}, "co"}; (* meantone *)
 test[optimizeGtm, m, {1200., 696.578}];
 
 test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", {1202.39, 697.176}];
-test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, {1202.61, 696.741}];
+test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, {1202.728, 697.26}];
 test[optimizeGtm, m, "weighted" -> True, {1201.7, 697.564}];
-test[optimizeGtm, m, "weighted" -> True, "complexityPower" -> 2, {1201.4, 697.049}];
+test[optimizeGtm, m, "weighted" -> True, "complexityPower" -> 2, {1201.6, 697.53}];
 
-test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", {1202.39, 697.176}];
-test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, {1202.61, 696.741}];
-test[optimizeGtm, m, "weighted" -> True, {1201.7, 697.564}];
-test[optimizeGtm, m, "weighted" -> True, "complexityPower" -> 2, {1201.4, 697.049}];
+test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "tim" -> {}, {1202.39, 697.176}];
+test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, "tim" -> {}, {1202.61, 696.741}];
+test[optimizeGtm, m, "weighted" -> True, "tim" -> {}, {1201.7, 697.564}];
+test[optimizeGtm, m, "weighted" -> True, "complexityPower" -> 2, "tim" -> {}, {1201.4, 697.049}];
 
 test[optimizeGtm, m, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", {1197.61, 694.786}];
 test[optimizeGtm, m, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", "complexityPower" -> 2, {1197.43, 694.976}];
@@ -49,17 +49,17 @@ test[optimizeGtm, m, "meanPower" -> 1, "weighted" -> True, "weightingDirection" 
 
 m = {{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"}; (* pajara *)
 
-test[optimizeGtm, m, SetPrecision[{600., 106.84}, 4]];
+test[optimizeGtm, m, {600., 106.843}];
 
-test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", {597.119, 103.293}];
-test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, {598.345, 106.693}];
-test[optimizeGtm, m, "weighted" -> True, {598.447, 106.567}];
-test[optimizeGtm, m, "weighted" -> True, "complexityPower" -> 2, {598.859, 106.844}];
+test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", {596.502, 106.767}];
+test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, {598.233, 104.469}];
+test[optimizeGtm, m, "weighted" -> True, {598.447, 107.09}];
+test[optimizeGtm, m, "weighted" -> True, "complexityPower" -> 2, {599.682, 107.988}];
 
-test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", {597.119, 103.293}];
-test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, {598.345, 106.693}];
-test[optimizeGtm, m, "weighted" -> True, {598.447, 106.567}];
-test[optimizeGtm, m, "weighted" -> True, "complexityPower" -> 2, {598.859, 106.844}];
+test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "tim" -> {}, {597.119, 103.293}];
+test[optimizeGtm, m, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, "tim" -> {}, {598.345, 106.693}];
+test[optimizeGtm, m, "weighted" -> True, "tim" -> {}, {598.447, 106.567}];
+test[optimizeGtm, m, "weighted" -> True, "complexityPower" -> 2, "tim" -> {}, {598.859, 106.844}];
 
 test[optimizeGtm, m, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", {601.897, 108.014}];
 test[optimizeGtm, m, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", "complexityPower" -> 2, {601.99, 108.325}];

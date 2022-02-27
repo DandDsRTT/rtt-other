@@ -7,32 +7,32 @@ Options[optimizeGtm] = {
   "tim" -> Null
 };
 
-optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim},
+optimizeGtm[m_, OptionsPattern[]] := Module[{meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tima},
   meanPower = OptionValue["meanPower"];
   weighted = OptionValue["weighted"];
   weightingDirection = OptionValue["weightingDirection"];
   complexityWeighting = OptionValue["complexityWeighting"];
   complexityPower = OptionValue["complexityPower"];
-  tim = OptionValue["tim"];
+  tima = If[OptionValue["tim"] === Null, getDiamond[getD[m]], If[Length[OptionValue["tim"]] == 0, {}, getA[OptionValue["tim"]]]];
   
   1200 * If[
     meanPower == \[Infinity],
-    optimizeGtmMinimax[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
+    optimizeGtmMinimax[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower],
     If[
       meanPower == 2,
-      optimizeGtmLeastSquares[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
-      optimizeGtmLeastAbsolutes[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower]
+      optimizeGtmLeastSquares[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower],
+      optimizeGtmLeastAbsolutes[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower]
     ]
   ]
 ];
 
-optimizeGtmMinimax[m_, tim_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := If[
-  weighted == True && weightingDirection == "regressive" && Length[tim] == 0,
+optimizeGtmMinimax[m_, tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := If[
+  weighted == True && weightingDirection == "regressive" && Length[tima] == 0,
   optimizeGtmMinimaxPLimit[m, complexityWeighting, complexityPower],
   If[
     weighted == False,
-    optimizeGtmMinimaxConsonanceSetAnalytical[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower],
-    optimizeGtmMinimaxConsonanceSetNumerical[m, tim, weighted, weightingDirection, complexityWeighting, complexityPower]
+    optimizeGtmMinimaxConsonanceSetAnalytical[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower],
+    optimizeGtmMinimaxConsonanceSetNumerical[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower]
   ]
 ];
 
@@ -80,13 +80,12 @@ getWeightingMatrix[d_, complexityWeighting_] := If[
 
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
-optimizeGtmMinimaxConsonanceSetAnalytical[m_, tim_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
+optimizeGtmMinimaxConsonanceSetAnalytical[m_, tima_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
   (* TODO: DRY up with optimizeGtmLeastAbsolutes *)
   {
     r,
     d,
     ptm,
-    tima,
     unchangedIntervalSetIndices,
     potentialUnchangedIntervalSets,
     normalizedPotentialUnchangedIntervalSets,
@@ -104,8 +103,6 @@ optimizeGtmMinimaxConsonanceSetAnalytical[m_, tim_, weighted_, weightingDirectio
   r = getR[m]; (*TODO: since we use r here maybe use it elsewhere too even though not stictly necessary *)
   d = getD[m];
   ptm = getPtm[d];
-  
-  tima = If[tim === Null, getDiamond[d], getA[tim]];
   
   unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
   potentialUnchangedIntervalSets = Map[Map[tima[[#]]&, #]&, unchangedIntervalSetIndices];
@@ -128,13 +125,12 @@ optimizeGtmMinimaxConsonanceSetAnalytical[m_, tim_, weighted_, weightingDirectio
   ptm.projectedGenerators // N
 ];
 
-optimizeGtmMinimaxConsonanceSetNumerical[m_, tim_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
+optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
   {
     d,
     ma,
     ptm,
     gtm,
-    tima,
     mappedTima,
     pureTimaSizes,
     w,
@@ -147,7 +143,6 @@ optimizeGtmMinimaxConsonanceSetNumerical[m_, tim_, weighted_, weightingDirection
   
   gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[m]}];
   
-  tima = If[tim === Null, getDiamond[d], getA[tim]];
   mappedTima = Transpose[ ma.Transpose[tima]];
   pureTimaSizes = Map[ptm.#&, tima];
   w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
@@ -180,25 +175,23 @@ optimizeGtmMinimaxConsonanceSetNumerical[m_, tim_, weighted_, weightingDirection
   gtm /. Last[solution] // N
 ];
 
-optimizeGtmLeastSquares[m_, tim_, weighted_, weightingDirection_ , complexityWeighting_, complexityPower_] := Module[{d, ma, ptm, tima, w, unchangedIntervals},
+optimizeGtmLeastSquares[m_, inputTima_, weighted_, weightingDirection_ , complexityWeighting_, complexityPower_] := Module[{d, ma, ptm, tima, w, unchangedIntervals},
   d = getD[m];
   ma = getA[m];
   ptm = getPtm[d]; (* TODO these three recur a lot, perhaps DRY up their computation *)
   
-  tima = If[tim === Null, getDiamond[d], getA[tim]];
-  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
-  tima = tima * w;
+  w = getW[inputTima, weighted, weightingDirection, complexityWeighting, complexityPower];
+  tima = inputTima * w;
   unchangedIntervals = ma.Transpose[tima].tima;
   
   ptm.Transpose[unchangedIntervals].Inverse[unchangedIntervals.Transpose[ma]] // N
 ];
 
-optimizeGtmLeastAbsolutes[m_, tim_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_ ] := Module[
+optimizeGtmLeastAbsolutes[m_, tima_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_ ] := Module[
   {
     r,
     d,
     ptm,
-    tima,
     unchangedIntervalSetIndices,
     potentialUnchangedIntervalSets,
     normalizedPotentialUnchangedIntervalSets,
@@ -216,8 +209,6 @@ optimizeGtmLeastAbsolutes[m_, tim_, weighted_, weightingDirection_ , complexityW
   r = getR[m]; (*TODO: since we use r here maybe use it elsewhere too even though not stictly necessary *)
   d = getD[m];
   ptm = getPtm[d];
-  
-  tima = If[tim === Null, getDiamond[d], getA[tim]];
   
   unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
   potentialUnchangedIntervalSets = Map[Map[tima[[#]]&, #]&, unchangedIntervalSetIndices];
