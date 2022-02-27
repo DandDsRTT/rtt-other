@@ -80,50 +80,8 @@ getWeightingMatrix[d_, complexityWeighting_] := If[
 
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
-optimizeGtmMinimaxConsonanceSetAnalytical[m_, tima_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
-  (* TODO: DRY up with optimizeGtmLeastAbsolutes *)
-  {
-    r,
-    d,
-    ptm,
-    unchangedIntervalSetIndices,
-    potentialUnchangedIntervalSets,
-    normalizedPotentialUnchangedIntervalSets,
-    filteredNormalizedPotentialUnchangedIntervalSets,
-    potentialPs,
-    meanOfDamages,
-    minMeanIndices,
-    minMeanIndex,
-    tiedPs,
-    minMeanP,
-    gpt,
-    projectedGenerators
-  },
-  
-  r = getR[m]; (*TODO: since we use r here maybe use it elsewhere too even though not stictly necessary *)
-  d = getD[m];
-  ptm = getPtm[d];
-  
-  unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
-  potentialUnchangedIntervalSets = Map[Map[tima[[#]]&, #]&, unchangedIntervalSetIndices];
-  normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, potentialUnchangedIntervalSets];
-  filteredNormalizedPotentialUnchangedIntervalSets = Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&];
-  potentialPs = Select[Map[getPFromMAndUnchangedIntervals[m, #]&, filteredNormalizedPotentialUnchangedIntervalSets], Not[# === Null]&];
-  meanOfDamages = Map[getMaxDamage[#, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]&, potentialPs];
-  
-  minMeanIndices = Position[meanOfDamages, Min[meanOfDamages]];
-  If[
-    Length[minMeanIndices] == 1,
-    minMeanIndex = First[First[Position[meanOfDamages, Min[meanOfDamages]]]];
-    minMeanP = potentialPs[[minMeanIndex]],
-    tiedPs = Part[potentialPs, Flatten[minMeanIndices]];
-    minMeanP = tieBreak[tiedPs, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]
-  ];
-  
-  gpt = getGpt[m];
-  projectedGenerators = minMeanP.gpt;
-  ptm.projectedGenerators // N
-];
+optimizeGtmMinimaxConsonanceSetAnalytical[m_, tima_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] :=
+    optimizeGtmSimplex[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower, getMaxDamage];
 
 optimizeGtmMinimaxConsonanceSetNumerical[m_, tima_, weighted_, weightingDirection_, complexityWeighting_ , complexityPower_ ] := Module[
   {
@@ -187,7 +145,7 @@ optimizeGtmLeastSquares[m_, inputTima_, weighted_, weightingDirection_ , complex
   ptm.Transpose[unchangedIntervals].Inverse[unchangedIntervals.Transpose[ma]] // N
 ];
 
-optimizeGtmLeastAbsolutes[m_, tima_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_ ] := Module[
+optimizeGtmSimplex[m_, tima_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_, damageMean_] := Module[
   {
     r,
     d,
@@ -206,7 +164,7 @@ optimizeGtmLeastAbsolutes[m_, tima_, weighted_, weightingDirection_ , complexity
     projectedGenerators
   },
   
-  r = getR[m]; (*TODO: since we use r here maybe use it elsewhere too even though not stictly necessary *)
+  r = getR[m]; (*TODO: since we use r here maybe use it elsewhere too even though not strictly necessary *)
   d = getD[m];
   ptm = getPtm[d];
   
@@ -215,7 +173,7 @@ optimizeGtmLeastAbsolutes[m_, tima_, weighted_, weightingDirection_ , complexity
   normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, potentialUnchangedIntervalSets];
   filteredNormalizedPotentialUnchangedIntervalSets = Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&];
   potentialPs = Select[Map[getPFromMAndUnchangedIntervals[m, #]&, filteredNormalizedPotentialUnchangedIntervalSets], Not[# === Null]&];
-  meanOfDamages = Map[getSumOfAbsolutesDamage[#, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]&, potentialPs];
+  meanOfDamages = Map[damageMean[#, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]&, potentialPs];
   
   minMeanIndices = Position[meanOfDamages, Min[meanOfDamages]];
   If[
@@ -230,6 +188,9 @@ optimizeGtmLeastAbsolutes[m_, tima_, weighted_, weightingDirection_ , complexity
   projectedGenerators = minMeanP.gpt;
   ptm.projectedGenerators // N
 ];
+
+optimizeGtmLeastAbsolutes[m_, tima_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_ ] :=
+    optimizeGtmSimplex[m, tima, weighted, weightingDirection, complexityWeighting, complexityPower, getSumOfAbsolutesDamage];
 
 getSumOfAbsolutesDamage[p_, tima_, ptm_, weighted_, weightingDirection_ , complexityWeighting_ , complexityPower_] := Module[{e, w},
   e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
