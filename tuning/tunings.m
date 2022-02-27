@@ -93,9 +93,12 @@ optimizeGtmMinimaxPLimit[d_, ma_, ptm_, complexityWeighting_, complexityPower_] 
   optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d, ma, ptm, complexityWeighting, complexityPower]
 ];
 
-optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d_, ma_, ptm_, complexityWeighting_] := Module[{weightingMatrix, g, gtm},
-  weightingMatrix = getWeightingMatrix[d, complexityWeighting];
-  g = weightingMatrix.PseudoInverse[ma.weightingMatrix];
+optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d_, ma_, ptm_, complexityWeighting_] := Module[{w, tima, weightedTima, g, gtm},
+  w = If[complexityWeighting == "P", 1 / ptm, Table[1, d]];
+  tima = IdentityMatrix[d];
+  weightedTima = tima * w;
+  
+  g = weightedTima.PseudoInverse[ma.weightedTima];
   gtm = ptm.g;
   
   gtm // N
@@ -108,12 +111,6 @@ optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d_, ma_, ptm_, complexityWeig
   
   solution = NMinimize[Norm[e, dualPower[complexityPower]], gtm, Method -> "NelderMead", WorkingPrecision -> 15];
   gtm /. Last[solution] // N
-];
-
-getWeightingMatrix[d_, complexityWeighting_] := If[
-  complexityWeighting == "P",
-  DiagonalMatrix[1 / getPtm[d]],
-  IdentityMatrix[d]
 ];
 
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
