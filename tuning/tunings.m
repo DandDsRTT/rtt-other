@@ -93,15 +93,11 @@ optimizeGtmMinimaxPLimit[d_, ma_, ptm_, complexityWeighting_, complexityPower_] 
   optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d, ma, ptm, complexityWeighting, complexityPower]
 ];
 
-optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d_, ma_, ptm_, complexityWeighting_] := Module[{w, tima, weightedTima, g, gtm},
+optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d_, ma_, ptm_, complexityWeighting_] := Module[{w, tima, weightedTima, unchangedIntervals, g, gtm},
   w = If[complexityWeighting == "P", 1 / ptm, Table[1, d]];
   tima = IdentityMatrix[d];
-  weightedTima = tima * w;
   
-  g = weightedTima.PseudoInverse[ma.weightedTima];
-  gtm = ptm.g;
-  
-  gtm // N
+  optimizeGtmWithPseudoInverse[tima, w, ma, ptm]
 ];
 
 optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d_, ma_, ptm_, complexityWeighting_, complexityPower_] := Module[{gtm, tm, e, solution},
@@ -167,12 +163,20 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, d_, ma_, ptm_, weighted_, weight
 
 (* LEAST-SQUARES *)
 
-optimizeGtmLeastSquares[{meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[{w, weightedTima, unchangedIntervals},
+optimizeGtmLeastSquares[{meanPower_, tima_, d_, ma_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[{w, weightedTima, unchangedIntervals, g, gtm},
   w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
+  
+  optimizeGtmWithPseudoInverse[tima, w, ma, ptm]
+];
+
+optimizeGtmWithPseudoInverse[tima_, w_, ma_, ptm_] := Module[{weightedTima, unchangedIntervals, g, gtm},
   weightedTima = tima * w;
   unchangedIntervals = ma.Transpose[weightedTima].weightedTima;
-  
-  ptm.Transpose[unchangedIntervals].Inverse[unchangedIntervals.Transpose[ma]] // N
+  g = Transpose[unchangedIntervals].Inverse[unchangedIntervals.Transpose[ma]];
+  gtm = ptm.g;
+  gtm // N
+  (*thing = ma.weightedTima;
+  ptm.weightedTima.PseudoInverse[thing] // N*)
 ];
 
 
