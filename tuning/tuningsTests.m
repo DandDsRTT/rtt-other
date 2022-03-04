@@ -13,6 +13,16 @@ testClose[fn_, args___, expectation_] := Module[{actual},
 ];
 
 
+(* GENERATORS PREIMAGE TRANSVERSAL *)
+
+
+(* getGpt *)
+test[getGpt, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {{{1, 0, 0}, {-1, 1, 0}}, "contra"}];
+test[getGpt, {{{4, -4, 1}}, "contra"}, {{{1, 0, 0}, {0, 1, 0}}, "contra"}];
+
+
+(* TUNING *)
+
 (* optimizeGtm, by individual tuning properties *)
 
 t = {{{1, 1, 0}, {0, 1, 4}}, "co"}; (* meantone *)
@@ -166,14 +176,11 @@ test[dualPower, 1, \[Infinity]];
 test[dualPower, 2, 2];
 test[dualPower, \[Infinity], 1];
 
-(* getPFromMaAndUnchangedIntervals *)
-test[getPFromMaAndUnchangedIntervals, {{1, 1, 0}, {0, 1, 4}}, {{1, 0, 0}, {-2, 0, 1}}, {{1, 1, 0}, {0, 0, 0}, {0,FractionBox["1", "4"], 1}}];
+(* getPFromUnchangedIntervals *)
+test[getPFromUnchangedIntervals, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {{1, 0, 0}, {-2, 0, 1}}, {{1, 1, 0}, {0, 0, 0}, {0,FractionBox["1", "4"], 1}}];
 
 (* getDiagonalEigenvalueMatrix *)
 test[getDiagonalEigenvalueMatrix, {{1, 0, 0}, {-2, 0, 1}}, {{-4, 4, -1}}, {{1, 0, 0}, {0, 1, 0}, {0, 0, 0}}];
-
-(* getGpt *)
-test[getGpt, {{1, 1, 0}, {0, 1, 4}}, Transpose[{{1, 0, 0}, {-1, 1, 0}}]];
 
 (* getPtm *)
 test[getPtm, 3, {Log[2, 2], Log[2, 3], Log[2, 5]}];
