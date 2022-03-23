@@ -32,7 +32,7 @@ visualizeResult[m_, edo_, narrowestPrimeIndex_, damage_] := Module[{},
   myCyan = RGBColor[0.3, 0.7, 0.2];
   dangerZoneTopCenter = Part[maxDamageContourForFilling, Round[Length[maxDamageContourForFilling] / 2 ]];
   dangerZoneLabelPoint = Offset[{0, 66}, dangerZoneTopCenter ];
-  dangerZoneCenterPoint = { First[dangerZoneTopCenter], (Part[dangerZoneTopCenter, 2] + damage) / 2};
+  dangerZoneCenterPoint = {First[dangerZoneTopCenter], (Part[dangerZoneTopCenter, 2] + damage) / 2};
   primePossibilities = Map[{{#, 0}, {#, getTopPossibility[#]}}&, primeDamagesPrimes];
   plotStyle = {
     White,
@@ -46,7 +46,7 @@ visualizeResult[m_, edo_, narrowestPrimeIndex_, damage_] := Module[{},
   };
   plotMarkers = {{Graphics[{Black, Disk[]}], .03}, None, None, {Graphics[{Magenta, Circle[]}], .04}, None, None, None, None};
   Do[AppendTo[plotStyle, {myCyan, Dashed}], Length[primePossibilities]];
-  Do[AppendTo[plotMarkers, Graphics[]], Length[primePossibilities]];
+  Do[AppendTo[plotMarkers, None], Length[primePossibilities]];
   
   ListLinePlot[
     Flatten[{{primeDamages}, {threshold}, {maxDamageContour}, { maxes}, { biggerPrimeMax}, { crossingLine}, { thresholdForFilling}, {maxDamageContourForFilling}, primePossibilities}, 1],
@@ -54,7 +54,7 @@ visualizeResult[m_, edo_, narrowestPrimeIndex_, damage_] := Module[{},
     (* overall config *)
     ImageSize -> 1000,
     ImagePadding -> 44,
-    PlotLabel -> Style[ToString[N[edo, 18]] <> " \[RightArrow] ⟨" <> StringRiffle[shorterM] <> " ...]", 22, Bold],
+    PlotLabel -> Style[ToString[N[edo, 18]] <> " \[RightArrow] ⟨" <> StringRiffle[shorterM] <> " ...]", 22, Bold, FontFamily -> "Arial"],
     
     (* per line config *)
     PlotStyle -> plotStyle,
