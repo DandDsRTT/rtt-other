@@ -6,7 +6,6 @@ getDamage[primeMapping_, prime_, edo_] := Abs[(primeMapping / edo) / Log[2, prim
 getTopPossibility[prime_] := Part[First[Select[maxDamageContour, First[#] == prime&]], 2];
 
 visualizeResult[m_, edo_, narrowestPrimeIndex_, damage_] := Module[{},
-  Print["heh?", m, " edo: ", edo // N, " narrowest prime index: ", narrowestPrimeIndex, " damage: ", damage // N];
   adjusto = 1;
   primes = Map[Prime, Range[Length[m] + adjusto]];
   primeDamagesPrimes = primes[[1 ;; Length[primes] - (adjusto + 1)]];
@@ -34,9 +33,9 @@ visualizeResult[m_, edo_, narrowestPrimeIndex_, damage_] := Module[{},
   dangerZoneTopCenter = Part[maxDamageContourForFilling, Round[Length[maxDamageContourForFilling] / 2 ]];
   dangerZoneLabelPoint = Offset[{0, 66}, dangerZoneTopCenter ];
   dangerZoneCenterPoint = { First[dangerZoneTopCenter], (Part[dangerZoneTopCenter, 2] + damage) / 2};
-  primePossibilities = Map[{{#, 0}, {#, getTopPossibility[#]}(*, {#,0}*)}&, primeDamagesPrimes];
+  primePossibilities = Map[{{#, 0}, {#, getTopPossibility[#]}}&, primeDamagesPrimes];
   plotStyle = {
-    Opacity[0],
+    White,
     Magenta,
     myCyan,
     Magenta,
@@ -45,7 +44,7 @@ visualizeResult[m_, edo_, narrowestPrimeIndex_, damage_] := Module[{},
     Opacity[0],
     Opacity[0]
   };
-  plotMarkers = {Automatic, Graphics[], Graphics[], {"\[EmptyCircle]", 30}, Graphics[], Graphics[], Graphics[], Graphics[]};
+  plotMarkers = {{Graphics[{Black, Disk[]}], .03}, None, None, {Graphics[{Magenta, Circle[]}], .04}, None, None, None, None};
   Do[AppendTo[plotStyle, {myCyan, Dashed}], Length[primePossibilities]];
   Do[AppendTo[plotMarkers, Graphics[]], Length[primePossibilities]];
   
@@ -63,31 +62,14 @@ visualizeResult[m_, edo_, narrowestPrimeIndex_, damage_] := Module[{},
     
     (* per axis config *)
     PlotRange -> {{1, All }, All},
-    AxesStyle -> {Opacity[0], Opacity[0.00001]}, (*is this really necessary?*)
-    AxesLabel -> {"", "damage"}, (* and this too seems dumb *)
+    Ticks -> {primes, Automatic},
+    AxesLabel -> {"primes", "Erlich\ndamage"},
     
     (* filling config *)
     FillingStyle -> Directive[Opacity[0.3], Orange],
     Filling -> {7 -> {8}},
     
     Epilog -> {
-      AxisObject[
-        Line[{{1, 0}, {maxPrimeForAxis, 0}}],
-        {1, maxPrimeForAxis},
-        TickPositions -> {{primes}},
-        TickLabels -> {primeLabels},
-        TicksStyle -> {FontSize -> 14},
-        AxisLabel -> "primes",
-        AxisStyle -> {FontSize -> 14}
-      ],
-      AxisObject[
-        Line[
-          {{1, 0}, {1, highestPointInChart}}],
-        {0, highestPointInChart},
-        AxisLabel -> "Erlich\ndamage",
-        TicksStyle -> {FontSize -> 14},
-        AxisStyle -> {FontSize -> 14}
-      ],
       Magenta,
       Text["tuning-defining\nprime (smaller)", Offset[{44, 22}, {smallerPrime, damage}]],
       Text["tuning-defining\n prime (larger)", Offset[{-44, -22}, {biggerPrime, damage}]],
@@ -110,12 +92,10 @@ m = {12, 20, 29};
 (*m = {22, 35, 51, 62, 76, 81, 90, 93, 99, 107, 109};*)
 (*m = {2, 3, 4, 5, 6, 7, 8, 8, 8, 9, 9};*)
 (*m = getUniformMap[1.86135311615,5];*)(*here's a way to check the values from Keenan's original post which don't have their maps with them *)
-m = getUniformMap[1.861353116, 19];
+(*m = getUniformMap[1.861353116, 19];
 m = getUniformMap[20.8201746563 , 43];
-m = getUniformMap[20.84434941344809, 7 ];
+m = getUniformMap[20.84434941344809, 7 ];*)
 
-(*fullThing[edo_] := Module[{m, mPrevious,mWeighted,  narrowestPrimeIndex, widestPrimeIndex, narrowestPrime,widestPrime, narrowestPrimeMapping,widestPrimeMapping, edo, damage,maximumPrimePossibleToExceedDamage },
-m = getUniformMap[edo, 5];*)
 howManyToDoAtOnceStartingWithTheAbove = 1;
 
 Do[
@@ -142,7 +122,6 @@ Do[
   ];
   
   Print["\n\n\n"];
-  (* Print["trying to figure out if it's ever the case that tied primes are both on the same side of 1",( mWeighted/First[m]) // N];*)
   Print[visualizeResult[m, edo, narrowestPrimeIndex, 1200 * damage]];
   
   m[[narrowestPrimeIndex]]++,
