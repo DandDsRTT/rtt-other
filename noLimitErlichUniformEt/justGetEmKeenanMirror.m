@@ -26,7 +26,7 @@ Do[
     map = getUniformMap[edo, maximumPrimePossibleToExceedDamage];
   ];
   
-  results = results <> ToString[N[edo, 17]] <> " " <> ToString[map] <> "\n";
+  results = results <> ToString[N[edo, 17]] <> " " <> ToString[narrowestPrime] <> " " <> ToString[widestPrime] <> " " <> ToString[map[[1 ;; Length[map] - 1]]] <> "\n";
   
   map[[narrowestPrimeIndex]]++,
   

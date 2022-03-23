@@ -6,6 +6,7 @@ getDamage[primeMapping_, prime_, edo_] := Abs[(primeMapping / edo) / Log[2, prim
 getTopPossibility[prime_] := Part[First[Select[maxDamageContour, First[#] == prime&]], 2];
 
 visualizeResult[m_, edo_, narrowestPrimeIndex_, damage_] := Module[{},
+  Print["heh?", m, " edo: ", edo // N, " narrowest prime index: ", narrowestPrimeIndex, " damage: ", damage // N];
   adjusto = 1;
   primes = Map[Prime, Range[Length[m] + adjusto]];
   primeDamagesPrimes = primes[[1 ;; Length[primes] - (adjusto + 1)]];
@@ -109,7 +110,12 @@ m = {12, 20, 29};
 (*m = {22, 35, 51, 62, 76, 81, 90, 93, 99, 107, 109};*)
 (*m = {2, 3, 4, 5, 6, 7, 8, 8, 8, 9, 9};*)
 (*m = getUniformMap[1.86135311615,5];*)(*here's a way to check the values from Keenan's original post which don't have their maps with them *)
+m = getUniformMap[1.861353116, 19];
+m = getUniformMap[20.8201746563 , 43];
+m = getUniformMap[20.84434941344809, 7 ];
 
+(*fullThing[edo_] := Module[{m, mPrevious,mWeighted,  narrowestPrimeIndex, widestPrimeIndex, narrowestPrime,widestPrime, narrowestPrimeMapping,widestPrimeMapping, edo, damage,maximumPrimePossibleToExceedDamage },
+m = getUniformMap[edo, 5];*)
 howManyToDoAtOnceStartingWithTheAbove = 1;
 
 Do[
@@ -143,3 +149,14 @@ Do[
   
   howManyToDoAtOnceStartingWithTheAbove
 ];
+(*]*)
+
+
+
+(*this is me attempting to do one-off charts, including counterexamples (this is one such case), but there must be some assumptions in the gnarled code that prevent things that are counterexamples from rendering without crashing *)
+edo = 20.8201746563;
+m = getUniformMap[edo , 43];
+narrowestPrimeIndex = PrimePi[43];
+damage = 10.364486176;
+visualizeResult[m, edo, narrowestPrimeIndex, damage]
+
