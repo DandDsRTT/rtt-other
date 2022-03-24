@@ -1,20 +1,18 @@
 chartStartEdo = (*6.875;*)6.8; (*11.8;*)
 chartEndEdo = (*6.9;*)7.3;(*12.1;*)
 chartMaxPrime = 13;
-sliderIncrement = 0.0001;
-gifIncrement = 0.01;
+increment = 0.0001;
 
-primes = Map[Prime, Range[PrimePi[maxPrime]]];
+primes = Map[Prime, Range[PrimePi[chartMaxPrime]]];
 primeLogs = Map[Log[2, #]&, primes];
 primeCount = Length[primes];
 p = 1200 * primeLogs;
-(*Print["what is even happening right now", primes];*)
 
 myCyan = RGBColor[0.3, 0.7, 0.2];
 
 getTopPossibility[prime_, maxDamageContour_] := Part[First[Select[maxDamageContour, First[#] == prime&]], 2];
 
-doPlot[edo_] := Apply[ListLinePlot, Module[{g, uniformMap, t, e, d, maxD, secondmostMaxD, isErlichTuning, maxPrime, secondmostMaxPrime, damagesLine, maximumDamageLine, maxDamageContour, maxes, primePossibilities, plotStyle, plotMarkers, biggerPrime, smallerPrime, epilog},
+renderEdo[edo_] := Apply[ListLinePlot, Module[{g, uniformMap, t, e, d, maxD, secondmostMaxD, isErlichTuning, maxPrime, secondmostMaxPrime, damagesLine, maximumDamageLine, maxDamageContour, maxes, primePossibilities, plotStyle, plotMarkers, biggerPrime, smallerPrime, epilog, primeDamages},
   g = 1200 / edo;
   uniformMap = Map[Round[edo * #]&, primeLogs];
   t = g * uniformMap;
@@ -23,15 +21,9 @@ doPlot[edo_] := Apply[ListLinePlot, Module[{g, uniformMap, t, e, d, maxD, second
   
   maxD = Max[d];
   secondmostMaxD = Last[Sort[d][[1 ;; Length[d] - 1]]];
-  (*Print["nowhere close?", maxD," and 2nd ", secondmostMaxD," and diff ", Abs[maxD - secondmostMaxD] ," and sorted ", Sort[d]];*)
   isErlichTuning = Abs[maxD - secondmostMaxD] < 0.1;
   maxPrime = Part[primes, First[First[Position[d, maxD]]]];
   secondmostMaxPrime = Part[primes, First[First[Position[d, secondmostMaxD]]]];
-  (* If[
-   Part[e, First[First[Position[d,maxD]]]] > 0,
-   widestPrime = maxPrime; narrowestPrime = secondmostMaxPrime,
-   narrowestPrime = maxPrime; widestPrime = secondmostMaxPrime
-   ];*)
   biggerPrime = Max[maxPrime, secondmostMaxPrime];
   smallerPrime = Min[maxPrime, secondmostMaxPrime];
   
@@ -45,24 +37,24 @@ doPlot[edo_] := Apply[ListLinePlot, Module[{g, uniformMap, t, e, d, maxD, second
   Do[AppendTo[plotStyle, {myCyan, Dashed}], Length[primePossibilities]];
   Do[AppendTo[plotMarkers, None], Length[primePossibilities]];
   
-  (*  Print["primeDamages: ", primeDamages, " maximumDamageLine: ", maximumDamageLine];*)
-  
-  epilog = {
-    myCyan,
-    Text["max possible\ndamage\nper prime", Offset[{55, -22}, First[maxDamageContour]]]
-  };
-  If[
-    isErlichTuning,
-    epilog = Join[{
-      Magenta,
-      Text["tuning-defining\nprime (smaller)", Offset[{44, 22}, {smallerPrime, damage}]],
-      Text["tuning-defining\n prime (larger)", Offset[{-44, -22}, {biggerPrime, damage}]],
-      Text["pair of tied damages\n(with opposite errors)\ndefining an Erlich tuning", Offset[{-350, -33}, Last[maximumDamageLine]]],
-    }, epilog],
-    epilog = Join[{
-      Orange,
-      Text["maximum damage", Offset[{-350, -11}, Last[maximumDamageLine]]],
-    }, epilog]
+  epilog = Join[
+    If[
+      isErlichTuning,
+      {
+        Magenta,
+        Text["tuning-defining\nprime (smaller)", Offset[{44, 22}, {smallerPrime, maxD}]],
+        Text["tuning-defining\n prime (larger)", Offset[{-44, -22}, {biggerPrime, maxD}]],
+        Text["pair of tied damages\n(with opposite errors)\ndefining an Erlich tuning", Offset[{-350, -33}, Last[maximumDamageLine]]],
+      },
+      {
+        Orange,
+        Text["maximum damage", Offset[{-350, -11}, Last[maximumDamageLine]]],
+      }
+    ],
+    {
+      myCyan,
+      Text["max possible\ndamage\nper prime", Offset[{55, -22}, First[maxDamageContour]]]
+    }
   ];
   
   {
@@ -77,7 +69,7 @@ doPlot[edo_] := Apply[ListLinePlot, Module[{g, uniformMap, t, e, d, maxD, second
     (* overall config *)
     ImageSize -> 1000,
     ImagePadding -> 44,
-    PlotLabel -> Style["prime damages for uniform map of " <> ToString[N[edo, 18]] <> "-EDO", 22, Bold, FontFamily -> "Arial"],
+    PlotLabel -> Style["prime damages for uniform map of" <> ToString[PaddedForm[edo, {5, 4}]] <> "-EDO", 22, Bold, FontFamily -> "Arial"],
     
     (* per line config *)
     PlotStyle -> plotStyle,
@@ -91,9 +83,17 @@ doPlot[edo_] := Apply[ListLinePlot, Module[{g, uniformMap, t, e, d, maxD, second
     Epilog -> epilog
   }
 ]];
-(*doPlot[chartStartEdo]*)
 
-Animate[doPlot[edo], {edo, chartStartEdo, chartEndEdo, sliderIncrement, Appearance -> "Labeled"}, AnimationRunning -> False]
+(*Animate[renderEdo[edo], {edo, chartStartEdo, chartEndEdo, increment, Appearance -> "Labeled"}, AnimationRunning -> False]*)
 
-(*gif = Table[doPlot[edo], {edo, chartStartEdo, chartEndEdo, gifIncrement}];
-CloudExport[gif, "GIF", "bouncyAnimation", "DisplayDurations" -> 0.5]*)
+(*gifEdo = 6.897064285;
+gifIncrement = 0.001;
+frames = 10;
+gif = Table[renderEdo[edo], {edo, gifEdo - gifIncrement * Floor[frames / 2], gifEdo + gifIncrement * Ceiling[frames / 2], gifIncrement}];
+CloudExport[gif, "GIF", "bouncyAnimation", "DisplayDurations" -> 0.5]
+(*Export["bouncyAnimation.gif", gif, "DisplayDurations" -> 0.5];*)
+CopyFile["bouncyAnimation.gif",CloudObject["bouncyAnimation.gif"],OverwriteTarget->True]*)
+
+
+(*gif = Table[renderEdo[edo], {edo, chartStartEdo, chartEndEdo, increment}];
+Export["bouncyAnimation.gif", gif, "DisplayDurations" -> 0.002];*)
