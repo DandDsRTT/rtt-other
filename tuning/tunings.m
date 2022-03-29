@@ -138,7 +138,7 @@ optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d_, t_, ptm_, complexityWeigh
   tm = gtm.ma;
   e = If[complexityWeighting == "P", tm / ptm - Table[1, d], tm - ptm];
   
-  solution = NMinimize[Norm[e, dualPower[complexityPower]], gtm, Method -> "NelderMead", WorkingPrecision -> 15];
+  solution = NMinimize[Norm[e, dualPower[complexityPower]], gtm, Method -> "NelderMead"];
   gtm /. Last[solution] // N
 ];
 
