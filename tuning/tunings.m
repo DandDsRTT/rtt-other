@@ -138,7 +138,7 @@ optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d_, t_, ptm_, complexityWeigh
   tm = gtm.ma;
   e = If[complexityWeighting == "P", tm / ptm - Table[1, d], tm - ptm];
   
-  solution = NMinimize[Norm[e, dualPower[complexityPower]], gtm, Method -> "NelderMead"];
+  solution = NMinimize[Norm[e, dualPower[complexityPower]], gtm, Method -> "NelderMead", WorkingPrecision -> 15];
   gtm /. Last[solution] // N
 ];
 
@@ -188,7 +188,8 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, d_, t_, ptm_, weighted_, weighti
       ]
     ],
     gtm,
-    Method -> "NelderMead"
+    Method -> "NelderMead",
+    WorkingPrecision -> 15
   ];
   
   gtm /. Last[solution] // N
