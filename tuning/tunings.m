@@ -26,7 +26,7 @@ getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
   
   gpt = right.Transpose[snf].left;
   
-  gpt
+  {Transpose[gpt], "contra"}
 ];
 
 
