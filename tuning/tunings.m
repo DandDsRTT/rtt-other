@@ -188,8 +188,7 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, d_, t_, ptm_, weighted_, weighti
       ]
     ],
     gtm,
-    Method -> "NelderMead",
-    WorkingPrecision -> 15
+    Method -> "NelderMead"
   ];
   
   gtm /. Last[solution] // N
@@ -211,8 +210,6 @@ optimizeGtmWithPseudoInverse[tima_, w_, t_, ptm_] := Module[{ma, weightedTima, u
   g = Transpose[unchangedIntervals].Inverse[unchangedIntervals.Transpose[ma]];
   gtm = ptm.g;
   gtm // N
-  (*thing = ma.weightedTima;
-  ptm.weightedTima.PseudoInverse[thing] // N*)
 ];
 
 
