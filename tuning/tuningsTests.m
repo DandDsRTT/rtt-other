@@ -75,7 +75,7 @@ testClose[optimizeGtm, t, "meanPower" -> 1, "weighted" -> True, "weightingDirect
 
 t = {{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"}; (* pajara *)
 
-testClose[optimizeGtm, t, "mean" -> "MAV", {600., 106.843}];
+testClose[optimizeGtm, t, "mean" -> "MAV", {600., 106.843}]; (*it seems, based on my https://docs.google.com/spreadsheets/d/1D6mE4MvbsbLqTDTYyagmlKZ_TenrqoN84VLDzsLfJnQ/edit#gid=1685147662, that 108.01 is actually more correct *)
 
 testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "F1", {596.502, 106.767}];
 testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "F2", {598.233, 104.469}];
