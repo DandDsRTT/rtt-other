@@ -208,7 +208,7 @@ optimizeGtmWithPseudoInverse[tima_, w_, t_, ptm_] := Module[{ma, weightedTima, u
   ma = getA[getM[t]];
   weightedTima = tima * w;
   unchangedIntervals = ma.weightedTima;
-  g = Transpose[unchangedIntervals].Inverse[unchangedIntervals.Transpose[ma]];
+  g = PseudoInverse[unchangedIntervals];
   gtm = ptm.g;
   gtm // N
 ];
