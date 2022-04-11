@@ -206,9 +206,7 @@ optimizeGtmLeastSquares[{meanPower_, tima_, d_, t_, ptm_, weighted_, weightingDi
 
 optimizeGtmWithPseudoInverse[tima_, w_, t_, ptm_] := Module[{ma, weightedTima, unchangedIntervals, g, gtm},
   ma = getA[getM[t]];
-  weightedTima = tima * w;
-  unchangedIntervals = ma.weightedTima;
-  g = PseudoInverse[unchangedIntervals];
+  g = PseudoInverse[ma.(tima * w)];
   gtm = ptm.g;
   gtm // N
 ];
