@@ -164,7 +164,13 @@ testClose[optimizeGtm, t, "tuning" -> "least absolutes", {600., 106.843}];
 (*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pP1", {600., 106.843}];*)
 (*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pP2", {600., 106.843}];*)
 
+t = {{{1, 1, 5}, {0, -1, -3}}, "co", {2, 7 / 5, 11}};
+testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "inharmonic", {1200.4181, 617.7581}];
+testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "subgroup", {1200.0558, 616.4318}];
 
+t = {{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}};
+testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "inharmonic", {1201.3969, 3796.8919, 5270.7809}];
+testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "subgroup", {1201.3969, 3796.8919, 5267.2719}];
 
 
 (* ___ PRIVATE ___ *)
