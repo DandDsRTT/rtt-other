@@ -165,7 +165,7 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, d_, t_, ptm_, weighted_, weighti
   
   mappedTima = Transpose[ma.Transpose[tima]];
   pureTimaSizes = Map[ptm.#&, tima];
-  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[t, tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   
   solution = NMinimize[
     Max[
@@ -199,14 +199,16 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, d_, t_, ptm_, weighted_, weighti
 (* LEAST-SQUARES *)
 
 optimizeGtmLeastSquares[{meanPower_, tima_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[{w, weightedTima, unchangedIntervals, g, gtm},
-  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[t, tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   
   optimizeGtmWithPseudoInverse[tima, w, t, ptm]
 ];
 
-optimizeGtmWithPseudoInverse[tima_, w_, t_, ptm_] := Module[{ma, weightedTima, unchangedIntervals, g, gtm},
+optimizeGtmWithPseudoInverse[tima_, w_, t_, ptm_] := Module[{ma, weightingMatrix, weightedTimaMapped, g, gtm},
   ma = getA[getM[t]];
-  g = PseudoInverse[ma.(tima * w)];
+  weightingMatrix = DiagonalMatrix[w]; (* TODO: THAT'S IF STANDARD INTERVAL BASIS, OR INHARMONIC NOTION; WHAT OF SUBGROUP NOTION? *)
+  weightedTimaMapped = ma.Transpose[tima].weightingMatrix;
+  g = Transpose[tima].weightingMatrix.Transpose[weightedTimaMapped].Inverse[weightedTimaMapped.Transpose[weightedTimaMapped]]; (* TODO: if we're constantly transposing tima, maybe just do it once up front? or have getA respect the co/contra? *)
   gtm = ptm.g;
   gtm // N
 ];
@@ -348,9 +350,9 @@ getDamage[t_, gtm_, OptionsPattern[]] := Module[
   ]
 ];
 
-getTid[tm_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{e, w},
+getTid[t_, tm_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{e, w},
   e = N[tm.Transpose[tima]] - N[ptm.Transpose[tima]];
-  w = getW[tima, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[t, tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   
   e * w
 ];
@@ -358,13 +360,13 @@ getTid[tm_, tima_, ptm_, weighted_, weightingDirection_, complexityWeighting_, c
 Square[n_] := n^2;
 
 getSumOfAbsolutesDamage[tm_, {meanPower_, tima_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
-    Total[Map[Abs, getTid[tm, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+    Total[Map[Abs, getTid[t, tm, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
 
 getSumOfSquaresDamage[tm_, {meanPower_, tima_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
-    Total[Map[Square, getTid[tm, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+    Total[Map[Square, getTid[t, tm, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
 
 getMaxDamage[tm_, {meanPower_, tima_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
-    Max[Map[Abs, getTid[tm, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+    Max[Map[Abs, getTid[t, tm, tima, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
 
 tieBreak[tiedTms_, meanPower_, tima_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{meanOfDamages},
   meanOfDamages = Map[getSumOfSquaresDamage[#, {meanPower, tima, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}]&, tiedTms];
@@ -473,26 +475,26 @@ processTuningOptions[t_, inputMeanPower_, inputWeighted_, inputWeightingDirectio
   ];
   
   d = getD[t];
-  ptm = getPtm[d];
+  ptm = getPtm[t];
   
   tima = If[tim === Null, getDiamond[d], If[Length[tim] == 0, If[forDamage, getA[getC[t]], {}], getA[tim]]];
   
   {meanPower, tima, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}
 ];
 
-getPtm[d_] := Log[2, getPrimes[d]];
+getPtm[t_] := Log[2, getB[t]];
 
-getW[tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w},
+getW[t_, tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w},
   w = If[
     weighted,
-    Map[getComplexity[#, complexityWeighting, complexityPower]&, tima],
+    Map[getComplexity[#, t, complexityWeighting, complexityPower]&, tima],
     Map[1&, tima]
   ];
   
   If[weightingDirection == "regressive", 1 / w, w]
 ];
 
-getComplexity[pcv_, complexityWeighting_, complexityPower_] := Module[{weightedPcv},
-  weightedPcv = If[complexityWeighting == "P", pcv * getPtm[Length[pcv]], pcv];
+getComplexity[pcv_, t_, complexityWeighting_, complexityPower_] := Module[{weightedPcv},
+  weightedPcv = If[complexityWeighting == "P", pcv * getPtm[t], pcv];
   Norm[weightedPcv, complexityPower]
 ];

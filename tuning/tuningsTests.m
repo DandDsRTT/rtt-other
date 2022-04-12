@@ -183,7 +183,8 @@ test[getPFromUnchangedIntervals, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {{1, 0, 0}, {-2
 test[getDiagonalEigenvalueMatrix, {{1, 0, 0}, {-2, 0, 1}}, {{-4, 4, -1}}, {{1, 0, 0}, {0, 1, 0}, {0, 0, 0}}];
 
 (* getPtm *)
-test[getPtm, 3, {Log[2, 2], Log[2, 3], Log[2, 5]}];
+test[getPtm, {{{12, 19, 28}}, "co", {2, 3, 5}}, {Log[2, 2], Log[2, 3], Log[2, 5]}];
+test[getPtm, {{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}}, {Log[2, 2], Log[2, 9], Log[2, 5], Log[2, 21]}];
 
 (* getDiamond *)
 test[getDiamond, 2, {{2, -1}, {-1, 1}}];
@@ -203,9 +204,9 @@ test[oddLimitFromD, 5, 11];
 test[oddLimitFromD, 6, 15];
 
 (* getComplexity *)
-test[getComplexity, {1, 1, -1}, "F", 1, 3];
-test[getComplexity, {1, 1, -1}, "F", 2, \[Sqrt]3];
-test[getComplexity, {1, 1, -1}, "P", 1, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
+test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "F", 1, 3];
+test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "F", 2, \[Sqrt]3];
+test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "P", 1, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
 
 (* getDamage *)
 testClose[getDamage, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {1200., 696.578}, "tuning" -> "least absolutes", 0.0179233];
