@@ -73,7 +73,7 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
     tuning,
     mean,
     tuningOptions,
-    result
+    optimizedGtm
   },
   
   meanPower = OptionValue["meanPower"];
@@ -89,8 +89,6 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
   
   tuningOptions = processTuningOptions[t, meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, notion, damage, tuning, mean, False]; (* TODO: figure out why my defaulting of this arg doesn't work anymore ... Wolfram Lnaguage bug?*)
   meanPower = First[tuningOptions];
-  
-  (*Print["top-level what's happening mean power: ", meanPower];*)
   
   optimizedGtm = 1200 * If[
     meanPower == \[Infinity],
@@ -109,51 +107,16 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
   ]
 ];
 
-retrieveSubgroupNotionTuning[optimizedGtm_, originalT_, {meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[{ma, optimizedTm, retrievedTm, gens, equations, instance, T, S, P},
+retrieveSubgroupNotionTuning[optimizedGtm_, originalT_, {meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[
+  {ma, optimizedTm, gpt, f},
   
   ma = getA[getM[t]];
-  
   optimizedTm = optimizedGtm.ma;
+  gpt = Transpose[getA[getGpt[originalT]]];
+  f = Transpose[getF[originalT]];
   
-  (*Print["optimizedTm: ", optimizedTm];
-  Print["f for originalT: ", getF[originalT]];
-  (*Print["f for new t: ", getF[t]];*)
-  Print["t in its original nonstandard interval basis: ",originalT];
-  Print["okay, you want a 1\[Times]3 matrix as a result. so, multiply a 1\[Times]5 by a 5\[Times]3 matrix", optimizedTm.Transpose[getF[originalT]]];
-  
-  retrievedTm = optimizedTm.Transpose[getF[originalT]];
-  
-  gens = Table[Subscript[g, index], {index, getR[originalT]}];
-  Print["gens: ", gens];
-  equations = MapThread[#1.gens==#2&,{Transpose[getA[getM[originalT]]], retrievedTm}];
-  Print["equations: ", equations, " and reduced? ", Reduce[equations,gens]];
-  instance =Solve[equations, gens, Reals];(*Apply[FindInstance, Reduce[equations,gens, Reals]];*)
-  Print["instance: ", instance];
-  
-  (*instance = Solve[retrivedTm == gens.getA[getM[originalT]], gens, Reals, WorkingPrecision -> 3];
-  Print["instance: ", instance,  gens.getA[getM[originalT]]];*)*)
-  
-  
-  
-  
-  (*"preimage"*)
-  P = Transpose[getA[getGpt[originalT]]];
-  (*"subgroup basis" *)
-  S = Transpose[getF[originalT]];
-  (*"tuning map" *)
-  T = optimizedTm;
-  
-  (*Print["T: ", T, " S: ", S, " P: ", P];*)
-  
-  T.S.P
-  
-  (*{5,1,1,1,1}*)
+  optimizedTm.f.gpt
 ];
-
-t = {{{1, 1, 5}, {0, -1, -3}}, "co", {2, 7 / 5, 11}};
-(*testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "inharmonic", {1200.4181, 617.7581}];*)
-testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "subgroup", {1200.0558, 616.4318}];
-
 
 
 
@@ -181,15 +144,11 @@ optimizeGtmMinimaxPLimit[d_, t_, ptm_, complexityWeighting_, complexityPower_, n
   optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d, t, ptm, complexityWeighting, complexityPower]
 ];
 
-optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d_, t_, ptm_, complexityWeighting_, notion_] := Module[{w, tima, weightedTima, unchangedIntervals, g, gtm, quezz},
+optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d_, t_, ptm_, complexityWeighting_, notion_] := Module[{w, tima, weightedTima, unchangedIntervals, g, gtm},
   w = If[complexityWeighting == "P", 1 / ptm, Table[1, d]];
   tima = IdentityMatrix[d];
-  (*Print["I assume I am going here", d, tima, notion, w, t, ptm];*)
   
-  quezz = optimizeGtmWithPseudoInverse[tima, notion, w, t, ptm];
-  
-  (*Print["alreight well what do i get? ", quezz];*)
-  quezz
+  optimizeGtmWithPseudoInverse[tima, notion, w, t, ptm]
 ];
 
 optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d_, t_, ptm_, complexityWeighting_, complexityPower_] := Module[{gtm, ma, tm, e, solution},
@@ -261,35 +220,16 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, notion_, d_, t_, ptm_, weighted_
 optimizeGtmLeastSquares[{meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[{w, weightedTima, unchangedIntervals, g, gtm},
   w = getW[t, tima, weighted, weightingDirection, complexityWeighting, complexityPower];
   
-  (* Print["i hope here"];*)
-  
   optimizeGtmWithPseudoInverse[tima, notion, w, t, ptm]
 ];
 
 optimizeGtmWithPseudoInverse[tima_, notion_, w_, t_, ptm_] := Module[{ma, weightingMatrix, weightedTimaMapped, g, gtm},
   ma = getA[getM[t]];
-  
-  (*If[
-  !isStandardPrimeLimitB[getB[t]] && notion == "subgroup",
- (* optimizeGtmWithPseudoInverse[tima.rebase, notion, w.rebase, t.rebase, ptm.rebase], (* TODO: no i think you really gotta start over *)*)
- {1,1,1,1,1},*)
-  
-  
-  (* STANDARD INTERVAL BASIS, OR INHARMONIC NOTION *)
   weightingMatrix = DiagonalMatrix[w];
-  
-  (*  (* TODO: SUBGROUP NOTION? *)
-    commaBasisInNonstandardIntervalBasis = getC[t];
-      primeLimitIntervalBasis = getPrimes[getDp[getB[t]]];
-      commaBasisInPrimeLimitIntervalBasis = changeB[commaBasisInNonstandardIntervalBasis,primeLimitIntervalBasis];
-    mappingInPrimeLimitIntervalBasis = getM[commaBasisInPrimeLimitIntervalBasis];
-    Print["commaBasisInNonstandardIntervalBasis: ", commaBasisInNonstandardIntervalBasis," primeLimitIntervalBasis: ", primeLimitIntervalBasis," commaBasisInPrimeLimitIntervalBasis: ", commaBasisInPrimeLimitIntervalBasis,  " mappingInPrimeLimitIntervalBasis: ", mappingInPrimeLimitIntervalBasis];*)
-  
   weightedTimaMapped = ma.Transpose[tima].weightingMatrix;
   g = Transpose[tima].weightingMatrix.Transpose[weightedTimaMapped].Inverse[weightedTimaMapped.Transpose[weightedTimaMapped]]; (* TODO: if we're constantly transposing tima, maybe just do it once up front? or have getA respect the co/contra? *)
   gtm = ptm.g;
   gtm // N
-  (*  ]*)
 ];
 
 
@@ -500,7 +440,13 @@ processTuningOptions[
     damage,
     tuning,
     mean,
-    commaBasisInNonstandardIntervalBasis, primeLimitIntervalBasis, commaBasisInPrimeLimitIntervalBasis, mappingInPrimeLimitIntervalBasis, tPossiblyWithChangedIntervalBasis, b, ir
+    commaBasisInNonstandardIntervalBasis,
+    primeLimitIntervalBasis,
+    commaBasisInPrimeLimitIntervalBasis,
+    mappingInPrimeLimitIntervalBasis,
+    tPossiblyWithChangedIntervalBasis,
+    b,
+    ir
   },
   
   meanPower = inputMeanPower;
@@ -572,16 +518,9 @@ processTuningOptions[
     ]
   ];
   
-  
-  
-  
-  
   b = getB[t];
   If[
     !isStandardPrimeLimitB[b] && notion == "subgroup",
-    
-    (* TODO: SUBGROUP NOTION? *)
-    (* Print["b: ", b];*)
     
     commaBasisInNonstandardIntervalBasis = getC[t];
     primeLimitIntervalBasis = getPrimes[getDp[b]];
@@ -589,18 +528,15 @@ processTuningOptions[
     ir = getIrForC[b, primeLimitIntervalBasis];
     tima = If[tim === Null, getDiamond[d], If[Length[tim] == 0, If[forDamage, ir.getA[getC[t]], {}], ir.getA[tim]]];
     mappingInPrimeLimitIntervalBasis = getM[commaBasisInPrimeLimitIntervalBasis];
-    (*  Print["commaBasisInNonstandardIntervalBasis: ", commaBasisInNonstandardIntervalBasis," primeLimitIntervalBasis: ", primeLimitIntervalBasis," commaBasisInPrimeLimitIntervalBasis: ", commaBasisInPrimeLimitIntervalBasis,  " mappingInPrimeLimitIntervalBasis: ", mappingInPrimeLimitIntervalBasis, " ir: ", ir, " tima: ", tima];*)
     tPossiblyWithChangedIntervalBasis = mappingInPrimeLimitIntervalBasis;
     d = getD[tPossiblyWithChangedIntervalBasis];
     ptm = getPtm[tPossiblyWithChangedIntervalBasis],
-    
     
     tPossiblyWithChangedIntervalBasis = t;
     d = getD[tPossiblyWithChangedIntervalBasis];
     ptm = getPtm[tPossiblyWithChangedIntervalBasis];
     tima = If[tim === Null, getDiamond[d], If[Length[tim] == 0, If[forDamage, getA[getC[t]], {}], getA[tim]]];
   ];
-  (*Print["this thing still on? ", tPossiblyWithChangedIntervalBasis, " and should it have done the thing? ", !isStandardPrimeLimitB[b] && notion == "subgroup", " and did it do the right thing to tima? ", tima];*)
   
   {meanPower, tima, notion, d, tPossiblyWithChangedIntervalBasis, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}
 ];
