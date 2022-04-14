@@ -155,7 +155,27 @@ optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d_, t_, ptm_, complexityWeigh
   gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
   tm = gtm.ma;
-  e = If[complexityWeighting == "P", tm / ptm - Table[1, d], tm - ptm];
+  e = If[
+    complexityWeighting == "P",
+    tm / ptm - Table[1, d],
+    If[
+      complexityWeighting == "logSopfr",
+      (tm - ptm) * (1 / Map[getLogSopfrComplexity[#, t]&, IdentityMatrix[getD[t]]]),
+      If[
+        complexityWeighting == "kees",
+        (tm - ptm) * (1 / Map[getKeesComplexity[#, t]&, IdentityMatrix[getD[t]]]),
+        If[
+          complexityWeighting == "bop",
+          (tm - ptm) * (1 / Map[getBopComplexity[#, t]&, IdentityMatrix[getD[t]]]),
+          If[
+            complexityWeighting == "sopfr",
+            (tm - ptm) * (1 / Map[getSopfrComplexity[#, t]&, IdentityMatrix[getD[t]]]),
+            tm - ptm
+          ]
+        ]
+      ]
+    ]
+  ];
   
   solution = NMinimize[Norm[e, dualPower[complexityPower]], gtm, Method -> "NelderMead", WorkingPrecision -> 15];
   gtm /. Last[solution] // N
@@ -184,7 +204,7 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, notion_, d_, t_, ptm_, weighted_
   
   mappedTima = Transpose[ma.Transpose[tima]];
   pureTimaSizes = Map[ptm.#&, tima];
-  w = getW[t, tima, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[t, tima, notion, weighted, weightingDirection, complexityWeighting, complexityPower];
   
   solution = NMinimize[
     Max[
@@ -218,7 +238,7 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, notion_, d_, t_, ptm_, weighted_
 (* LEAST-SQUARES *)
 
 optimizeGtmLeastSquares[{meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[{w, weightedTima, unchangedIntervals, g, gtm},
-  w = getW[t, tima, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[t, tima, notion, weighted, weightingDirection, complexityWeighting, complexityPower];
   
   optimizeGtmWithPseudoInverse[tima, notion, w, t, ptm]
 ];
@@ -278,7 +298,7 @@ optimizeGtmSimplex[meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightin
     
     tiedTms = Part[potentialTms, Flatten[minMeanIndices]];
     tiedPs = Part[potentialPs, Flatten[minMeanIndices]];
-    minMeanIndex = tieBreak[tiedTms, meanPower, tima, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
+    minMeanIndex = tieBreak[tiedTms, meanPower, tima, notion, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
     minMeanP = tiedPs[[minMeanIndex]]
   ];
   
@@ -388,6 +408,22 @@ getSumOfSquaresDamage[tm_, {meanPower_, tima_, notion_, d_, t_, ptm_, weighted_,
 
 getMaxDamage[tm_, {meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
     Max[Map[Abs, getTid[t, tm, tima, notion, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+
+getLogSopfrDamage[tm_, {meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[{e, w},
+  e = N[tm.Transpose[tima]] - N[ptm.Transpose[tima]];
+  w = Map[getLogSopfrComplexity[#, t]&, tima];
+  w = If[weightingDirection == "regressive", 1 / w, w];
+  
+  e * w
+];
+getLogSopfrComplexity[pcv_, t_] := Log[2, getSopfrComplexity[pcv, t]];
+getKeesComplexity[pcv_, t_] := Module[{rational},
+  rational = pcvToRational[noTwos[pcv]]; (* TODO: this doesn't support nonstandard interval bases yet *)
+  Max[Numerator[rational], Denominator[rational]]
+];
+getBopComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getB[t], pcv}];
+getSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getB[t], pcv}]];
+noTwos[pcv_] := MapIndexed[If[First[#2] == 1, 0, #1]&, pcv];
 
 tieBreak[tiedTms_, meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{meanOfDamages},
   meanOfDamages = Map[getSumOfSquaresDamage[#, {meanPower, tima, notion, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}]&, tiedTms];
