@@ -129,7 +129,7 @@ optimizeGtmMinimax[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlop
   If[
     damageWeightingSlope == "unweighted",
     optimizeGtmMinimaxTargetingListAnalytical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch],
-    optimizeGtmMinimaxTargetingListNumerical[tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
+    optimizeGtmTargetingListNumerical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
   ]
 ];
 
@@ -167,8 +167,19 @@ optimizeGtmTargetingAllSolverNumerical[d_, t_, ptm_, complexityUnitsMultiplier_,
   ]
 ];
 
-optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[{e, solution},
-  e = If[
+optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
+  {
+    e,
+    solution,
+    previousSolution,
+    optimizationPower,
+    previousPrimesErrorMagnitude,
+    primesErrorMagnitude,
+    normPowerPower,
+    normPower
+  },
+  
+  eₚ = If[
     complexityUnitsMultiplier == "standardized",
     tm / ptm - Table[1, d],
     If[
@@ -177,18 +188,33 @@ optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMulti
       tm - ptm
     ]
   ];
+  optimizationPower = dualPower[complexityNormPower];
+  previousPrimesErrorMagnitude = \[Infinity];
+  primesErrorMagnitude = 1000000;
+  normPowerPower = 1;
+  normPower = 2;
   
-  (* TODO: note that this is power is always 1, therefore dual used below is \[Infinity], because in here we're always minimaxing damage *)
+  While[
+    normPowerPower <= 7 && previousPrimesErrorMagnitude - primesErrorMagnitude > 0.000001,
+    
+    previousPrimesErrorMagnitude = primesErrorMagnitude;
+    previousSolution = solution;
+    solution = NMinimize[Norm[eₚ, normPower], gtm];
+    primesErrorMagnitude = First[solution];
+    normPowerPower = normPowerPower += 1;
+    normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
+  ];
   
-  solution = NMinimize[Norm[e, dualPower[complexityNormPower]], gtm, Method -> "NelderMead", WorkingPrecision -> 15];
-  gtm /. Last[solution] // N
+  (* TODO: note that this is power is always 1, therefore dual used below is \[Infinity], because if you're using power 2, then you're using the pseudoinverse technique, and there's no good reason to look at 1-min'd prime error mag for \[Infinity]-min'd intervals; except this consideration is now outmoded to large extent by the fact that this should follow the pattern of optimizeGtmTargetingListNumerical *)
+  
+  gtm /. Last[previousSolution] // N
 ];
 
 optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogIntegerLimit[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[{augmentedThing, logIntegerLimitNorm, solution, middleMan},
   middleMan = tm / ptm - Table[1, d]; (* TODO: Note: currently weighted *)
   augmentedThing = AppendTo[middleMan, 0];
   logIntegerLimitNorm = Max[augmentedThing] - Min[augmentedThing];
-  solution = NMinimize[logIntegerLimitNorm, gtm, Method -> "NelderMead", WorkingPrecision -> 15];
+  solution = NMinimize[logIntegerLimitNorm, gtm];
   gtm /. Last[solution] // N
 ];
 
@@ -196,7 +222,7 @@ optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogOddLimit[d_, t_, ptm_, com
   middleMan = Drop[tm - ptm, 1]; (* TODO: Note: currently NOT weighted *)
   augmentedThing = AppendTo[middleMan, 0];
   logOddLimitNorm = Max[augmentedThing] - Min[augmentedThing];
-  solution = NMinimize[logOddLimitNorm, gtm, Method -> "NelderMead", WorkingPrecision -> 15];
+  solution = NMinimize[logOddLimitNorm, gtm];
   gtm /. Last[solution] // N
 ];
 
@@ -207,51 +233,6 @@ dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
 optimizeGtmMinimaxTargetingListAnalytical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_] :=
     optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch];
-
-optimizeGtmMinimaxTargetingListNumerical[tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
-  {
-    gtm,
-    ma,
-    mappedTima,
-    pureTimaSizes,
-    w,
-    solution
-  },
-  
-  gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
-  ma = getA[getM[t]];
-  
-  mappedTima = Transpose[ma.Transpose[tima]];
-  pureTimaSizes = Map[ptm.#&, tima];
-  w = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
-  
-  solution = NMinimize[
-    Max[
-      MapIndexed[
-        Function[
-          {mappedTi, tiIndex},
-          Abs[
-            Total[
-              MapThread[
-                Function[
-                  {mappedTiEntry, gtmEntry},
-                  mappedTiEntry * gtmEntry
-                ],
-                {mappedTi, gtm}
-              ]
-            ] - pureTimaSizes[[tiIndex]]
-          ] * w[[tiIndex]]
-        ],
-        mappedTima
-      ]
-    ],
-    gtm,
-    Method -> "NelderMead",
-    WorkingPrecision -> 15
-  ];
-  
-  gtm /. Last[solution] // N
-];
 
 
 (* MINISOS *)
@@ -278,15 +259,24 @@ optimizeGtmWithPseudoInverse[tima_, w_, t_, ptm_] := Module[{ma, weightingMatrix
 optimizeGtmMinisum[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_}] :=
     optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch];
 
-(* TODO: very not dry with optimizeGtmMinimaxTargetingListNumerical *)
-optimizeGtmMinisumTargetingListNumerical[tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
+
+(* SOLVER (USED BY NUMERICAL MINIMAX AND MINISUM) *)
+
+(* TODO: you could save a lot of computation time and possbily get more precise reuslts if yo had a function that would take in a mapping matrix and output whether it is parallel to its corresponding concentric constant TOP damage shape, i.e. whether or not it has a unique TOP tuning? then you could just go back to the way of minimization = Max or Total depending ont he oprtimizationPower *)
+optimizeGtmTargetingListNumerical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
   {
     gtm,
     ma,
     mappedTima,
     pureTimaSizes,
     w,
-    solution
+    solution,
+    errorMagnitude,
+    previousErrorMagnitude,
+    normPower,
+    normPowerPower,
+    e,
+    previousSolution
   },
   
   gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
@@ -296,32 +286,40 @@ optimizeGtmMinisumTargetingListNumerical[tima_, d_, t_, ptm_, damageWeightingSlo
   pureTimaSizes = Map[ptm.#&, tima];
   w = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
   
-  solution = NMinimize[
-    Total[
-      MapIndexed[
-        Function[
-          {mappedTi, tiIndex},
-          Abs[
-            Total[
-              MapThread[
-                Function[
-                  {mappedTiEntry, gtmEntry},
-                  mappedTiEntry * gtmEntry
-                ],
-                {mappedTi, gtm}
-              ]
-            ] - pureTimaSizes[[tiIndex]]
-          ] * w[[tiIndex]]
-        ],
-        mappedTima
-      ]
+  previousErrorMagnitude = \[Infinity];
+  errorMagnitude = 1000000;
+  normPowerPower = 1;
+  normPower = 2;
+  e = Flatten[MapIndexed[
+    Function[
+      {mappedTi, tiIndex},
+      Abs[
+        Total[
+          MapThread[
+            Function[
+              {mappedTiEntry, gtmEntry},
+              mappedTiEntry * gtmEntry
+            ],
+            {mappedTi, gtm}
+          ]
+        ] - pureTimaSizes[[tiIndex]]
+      ] * w[[tiIndex]]
     ],
-    gtm,
-    Method -> "NelderMead",
-    WorkingPrecision -> 15
+    mappedTima
+  ]];
+  
+  While[
+    normPowerPower <= 7 && previousErrorMagnitude - errorMagnitude > 0.000001,
+    
+    previousErrorMagnitude = errorMagnitude;
+    previousSolution = solution;
+    solution = NMinimize[Norm[e, normPower], gtm];
+    errorMagnitude = First[solution];
+    normPowerPower = normPowerPower += 1;
+    normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
   
-  gtm /. Last[solution] // N
+  gtm /. Last[previousSolution] // N
 ];
 
 
@@ -364,12 +362,8 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
     gpt = Transpose[getA[getGpt[t]]];
     projectedGenerators = minMeanP.gpt;
     ptm.projectedGenerators // N,
-    
-    If[
-      optimizationPower == 1,
-      optimizeGtmMinisumTargetingListNumerical[tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower],
-      optimizeGtmMinimaxTargetingListNumerical[tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
-    ]
+  
+    optimizeGtmTargetingListNumerical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
   ]
 ];
 
