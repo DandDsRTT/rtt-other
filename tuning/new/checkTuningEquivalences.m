@@ -5,11 +5,12 @@ et5M5 = {{{5, 8, 12}}, "co"};
 septimalBlackwoodM = {{{5, 8, 0, 14}, {0, 0, 1, 0}}, "co"};
 tetracotM = {{{1, 1, 1}, {0, 4, 9}}, "co"};
 
-checkKeesIsPotopConjecture[t_] := Module[{keesTuning, topTuning},
-  (*  keesTuning = optimizeGtm[t, "mean" -> "MAV", "weighted" -> True, "complexityWeighting" -> "oddLimit", "tim" -> {}];*)
-  keesTuning = optimizeGtm[t, "tuning" -> "Kees"];
-  topTuning = optimizeGtm[t, "tuning" -> "TOP"];
+checkKeesIsPotopConjecture[t_] := Module[{keesTuning, topTuning, potopTuning},
+  (*  keesTuning = optimizeGtm[t, "optimization" -> "minimax", "weighted" -> True, "complexityUnitsMultiplier" -> "oddLimit", "tim" -> {}];*)
+  keesTuning = optimizeGtm[t, "originalTuningName" -> "Kees"];
+  topTuning = optimizeGtm[t, "originalTuningName" -> "TOP"];
   potopTuning = 1200 * (topTuning / First[topTuning]); (* TODO: this doesn't handle nonoctave periods *)
+  (* TODO: I should just implement PO *)
   
   Print["keesTuning: ", keesTuning];
   Print["topTuning: ", topTuning];
@@ -19,9 +20,9 @@ checkKeesIsPotopConjecture[t_] := Module[{keesTuning, topTuning},
 ];
 checkKeIsPoteConjecture[t_] := Module[{}, True]; (*same but change complexity power to 2? *)
 checkLogSopfrIsTopConjecture[t_] := Module[{logSopfrTuning, topTuning},
-  (*  logSopfrTuning = optimizeGtm[t, "mean" -> "MAV", "weighted" -> True, "complexityWeighting" -> "logSopfr", "tim" -> {}];*)
-  logSopfrTuning = optimizeGtm[t, "tuning" -> "logSopfr"];
-  topTuning = optimizeGtm[t, "tuning" -> "TOP"];
+  (*  logSopfrTuning = optimizeGtm[t, "optimization" -> "minimax", "weighted" -> True, "complexityUnitsMultiplier" -> "logSopfr", "tim" -> {}];*)
+  logSopfrTuning = optimizeGtm[t, "originalTuningName" -> "logSopfr"];
+  topTuning = optimizeGtm[t, "originalTuningName" -> "TOP"];
   
   Print["logSopfrTuning: ", logSopfrTuning];
   Print["topTuning: ", topTuning];
@@ -29,10 +30,10 @@ checkLogSopfrIsTopConjecture[t_] := Module[{logSopfrTuning, topTuning},
   logSopfrTuning == topTuning
 ];
 checkSopfrIsBopConjecture[t_] := Module[{sopfrTuning, bopTuning},
-  sopfrTuning = optimizeGtm[t, "tuning" -> "sopfr"];
-  bopTuning = optimizeGtm[t, "tuning" -> "BOP"];
-  (*  sopfrTuning = optimizeGtm[t, "mean" -> "MAV", "weighted" -> True, "complexityWeighting" -> "sopfr", "tim" -> {}];*)
-  (*  bopTuning = optimizeGtm[t, "mean" -> "MAV", "weighted" -> True, "complexityWeighting" -> "product", "tim" -> {}];*)
+  sopfrTuning = optimizeGtm[t, "originalTuningName" -> "sopfr"];
+  bopTuning = optimizeGtm[t, "originalTuningName" -> "BOP"];
+  (*  sopfrTuning = optimizeGtm[t, "optimization" -> "minimax", "weighted" -> True, "complexityUnitsMultiplier" -> "sopfr", "tim" -> {}];*)
+  (*  bopTuning = optimizeGtm[t, "optimization" -> "minimax", "weighted" -> True, "complexityUnitsMultiplier" -> "product", "tim" -> {}];*)
   
   Print["sopfrTuning: ", sopfrTuning];
   Print["bopTuning: ", bopTuning];

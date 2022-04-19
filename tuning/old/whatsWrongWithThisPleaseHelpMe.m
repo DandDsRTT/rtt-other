@@ -44,7 +44,7 @@ getW[tim_, unweighted_, gression_, weighting_, normNumber_] := Module[{complexit
     unweighted == True,
     Map[1, complexities],
     If[
-      gression == "regressive",
+      gression == "simplicityWeighted",
       1 / complexities,
       complexities
     ]
@@ -54,7 +54,7 @@ getW[tim_, unweighted_, gression_, weighting_, normNumber_] := Module[{complexit
 ensureNumeric[n_, gtm_] := If[NumberQ[n], n, Print["well what the fuck is it? does this even owrk", (*gtm,  n,*) {g1 → 0.918621, g2 → 0.716689} /. n // N]];
 
 (*given a mapping, a target intervals matrix (currently defaults to 5-odd-limit diamond), which mean to take (minimax, least squares, least absolutes; currently hardcoded to minimax),and a weighting (unweighted, or {progressive/regressive, P/F/T, 1/2/\[Infinity]}; currently defaults to progressive P1 (partch))*)
-tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "regressive", weighting_ : "P", normNumber_ : "1"] := Module[{r, d, tim, ma, gtm, mappedTim, complexities, solution},
+tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityWeighted", weighting_ : "standardized", normNumber_ : "1"] := Module[{r, d, tim, ma, gtm, mappedTim, complexities, solution},
   r = getR[m];
   d = getD[m];
   tim = getDiamond[If[d == 3, 5, 7]];
@@ -97,5 +97,5 @@ tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "regressive"
 
 
 
-partch = tune[m, \[Infinity], False, "progressive", "P", 1]
+partch = tune[m, \[Infinity], False, "complexityWeighted", "standardized", 1]
 minimax = tune[m, \[Infinity], True]

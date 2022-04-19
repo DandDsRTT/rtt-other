@@ -2,24 +2,24 @@
 
 
 checkLonePrimeConjecture[m_] := Module[{a1,a2,b1,b2, c1, c2, d1, d2},
-  (*a1 = optimizeGtm[m, "tuning" -> "Euclidean"]; (*AMES-minimax, AKA Frobenius *)
+  (*a1 = optimizeGtm[m, "originalTuningName" -> "Frobenius"]; (*AMES-minimax, AKA Frobenius *)
   Print["a1: ", a1];
-  a2 = optimizeGtm[m, "tuning" -> "least squares", "tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target U-minisos*)
+  a2 = optimizeGtm[m, "originalTuningName" -> "least squares", "tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target U-minisos*)
   Print["a2: ", a2];
   
-      b1= optimizeGtm[m, "tuning" -> "Breed"]; (*AES-minimax, AKA TE*)
+      b1= optimizeGtm[m, "originalTuningName" -> "TE"]; (*AES-minimax, AKA TE*)
     Print["b1: ", b1];
-      b2 = optimizeGtm[m, "tuning" -> "least squares","damage" -> "P2" ,"tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target ES-minisos*)
+      b2 = optimizeGtm[m, "originalTuningName" -> "least squares","damage" -> "ES" ,"tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target ES-minisos*)
       Print["b2: ", b2];*)
   
-  c1 = optimizeGtm[m,"mean" -> "MAV", "damage" -> "F1", "tim" ->{}]; (*AMS-minimax- member, 1 is on intervals, \[Infinity] is on primes*)
+  c1 = optimizeGtm[m,"optimization" -> "minimax", "damage" -> "MS", "tim" ->{}]; (*AMS-minimax- member, 1 is on intervals, \[Infinity] is on primes*)
   Print["c1: ", c1];
-  c2 = optimizeGtm[m, "mean" -> "MAV", "weighted" -> False,"tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target U-minimax*)
+  c2 = optimizeGtm[m, "optimization" -> "minimax", "weighted" -> False,"tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target U-minimax*)
   Print["c2: ", c2];
   
-  d1= optimizeGtm[m, "mean" -> "MAV","damage" -> "P1", "tim" -> {}]; (*AS-minimax, AKA TOP - member, 1 is on intervals, \[Infinity] is on primes*)
+  d1= optimizeGtm[m, "optimization" -> "minimax","damage" -> "S", "tim" -> {}]; (*AS-minimax, AKA TOP - member, 1 is on intervals, \[Infinity] is on primes*)
   Print["d1: ", d1];
-  d2 = optimizeGtm[m, "mean" -> "MAV","damage" -> "P1" ,"tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target S-minimax, that is, simplicity-weighted*)
+  d2 = optimizeGtm[m, "optimization" -> "minimax","damage" -> "S" ,"tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target S-minimax, that is, simplicity-weighted*)
   Print["d2: ", d2];
   
   (*And @@MapThread[Abs[#1 -#2]<0.01&, {a1, a2}] && 

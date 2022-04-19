@@ -57,14 +57,14 @@ m = {{{1, 2, 3}, {0, -3, -5}}, "co"}; (*porcupine*)
 m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)*)
 
 1200 * getLeastSquaresTuningWeighted[m]
-1200 * getLeastSquaresTuningWeighted[m, "regressive", "F", 1]
-1200 * getLeastSquaresTuningWeighted[m, "regressive", "F", 2]
-1200 * getLeastSquaresTuningWeighted[m, "regressive", "P", 1]
-1200 * getLeastSquaresTuningWeighted[m, "regressive", "P", 2]
-1200 * getLeastSquaresTuningWeighted[m, "progressive", "F", 1]
-1200 * getLeastSquaresTuningWeighted[m, "progressive", "F", 2]
-1200 * getLeastSquaresTuningWeighted[m, "progressive", "P", 1]
-1200 * getLeastSquaresTuningWeighted[m, "progressive", "P", 2]
+1200 * getLeastSquaresTuningWeighted[m, "simplicityWeighted", "unstandardized", 1]
+1200 * getLeastSquaresTuningWeighted[m, "simplicityWeighted", "unstandardized", 2]
+1200 * getLeastSquaresTuningWeighted[m, "simplicityWeighted", "standardized", 1]
+1200 * getLeastSquaresTuningWeighted[m, "simplicityWeighted", "standardized", 2]
+1200 * getLeastSquaresTuningWeighted[m, "complexityWeighted", "unstandardized", 1]
+1200 * getLeastSquaresTuningWeighted[m, "complexityWeighted", "unstandardized", 2]
+1200 * getLeastSquaresTuningWeighted[m, "complexityWeighted", "standardized", 1]
+1200 * getLeastSquaresTuningWeighted[m, "complexityWeighted", "standardized", 2]
 
 (*1200 * getLeastSquaresTuning[{{{1, 1, 0}, {0, 1, 4}}, "co"}]
 1200 * getLeastSquaresTuning[{{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"}]

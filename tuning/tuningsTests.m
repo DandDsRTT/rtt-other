@@ -23,154 +23,140 @@ test[getGpt, {{{4, -4, 1}}, "contra"}, {{{1, 0, 0}, {0, 1, 0}}, "contra"}];
 
 (* TUNING *)
 
+(* some temperaments to check against *)
+
+meantone = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+blackwood = {{{5, 8, 0}, {0, 0, 1}}, "co"};
+dicot = {{ {1, 1, 2}, {0, 2, 1}}, "co"};
+augmented = {{{3, 0, 7}, {0, 1, 0}}, "co"};
+mavila = {{{1, 0, 7}, {0, 1, -3}}, "co"};
+porcupine = {{{1, 2, 3}, {0, 3, 5}}, "co"};
+srutal = {{{2, 0, 11}, {0, 1, -2}}, "co"};
+hanson = {{{1, 0, 1}, {0, 6, 5}}, "co"};
+magic = {{{1, 0, 2}, {0, 5, 1}}, "co"};
+negri = {{{1, 2, 2}, {0, -4, 3}}, "co"};
+tetracot = {{{1, 1, 1}, {0, 4, 9}}, "co"};
+meantone7 = {{{1, 0, -4, -13}, {0, 1, 4, 10}}, "co"};
+magic7 = {{{1, 0, 2, -1}, {0, 5, 1, 12}}, "co"};
+pajara = {{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"};
+augene = {{{3, 0, 7, 18}, {0, 1, 0, -2}}, "co"};
+sensi = {{{1, -1, -1, -2}, {0, 7, 9, 13}}, "co"};
+sensamagic = {{{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}}, "co"};
+
 (* optimizeGtm, by individual tuning properties *)
 
-t = {{{1, 1, 0}, {0, 1, 4}}, "co"}; (* meantone *)
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1200., 696.578}];
 
-testClose[optimizeGtm, t, {1200., 696.578}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1202.39, 697.176}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1202.728, 697.26}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.7, 697.564}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.6, 697.53}];
 
-testClose[optimizeGtm, t, "weighted" -> True, "complexityWeighting" -> "F", {1202.39, 697.176}];
-testClose[optimizeGtm, t, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, {1202.728, 697.26}];
-testClose[optimizeGtm, t, "weighted" -> True, {1201.7, 697.564}];
-testClose[optimizeGtm, t, "weighted" -> True, "complexityPower" -> 2, {1201.6, 697.53}];
+testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1202.39, 697.176}];
+testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1202.61, 696.741}];
+testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.7, 697.564}];
+testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.4, 697.049}];
 
-testClose[optimizeGtm, t, "weighted" -> True, "complexityWeighting" -> "F", "tim" -> {}, {1202.39, 697.176}];
-testClose[optimizeGtm, t, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, "tim" -> {}, {1202.61, 696.741}];
-testClose[optimizeGtm, t, "weighted" -> True, "tim" -> {}, {1201.7, 697.564}];
-testClose[optimizeGtm, t, "weighted" -> True, "complexityPower" -> 2, "tim" -> {}, {1201.4, 697.049}];
-
-testClose[optimizeGtm, t, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", {1197.61, 694.786}];
-testClose[optimizeGtm, t, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", "complexityPower" -> 2, {1197.43, 694.976}];
-testClose[optimizeGtm, t, "weighted" -> True, "weightingDirection" -> "progressive", {1197.98, 694.711}];
-testClose[optimizeGtm, t, "weighted" -> True, "weightingDirection" -> "progressive", "complexityPower" -> 2, {1198.16, 695.01}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1197.61, 694.786}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1197.43, 694.976}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", {1197.98, 694.711}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1198.16, 695.01}];
 
 
-testClose[optimizeGtm, t, "meanPower" -> 2, {1199.02, 695.601}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "unweighted", {1199.02, 695.601}];
 
-testClose[optimizeGtm, t, "meanPower" -> 2, "weighted" -> True, "complexityWeighting" -> "F", {1200.07, 696.005}];
-testClose[optimizeGtm, t, "meanPower" -> 2, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, {1200.74, 696.205}];
-testClose[optimizeGtm, t, "meanPower" -> 2, "weighted" -> True, {1200.98, 696.904}];
-testClose[optimizeGtm, t, "meanPower" -> 2, "weighted" -> True, "complexityPower" -> 2, {1201.13, 696.905}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1200.07, 696.005}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1200.74, 696.205}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", {1200.98, 696.904}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.13, 696.905}];
 
-testClose[optimizeGtm, t, "meanPower" -> 2, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", {1198.4, 695.289}];
-testClose[optimizeGtm, t, "meanPower" -> 2, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", "complexityPower" -> 2, {1198.24, 695.294}];
-testClose[optimizeGtm, t, "meanPower" -> 2, "weighted" -> True, "weightingDirection" -> "progressive", {1198.08, 694.93}];
-testClose[optimizeGtm, t, "meanPower" -> 2, "weighted" -> True, "weightingDirection" -> "progressive", "complexityPower" -> 2, {1197.93, 694.911}];
-
-
-testClose[optimizeGtm, t, "meanPower" -> 1, {1200., 696.578}];
-
-testClose[optimizeGtm, t, "meanPower" -> 1, "weighted" -> True, "complexityWeighting" -> "F", {1195.7, 693.352}];
-testClose[optimizeGtm, t, "meanPower" -> 1, "weighted" -> True, "complexityWeighting" -> "F", "complexityPower" -> 2, {1195.7, 693.352}];
-testClose[optimizeGtm, t, "meanPower" -> 1, "weighted" -> True, {1200., 696.578}];
-testClose[optimizeGtm, t, "meanPower" -> 1, "weighted" -> True, "complexityPower" -> 2, {1200., 696.578}];
-
-testClose[optimizeGtm, t, "meanPower" -> 1, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", {1200., 696.578}];
-testClose[optimizeGtm, t, "meanPower" -> 1, "weighted" -> True, "weightingDirection" -> "progressive", "complexityWeighting" -> "F", "complexityPower" -> 2, {1200., 696.578}];
-testClose[optimizeGtm, t, "meanPower" -> 1, "weighted" -> True, "weightingDirection" -> "progressive", {1195.7, 693.352}];
-testClose[optimizeGtm, t, "meanPower" -> 1, "weighted" -> True, "weightingDirection" -> "progressive", "complexityPower" -> 2, {1195.7, 693.352}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1198.4, 695.289}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1198.24, 695.294}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", {1198.08, 694.93}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1197.93, 694.911}];
 
 
-(* optimizeGtm, by "mean" and "damage" *)
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1200., 696.578}];
 
-t = {{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"}; (* pajara *)
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1195.7, 693.352}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1195.7, 693.352}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", {1200., 696.578}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1200., 696.578}];
 
-testClose[optimizeGtm, t, "mean" -> "MAV", {600., 106.843}]; (*it seems, based on my https://docs.google.com/spreadsheets/d/1D6mE4MvbsbLqTDTYyagmlKZ_TenrqoN84VLDzsLfJnQ/edit#gid=1685147662, that 108.01 is actually more correct *)
-
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "F1", {596.502, 106.767}];
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "F2", {598.233, 104.469}];
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "P1", {598.447, 107.09}];
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "P2", {599.682, 107.988}];
-
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "F1", "tim" -> {}, {597.119, 103.293}];
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "F2", "tim" -> {}, {598.345, 106.693}];
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "P1", "tim" -> {}, {598.447, 106.567}];
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "P2", "tim" -> {}, {598.859, 106.844}];
-
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "pF1", {601.897, 108.014}];
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "pF2", {601.99, 108.325}];
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "pP1", {601.553, 107.922}];
-testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "pP2", {600.318, 108.159}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1200., 696.578}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1200., 696.578}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", {1195.7, 693.352}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1195.7, 693.352}];
 
 
-testClose[optimizeGtm, t, "mean" -> "RMS", {599.45, 107.15}];
+(* optimizeGtm, by "systematicTuningName" *)
+(* TODO: you should probably instead just test that these map to the correct traits, or something *)
 
-testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "F1", {597.851, 106.643}];
-testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "F2", {598.31, 106.798}];
-testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "P1", {598.436, 106.672}];
-testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "P2", {598.762, 106.835}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-U", {600., 106.843}]; (*it seems, based on my https://docs.google.com/spreadsheets/d/1D6mE4MvbsbLqTDTYyagmlKZ_TenrqoN84VLDzsLfJnQ/edit#gid=1685147662, that 108.01 is actually more correct *)
 
-testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "pF1", {601.653, 107.288}];
-testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "pF2", {601.522, 107.178}];
-testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "pP1", {600.655, 107.426}];
-testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "pP2", {600.263, 107.259}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-MS", {596.502, 106.767}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-MES", {598.233, 104.469}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-S", {598.447, 107.09}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-ES", {599.682, 107.988}];
 
+testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-MS", {597.119, 103.293}];
+testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-MES", {598.345, 106.693}];
+testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-S", {598.447, 106.567}];
+testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-ES", {598.859, 106.844}];
 
-testClose[optimizeGtm, t, "mean" -> "AAV", {600., 106.843}];
-
-testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "F1", {596.741, 105.214}];
-testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "F2", {596.741, 105.214}];
-testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "P1", {596.741, 105.214}];
-testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "P2", {596.741, 105.214}];
-
-testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pF1", {601.397, 106.145}];
-testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pF2", {601.397, 106.145}];
-testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pP1", {600., 106.843}];
-testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pP2", {600., 106.843}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-MC", {601.897, 108.014}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-MEC", {601.99, 108.325}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-C", {601.553, 107.922}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-EC", {600.318, 108.159}];
 
 
-(* optimizeGtm, by "tuning" *)
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-U", {599.45, 107.15}];
 
-testClose[optimizeGtm, t, "tuning" -> "minimax", {600., 106.843}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-MS", {597.851, 106.643}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-MES", {598.31, 106.798}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-S", {598.436, 106.672}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-ES", {598.762, 106.835}];
 
-(*testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "F1", {596.502, 106.767}];*)
-(*testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "F2", {598.233, 104.469}];*)
-(*testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "P1", {598.447, 107.09}];*)
-(*testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "P2", {599.682, 107.988}];*)
-
-(*testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "F1", "tim" -> {}, {597.119, 103.293}];*)
-testClose[optimizeGtm, t, "tuning" -> "Euclidean", {598.345, 106.693}];
-testClose[optimizeGtm, t, "tuning" -> "Tenney", {598.447, 106.567}];
-testClose[optimizeGtm, t, "tuning" -> "Breed", {598.859, 106.844}];
-
-(*testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "pF1", {601.897, 108.014}];*)
-(*testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "pF2", {601.99, 108.325}];*)
-testClose[optimizeGtm, t, "tuning" -> "Partch", {601.553, 107.922}];
-(*testClose[optimizeGtm, t, "mean" -> "MAV", "damage" -> "pP2", {600.318, 108.159}];*)
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-MC", {601.653, 107.288}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-MEC", {601.522, 107.178}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-C", {600.655, 107.426}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-EC", {600.263, 107.259}];
 
 
-testClose[optimizeGtm, t, "tuning" -> "least squares", {599.45, 107.15}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-U", {600., 106.843}];
 
-(*testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "F1", {597.851, 106.643}];*)
-(*testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "F2", {598.31, 106.798}];*)
-testClose[optimizeGtm, t, "tuning" -> "Tenney least squares", {598.436, 106.672}];
-(*testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "P2", {598.762, 106.835}];*)
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MS", {596.741, 105.214}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MES", {596.741, 105.214}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-S", {596.741, 105.214}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-ES", {596.741, 105.214}];
 
-(*testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "pF1", {601.653, 107.288}];*)
-(*testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "pF2", {601.522, 107.178}];*)
-(*testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "pP1", {600.655, 107.426}];*)
-(*testClose[optimizeGtm, t, "mean" -> "RMS", "damage" -> "pP2", {600.263, 107.259}];*)
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MC", {601.397, 106.145}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MEC", {601.397, 106.145}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-C", {600., 106.843}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-EC", {600., 106.843}];
 
 
-testClose[optimizeGtm, t, "tuning" -> "least absolutes", {600., 106.843}];
+(* optimizeGtm, by "originalTuningName" *)
+(* TODO: you should probably instead just test that these map to the correct traits, or something *)
 
-(*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "F1", {596.741, 105.214}];*)
-(*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "F2", {596.741, 105.214}];*)
-(*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "P1", {596.741, 105.214}];*)
-(*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "P2", {596.741, 105.214}];*)
+testClose[optimizeGtm, pajara, "originalTuningName" -> "minimax", {600., 106.843}];
+testClose[optimizeGtm, pajara, "originalTuningName" -> "least squares", {599.45, 107.15}];
+testClose[optimizeGtm, pajara, "originalTuningName" -> "TOP", {598.447, 106.567}];
+testClose[optimizeGtm, pajara, "originalTuningName" -> "TE", {598.859, 106.844}];
+testClose[optimizeGtm, pajara, "originalTuningName" -> "Frobenius", {598.345, 106.693}];
 
-(*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pF1", {601.397, 106.145}];*)
-(*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pF2", {601.397, 106.145}];*)
-(*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pP1", {600., 106.843}];*)
-(*testClose[optimizeGtm, t, "mean" -> "AAV", "damage" -> "pP2", {600., 106.843}];*)
+
+(* interval basis *)
+(* TODO: rename options to traits *)
+(* TODO: decide whether I really want to use camelCase for the user provided options, or sentence case maybe would be better*)
 
 t = {{{1, 1, 5}, {0, -1, -3}}, "co", {2, 7 / 5, 11}};
-testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "inharmonic", {1200.4181, 617.7581}];
-testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "subgroup", {1200.0558, 616.4318}];
+testClose[optimizeGtm, t, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningIntervalBasis" -> "formalPrimes", {1200.4181, 617.7581}];
+testClose[optimizeGtm, t, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningIntervalBasis" -> "primes", {1200.0558, 616.4318}];
 
 t = {{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}};
-testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "inharmonic", {1201.3969, 3796.8919, 5270.7809}];
-testClose[optimizeGtm, t, "tuning" -> "Breed", "notion" -> "subgroup", {1201.3969, 3796.8919, 5267.2719}];
+testClose[optimizeGtm, t, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningIntervalBasis" -> "formalPrimes", {1201.3969, 3796.8919, 5270.7809}];
+testClose[optimizeGtm, t, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningIntervalBasis" -> "primes", {1201.3969, 3796.8919, 5267.2719}];
 
 
 (* ___ PRIVATE ___ *)
@@ -210,15 +196,14 @@ test[oddLimitFromD, 5, 11];
 test[oddLimitFromD, 6, 15];
 
 (* getComplexity *)
-test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "F", 1, 3];
-test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "F", 2, \[Sqrt]3];
-test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "P", 1, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
+test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "unstandardized", 1, 3];
+test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "unstandardized", 2, \[Sqrt]3];
+test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "standardized", 1, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
 
 (* getDamage *)
-testClose[getDamage, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {1200., 696.578}, "tuning" -> "least absolutes", 0.0179233];
-testClose[getDamage, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {1201.7, 697.564}, "tuning" -> "Tenney", 0.00141545];
-testClose[getDamage, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {1199.02, 695.601}, "tuning" -> "least squares", 0.000072999];
-testClose[getDamage, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {1200., 696.578}, "tuning" -> "minimax", 0.0044808];
+testClose[getDamage, meantone, {1201.7, 697.564}, "originalTuningName" -> "TOP", 0.00141545];
+testClose[getDamage, meantone, {1199.02, 695.601}, "originalTuningName" -> "least squares", 0.000072999];
+testClose[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 0.00179235];
 
 
 

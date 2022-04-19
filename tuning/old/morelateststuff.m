@@ -6,7 +6,7 @@ getWeightingMatrix[d_, weight_] := If[
   weight == "Partch",
   DiagonalMatrix[jip[d]],
   If[
-    weight == "Tenney",
+    weight == "TOP",
     DiagonalMatrix[1 / jip[d]],
     If[
       weight == "unweighted",
@@ -66,15 +66,15 @@ sensamagic = {{{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}}, "co"};
 
 optimizeGtm[sensamagic, 1]
 
-optimizeGtm[sensamagic, 1, "Tenney"]
+optimizeGtm[sensamagic, 1, "TOP"]
 
 optimizeGtm[sensamagic, 2]
 
-optimizeGtm[sensamagic, 2, "Tenney"]
+optimizeGtm[sensamagic, 2, "TOP"]
 
 optimizeGtm[sensamagic, Infinity]
 
-optimizeGtm[sensamagic, Infinity, "Tenney"]
+optimizeGtm[sensamagic, Infinity, "TOP"]
 
 d = 4;
 ma = {{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}};
@@ -90,9 +90,9 @@ tm = gtm.ma;
 ptm = Log[2, getPrimes[d]];
 e = tm - ptm
 
-optimizeGtm[{{{12, 19, 28}}, "co"}, 1, "Tenney"]
+optimizeGtm[{{{12, 19, 28}}, "co"}, 1, "TOP"]
 
-optimizeGtm[{{{5, 8, 0}, {0, 0, 1}}, "co"}, 1, "Tenney"]
+optimizeGtm[{{{5, 8, 0}, {0, 0, 1}}, "co"}, 1, "TOP"]
 
 dual[{{{1, 0, 0, -5}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}]
 dual[{{{1, 2, -3, 1}}, "contra"}]
@@ -104,9 +104,9 @@ mapping = {{{1, 1, 0}, {0, 1, 4}}, "co"};
 1200 * optimizeGtm[mapping, 1, "unweighted"]
 1200 * optimizeGtm[mapping, 2, "unweighted"]
 1200 * optimizeGtm[mapping, Infinity, "unweighted"]
-1200 * optimizeGtm[mapping, 1, "Tenney"]
-1200 * optimizeGtm[mapping, 2, "Tenney"]
-1200 * optimizeGtm[mapping, Infinity, "Tenney"]
+1200 * optimizeGtm[mapping, 1, "TOP"]
+1200 * optimizeGtm[mapping, 2, "TOP"]
+1200 * optimizeGtm[mapping, Infinity, "TOP"]
 1200 * optimizeGtm[mapping, 1, "Partch"]
 1200 * optimizeGtm[mapping, 2, "Partch"]
 1200 * optimizeGtm[mapping, Infinity, "Partch"]

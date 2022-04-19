@@ -4,10 +4,10 @@ complexity[i_, weighting_, normPower_] := Module[{pcv,d,  weightedPcv},
   pcv = Map[Abs,rationalToPcv[i]];
   d = Length[pcv];
   weightedPcv = If[
-    weighting == "F",
+    weighting == "unstandardized",
     pcv,
     If[
-      weighting == "P",
+      weighting == "standardized",
       pcv * jip[d],
       If[
         weighting == "I",
@@ -20,16 +20,16 @@ complexity[i_, weighting_, normPower_] := Module[{pcv,d,  weightedPcv},
 ];
 
 (* sanity checking *)
-complexity[3/2, "P", 1] // N (* 2.584962500721156` *)
-complexity[5/4, "P", 1] // N (* 4.321928094887362` *)
-complexity[5/3, "P", 1] // N (* 3.9068905956085187` *)
-complexity[4/3, "P", 1] // N (* 3.584962500721156` *)
-complexity[8/5, "P", 1] // N (* 5.321928094887362` *)
-complexity[6/5, "P", 1] // N (* 4.906890595608518` *)
+complexity[3/2, "standardized", 1] // N (* 2.584962500721156` *)
+complexity[5/4, "standardized", 1] // N (* 4.321928094887362` *)
+complexity[5/3, "standardized", 1] // N (* 3.9068905956085187` *)
+complexity[4/3, "standardized", 1] // N (* 3.584962500721156` *)
+complexity[8/5, "standardized", 1] // N (* 5.321928094887362` *)
+complexity[6/5, "standardized", 1] // N (* 4.906890595608518` *)
 
 (* setup for hard-coded comparison example, for both graph and minimized result; this is 5-odd-limit tonality diamond including octave compements (to support tempered octaves) for the diamond PC-vectors mapped to GC-vectors under 5-limit meantone [⟨1 1 0] ⟨0 1 4]⟩, and we're PROGRESSIVELY weighting it (multiplying by the complexity!), and that complexity is Tenney = P1 = taxicab norm of prime tuning map weighted prime counts, so progressive Tenney = Partch, and then we're minimizing the max, so this is just Partch minimax of meantone *)
     
-    complexityWeighting = "P";
+    complexityWeighting = "standardized";
 normPower = 1;
 
 c1 = complexity[3/2, complexityWeighting, normPower];
@@ -165,7 +165,7 @@ mapTim[m, getDiamond[5]] (* {{{0},{1}},{{-2},{4}},{{-1},{3}},{{1},{-1}},{{3},{-4
             unweighted == True,
             Map[1, complexities],
             If[
-              gression == "regressive",
+              gression == "simplicityWeighted",
               1 / complexities,
               complexities
             ]
@@ -175,7 +175,7 @@ mapTim[m, getDiamond[5]] (* {{{0},{1}},{{-2},{4}},{{-1},{3}},{{1},{-1}},{{3},{-4
 ensureNumeric[n_] := If[NumberQ[n], n, Print["well what the fuck is it? does this even owrk",n /.{g1 ->(*648.26400003575*)550.26400003575,g2->(*139.86884032701985*)58.35662109968045} // N(*,(*gtm,  n,*)  // N*)]];
 
 (*given a mapping, a target intervals matrix (currently defaults to 5-odd-limit diamond), which mean to take (minimax, least squares, least absolutes; currently hardcoded to minimax),and a weighting (unweighted, or {progressive/regressive, P/F/T, 1/2/\[Infinity]}; currently defaults to progressive P1 (partch))*)
-tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "regressive", weighting_ : "P", normNumber_ : "1"] := Module[{r, d, tim, ma, gtm, mappedTim, complexities, solution, guessRange},
+tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityWeighted", weighting_ : "standardized", normNumber_ : "1"] := Module[{r, d, tim, ma, gtm, mappedTim, complexities, solution, guessRange},
   r = getR[m];
   d = getD[m];
   tim = getDiamond[If[d == 3, 5, 7]];
@@ -225,7 +225,7 @@ tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "regressive"
 
 
 
-partch = tune[m, \[Infinity], False, "progressive", "P", 1]
+partch = tune[m, \[Infinity], False, "complexityWeighted", "standardized", 1]
 minimax = tune[m, \[Infinity], True]
 
 
@@ -235,10 +235,10 @@ getW[d_, weight_] := If[
   weight == "I",
   DiagonalMatrix[jip[d]],
   If[
-    weight == "P",
+    weight == "standardized",
     DiagonalMatrix[1 / jip[d]],
     If[
-      weight == "F",
+      weight == "unstandardized",
       DiagonalMatrix[Table[1, d]],
       Error
     ]
@@ -247,7 +247,7 @@ getW[d_, weight_] := If[
 
 precision = 7;
 
-optimizeGtm[m_, norm_, weight_ : "F"] := If[
+optimizeGtm[m_, norm_, weight_ : "unstandardized"] := If[
   norm == 2,
   optimizeGtmWithPseudoinverse[m, weight],
   optimizeGtmWithMinimizer[m, norm, weight]
@@ -294,17 +294,17 @@ f1 = 1200*optimizeGtm[m, 1]
 f2 = 1200*optimizeGtm[m, 2]
 f\[Infinity] = 1200*optimizeGtm[m, \[Infinity]]
 
-p1 = 1200*optimizeGtm[m, 1, "P"]
-p2 = 1200*optimizeGtm[m, 2, "P"]
-p\[Infinity] = 1200*optimizeGtm[m, \[Infinity], "P"]
+p1 = 1200*optimizeGtm[m, 1, "standardized"]
+p2 = 1200*optimizeGtm[m, 2, "standardized"]
+p\[Infinity] = 1200*optimizeGtm[m, \[Infinity], "standardized"]
 
 i1 = 1200*optimizeGtm[m, 1, "I"]
 i2 = 1200*optimizeGtm[m, 2, "I"]
 i\[Infinity] = 1200*optimizeGtm[m, \[Infinity], "I"]
 
 data = {
-  {f1, "F1"},
-  {f2, "F2"},
+  {f1, "MS"},
+  {f2, "MES"},
   {f\[Infinity], "F\[Infinity]"},
   {p1, "P1 (Tenney)"},
   {p2, "P2 (Breed)"},
@@ -317,4 +317,4 @@ data = {
 
 Show[ListPlot[MapThread[Callout[#1, #2, LabelVisibility->All]&,{Map[First,data], Map[Last, data]}], PlotRange->All], ImageSize ->1000]
 
-1200 *optimizeGtm[{{{1,1,0},{0,1,4}},"co"},1, "P"]
+1200 *optimizeGtm[{{{1,1,0},{0,1,4}},"co"},1, "standardized"]

@@ -69,12 +69,12 @@ m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)*)
 
 1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m]
 
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "regressive", "F", 1]
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "regressive", "F", 2]
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "regressive", "P", 1]
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "regressive", "P", 2]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "unstandardized", 1]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "unstandardized", 2]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "standardized", 1]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "standardized", 2]
 
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "progressive", "F", 1]
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "progressive", "F", 2]
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "progressive", "P", 1]
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "progressive", "P", 2]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "unstandardized", 1]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "unstandardized", 2]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "standardized", 1]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "standardized", 2]

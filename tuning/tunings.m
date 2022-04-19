@@ -40,7 +40,7 @@ getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
   Given a representation of a temperament as a mapping or comma basis,
   returns the optimal generator tuning map.
   
-  The tuning may be specified by name, or by individual parameters.
+  The tuning may be specified by original name, systematic name, or by individual parameters.
   
   Examples:
   
@@ -50,76 +50,60 @@ getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
   Out   {1200., 696.578}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGtm[meantoneM, "tuning" -> "Tenney"]
+        optimizeGtm[meantoneM, "originalTuningName" -> "TOP"]
     
   Out   {1201.7, 697.564}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGtm[meantoneM, "mean" -> "RMS", "damage" -> "pF2"]
+        optimizeGtm[meantoneM, "systematicTuningName" -> "minisos-MEC"]
     
   Out   {1198.24, 695.294}
 *)
 Options[optimizeGtm] = tuningOptions;
 optimizeGtm[t_, OptionsPattern[]] := Module[
   {
-    meanPower,
-    weighted,
-    weightingDirection,
-    complexityWeighting,
-    complexityPower,
+    optimizationPower,
+    damageWeightingSlope,
+    complexityUnitsMultiplier,
+    complexityNormPower,
     tim,
-    notion,
-    damage,
-    tuning,
-    mean,
+    tuningIntervalBasis,
+    systematicTuningName,
+    originalTuningName,
     tuningOptions,
     optimizedGtm
   },
   
-  meanPower = OptionValue["meanPower"];
-  weighted = OptionValue["weighted"];
-  weightingDirection = OptionValue["weightingDirection"];
-  complexityWeighting = OptionValue["complexityWeighting"];
-  complexityPower = OptionValue["complexityPower"];
+  optimizationPower = OptionValue["optimizationPower"];
+  damageWeightingSlope = OptionValue["damageWeightingSlope"];
+  complexityUnitsMultiplier = OptionValue["complexityUnitsMultiplier"];
+  complexityNormPower = OptionValue["complexityNormPower"];
   tim = OptionValue["tim"];
-  notion = OptionValue["notion"];
-  damage = OptionValue["damage"];
-  tuning = OptionValue["tuning"];
-  mean = OptionValue["mean"];
+  tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
+  systematicTuningName = OptionValue["systematicTuningName"];
+  originalTuningName = OptionValue["originalTuningName"];
   
-  Print["compelxity power already 2? ", complexityPower];
-  
-  tuningOptions = processTuningOptions[t, meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, notion, damage, tuning, mean, False]; (* TODO: figure out why my defaulting of this arg doesn't work anymore ... Wolfram Lnaguage bug?*)
-  meanPower = First[tuningOptions];
+  (* TODO: figure out why my defaulting of this final arg doesn't work anymore ... Wolfram Lnaguage bug? I mean obviously I've removed it now due to other stuff, but see if you can't put it back, I bet you can't. maybe it's like a max parameter list size or something crazy and undocumented like that *)
+  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, False];
+  optimizationPower = First[tuningOptions];
   
   optimizedGtm = 1200 * If[
-    meanPower == \[Infinity],
-    Print["should be mean power inf"];
+    optimizationPower == \[Infinity],
     optimizeGtmMinimax[tuningOptions],
     If[
-      meanPower == 2,
-      optimizeGtmLeastSquares[tuningOptions],
-      optimizeGtmLeastAbsolutes[tuningOptions]
+      optimizationPower == 2,
+      optimizeGtmMinisos[tuningOptions],
+      optimizeGtmMinisum[tuningOptions]
     ]
   ];
   
   If[
-    !isStandardPrimeLimitB[getB[t]] && notion == "subgroup",
-    retrieveSubgroupNotionTuning[optimizedGtm, t, tuningOptions],
+    !isStandardPrimeLimitB[getB[t]] && tuningIntervalBasis == "primes",
+    retrievePrimesIntervalBasisGtm[optimizedGtm, t, tuningOptions],
     optimizedGtm
   ]
 ];
 
-retrieveSubgroupNotionTuning[optimizedGtm_, originalT_, {meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[
-  {ma, optimizedTm, gpt, f},
-  
-  ma = getA[getM[t]];
-  optimizedTm = optimizedGtm.ma;
-  gpt = Transpose[getA[getGpt[originalT]]];
-  f = Transpose[getF[originalT]];
-  
-  optimizedTm.f.gpt
-];
 
 
 
@@ -128,104 +112,78 @@ retrieveSubgroupNotionTuning[optimizedGtm_, originalT_, {meanPower_, tima_, noti
 
 (* MINIMAX *)
 
-optimizeGtmMinimax[{meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := If[
-  weighted == True && weightingDirection == "regressive" && Length[tima] == 0,
-  optimizeGtmMinimaxPLimit[d, t, ptm, complexityWeighting, complexityPower, notion],
-  Print["well wtf is wrong then", weighted, weightingDirection, tima];
+optimizeGtmMinimax[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] := If[
+  damageWeightingSlope == "simplicityWeighted" && Length[tima] == 0,
+  optimizeGtmTargetingAll[d, t, ptm, complexityUnitsMultiplier, complexityNormPower],
   If[
-    weighted == False,
-    optimizeGtmMinimaxConsonanceSetAnalytical[meanPower, tima, notion, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower],
-    optimizeGtmMinimaxConsonanceSetNumerical[tima, notion, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]
+    damageWeightingSlope == "unweighted",
+    optimizeGtmMinimaxTargetingListAnalytical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower],
+    optimizeGtmMinimaxTargetingListNumerical[tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
   ]
 ];
 
 
-(* MINIMAX P-LIMIT *)
+(* TARGETING-ALL MINIMAX *)
 
-optimizeGtmMinimaxPLimit[d_, t_, ptm_, complexityWeighting_, complexityPower_, notion_] := If[
-  complexityPower == 2,
-  Print["oops going into analytical psuedoinverse"];
-  optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d, t, ptm, complexityWeighting, notion],
-  optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d, t, ptm, complexityWeighting, complexityPower]
+optimizeGtmTargetingAll[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_] := If[
+  complexityNormPower == 2,
+  optimizeGtmTargetingAllPseudoInverseAnalytical[d, t, ptm, complexityUnitsMultiplier],
+  optimizeGtmTargetingAllSolverNumerical[d, t, ptm, complexityUnitsMultiplier, complexityNormPower]
 ];
 
-optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d_, t_, ptm_, complexityWeighting_, notion_] := Module[{w, tima, weightedTima, unchangedIntervals, g, gtm},
-  w = If[complexityWeighting == "P", 1 / ptm, Table[1, d]];
+optimizeGtmTargetingAllPseudoInverseAnalytical[d_, t_, ptm_, complexityUnitsMultiplier_] := Module[{w, tima},
+  w = If[complexityUnitsMultiplier == "standardized", 1 / ptm, Table[1, d]];
   tima = IdentityMatrix[d];
   
-  optimizeGtmWithPseudoInverse[tima, notion, w, t, ptm]
+  optimizeGtmWithPseudoInverse[tima, w, t, ptm]
 ];
 
-optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d_, t_, ptm_, complexityWeighting_, complexityPower_] := Module[{gtm, ma, tm},
+optimizeGtmTargetingAllSolverNumerical[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{gtm, ma, tm},
   gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
   tm = gtm.ma;
   
-  Print["make it this far"];
-  
   If[
     (* covers Weil, does the max - min special augmented norm-like thing *)
-    complexityWeighting == "logIntegerLimit",
-    Print["doing logIntegerLimit AKA Weil"];
-    findNotExactlyL1NormStyleOptimumForLogIntegerLimit[d, t, ptm, complexityWeighting, complexityPower, gtm, tm],
+    complexityUnitsMultiplier == "logIntegerLimit",
+    optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogIntegerLimit[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
     If[
       (* covers Kees, does the max - min special augmented norm-like thing like Weil, but with no 2's *)
-      complexityWeighting == "logOddLimit",
-      Print["doing logOddLimit AKA Kees"];
-      findNotExactlyL1NormStyleOptimumForLogOddLimit[d, t, ptm, complexityWeighting, complexityPower, gtm, tm],
-      findL1NormStyleOptimum[d, t, ptm, complexityWeighting, complexityPower, gtm, tm]
+      complexityUnitsMultiplier == "logOddLimit",
+      optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogOddLimit[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
+      optimizeGtmTargetingAllSolverNumericalL1Style[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm]
     ]
   ]
 ];
 
-findL1NormStyleOptimum[d_, t_, ptm_, complexityWeighting_, complexityPower_, gtm_, tm_] := Module[{e, solution},
+optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[{e, solution},
   e = If[
-    complexityWeighting == "P",
-    Print["doing TOP"];
-    (* covers TOP, 1/log(p) weights each prime error *)
+    complexityUnitsMultiplier == "standardized",
     tm / ptm - Table[1, d],
     If[
-      complexityWeighting == "sopfr",
-      Print["doing sopfr AKA BOP"];
-      (* covers BOP, 1/p weights each prime error *)
+      complexityUnitsMultiplier == "sopfr",
       (tm - ptm) * (1 / Map[getSopfrComplexity[#, t]&, IdentityMatrix[d]]),
-      Print["doing AMS-minimax"];
-      (* covers AMS-minimax, does not weight prime error *)
       tm - ptm
     ]
   ];
   
   (* TODO: note that this is power is always 1, therefore dual used below is \[Infinity], because in here we're always minimaxing damage *)
-  (*  Print["complexityPower here: ", complexityPower];*)
   
-  solution = NMinimize[Norm[e, dualPower[complexityPower]], gtm, Method -> "NelderMead", WorkingPrecision -> 15];
+  solution = NMinimize[Norm[e, dualPower[complexityNormPower]], gtm, Method -> "NelderMead", WorkingPrecision -> 15];
   gtm /. Last[solution] // N
 ];
 
-findNotExactlyL1NormStyleOptimumForLogIntegerLimit[d_, t_, ptm_, complexityWeighting_, complexityPower_, gtm_, tm_] := Module[{augmentedThing, logIntegerLimitNorm, solution},
-  (*  augmentedThing = AppendTo[tm - ptm, 0];*)
-  augmentedThing = AppendTo[tm / ptm - Table[1, d], 0];
+optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogIntegerLimit[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[{augmentedThing, logIntegerLimitNorm, solution, middleMan},
+  middleMan = tm / ptm - Table[1, d]; (* TODO: Note: currently weighted *)
+  augmentedThing = AppendTo[middleMan, 0];
   logIntegerLimitNorm = Max[augmentedThing] - Min[augmentedThing];
   solution = NMinimize[logIntegerLimitNorm, gtm, Method -> "NelderMead", WorkingPrecision -> 15];
   gtm /. Last[solution] // N
 ];
 
-findNotExactlyL1NormStyleOptimumForLogOddLimit[d_, t_, ptm_, complexityWeighting_, complexityPower_, gtm_, tm_] := Module[{localTm, localPtm, augmentedThing, logOddLimitNorm, solution, middleMan},
-  (*Print["do we do this at least"];*)
-  localTm = tm;
-  localPtm = ptm;
-  (*Print["hows this", localTm / localPtm - Table[1, d]];
-  Print["and this", Drop[localTm / localPtm - Table[1, d], 1]];
-  Print["and then this", AppendTo[Drop[localTm / localPtm - Table[1, d], 1], 0]];*)
-  
-  
-  (*middleMan = Drop[localTm / localPtm - Table[1, d], 1];*)
-  middleMan = Drop[tm - ptm, 1];
-  
-  
-  (*  augmentedThing = AppendTo[Drop[tm - ptm, 1], 0];*)
+optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogOddLimit[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[{augmentedThing, logOddLimitNorm, solution, middleMan},
+  middleMan = Drop[tm - ptm, 1]; (* TODO: Note: currently NOT weighted *)
   augmentedThing = AppendTo[middleMan, 0];
-  Print["augmented thing", augmentedThing];
   logOddLimitNorm = Max[augmentedThing] - Min[augmentedThing];
   solution = NMinimize[logOddLimitNorm, gtm, Method -> "NelderMead", WorkingPrecision -> 15];
   gtm /. Last[solution] // N
@@ -234,12 +192,12 @@ findNotExactlyL1NormStyleOptimumForLogOddLimit[d_, t_, ptm_, complexityWeighting
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
 
-(* MINIMAX CONSONANCE-SET *)
+(* TARGETING-LIST MINIMAX *)
 
-optimizeGtmMinimaxConsonanceSetAnalytical[meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
-    optimizeGtmSimplex[meanPower, tima, notion, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower, getMaxDamage];
+optimizeGtmMinimaxTargetingListAnalytical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] :=
+    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, getMaxDamage];
 
-optimizeGtmMinimaxConsonanceSetNumerical[tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[
+optimizeGtmMinimaxTargetingListNumerical[tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
   {
     gtm,
     ma,
@@ -254,7 +212,7 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, notion_, d_, t_, ptm_, weighted_
   
   mappedTima = Transpose[ma.Transpose[tima]];
   pureTimaSizes = Map[ptm.#&, tima];
-  w = getW[t, tima, notion, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
   
   solution = NMinimize[
     Max[
@@ -285,33 +243,34 @@ optimizeGtmMinimaxConsonanceSetNumerical[tima_, notion_, d_, t_, ptm_, weighted_
 ];
 
 
-(* LEAST-SQUARES *)
+(* MINISOS *)
 
-optimizeGtmLeastSquares[{meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] := Module[{w, weightedTima, unchangedIntervals, g, gtm},
-  w = getW[t, tima, notion, weighted, weightingDirection, complexityWeighting, complexityPower];
+optimizeGtmMinisos[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] := Module[{w},
+  w = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
   
-  optimizeGtmWithPseudoInverse[tima, notion, w, t, ptm]
+  optimizeGtmWithPseudoInverse[tima, w, t, ptm]
 ];
 
-optimizeGtmWithPseudoInverse[tima_, notion_, w_, t_, ptm_] := Module[{ma, weightingMatrix, weightedTimaMapped, g, gtm},
+optimizeGtmWithPseudoInverse[tima_, w_, t_, ptm_] := Module[{ma, weightingMatrix, weightedTimaMapped, g, gtm},
   ma = getA[getM[t]];
   weightingMatrix = DiagonalMatrix[w];
   weightedTimaMapped = ma.Transpose[tima].weightingMatrix;
-  g = Transpose[tima].weightingMatrix.Transpose[weightedTimaMapped].Inverse[weightedTimaMapped.Transpose[weightedTimaMapped]]; (* TODO: if we're constantly transposing tima, maybe just do it once up front? or have getA respect the co/contra? *)
+  (* TODO: if we're constantly transposing tima, maybe just do it once up front? or have getA respect the co/contra? *)
+  g = Transpose[tima].weightingMatrix.Transpose[weightedTimaMapped].Inverse[weightedTimaMapped.Transpose[weightedTimaMapped]];
   gtm = ptm.g;
   gtm // N
 ];
 
 
-(* LEAST-ABSOLUTES *)
+(* MINISUM *)
 
-optimizeGtmLeastAbsolutes[{meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
-    optimizeGtmSimplex[meanPower, tima, notion, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower, getSumOfAbsolutesDamage];
+optimizeGtmMinisum[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] :=
+    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, getSumDamage];
 
 
-(* SIMPLEX (USED BY ANALYTICAL MINIMAX AND LEAST-ABSOLUTES) *)
+(* SIMPLEX (USED BY ANALYTICAL MINIMAX AND MINISUM) *)
 
-optimizeGtmSimplex[meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_, damageMean_] := Module[
+optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, damageMean_] := Module[
   {
     r,
     unchangedIntervalSetIndices,
@@ -337,7 +296,7 @@ optimizeGtmSimplex[meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightin
   filteredNormalizedPotentialUnchangedIntervalSets = Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&];
   potentialPs = Select[Map[getPFromUnchangedIntervals[t, #]&, filteredNormalizedPotentialUnchangedIntervalSets], Not[# === Null]&];
   potentialTms = Map[ptm.#&, potentialPs];
-  meanOfDamages = Map[damageMean[#, {meanPower, tima, notion, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}]&, potentialTms];
+  meanOfDamages = Map[damageMean[#, {optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower}]&, potentialTms];
   
   minMeanIndices = Position[meanOfDamages, Min[meanOfDamages]];
   If[
@@ -348,7 +307,7 @@ optimizeGtmSimplex[meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightin
     
     tiedTms = Part[potentialTms, Flatten[minMeanIndices]];
     tiedPs = Part[potentialPs, Flatten[minMeanIndices]];
-    minMeanIndex = tieBreak[tiedTms, meanPower, tima, notion, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower];
+    minMeanIndex = tieBreak[tiedTms, optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
     minMeanP = tiedPs[[minMeanIndex]]
   ];
   
@@ -398,66 +357,62 @@ oddLimitFromD[d_] := Prime[d + 1] - 2;
 Options[getDamage] = tuningOptions;
 getDamage[t_, gtm_, OptionsPattern[]] := Module[
   {
-    meanPower,
-    weighted,
-    weightingDirection,
-    complexityWeighting,
-    complexityPower,
+    optimizationPower,
+    damageWeightingSlope,
+    complexityUnitsMultiplier,
+    complexityNormPower,
     tim,
-    notion,
-    damage,
-    tuning,
-    mean,
+    tuningIntervalBasis,
+    systematicTuningName,
+    originalTuningName,
     ma,
     tm,
     tuningOptions
   },
   
-  meanPower = OptionValue["meanPower"];
-  weighted = OptionValue["weighted"];
-  weightingDirection = OptionValue["weightingDirection"];
-  complexityWeighting = OptionValue["complexityWeighting"];
-  complexityPower = OptionValue["complexityPower"];
+  optimizationPower = OptionValue["optimizationPower"];
+  damageWeightingSlope = OptionValue["damageWeightingSlope"];
+  complexityUnitsMultiplier = OptionValue["complexityUnitsMultiplier"];
+  complexityNormPower = OptionValue["complexityNormPower"];
   tim = OptionValue["tim"];
-  notion = OptionValue["notion"];
-  damage = OptionValue["damage"];
-  tuning = OptionValue["tuning"];
-  mean = OptionValue["mean"];
+  tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
+  systematicTuningName = OptionValue["systematicTuningName"];
+  originalTuningName = OptionValue["originalTuningName"];
   
-  tuningOptions = processTuningOptions[t, meanPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, notion, damage, tuning, mean, True];
-  meanPower = First[tuningOptions];
+  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, True];
+  optimizationPower = First[tuningOptions];
   ma = getA[getM[t]];
   
   tm = (gtm / 1200).ma;
   
   If[
-    meanPower == \[Infinity],
+    optimizationPower == \[Infinity],
     getMaxDamage[tm, tuningOptions],
     If[
-      meanPower == 2,
-      getSumOfSquaresDamage[tm, tuningOptions],
-      getSumOfAbsolutesDamage[tm, tuningOptions]
+      optimizationPower == 2,
+      get2SumDamage[tm, tuningOptions],
+      getSumDamage[tm, tuningOptions]
     ]
   ]
 ];
 
-getTid[t_, tm_, tima_, notion_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{e, w},
+getTid[t_, tm_, tima_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{e, w},
   e = N[tm.Transpose[tima]] - N[ptm.Transpose[tima]];
-  w = getW[t, tima, notion, weighted, weightingDirection, complexityWeighting, complexityPower];
+  w = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
   
   e * w
 ];
 
 Square[n_] := n^2;
 
-getSumOfAbsolutesDamage[tm_, {meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
-    Total[Map[Abs, getTid[t, tm, tima, notion, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+getSumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] :=
+    Total[Map[Abs, getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]]];
 
-getSumOfSquaresDamage[tm_, {meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
-    Total[Map[Square, getTid[t, tm, tima, notion, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+get2SumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] :=
+    Total[Map[Square, getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]]];
 
-getMaxDamage[tm_, {meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_}] :=
-    Max[Map[Abs, getTid[t, tm, tima, notion, ptm, weighted, weightingDirection, complexityWeighting, complexityPower]]];
+getMaxDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] :=
+    Max[Map[Abs, getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]]];
 
 
 (* AKA "Benedetti height" *)
@@ -466,12 +421,13 @@ getProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getB[t], pcv}
 (* AKA "Wilson height" *)
 getSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getB[t], pcv}]];
 
-(* This just gives TOP tuning *)
+(* This just gives TOP originalTuningName *)
 getLogSopfrComplexity[pcv_, t_] := Log[2, getSopfrComplexity[pcv, t]];
 
 (* AKA "Weil height" *)
 getIntegerLimitComplexity[pcv_, t_] := Module[{rational},
-  rational = pcvToRational[pcv]; (* TODO: pcvToRational doesn't support nonstandard interval bases yet; should move this there *)
+  (* TODO: pcvToRational doesn't support nonstandard interval bases yet; should move this there *)
+  rational = pcvToRational[pcv];
   Max[Numerator[rational], Denominator[rational]]
 ];
 
@@ -479,57 +435,64 @@ getIntegerLimitComplexity[pcv_, t_] := Module[{rational},
 noTwos[pcv_] := MapIndexed[If[First[#2] == 1, 0, #1]&, pcv];
 getOddLimitComplexity[pcv_, t_] := getIntegerLimitComplexity[noTwos[pcv], t];
 
-tieBreak[tiedTms_, meanPower_, tima_, notion_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{meanOfDamages},
-  meanOfDamages = Map[getSumOfSquaresDamage[#, {meanPower, tima, notion, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}]&, tiedTms];
+tieBreak[tiedTms_, optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{meanOfDamages},
+  meanOfDamages = Map[get2SumDamage[#, {optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower}]&, tiedTms];
   
   First[First[Position[meanOfDamages, Min[meanOfDamages]]]]
+];
+
+
+(* INTERVAL BASIS *)
+
+retrievePrimesIntervalBasisGtm[optimizedGtm_, originalT_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] := Module[
+  {ma, optimizedTm, gpt, f},
+  
+  ma = getA[getM[t]];
+  optimizedTm = optimizedGtm.ma;
+  gpt = Transpose[getA[getGpt[originalT]]];
+  f = Transpose[getF[originalT]];
+  
+  optimizedTm.f.gpt
 ];
 
 
 (* SHARED *)
 
 tuningOptions = {
-  "meanPower" -> \[Infinity],
-  "weighted" -> False,
-  "weightingDirection" -> "regressive",
-  "complexityWeighting" -> "P",
-  "complexityPower" -> 1,
+  "optimizationPower" -> Null,
+  "damageWeightingSlope" -> "",
+  "complexityUnitsMultiplier" -> "standardized",
+  "complexityNormPower" -> 1,
   "tim" -> Null,
-  "notion" -> "subgroup",
-  "damage" -> "",
-  "mean" -> "",
-  "tuning" -> ""
+  "tuningIntervalBasis" -> "primes",
+  "systematicTuningName" -> "",
+  "originalTuningName" -> ""
 };
 
 processTuningOptions[
   t_,
-  inputMeanPower_,
-  inputWeighted_,
-  inputWeightingDirection_,
-  inputComplexityWeighting_,
-  inputComplexityPower_,
+  inputOptimizationPower_,
+  inputDamageWeightingSlope_,
+  inputComplexityUnitsMultiplier_,
+  inputComplexityNormPower_,
   inputTim_,
-  inputNotion_,
-  inputDamage_,
-  inputTuning_,
-  inputMean_,
-  forDamage_ : False
+  inputTuningIntervalBasis_,
+  inputSystematicTuningName_,
+  inputOriginalTuningName_,
+  forDamage_
 ] := Module[
   {
     tima,
-    damageParts,
     d,
     ptm,
-    meanPower,
-    weighted,
-    weightingDirection,
-    complexityWeighting,
-    complexityPower,
+    optimizationPower,
+    damageWeightingSlope,
+    complexityUnitsMultiplier,
+    complexityNormPower,
     tim,
-    notion,
-    damage,
-    tuning,
-    mean,
+    tuningIntervalBasis,
+    systematicTuningName,
+    originalTuningName,
     commaBasisInNonstandardIntervalBasis,
     primeLimitIntervalBasis,
     commaBasisInPrimeLimitIntervalBasis,
@@ -539,135 +502,107 @@ processTuningOptions[
     ir
   },
   
-  meanPower = inputMeanPower;
-  weighted = inputWeighted;
-  weightingDirection = inputWeightingDirection;
-  complexityWeighting = inputComplexityWeighting;
-  complexityPower = inputComplexityPower;
+  optimizationPower = inputOptimizationPower;
+  damageWeightingSlope = inputDamageWeightingSlope;
+  complexityUnitsMultiplier = inputComplexityUnitsMultiplier;
+  complexityNormPower = inputComplexityNormPower;
   tim = inputTim;
-  notion = inputNotion;
-  damage = inputDamage;
-  tuning = inputTuning;
-  mean = inputMean;
-  
-  Print["uh tuning is ", tuning];
-  Print["what is happening to complexityPower ", complexityPower];
+  tuningIntervalBasis = inputTuningIntervalBasis;
+  systematicTuningName = inputSystematicTuningName;
+  originalTuningName = inputOriginalTuningName;
   
   If[
-    tuning === "Tenney" || tuning === "TOP",
-    Print["Tenney"];
-    damage = "P1"; tim = {}
+    originalTuningName === "minimax",
+    optimizationPower = 1; damageWeightingSlope = "unweighted";
   ];
   If[
-    tuning === "Breed" || tuning === "TE",
-    Print["Breed"];
-    damage = "P2"; tim = {}
+    originalTuningName === "least squares",
+    optimizationPower = 2; damageWeightingSlope = "unweighted";
   ];
   If[
-    tuning === "Partch",
-    Print["Partch"];
-    damage = "pP1"
+    originalTuningName === "TOP" || originalTuningName === "TIPTOP" || originalTuningName === "Tenney OPtimal",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "standardized";
   ];
   If[
-    tuning === "AMS-minimax",
-    Print["AMS-minimax"];
-    damage = "F1"; tim = {}
+    originalTuningName === "TE" || originalTuningName === "Tenney-Euclidean",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "standardized";
   ];
   If[
-    tuning === "Euclidean" || tuning === "Frobenius" || tuning === "AMES-minimax",
-    Print["Euclidean"];
-    damage = "F2"; tim = {}
+    originalTuningName === "Frobenius",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "unstandardized";
   ];
   If[
-    tuning === "least squares",
-    Print["least squares"];
-    meanPower = 2
+    originalTuningName === "BOP",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "product";
   ];
   If[
-    tuning === "least absolutes",
-    Print["least absolutes"];
-    meanPower = 1
+    originalTuningName === "BE",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "product";
   ];
   If[
-    tuning === "Tenney least squares",
-    Print["Tenney least squares"];
-    meanPower = 2; damage = "P1"
+    originalTuningName === "Kees",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logOddLimit";
   ];
   If[
-    tuning === "BOP",
-    Print["BOP"];
-    weighted = True; weightingDirection = "regressive"; tim = {}; complexityWeighting = "product"
+    originalTuningName === "KE",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logOddLimit";
   ];
   If[
-    tuning === "BE",
-    Print["BE"];
-    weighted = True; weightingDirection = "regressive"; tim = {}; complexityWeighting = "product"; complexityPower = 2
+    originalTuningName === "Weil",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logIntegerLimit";
   ];
   If[
-    tuning === "Kees",
-    Print["Kees"];
-    weighted = True; weightingDirection = "regressive"; tim = {}; complexityWeighting = "logOddLimit"
-  ];
-  If[
-    tuning === "KE",
-    Print["KE"];
-    weighted = True; weightingDirection = "regressive"; tim = {}; complexityWeighting = "logOddLimit"; complexityPower = 2
-  ];
-  If[
-    tuning === "Weil",
-    Print["Weil"];
-    weighted = True; weightingDirection = "regressive"; tim = {}; complexityWeighting = "logIntegerLimit"
-  ];
-  If[
-    tuning === "WE",
-    Print["WE"];
-    weighted = True; weightingDirection = "regressive"; tim = {}; complexityWeighting = "logIntegerLimit"; complexityPower = 2
-  ];
-  If[
-    tuning === "logSopfr",
-    Print["logSopfr"];
-    weighted = True; complexityWeighting = "logSopfr"
-  ];
-  If[
-    tuning === "sopfr",
-    Print["sopfr"];
-    weighted = True; complexityWeighting = "sopfr"
-  ];
-  
-  Print["what is happening to complexityPower ", complexityPower];
-  
-  damageParts = StringPartition[damage, 1];
-  If[
-    Length[damageParts] === 3,
-    weighted = True;
-    weightingDirection = "progressive";
-    complexityWeighting = damageParts[[2]];
-    complexityPower = ToExpression[damageParts[[3]]],
-    If[
-      Length[damageParts] === 2,
-      weighted = True;
-      weightingDirection = "regressive";
-      complexityWeighting = damageParts[[1]];
-      complexityPower = ToExpression[damageParts[[2]]];
-    ]
+    originalTuningName === "WE",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logIntegerLimit";
   ];
   
   If[
-    mean === "AAV",
-    meanPower = 1,
-    If[
-      mean === "RMS",
-      meanPower = 2,
-      If[
-        mean === "MAV",
-        meanPower = \[Infinity]
-      ]
-    ]
+    StringMatchQ[systematicTuningName, "*S*"],
+    damageWeightingSlope = "simplicityWeighted";
   ];
+  If[
+    StringMatchQ[systematicTuningName, "*C*"],
+    damageWeightingSlope = "complexityWeighted";
+  ];
+  If[
+    StringMatchQ[systematicTuningName, "*U*"],
+    damageWeightingSlope = "unweighted";
+  ];
+  If[
+    StringMatchQ[systematicTuningName, "*E*"],
+    complexityNormPower = 2;
+  ];
+  If[
+    StringMatchQ[systematicTuningName, "*T*"],
+    complexityNormPower = 1;
+  ];
+  If[
+    StringMatchQ[systematicTuningName, "*M*"],
+    complexityUnitsMultiplier = "unstandardized";
+  ];
+  If[
+    StringMatchQ[systematicTuningName, "*O*"],
+    complexityUnitsMultiplier = "standardized";
+  ];
+  If[
+    StringMatchQ[systematicTuningName, "*minimax*"],
+    optimizationPower = \[Infinity];
+  ];
+  If[
+    StringMatchQ[systematicTuningName, "*minisos*"],
+    optimizationPower = 2;
+  ];
+  If[
+    StringMatchQ[systematicTuningName, "*minisum*"],
+    optimizationPower = 1;
+  ];
+  
+  If[!NumericQ[optimizationPower] && optimizationPower != \[Infinity], Throw["no optimization power"]];
+  If[damageWeightingSlope == "", Throw["no damage weighting slope"]];
   
   b = getB[t];
   If[
-    !isStandardPrimeLimitB[b] && notion == "subgroup",
+    !isStandardPrimeLimitB[b] && tuningIntervalBasis == "primes",
     
     commaBasisInNonstandardIntervalBasis = getC[t];
     primeLimitIntervalBasis = getPrimes[getDp[b]];
@@ -685,24 +620,24 @@ processTuningOptions[
     tima = If[tim === Null, getDiamond[d], If[Length[tim] == 0, If[forDamage, getA[getC[t]], {}], getA[tim]]];
   ];
   
-  {meanPower, tima, notion, d, tPossiblyWithChangedIntervalBasis, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}
+  {optimizationPower, tima, d, tPossiblyWithChangedIntervalBasis, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower}
 ];
 
 getPtm[t_] := Log[2, getB[t]];
 
-getW[t_, tima_, notion_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w},
+getW[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{w},
   w = If[
-    weighted,
-    Map[getComplexity[#, t, complexityWeighting, complexityPower]&, tima],
+    damageWeightingSlope != "unweighted",
+    Map[getComplexity[#, t, complexityUnitsMultiplier, complexityNormPower]&, tima],
     Map[1&, tima]
   ];
   
-  If[weightingDirection == "regressive", 1 / w, w]
+  If[damageWeightingSlope == "simplicityWeighted", 1 / w, w]
 ];
 
-getComplexity[pcv_, t_, complexityWeighting_, complexityPower_] := Module[{weightedPcv},
-  weightedPcv = If[complexityWeighting == "P", pcv * getPtm[t], pcv];
-  Norm[weightedPcv, complexityPower]
+getComplexity[pcv_, t_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{weightedPcv},
+  weightedPcv = If[complexityUnitsMultiplier == "standardized", pcv * getPtm[t], pcv];
+  Norm[weightedPcv, complexityNormPower]
 ];
 
 (* TODO: how do I not have this already? *)

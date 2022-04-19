@@ -6,7 +6,7 @@ getWeightingMatrix[d_, weight_] := If[
   weight == "Partch",
   DiagonalMatrix[jip[d]],
   If[
-    weight == "Tenney",
+    weight == "TOP",
     DiagonalMatrix[1 / jip[d]],
     If[
       weight == "unweighted",
@@ -63,8 +63,8 @@ optimizeGtmWithMinimizer[m_, norm_, weight_] := Module[{r, d, ma, gtm, ptm, tm, 
 
 
 optimizeGtm[sensamagic, 1]
-optimizeGtm[sensamagic, 1, "Tenney"]
+optimizeGtm[sensamagic, 1, "TOP"]
 optimizeGtm[sensamagic, 2]
-optimizeGtm[sensamagic, 2, "Tenney"]
+optimizeGtm[sensamagic, 2, "TOP"]
 optimizeGtm[sensamagic, Infinity]
-optimizeGtm[sensamagic, Infinity, "Tenney"]
+optimizeGtm[sensamagic, Infinity, "TOP"]
