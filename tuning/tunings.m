@@ -195,11 +195,11 @@ optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMulti
   normPower = 2;
   
   While[
-    normPowerPower <= 7 && previousPrimesErrorMagnitude - primesErrorMagnitude > 0.000001,
+    normPowerPower <= 10 && previousPrimesErrorMagnitude - primesErrorMagnitude > 0,
     
     previousPrimesErrorMagnitude = primesErrorMagnitude;
     previousSolution = solution;
-    solution = NMinimize[Norm[eₚ, normPower], gtm];
+    solution = NMinimize[Norm[eₚ, normPower], gtm, WorkingPrecision -> 128];
     primesErrorMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
@@ -214,7 +214,7 @@ optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogIntegerLimit[d_, t_, ptm_,
   middleMan = tm / ptm - Table[1, d]; (* TODO: Note: currently weighted *)
   augmentedThing = AppendTo[middleMan, 0];
   logIntegerLimitNorm = Max[augmentedThing] - Min[augmentedThing];
-  solution = NMinimize[logIntegerLimitNorm, gtm];
+  solution = NMinimize[logIntegerLimitNorm, gtm, WorkingPrecision -> 128];
   gtm /. Last[solution] // N
 ];
 
@@ -222,7 +222,7 @@ optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogOddLimit[d_, t_, ptm_, com
   middleMan = Drop[tm - ptm, 1]; (* TODO: Note: currently NOT weighted *)
   augmentedThing = AppendTo[middleMan, 0];
   logOddLimitNorm = Max[augmentedThing] - Min[augmentedThing];
-  solution = NMinimize[logOddLimitNorm, gtm];
+  solution = NMinimize[logOddLimitNorm, gtm, WorkingPrecision -> 128];
   gtm /. Last[solution] // N
 ];
 
@@ -309,11 +309,11 @@ optimizeGtmTargetingListNumerical[optimizationPower_, tima_, d_, t_, ptm_, damag
   ]];
   
   While[
-    normPowerPower <= 7 && previousErrorMagnitude - errorMagnitude > 0.000001,
+    normPowerPower <= 10 && previousErrorMagnitude - errorMagnitude > 0,
     
     previousErrorMagnitude = errorMagnitude;
     previousSolution = solution;
-    solution = NMinimize[Norm[e, normPower], gtm];
+    solution = NMinimize[Norm[e, normPower], gtm, WorkingPrecision -> 128];
     errorMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
@@ -362,7 +362,7 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
     gpt = Transpose[getA[getGpt[t]]];
     projectedGenerators = minMeanP.gpt;
     ptm.projectedGenerators // N,
-  
+    
     optimizeGtmTargetingListNumerical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
   ]
 ];
