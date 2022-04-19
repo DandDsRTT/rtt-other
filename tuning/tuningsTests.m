@@ -93,7 +93,7 @@ testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope
 (* optimizeGtm, by "systematicTuningName" *)
 (* TODO: you should probably instead just test that these map to the correct traits, or something *)
 
-testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-U", {600.000, 106.843}]; (*it seems, based on my https://docs.google.com/spreadsheets/d/1D6mE4MvbsbLqTDTYyagmlKZ_TenrqoN84VLDzsLfJnQ/edit#gid=1685147662, that 108.01 is actually more correct *)
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-U", {600.000, 108.009}];
 
 testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-MS", {596.502, 106.767}];
 testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-MES", {598.233, 104.469}];
@@ -149,6 +149,7 @@ testClose[optimizeGtm, pajara, "originalTuningName" -> "Frobenius", {598.345, 10
 testClose[optimizeGtm, pajara, "originalTuningName" -> "POTE", {600.000, 107.048}]; (* TODO: this is weird example for PO b/c not pure octave, I mean it's good to have this, but not as the first and only example *)
 testClose[optimizeGtm, pajara, "originalTuningName" -> "POTOP", {600.000, 106.844}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "POTT", {600.000, 106.844}];
+
 
 (* interval basis *)
 (* TODO: rename options to traits *)

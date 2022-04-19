@@ -206,7 +206,7 @@ dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 (* TARGETING-LIST MINIMAX *)
 
 optimizeGtmMinimaxTargetingListAnalytical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_] :=
-    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, getMaxDamage];
+    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch];
 
 optimizeGtmMinimaxTargetingListNumerical[tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
   {
@@ -276,12 +276,58 @@ optimizeGtmWithPseudoInverse[tima_, w_, t_, ptm_] := Module[{ma, weightingMatrix
 (* MINISUM *)
 
 optimizeGtmMinisum[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_}] :=
-    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, getSumDamage];
+    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch];
+
+(* TODO: very not dry with optimizeGtmMinimaxTargetingListNumerical *)
+optimizeGtmMinisumTargetingListNumerical[tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
+  {
+    gtm,
+    ma,
+    mappedTima,
+    pureTimaSizes,
+    w,
+    solution
+  },
+  
+  gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
+  ma = getA[getM[t]];
+  
+  mappedTima = Transpose[ma.Transpose[tima]];
+  pureTimaSizes = Map[ptm.#&, tima];
+  w = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
+  
+  solution = NMinimize[
+    Total[
+      MapIndexed[
+        Function[
+          {mappedTi, tiIndex},
+          Abs[
+            Total[
+              MapThread[
+                Function[
+                  {mappedTiEntry, gtmEntry},
+                  mappedTiEntry * gtmEntry
+                ],
+                {mappedTi, gtm}
+              ]
+            ] - pureTimaSizes[[tiIndex]]
+          ] * w[[tiIndex]]
+        ],
+        mappedTima
+      ]
+    ],
+    gtm,
+    Method -> "NelderMead",
+    WorkingPrecision -> 15
+  ];
+  
+  gtm /. Last[solution] // N
+];
 
 
 (* SIMPLEX (USED BY ANALYTICAL MINIMAX AND MINISUM) *)
 
-optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, damagePowerSum_] := Module[
+optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_] := Module[
   {
     r,
     unchangedIntervalSetIndices,
@@ -293,13 +339,13 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
     powerSumOfDamages,
     minMeanIndices,
     minMeanIndex,
-    tiedTms,
-    tiedPs,
     minMeanP,
     gpt,
-    projectedGenerators
+    projectedGenerators,
+    damagePowerSum
   },
   
+  damagePowerSum = If[optimizationPower == 1, getSumDamage, getMaxDamage];
   r = getR[t];
   unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
   potentialUnchangedIntervalSets = Map[Map[tima[[#]]&, #]&, unchangedIntervalSetIndices];
@@ -314,17 +360,17 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
     Length[minMeanIndices] == 1,
     
     minMeanIndex = First[First[Position[powerSumOfDamages, Min[powerSumOfDamages]]]];
-    minMeanP = potentialPs[[minMeanIndex]],
+    minMeanP = potentialPs[[minMeanIndex]];
+    gpt = Transpose[getA[getGpt[t]]];
+    projectedGenerators = minMeanP.gpt;
+    ptm.projectedGenerators // N,
     
-    tiedTms = Part[potentialTms, Flatten[minMeanIndices]];
-    tiedPs = Part[potentialPs, Flatten[minMeanIndices]];
-    minMeanIndex = tieBreak[tiedTms, optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch];
-    minMeanP = tiedPs[[minMeanIndex]]
-  ];
-  
-  gpt = Transpose[getA[getGpt[t]]];
-  projectedGenerators = minMeanP.gpt;
-  ptm.projectedGenerators // N
+    If[
+      optimizationPower == 1,
+      optimizeGtmMinisumTargetingListNumerical[tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower],
+      optimizeGtmMinimaxTargetingListNumerical[tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
+    ]
+  ]
 ];
 
 getPFromUnchangedIntervals[t_, unchangedIntervalEigenvectors_] := Module[{commaEigenvectors, eigenvectors, diagonalEigenvalueMatrix},
@@ -447,12 +493,6 @@ getIntegerLimitComplexity[pcv_, t_] := Module[{rational},
 (* AKA "Kees height" *)
 noTwos[pcv_] := MapIndexed[If[First[#2] == 1, 0, #1]&, pcv];
 getOddLimitComplexity[pcv_, t_] := getIntegerLimitComplexity[noTwos[pcv], t];
-
-tieBreak[tiedTms_, optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_] := Module[{powerSumOfDamages},
-  powerSumOfDamages = Map[get2SumDamage[#, {optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch}]&, tiedTms];
-  
-  First[First[Position[powerSumOfDamages, Min[powerSumOfDamages]]]]
-];
 
 
 (* INTERVAL BASIS *)
