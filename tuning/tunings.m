@@ -70,8 +70,10 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
     tuningIntervalBasis,
     systematicTuningName,
     originalTuningName,
+    pureOctaveStretch,
     tuningOptions,
-    optimizedGtm
+    optimizedGtm,
+    tPossiblyWithChangedIntervalBasis
   },
   
   optimizationPower = OptionValue["optimizationPower"];
@@ -82,10 +84,13 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
   tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
   systematicTuningName = OptionValue["systematicTuningName"];
   originalTuningName = OptionValue["originalTuningName"];
+  pureOctaveStretch = OptionValue["pureOctaveStretch"];
   
   (* TODO: figure out why my defaulting of this final arg doesn't work anymore ... Wolfram Lnaguage bug? I mean obviously I've removed it now due to other stuff, but see if you can't put it back, I bet you can't. maybe it's like a max parameter list size or something crazy and undocumented like that *)
-  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, False];
-  optimizationPower = First[tuningOptions];
+  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, pureOctaveStretch, False];
+  optimizationPower = Part[tuningOptions, 1];
+  tPossiblyWithChangedIntervalBasis = Part[tuningOptions, 4];
+  pureOctaveStretch = Part[tuningOptions, 9];
   
   optimizedGtm = 1200 * If[
     optimizationPower == \[Infinity],
@@ -99,9 +104,15 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
   
   If[
     !isStandardPrimeLimitB[getB[t]] && tuningIntervalBasis == "primes",
-    retrievePrimesIntervalBasisGtm[optimizedGtm, t, tuningOptions],
-    optimizedGtm
-  ]
+    optimizedGtm = retrievePrimesIntervalBasisGtm[optimizedGtm, t, tPossiblyWithChangedIntervalBasis]
+  ];
+  
+  If[
+    pureOctaveStretch,
+    optimizedGtm = getPureOctaveStretchedGtm[optimizedGtm, t]
+  ];
+  
+  optimizedGtm
 ];
 
 
@@ -112,12 +123,12 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
 
 (* MINIMAX *)
 
-optimizeGtmMinimax[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] := If[
+optimizeGtmMinimax[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_}] := If[
   damageWeightingSlope == "simplicityWeighted" && Length[tima] == 0,
   optimizeGtmTargetingAll[d, t, ptm, complexityUnitsMultiplier, complexityNormPower],
   If[
     damageWeightingSlope == "unweighted",
-    optimizeGtmMinimaxTargetingListAnalytical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower],
+    optimizeGtmMinimaxTargetingListAnalytical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch],
     optimizeGtmMinimaxTargetingListNumerical[tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
   ]
 ];
@@ -194,8 +205,8 @@ dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
 (* TARGETING-LIST MINIMAX *)
 
-optimizeGtmMinimaxTargetingListAnalytical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] :=
-    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, getMaxDamage];
+optimizeGtmMinimaxTargetingListAnalytical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_] :=
+    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, getMaxDamage];
 
 optimizeGtmMinimaxTargetingListNumerical[tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
   {
@@ -245,7 +256,7 @@ optimizeGtmMinimaxTargetingListNumerical[tima_, d_, t_, ptm_, damageWeightingSlo
 
 (* MINISOS *)
 
-optimizeGtmMinisos[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] := Module[{w},
+optimizeGtmMinisos[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_}] := Module[{w},
   w = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
   
   optimizeGtmWithPseudoInverse[tima, w, t, ptm]
@@ -264,13 +275,13 @@ optimizeGtmWithPseudoInverse[tima_, w_, t_, ptm_] := Module[{ma, weightingMatrix
 
 (* MINISUM *)
 
-optimizeGtmMinisum[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] :=
-    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, getSumDamage];
+optimizeGtmMinisum[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_}] :=
+    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, getSumDamage];
 
 
 (* SIMPLEX (USED BY ANALYTICAL MINIMAX AND MINISUM) *)
 
-optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, damageMean_] := Module[
+optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, damagePowerSum_] := Module[
   {
     r,
     unchangedIntervalSetIndices,
@@ -279,7 +290,7 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
     filteredNormalizedPotentialUnchangedIntervalSets,
     potentialPs,
     potentialTms,
-    meanOfDamages,
+    powerSumOfDamages,
     minMeanIndices,
     minMeanIndex,
     tiedTms,
@@ -296,18 +307,18 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
   filteredNormalizedPotentialUnchangedIntervalSets = Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&];
   potentialPs = Select[Map[getPFromUnchangedIntervals[t, #]&, filteredNormalizedPotentialUnchangedIntervalSets], Not[# === Null]&];
   potentialTms = Map[ptm.#&, potentialPs];
-  meanOfDamages = Map[damageMean[#, {optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower}]&, potentialTms];
+  powerSumOfDamages = Map[damagePowerSum[#, {optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch}]&, potentialTms];
   
-  minMeanIndices = Position[meanOfDamages, Min[meanOfDamages]];
+  minMeanIndices = Position[powerSumOfDamages, Min[powerSumOfDamages]];
   If[
     Length[minMeanIndices] == 1,
     
-    minMeanIndex = First[First[Position[meanOfDamages, Min[meanOfDamages]]]];
+    minMeanIndex = First[First[Position[powerSumOfDamages, Min[powerSumOfDamages]]]];
     minMeanP = potentialPs[[minMeanIndex]],
     
     tiedTms = Part[potentialTms, Flatten[minMeanIndices]];
     tiedPs = Part[potentialPs, Flatten[minMeanIndices]];
-    minMeanIndex = tieBreak[tiedTms, optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
+    minMeanIndex = tieBreak[tiedTms, optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch];
     minMeanP = tiedPs[[minMeanIndex]]
   ];
   
@@ -365,6 +376,7 @@ getDamage[t_, gtm_, OptionsPattern[]] := Module[
     tuningIntervalBasis,
     systematicTuningName,
     originalTuningName,
+    pureOctaveStretch,
     ma,
     tm,
     tuningOptions
@@ -378,11 +390,12 @@ getDamage[t_, gtm_, OptionsPattern[]] := Module[
   tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
   systematicTuningName = OptionValue["systematicTuningName"];
   originalTuningName = OptionValue["originalTuningName"];
+  pureOctaveStretch = OptionValue["pureOctaveStretch"];
   
-  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, True];
-  optimizationPower = First[tuningOptions];
+  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, pureOctaveStretch, True];
+  optimizationPower = Part[tuningOptions, 1];
+  
   ma = getA[getM[t]];
-  
   tm = (gtm / 1200).ma;
   
   If[
@@ -405,13 +418,13 @@ getTid[t_, tm_, tima_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, 
 
 Square[n_] := n^2;
 
-getSumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] :=
+getSumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_}] :=
     Total[Map[Abs, getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]]];
 
-get2SumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] :=
+get2SumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_}] :=
     Total[Map[Square, getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]]];
 
-getMaxDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] :=
+getMaxDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_}] :=
     Max[Map[Abs, getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]]];
 
 
@@ -435,16 +448,16 @@ getIntegerLimitComplexity[pcv_, t_] := Module[{rational},
 noTwos[pcv_] := MapIndexed[If[First[#2] == 1, 0, #1]&, pcv];
 getOddLimitComplexity[pcv_, t_] := getIntegerLimitComplexity[noTwos[pcv], t];
 
-tieBreak[tiedTms_, optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{meanOfDamages},
-  meanOfDamages = Map[get2SumDamage[#, {optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower}]&, tiedTms];
+tieBreak[tiedTms_, optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_] := Module[{powerSumOfDamages},
+  powerSumOfDamages = Map[get2SumDamage[#, {optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch}]&, tiedTms];
   
-  First[First[Position[meanOfDamages, Min[meanOfDamages]]]]
+  First[First[Position[powerSumOfDamages, Min[powerSumOfDamages]]]]
 ];
 
 
 (* INTERVAL BASIS *)
 
-retrievePrimesIntervalBasisGtm[optimizedGtm_, originalT_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_}] := Module[
+retrievePrimesIntervalBasisGtm[optimizedGtm_, originalT_, t_] := Module[
   {ma, optimizedTm, gpt, f},
   
   ma = getA[getM[t]];
@@ -454,6 +467,16 @@ retrievePrimesIntervalBasisGtm[optimizedGtm_, originalT_, {optimizationPower_, t
   
   optimizedTm.f.gpt
 ];
+
+
+(* PURE-OCTAVE STRETCH *)
+
+getPureOctaveStretchedGtm[optimizedGtm_, t_] := Module[{periodsPerOctave},
+  periodsPerOctave = First[First[getA[getM[t]]]];
+  
+  (1200 / periodsPerOctave) * (optimizedGtm / First[optimizedGtm])
+];
+
 
 
 (* SHARED *)
@@ -466,7 +489,8 @@ tuningOptions = {
   "tim" -> Null,
   "tuningIntervalBasis" -> "primes",
   "systematicTuningName" -> "",
-  "originalTuningName" -> ""
+  "originalTuningName" -> "",
+  "pureOctaveStretch" -> False
 };
 
 processTuningOptions[
@@ -479,6 +503,7 @@ processTuningOptions[
   inputTuningIntervalBasis_,
   inputSystematicTuningName_,
   inputOriginalTuningName_,
+  inputPureOctaveStretch_,
   forDamage_
 ] := Module[
   {
@@ -493,6 +518,7 @@ processTuningOptions[
     tuningIntervalBasis,
     systematicTuningName,
     originalTuningName,
+    pureOctaveStretch,
     commaBasisInNonstandardIntervalBasis,
     primeLimitIntervalBasis,
     commaBasisInPrimeLimitIntervalBasis,
@@ -510,6 +536,7 @@ processTuningOptions[
   tuningIntervalBasis = inputTuningIntervalBasis;
   systematicTuningName = inputSystematicTuningName;
   originalTuningName = inputOriginalTuningName;
+  pureOctaveStretch = inputPureOctaveStretch;
   
   If[
     originalTuningName === "minimax",
@@ -520,7 +547,7 @@ processTuningOptions[
     optimizationPower = 2; damageWeightingSlope = "unweighted";
   ];
   If[
-    originalTuningName === "TOP" || originalTuningName === "TIPTOP" || originalTuningName === "Tenney OPtimal",
+    originalTuningName === "TOP" || originalTuningName === "TIPTOP",
     tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "standardized";
   ];
   If[
@@ -536,7 +563,7 @@ processTuningOptions[
     tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "product";
   ];
   If[
-    originalTuningName === "BE",
+    originalTuningName === "BE" || originalTuningName === "Benedetti-Euclidean",
     tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "product";
   ];
   If[
@@ -544,7 +571,7 @@ processTuningOptions[
     tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logOddLimit";
   ];
   If[
-    originalTuningName === "KE",
+    originalTuningName === "KE" || originalTuningName === "Kees-Euclidean",
     tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logOddLimit";
   ];
   If[
@@ -552,8 +579,16 @@ processTuningOptions[
     tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logIntegerLimit";
   ];
   If[
-    originalTuningName === "WE",
+    originalTuningName === "WE" || originalTuningName === "Weil-Euclidean",
     tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logIntegerLimit";
+  ];
+  If[
+    originalTuningName === "POTOP" || originalTuningName === "POTT",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "standardized"; pureOctaveStretch = True;
+  ];
+  If[
+    originalTuningName === "POTE",
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "standardized"; pureOctaveStretch = True;
   ];
   
   If[
@@ -620,7 +655,7 @@ processTuningOptions[
     tima = If[tim === Null, getDiamond[d], If[Length[tim] == 0, If[forDamage, getA[getC[t]], {}], getA[tim]]];
   ];
   
-  {optimizationPower, tima, d, tPossiblyWithChangedIntervalBasis, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower}
+  {optimizationPower, tima, d, tPossiblyWithChangedIntervalBasis, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch}
 ];
 
 getPtm[t_] := Log[2, getB[t]];
