@@ -116,6 +116,67 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
 ];
 
 
+(*
+  optimizeTm[t]
+  
+  Given a representation of a temperament as a mapping or comma basis,
+  returns the optimal tuning map.
+  
+  The tuning may be specified by original name, systematic name, or by individual parameters.
+  
+  Examples:
+  
+  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+        optimizeTm[meantoneM]
+    
+  Out   {###, ###, ###} (* TODO: fill these all in *)
+  
+  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+        optimizeTm[meantoneM, "originalTuningName" -> "TOP"]
+    
+  Out   {###, ###, ###}
+  
+  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+        optimizeTm[meantoneM, "systematicTuningName" -> "minisos-MEC"]
+    
+  Out   {###, ###, ###}
+*)
+Options[optimizeTm] = tuningOptions;
+optimizeTm[t_, OptionsPattern[]] := Module[
+  {
+    optimizationPower,
+    damageWeightingSlope,
+    complexityUnitsMultiplier,
+    complexityNormPower,
+    tim,
+    tuningIntervalBasis,
+    systematicTuningName,
+    originalTuningName,
+    pureOctaveStretch
+  },
+  
+  optimizationPower = OptionValue["optimizationPower"];
+  damageWeightingSlope = OptionValue["damageWeightingSlope"];
+  complexityUnitsMultiplier = OptionValue["complexityUnitsMultiplier"];
+  complexityNormPower = OptionValue["complexityNormPower"];
+  tim = OptionValue["tim"];
+  tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
+  systematicTuningName = OptionValue["systematicTuningName"];
+  originalTuningName = OptionValue["originalTuningName"];
+  pureOctaveStretch = OptionValue["pureOctaveStretch"];
+  
+  optimizeGtm[t, {
+    "optimizationPower" -> optimizationPower,
+    "damageWeightingSlope" -> damageWeightingSlope,
+    "complexityUnitsMultiplier" -> complexityUnitsMultiplier,
+    "complexityNormPower" -> complexityNormPower,
+    "tim" -> tim,
+    "tuningIntervalBasis" -> tuningIntervalBasis,
+    "systematicTuningName" -> systematicTuningName,
+    "originalTuningName" -> originalTuningName,
+    "pureOctaveStretch" -> pureOctaveStretch
+  }].getA[getM[t]]
+];
 
 
 (* ___ PRIVATE ___ *)
@@ -162,6 +223,7 @@ optimizeGtmTargetingAllSolverNumerical[d_, t_, ptm_, complexityUnitsMultiplier_,
       (* covers Kees, does the max - min special augmented norm-like thing like Weil, but with no 2's *)
       complexityUnitsMultiplier == "logOddLimit",
       optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogOddLimit[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
+      (* covers TOP, BOP, and L1-version of Frobenius *)
       optimizeGtmTargetingAllSolverNumericalL1Style[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm]
     ]
   ]
@@ -169,7 +231,7 @@ optimizeGtmTargetingAllSolverNumerical[d_, t_, ptm_, complexityUnitsMultiplier_,
 
 optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
   {
-    e,
+    eₚ,
     solution,
     previousSolution,
     optimizationPower,
@@ -180,12 +242,26 @@ optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMulti
   },
   
   eₚ = If[
+    (* covers TOP *)
     complexityUnitsMultiplier == "standardized",
-    tm / ptm - Table[1, d],
+    tm / ptm - Table[1, d], (* TODO: might be more appropriate to articulate this as a weighting matrix too *)
     If[
-      complexityUnitsMultiplier == "sopfr",
-      (tm - ptm) * (1 / Map[getSopfrComplexity[#, t]&, IdentityMatrix[d]]),
-      tm - ptm
+      (* covers BOP *)
+      complexityUnitsMultiplier == "product",
+      (tm - ptm) * (1 / Map[getProductComplexity[#, t]&, IdentityMatrix[d]]),
+      If[
+        (* also covers TOP (equivalent to "standardized") *)
+        complexityUnitsMultiplier == "logSopfr",
+        (tm - ptm) * (1 / Map[getLogSopfrComplexity[#, t]&, IdentityMatrix[d]]),
+        If[
+          (* also covers BOP (equivalent to "product") *)
+          complexityUnitsMultiplier == "sopfr",
+          (tm - ptm) * (1 / Map[getSopfrComplexity[#, t]&, IdentityMatrix[d]]),
+          
+          (* covers L1 version of Frobenius *)
+          tm - ptm
+        ]
+      ]
     ]
   ];
   optimizationPower = dualPower[complexityNormPower];
@@ -474,7 +550,7 @@ getProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getB[t], pcv}
 (* AKA "Wilson height" *)
 getSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getB[t], pcv}]];
 
-(* This just gives TOP originalTuningName *)
+(* This just gives TOP tuning *)
 getLogSopfrComplexity[pcv_, t_] := Log[2, getSopfrComplexity[pcv, t]];
 
 (* AKA "Weil height" *)

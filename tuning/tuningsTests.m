@@ -46,7 +46,7 @@ sensamagic = {{{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}}, "co"};
 
 (* optimizeGtm, by individual tuning properties *)
 
-testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1202.387, 697.173}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
 
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1202.387, 697.173}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1202.726, 697.258}];
@@ -142,6 +142,7 @@ testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-EC", {600.000,
 (* optimizeGtm, by "originalTuningName" *)
 (* TODO: you should probably instead just test that these map to the correct traits, or something *)
 
+(* this is simply some coverage that they match the above *)
 testClose[optimizeGtm, pajara, "originalTuningName" -> "minimax", {600.000, 106.843}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "least squares", {599.450, 107.15}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "TOP", {598.451, 106.578}];
@@ -151,11 +152,112 @@ testClose[optimizeGtm, pajara, "originalTuningName" -> "Frobenius", {598.345, 10
 testClose[optimizeGtm, pajara, "originalTuningName" -> "POTE", {600.000, 107.048}]; (* TODO: this is weird example for PO b/c not pure octave, I mean it's good to have this, but not as the first and only example *)
 testClose[optimizeGtm, pajara, "originalTuningName" -> "POTOP", {600.000, 106.854}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "POTT", {600.000, 106.854}];
+(* TODO: include inharmonic TE in my list of originalTuningName (and support in systematicTuningName somehow... do something for now, and then ask Dave what he thinks) *)
+
+(* and then in this section I want to have a bunch of external examples, organized by tuning first, then temperament
+sources:
+[1] Facebook
+[1a] https://www.facebook.com/groups/xenharmonicmath/posts/2363908480416027/?comment_id=2363994823740726 
+[2] Yahoo posts
+[2a] https://yahootuninggroupsultimatebackup.github.io/tuning-math/topicId_21029.html
+[3] Graham's temperament app
+[3a] 
+[4] Flora's temperament app
+[5] Paul's papers
+[5a] 
+[6] Graham's paper
+[6a] 
+[7] Xen wiki
+[7a]
+*)
+
+(* minimax *)
+(* TODO: gather some *)
+
+(* least squares *)
+(* TODO: gather some *)
+
+(* TOP / TIPTOP *)
+(* TODO: gather some *)
+
+(* TE *)
+
+testClose[optimizeTm, meantone, "originalTuningName" -> "TE", {1201.397, 1898.446, 2788.196}]; (* [1a] *)
+testClose[optimizeTm, blackwood, "originalTuningName" -> "TE", {1194.308, 1910.892, 2786.314}]; (* [1a] *)
+
+(* Frobenius *)
+
+(* POTE *)
+
+testClose[optimizeTm, meantone, "originalTuningName" -> "POTE", {1200, 1896.239, 2784.955}]; (* [1a] *)
+testClose[optimizeTm, blackwood, "originalTuningName" -> "POTE", {1200, 1920, 2799.594}]; (* [1a] *)
+
+(* POTOP / POTT *)
+(* TODO: gather some *)
+
+(* BOP *)
+(* TODO: finish these tests; can find with Flora's code... but I don't trust it right now, it's still got my minkowksi and chebyshev stuff *)
+
+testClose[optimizeTm, meantone, "originalTuningName" -> "BOP", {1200, 1900, 2790}];
+testClose[optimizeTm, blackwood, "originalTuningName" -> "BOP", {1200, 1900, 2790}];
+
+(* BE *)
+(* TODO: not implemented yet, so this is just doing some who knows other tuning; this would involve the weighting matrix in the pseudoinverse style *)
+testClose[optimizeTm, meantone, "originalTuningName" -> "BE", {1201.4768, 1898.6321, 2788.6213}]; (* [4] *)
+testClose[optimizeTm, blackwood, "originalTuningName" -> "BE", {1193.9975, 1910.396, 0.}]; (* [4], probably that 0 should be a purely-tuned prime 5  *)
+
+(* Weil *)
+testClose[optimizeTm, meantone, "originalTuningName" -> "Weil", {1200.0, 1896.578, 2786.314}]; (* [2a] *)
+testClose[optimizeTm, blackwood, "originalTuningName" -> "Weil", {1188.722, 1901.955, 2773.22}]; (* [2a] *)
+testClose[optimizeTm, dicot, "originalTuningName" -> "Weil", {1200.000, 1901.955, 2750.978}]; (* [2a] *)
+testClose[optimizeTm, augmented, "originalTuningName" -> "Weil", {1194.134, 1897.307, 2786.314}]; (* [2a] *)
+testClose[optimizeTm, mavila, "originalTuningName" -> "Weil", {1200.0, 1881.31, 2756.07}]; (* [2a] *)
+testClose[optimizeTm, porcupine, "originalTuningName" -> "Weil", {1193.828, 1901.955, 2771.982}]; (* [2a] *)
+testClose[optimizeTm, srutal, "originalTuningName" -> "Weil", {1198.222, 1901.955, 2786.314}]; (* [2a] *)
+testClose[optimizeTm, hanson, "originalTuningName" -> "Weil", {1200.0, 1901.955, 2784.963}]; (* [2a] *)
+testClose[optimizeTm, magic, "originalTuningName" -> "Weil", {1200.0, 1901.955, 2780.391}]; (* [2a] *)
+testClose[optimizeTm, negri, "originalTuningName" -> "Weil", {1200.0, 1896.185, 2777.861}]; (* [2a] *)
+testClose[optimizeTm, tetracot, "originalTuningName" -> "Weil", {1198.064, 1901.955, 2781.819}]; (* [2a] *)
+testClose[optimizeTm, meantone7, "originalTuningName" -> "Weil", {1200.0, 1896.578, 2786.314 , 3365.784}]; (* [2a] *)
+testClose[optimizeTm, magic7, "originalTuningName" -> "Weil", {1200.0, 1901.955, 2780.391, 3364.692}]; (* [2a] *)
+testClose[optimizeTm, pajara, "originalTuningName" -> "Weil", {1193.803, 1896.996, 2771.924, 3368.826}]; (* [2a] *)
+testClose[optimizeTm, augene, "originalTuningName" -> "Weil", {1194.134, 1899.852, 2786.314, 3365.102}]; (* [2a] *)
+testClose[optimizeTm, sensi, "originalTuningName" -> "Weil", {1196.783, 1901.181, 2786.314, 3359.796}]; (* [2a] *)
+
+(* WE *)
+(* TODO: not implemented yet, so this is just doing some who knows other tuning; this would involve the weighting matrix in the pseudoinverse style *)
+
+testClose[optimizeTm, meantone, "originalTuningName" -> "WE", {1201.391, 1898.436, 2788.182}]; (* [1a] *)
+testClose[optimizeTm, blackwood, "originalTuningName" -> "WE", {1194.254, 1910.807, 2786.189}]; (* [1a] *)
+
+(* Kees *)
+(* TODO: not passing yet *)
+
+testClose[optimizeTm, meantone, "originalTuningName" -> "Kees", {1200., 1896.58, 2786.31}]; (* my own potop.m *)
+testClose[optimizeTm, blackwood, "originalTuningName" -> "Kees", {1200, 1920, 2801.37}]; (* my own potop.m *)
+
+(* KE *)
+(* TODO: not implemented yet, so this is just doing some who knows other tuning; this would involve the weighting matrix in the pseudoinverse style *)
+
+testClose[optimizeTm, meantone, "originalTuningName" -> "KE", {1200, 1896.651, 2786.605}]; (* [1a] *)
+testClose[optimizeTm, blackwood, "originalTuningName" -> "KE", {1200, 1920, 2795.126}]; (* [1a] *)
+
+(* tuning equivalences *)
+(* TODO: pull these in from checkTuningEquivalences.m *)
+
+(* Kees = POTOP / POTT *)
+
+(* KE \[TildeTilde] POTE *)
+
+(* BOP = sopfr *)
+
+(* TOP = log sopfr *)
 
 
 (* interval basis *)
-(* TODO: rename options to traits *)
+(* TODO: rename options to traits, if they really are traits *)
 (* TODO: decide whether I really want to use camelCase for the user provided options, or sentence case maybe would be better*)
+(* TODO: find and include more examples of this *)
 
 t = {{{1, 1, 5}, {0, -1, -3}}, "co", {2, 7 / 5, 11}};
 testClose[optimizeGtm, t, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningIntervalBasis" -> "formalPrimes", {1200.4181, 617.7581}];
