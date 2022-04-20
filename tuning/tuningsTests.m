@@ -242,16 +242,108 @@ testClose[optimizeTm, blackwood, "originalTuningName" -> "Kees", {1200, 1920, 28
 testClose[optimizeTm, meantone, "originalTuningName" -> "KE", {1200, 1896.651, 2786.605}]; (* [1a] *)
 testClose[optimizeTm, blackwood, "originalTuningName" -> "KE", {1200, 1920, 2795.126}]; (* [1a] *)
 
+
 (* tuning equivalences *)
-(* TODO: pull these in from checkTuningEquivalences.m *)
+
+dummyTestFn[result_] := result;
+
+(* logSopfr = TOP *)
+
+checkLogSopfrIsTopConjecture[t_] := Module[{logSopfrTuning, topTuning},
+  logSopfrTuning = optimizeGtm[t, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "logSopfr"];
+  topTuning = optimizeGtm[t, "originalTuningName" -> "TOP"];
+  
+  testClose[dummyTestFn, logSopfrTuning, topTuning];
+];
+checkLogSopfrIsTopConjecture[meantone];
+checkLogSopfrIsTopConjecture[blackwood];
+checkLogSopfrIsTopConjecture[dicot];
+checkLogSopfrIsTopConjecture[augmented];
+checkLogSopfrIsTopConjecture[mavila];
+checkLogSopfrIsTopConjecture[porcupine];
+checkLogSopfrIsTopConjecture[srutal];
+checkLogSopfrIsTopConjecture[hanson];
+checkLogSopfrIsTopConjecture[magic];
+checkLogSopfrIsTopConjecture[negri];
+checkLogSopfrIsTopConjecture[tetracot];
+checkLogSopfrIsTopConjecture[meantone7];
+checkLogSopfrIsTopConjecture[magic7];
+checkLogSopfrIsTopConjecture[pajara];
+checkLogSopfrIsTopConjecture[augene];
+checkLogSopfrIsTopConjecture[sensi];
+
+(* sopfr = BOP *)
+
+checkSopfrIsBopConjecture[t_] := Module[{sopfrTuning, bopTuning},
+  sopfrTuning = optimizeGtm[t, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "sopfr"];
+  bopTuning = optimizeGtm[t, "originalTuningName" -> "BOP"];
+  
+  testClose[dummyTestFn, sopfrTuning, bopTuning];
+];
+checkSopfrIsBopConjecture[meantone];
+checkSopfrIsBopConjecture[blackwood];
+checkSopfrIsBopConjecture[dicot];
+checkSopfrIsBopConjecture[augmented];
+checkSopfrIsBopConjecture[mavila];
+checkSopfrIsBopConjecture[porcupine];
+checkSopfrIsBopConjecture[srutal];
+checkSopfrIsBopConjecture[hanson];
+checkSopfrIsBopConjecture[magic];
+checkSopfrIsBopConjecture[negri];
+checkSopfrIsBopConjecture[tetracot];
+checkSopfrIsBopConjecture[meantone7];
+checkSopfrIsBopConjecture[magic7];
+checkSopfrIsBopConjecture[pajara];
+checkSopfrIsBopConjecture[augene];
+checkSopfrIsBopConjecture[sensi];
 
 (* Kees = POTOP / POTT *)
 
+checkKeesIsPotopConjecture[t_] := Module[{keesTuning, potopTuning},
+  keesTuning = optimizeGtm[t, "originalTuningName" -> "Kees"];
+  potopTuning = optimizeGtm[t, "originalTuningName" -> "POTOP"];
+  
+  testClose[dummyTestFn, keesTuning, potopTuning];
+];
+checkKeesIsPotopConjecture[meantone];
+checkKeesIsPotopConjecture[blackwood];
+checkKeesIsPotopConjecture[dicot];
+checkKeesIsPotopConjecture[augmented];
+checkKeesIsPotopConjecture[mavila];
+checkKeesIsPotopConjecture[porcupine];
+checkKeesIsPotopConjecture[srutal];
+checkKeesIsPotopConjecture[hanson];
+checkKeesIsPotopConjecture[magic];
+checkKeesIsPotopConjecture[negri];
+checkKeesIsPotopConjecture[tetracot];
+checkKeesIsPotopConjecture[meantone7];
+checkKeesIsPotopConjecture[magic7];
+checkKeesIsPotopConjecture[pajara];
+checkKeesIsPotopConjecture[augene];
+checkKeesIsPotopConjecture[sensi];
+
 (* KE \[TildeTilde] POTE *)
 
-(* BOP = sopfr *)
-
-(* TOP = log sopfr *)
+(* TODO: KE is still not implemented *)
+checkKeIsPoteConjecture[t_] := Module[{},
+  True
+];
+checkKeIsPoteConjecture[meantone];
+checkKeIsPoteConjecture[blackwood];
+checkKeIsPoteConjecture[dicot];
+checkKeIsPoteConjecture[augmented];
+checkKeIsPoteConjecture[mavila];
+checkKeIsPoteConjecture[porcupine];
+checkKeIsPoteConjecture[srutal];
+checkKeIsPoteConjecture[hanson];
+checkKeIsPoteConjecture[magic];
+checkKeIsPoteConjecture[negri];
+checkKeIsPoteConjecture[tetracot];
+checkKeIsPoteConjecture[meantone7];
+checkKeIsPoteConjecture[magic7];
+checkKeIsPoteConjecture[pajara];
+checkKeIsPoteConjecture[augene];
+checkKeIsPoteConjecture[sensi];
 
 
 (* interval basis *)

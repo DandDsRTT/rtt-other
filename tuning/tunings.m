@@ -220,7 +220,7 @@ optimizeGtmTargetingAllSolverNumerical[d_, t_, ptm_, complexityUnitsMultiplier_,
     complexityUnitsMultiplier == "logIntegerLimit",
     optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogIntegerLimit[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
     If[
-      (* covers Kees, does the max - min special augmented norm-like thing like Weil, but with no 2's *)
+      (* covers Kees, does the max - min special augmented norm-like thing like Weil, but with 2's locked to pure *)
       complexityUnitsMultiplier == "logOddLimit",
       optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogOddLimit[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
       (* covers TOP, BOP, and L1-version of Frobenius *)
@@ -287,18 +287,18 @@ optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMulti
 ];
 
 optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogIntegerLimit[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[{augmentedThing, logIntegerLimitNorm, solution, middleMan},
-  middleMan = tm / ptm - Table[1, d]; (* TODO: Note: currently weighted *)
+  middleMan = tm / ptm - Table[1, d];
   augmentedThing = AppendTo[middleMan, 0];
   logIntegerLimitNorm = Max[augmentedThing] - Min[augmentedThing];
-  solution = NMinimize[logIntegerLimitNorm, gtm, WorkingPrecision -> 128];
+  solution = NMinimize[logIntegerLimitNorm, gtm, WorkingPrecision -> 128]; (* TODO: only difference is the lock to zero below*)
   gtm /. Last[solution] // N
 ];
 
 optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogOddLimit[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[{augmentedThing, logOddLimitNorm, solution, middleMan},
-  middleMan = Drop[tm - ptm, 1]; (* TODO: Note: currently NOT weighted *)
+  middleMan = tm / ptm - Table[1, d];
   augmentedThing = AppendTo[middleMan, 0];
   logOddLimitNorm = Max[augmentedThing] - Min[augmentedThing];
-  solution = NMinimize[logOddLimitNorm, gtm, WorkingPrecision -> 128];
+  solution = NMinimize[{logOddLimitNorm, augmentedThing[[1]] == 0}, gtm, WorkingPrecision -> 128];
   gtm /. Last[solution] // N
 ];
 
@@ -686,7 +686,7 @@ processTuningOptions[
   ];
   If[
     originalTuningName === "Weil",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logIntegerLimit";
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logIntegerLimit";
   ];
   If[
     originalTuningName === "WE" || originalTuningName === "Weil-Euclidean",
