@@ -45,14 +45,14 @@ getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGtm[meantoneM]
+        optimizeGtm[meantoneM, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"]
     
-  Out   {1200., 696.578}
+  Out   {1201.69, 697.563}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
         optimizeGtm[meantoneM, "originalTuningName" -> "TOP"]
     
-  Out   {1201.7, 697.564}
+  Out   {1201.7, 697.563}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
         optimizeGtm[meantoneM, "systematicTuningName" -> "minisos-MEC"]
@@ -86,8 +86,7 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
   originalTuningName = OptionValue["originalTuningName"];
   pureOctaveStretch = OptionValue["pureOctaveStretch"];
   
-  (* TODO: figure out why my defaulting of this final arg doesn't work anymore ... Wolfram Lnaguage bug? I mean obviously I've removed it now due to other stuff, but see if you can't put it back, I bet you can't. maybe it's like a max parameter list size or something crazy and undocumented like that *)
-  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, pureOctaveStretch, False];
+  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, pureOctaveStretch];
   optimizationPower = Part[tuningOptions, 1];
   tPossiblyWithChangedIntervalBasis = Part[tuningOptions, 4];
   pureOctaveStretch = Part[tuningOptions, 9];
@@ -127,19 +126,19 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeTm[meantoneM]
+        optimizeTm[meantoneM, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"]
     
-  Out   {###, ###, ###} (* TODO: fill these all in *)
+  Out   {1201.69, 1899.26, 2790.25}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
         optimizeTm[meantoneM, "originalTuningName" -> "TOP"]
     
-  Out   {###, ###, ###}
+  Out   {1201.7, 1899.26, 2790.25} 
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
         optimizeTm[meantoneM, "systematicTuningName" -> "minisos-MEC"]
     
-  Out   {###, ###, ###}
+  Out   {1198.24, 1893.54, 2781.18} 
 *)
 Options[optimizeTm] = tuningOptions;
 optimizeTm[t_, OptionsPattern[]] := Module[
@@ -200,7 +199,7 @@ optimizeGtmMinimax[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlop
 optimizeGtmTargetingAll[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_] := If[
   complexityNormPower == 2,
   optimizeGtmTargetingAllPseudoInverseAnalytical[d, t, ptm, complexityUnitsMultiplier],
-  optimizeGtmTargetingAllSolverNumerical[d, t, ptm, complexityUnitsMultiplier, complexityNormPower]
+  optimizeGtmTargetingAllNumerical[d, t, ptm, complexityUnitsMultiplier, complexityNormPower]
 ];
 
 optimizeGtmTargetingAllPseudoInverseAnalytical[d_, t_, ptm_, complexityUnitsMultiplier_] := Module[{w, tima},
@@ -210,26 +209,21 @@ optimizeGtmTargetingAllPseudoInverseAnalytical[d_, t_, ptm_, complexityUnitsMult
   optimizeGtmWithPseudoInverse[tima, w, t, ptm]
 ];
 
-optimizeGtmTargetingAllSolverNumerical[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{gtm, ma, tm},
+optimizeGtmTargetingAllNumerical[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{gtm, ma, tm},
   gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
   tm = gtm.ma;
   
   If[
-    (* covers Weil, does the max - min special augmented norm-like thing *)
-    complexityUnitsMultiplier == "logIntegerLimit",
-    optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogIntegerLimit[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
-    If[
-      (* covers Kees, does the max - min special augmented norm-like thing like Weil, but with 2's locked to pure *)
-      complexityUnitsMultiplier == "logOddLimit",
-      optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogOddLimit[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
-      (* covers TOP, BOP, and L1-version of Frobenius *)
-      optimizeGtmTargetingAllSolverNumericalL1Style[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm]
-    ]
+    complexityUnitsMultiplier == "logIntegerLimit" || complexityUnitsMultiplier == "logOddLimit",
+    (* covers Weil and Kees *)
+    optimizeGtmTargetingAllNumericalAlmostL1Style[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
+    (* covers TOP, BOP, and L1-version of Frobenius *)
+    optimizeGtmTargetingAllNumericalL1Style[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm]
   ]
 ];
 
-optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
+optimizeGtmTargetingAllNumericalL1Style[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
   {
     eₚ,
     solution,
@@ -244,7 +238,7 @@ optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMulti
   eₚ = If[
     (* covers TOP *)
     complexityUnitsMultiplier == "standardized",
-    tm / ptm - Table[1, d], (* TODO: might be more appropriate to articulate this as a weighting matrix too *)
+    (tm - ptm) * (1 / Map[getLogProductComplexity[#, t]&, IdentityMatrix[d]]),
     If[
       (* covers BOP *)
       complexityUnitsMultiplier == "product",
@@ -281,24 +275,18 @@ optimizeGtmTargetingAllSolverNumericalL1Style[d_, t_, ptm_, complexityUnitsMulti
     normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
   
-  (* TODO: note that this is power is always 1, therefore dual used below is \[Infinity], because if you're using power 2, then you're using the pseudoinverse technique, and there's no good reason to look at 1-min'd prime error mag for \[Infinity]-min'd intervals; except this consideration is now outmoded to large extent by the fact that this should follow the pattern of optimizeGtmTargetingListNumerical *)
-  
   gtm /. Last[previousSolution] // N
 ];
 
-optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogIntegerLimit[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[{augmentedThing, logIntegerLimitNorm, solution, middleMan},
+optimizeGtmTargetingAllNumericalAlmostL1Style[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
+  {augmentedThing, almostL1Norm, solution, middleMan, minimizeSetup},
+  
   middleMan = tm / ptm - Table[1, d];
   augmentedThing = AppendTo[middleMan, 0];
-  logIntegerLimitNorm = Max[augmentedThing] - Min[augmentedThing];
-  solution = NMinimize[logIntegerLimitNorm, gtm, WorkingPrecision -> 128]; (* TODO: only difference is the lock to zero below*)
-  gtm /. Last[solution] // N
-];
-
-optimizeGtmTargetingAllSolverNumericalAlmostL1StyleLogOddLimit[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[{augmentedThing, logOddLimitNorm, solution, middleMan},
-  middleMan = tm / ptm - Table[1, d];
-  augmentedThing = AppendTo[middleMan, 0];
-  logOddLimitNorm = Max[augmentedThing] - Min[augmentedThing];
-  solution = NMinimize[{logOddLimitNorm, augmentedThing[[1]] == 0}, gtm, WorkingPrecision -> 128];
+  almostL1Norm = Max[augmentedThing] - Min[augmentedThing];
+  minimizeSetup = If[complexityUnitsMultiplier == "logOddLimit", {almostL1Norm, augmentedThing[[1]] == 0}, almostL1Norm];
+  solution = NMinimize[{almostL1Norm, augmentedThing[[1]] == 0}, gtm, WorkingPrecision -> 128];
+  
   gtm /. Last[solution] // N
 ];
 
@@ -338,7 +326,7 @@ optimizeGtmMinisum[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlop
 
 (* SOLVER (USED BY NUMERICAL MINIMAX AND MINISUM) *)
 
-(* TODO: you could save a lot of computation time and possbily get more precise reuslts if yo had a function that would take in a mapping matrix and output whether it is parallel to its corresponding concentric constant TOP damage shape, i.e. whether or not it has a unique TOP tuning? then you could just go back to the way of minimization = Max or Total depending ont he oprtimizationPower *)
+(* TODO: you could save a lot of computation time and possibly get more precise results if you had a function that would take in a mapping matrix and output whether it is parallel to its corresponding concentric constant TOP damage shape, i.e. whether or not it has a unique TOP tuning? then you could just go back to the way of minimization = Max or Total depending ont he optimizationPower *)
 optimizeGtmTargetingListNumerical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
   {
     gtm,
@@ -547,6 +535,9 @@ getMaxDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
 (* AKA "Benedetti height" *)
 getProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getB[t], pcv}];
 
+(* AKA "Tenney height" *)
+getLogProductComplexity[pcv_, t_] := Log[2, getProductComplexity[pcv, t]];
+
 (* AKA "Wilson height" *)
 getSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getB[t], pcv}]];
 
@@ -555,7 +546,6 @@ getLogSopfrComplexity[pcv_, t_] := Log[2, getSopfrComplexity[pcv, t]];
 
 (* AKA "Weil height" *)
 getIntegerLimitComplexity[pcv_, t_] := Module[{rational},
-  (* TODO: pcvToRational doesn't support nonstandard interval bases yet; should move this there *)
   rational = pcvToRational[pcv];
   Max[Numerator[rational], Denominator[rational]]
 ];
@@ -614,7 +604,7 @@ processTuningOptions[
   inputSystematicTuningName_,
   inputOriginalTuningName_,
   inputPureOctaveStretch_,
-  forDamage_
+  forDamage_ : False
 ] := Module[
   {
     tima,
@@ -783,10 +773,4 @@ getW[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNor
 getComplexity[pcv_, t_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{weightedPcv},
   weightedPcv = If[complexityUnitsMultiplier == "standardized", pcv * getPtm[t], pcv];
   Norm[weightedPcv, complexityNormPower]
-];
-
-(* TODO: how do I not have this already? *)
-getF[t_] := Module[{b},
-  b = getB[t];
-  padD[Map[rationalToPcv, b], getDp[b]]
 ];

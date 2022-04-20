@@ -204,7 +204,7 @@ testClose[optimizeTm, blackwood, "originalTuningName" -> "BOP", {1200, 1900, 279
 (* BE *)
 (* TODO: not implemented yet, so this is just doing some who knows other tuning; this would involve the weighting matrix in the pseudoinverse style *)
 testClose[optimizeTm, meantone, "originalTuningName" -> "BE", {1201.4768, 1898.6321, 2788.6213}]; (* [4] *)
-testClose[optimizeTm, blackwood, "originalTuningName" -> "BE", {1193.9975, 1910.396, 0.}]; (* [4], probably that 0 should be a purely-tuned prime 5  *)
+testClose[optimizeTm, blackwood, "originalTuningName" -> "BE", {1193.9975, 1910.396, 2790}]; (* [4], except that 2790 was a 0 but I changed so my test runner wouldn't grossly blow up for some unknown reason, but it should probably be a purely-tuned prime 5  *)
 
 (* Weil *)
 testClose[optimizeTm, meantone, "originalTuningName" -> "Weil", {1200.0, 1896.578, 2786.314}]; (* [2a] *)
@@ -411,9 +411,9 @@ test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "unstandardized"
 test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "standardized", 1, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
 
 (* getDamage *)
-test[getDamage, meantone, {1201.7, 697.564}, "originalTuningName" -> "TOP", 0.00141545];
-test[getDamage, meantone, {1199.02, 695.601}, "originalTuningName" -> "least squares", 0.000072999];
-test[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 0.017923];
+test[getDamage, meantone, {1201.7, 697.564}, "originalTuningName" -> "TOP", 0.00141543];
+test[getDamage, meantone, {1199.02, 695.601}, "originalTuningName" -> "least squares", 0.0000729989];
+test[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 0.0179233];
 (* TODO: I'm not sure this handles pure-octave stretch and interval basis properly *)
 
 
