@@ -92,7 +92,7 @@ testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope
 
 
 (* optimizeGtm, by "systematicTuningName" *)
-(* TODO: you should probably instead just test that these map to the correct traits, or something *)
+(* TODO: you should probably instead just test that these map to the correct traits, or something, both for these, and for the by "originalTuningName" *)
 (* TODO: you should make some diagrams and actually visually check some of these non-unique ones for pajara *)
 
 testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-U", {600.000, 108.125}];
@@ -140,7 +140,6 @@ testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-EC", {600.000,
 
 
 (* optimizeGtm, by "originalTuningName" *)
-(* TODO: you should probably instead just test that these map to the correct traits, or something *)
 
 (* this is simply some coverage that they match the above *)
 testClose[optimizeGtm, pajara, "originalTuningName" -> "minimax", {600.000, 106.843}];
@@ -347,8 +346,6 @@ checkKeIsPoteConjecture[sensi];
 
 
 (* interval basis *)
-(* TODO: rename options to traits, if they really are traits *)
-(* TODO: decide whether I really want to use camelCase for the user provided options, or sentence case maybe would be better*)
 (* TODO: find and include more examples of this *)
 
 t = {{{1, 1, 5}, {0, -1, -3}}, "co", {2, 7 / 5, 11}};

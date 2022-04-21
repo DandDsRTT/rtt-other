@@ -582,11 +582,11 @@ getPureOctaveStretchedGtm[optimizedGtm_, t_] := Module[{periodsPerOctave},
 (* SHARED *)
 
 tuningOptions = {
-  "optimizationPower" -> Null,
-  "damageWeightingSlope" -> "",
-  "complexityUnitsMultiplier" -> "standardized",
-  "complexityNormPower" -> 1,
-  "tim" -> Null,
+  "tim" -> Null, (* trait 0 *)
+  "optimizationPower" -> Null, (* trait 1 *)
+  "damageWeightingSlope" -> "", (* trait 2 *)
+  "complexityNormPower" -> 1, (* trait 3 *)
+  "complexityUnitsMultiplier" -> "standardized", (* trait 4 *)
   "tuningIntervalBasis" -> "primes",
   "systematicTuningName" -> "",
   "originalTuningName" -> "",
