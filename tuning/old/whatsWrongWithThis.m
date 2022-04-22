@@ -1,5 +1,5 @@
 (*given a mapping, a target intervals matrix (currently defaults to 5-odd-limit diamond), which mean to take (minimax, least squares, least absolutes; currently hardcoded to minimax),and a weighting (unweighted, or {progressive/regressive, P/F/T, 1/2/\[Infinity]}; currently defaults to progressive P1 (partch))*)
-tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityWeighted", weighting_ : "standardized", normNumber_ : "1"(*, tim_, mPower,weighting_*)] := Module[{solution, thing, mappedTim, complexities},
+tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityWeighted", weighting_ : "logProduct", normNumber_ : "1"(*, tim_, mPower,weighting_*)] := Module[{solution, thing, mappedTim, complexities},
   
   Print["well let's see what we got", meanPower, unweighted, gression, weighting, normNumber];
   
@@ -53,5 +53,5 @@ tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityW
   gtm /. Last[solution] // N
 ];
 
-partch = tune[m, \[Infinity], False, "complexityWeighted", "standardized", 1]
+partch = tune[m, \[Infinity], False, "complexityWeighted", "logProduct", 1]
 minimax = tune[m, \[Infinity], True]

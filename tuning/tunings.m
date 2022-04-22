@@ -498,7 +498,7 @@ getDamage[t_, gtm_, OptionsPattern[]] := Module[
   ]
 ];
 
-getTid[t_, tm_, tima_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{e, w},
+getTid[t_, tm_, tima_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{e, W},
   e = N[tm.Transpose[tima]] - N[ptm.Transpose[tima]];
   W = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
   
@@ -517,27 +517,16 @@ getMaxDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
     Max[getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]];
 
 
-(* AKA "Benedetti height" *)
-getProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getB[t], pcv}];
 
-(* AKA "Tenney height" *)
-getLogProductComplexity[pcv_, t_] := Log[2, getProductComplexity[pcv, t]];
 
-(* AKA "Wilson height" *)
-getSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getB[t], pcv}]];
 
-(* This just gives TOP tuning *)
-getLogSopfrComplexity[pcv_, t_] := Log[2, getSopfrComplexity[pcv, t]];
 
-(* AKA "Weil height" *)
-getIntegerLimitComplexity[pcv_, t_] := Module[{rational},
-  rational = pcvToRational[pcv];
-  Max[Numerator[rational], Denominator[rational]]
-];
 
-(* AKA "Kees height" *)
-noTwos[pcv_] := MapIndexed[If[First[#2] == 1, 0, #1]&, pcv];
-getOddLimitComplexity[pcv_, t_] := getIntegerLimitComplexity[noTwos[pcv], t];
+
+
+
+
+
 
 
 (* INTERVAL BASIS *)
@@ -571,7 +560,7 @@ tuningOptions = {
   "optimizationPower" -> Null, (* trait 1 *)
   "damageWeightingSlope" -> "", (* trait 2 *)
   "complexityNormPower" -> 1, (* trait 3 *)
-  "complexityUnitsMultiplier" -> "standardized", (* trait 4 *)
+  "complexityUnitsMultiplier" -> "logProduct", (* trait 4 *)
   "tuningIntervalBasis" -> "primes",
   "systematicTuningName" -> "",
   "originalTuningName" -> "",
@@ -633,15 +622,15 @@ processTuningOptions[
   ];
   If[
     originalTuningName === "TOP" || originalTuningName === "TIPTOP",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "standardized";
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logProduct";
   ];
   If[
     originalTuningName === "TE" || originalTuningName === "Tenney-Euclidean",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "standardized";
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct";
   ];
   If[
     originalTuningName === "Frobenius",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "unstandardized";
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "noop";
   ];
   If[
     originalTuningName === "BOP",
@@ -669,11 +658,11 @@ processTuningOptions[
   ];
   If[
     originalTuningName === "POTOP" || originalTuningName === "POTT",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "standardized"; pureOctaveStretch = True;
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logProduct"; pureOctaveStretch = True;
   ];
   If[
     originalTuningName === "POTE",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "standardized"; pureOctaveStretch = True;
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct"; pureOctaveStretch = True;
   ];
   
   If[
@@ -698,11 +687,11 @@ processTuningOptions[
   ];
   If[
     StringMatchQ[systematicTuningName, "*M*"],
-    complexityUnitsMultiplier = "unstandardized";
+    complexityUnitsMultiplier = "noop";
   ];
   If[
     StringMatchQ[systematicTuningName, "*O*"],
-    complexityUnitsMultiplier = "standardized";
+    complexityUnitsMultiplier = "logProduct";
   ];
   If[
     StringMatchQ[systematicTuningName, "*minimax*"],
@@ -745,6 +734,7 @@ processTuningOptions[
 
 getPtm[t_] := Log[2, getB[t]];
 
+(*TODO: eventually I would like to merge this with getWₚ *)
 getW[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{W},
   W = If[
     damageWeightingSlope != "unweighted",
@@ -752,22 +742,25 @@ getW[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNor
     IdentityMatrix[Length[tima]]
   ];
   
+  (*  Print["something wack here? ", W, " complexityUnitsMultiplier: ", complexityUnitsMultiplier, " complexityNormPower: ", complexityNormPower];*)
+  
   If[damageWeightingSlope == "simplicityWeighted", Inverse[W], W]
 ];
 
 (*TODO: for now while I iron stuff out this is going to look really redundant with getW, but I just want to avoid terminologically confusing myself for now *)
+(* TODO: should probably eventually dry this up with getComplexity... pretty sure it's the same except maybe everyone has to psuedoinverse, because that will just do an inverse in the case where inverse is possible? *)
 getWₚ[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{d, Wₚ},
   d = getD[t];
-  Wₚ = If[
+  Wₚ = If[ (* TODO: this is inverse W, as is the other one *)
     (* covers TOP *)
-    complexityUnitsMultiplier == "standardized",
+    complexityUnitsMultiplier == "logProduct",
     Inverse[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, IdentityMatrix[d]]]],
     If[
       (* covers BOP *)
       complexityUnitsMultiplier == "product",
       Inverse[DiagonalMatrix[Map[getProductComplexity[#, t]&, IdentityMatrix[d]]]],
       If[
-        (* also covers TOP (equivalent to "standardized") *)
+        (* also covers TOP (equivalent to "logProduct") *)
         complexityUnitsMultiplier == "logSopfr",
         Inverse[DiagonalMatrix[ Map[getLogSopfrComplexity[#, t]&, IdentityMatrix[d]]]],
         If[
@@ -778,10 +771,16 @@ getWₚ[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexity
           If[
             (* covers Weil *) (* TODO: note that what we're doing here is like, finding the dual weighting; perhaps work that into the name *)
             complexityUnitsMultiplier == "logIntegerLimit",
-            PseudoInverse[Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, IdentityMatrix[d]]], { Map[getLogProductComplexity[#, meantone]&, IdentityMatrix[d]]}]],
+            PseudoInverse[Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, IdentityMatrix[d]]], { Map[getLogProductComplexity[#, meantone]&, IdentityMatrix[d]]}]] / 2,
             
-            (* covers L1 version of Frobenius *)
-            Inverse[DiagonalMatrix[Map[1&, IdentityMatrix[d]]]]
+            If[
+              (* covers Kees *)
+              complexityUnitsMultiplier == "logOddLimit",
+              PseudoInverse[Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, DiagonalMatrix[Join[{0}, Table[1, d - 1]]]]], { Map[getLogProductComplexity[#, meantone]&, IdentityMatrix[d]]}]] / 2,
+              
+              (* covers L1 version of Frobenius *)
+              Inverse[DiagonalMatrix[Map[1&, IdentityMatrix[d]]]]
+            ]
           ]
         ]
       ]
@@ -793,7 +792,64 @@ getWₚ[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexity
 ];
 
 (* TODO: rename this to like, get normal complexity or something, because this only handles the (un)standardized power norm types. and/or eventually, as you will eventually want to support whichever complexity they want, BOP or Weil or whatever, for like normal targeting-list minimax, etc. something else *)
-getComplexity[pcv_, t_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{weightedPcv},
-  weightedPcv = If[complexityUnitsMultiplier == "standardized", pcv * getPtm[t], pcv];
-  Norm[weightedPcv, complexityNormPower]
+getComplexity[pcv_, t_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{d, W},
+  d = getD[t];
+  W = If[
+    (* covers TOP *)
+    complexityUnitsMultiplier == "logProduct",
+    DiagonalMatrix[Map[getLogProductComplexity[#, t]&, IdentityMatrix[d]]],
+    If[
+      (* covers BOP *)
+      complexityUnitsMultiplier == "product",
+      DiagonalMatrix[Map[getProductComplexity[#, t]&, IdentityMatrix[d]]],
+      If[
+        (* also covers TOP (equivalent to "logProduct") *)
+        complexityUnitsMultiplier == "logSopfr",
+        DiagonalMatrix[ Map[getLogSopfrComplexity[#, t]&, IdentityMatrix[d]]],
+        If[
+          (* also covers BOP (equivalent to "product") *)
+          complexityUnitsMultiplier == "sopfr",
+          DiagonalMatrix[Map[getSopfrComplexity[#, t]&, IdentityMatrix[d]]],
+          
+          If[
+            (* TODO: alright... so Weil and Kees tunings, when doing their dual norms, we actually go into the "almostL1" style path instead... but can still implement this here; their actual norms themselves can still follow this pattern... oh wait but this isn't really how it works, or maybe this gives the same thing as in the "vector i form" of my scrreadhsetet? https://docs.google.com/spreadsheets/d/1BBcUCoe6seCC1PM2qaByyiMNNLdxkEsx5X_-XJ9BdpE/edit#gid=694229653 *)
+            complexityUnitsMultiplier == "logIntegerLimit",
+            Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, IdentityMatrix[d]]], { Map[getLogProductComplexity[#, meantone]&, IdentityMatrix[d]]}] / 2,
+            
+            If[
+              (* covers Kees *)
+              complexityUnitsMultiplier == "logOddLimit",
+              Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, DiagonalMatrix[Join[{0}, Table[1, d - 1]]]]], { Map[getLogProductComplexity[#, meantone]&, IdentityMatrix[d]]}] / 2,
+              
+              (* covers L1 version of Frobenius *)
+              DiagonalMatrix[Map[1&, IdentityMatrix[d]]]
+            ]
+          ]
+        ]
+      ]
+    ]
+  ];
+  
+  Norm[W.pcv, complexityNormPower]
 ];
+getCopfrComplexity[pcv_, t_] := Total[Map[If[Abs[# > 0], 1, 0]&, pcv]];
+(* AKA "Benedetti height" *)
+getProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getB[t], pcv}];
+(* AKA "Tenney height" *)
+getLogProductComplexity[pcv_, t_] := Log[2, getProductComplexity[pcv, t]];
+(* AKA "Wilson height", can also be used to find BOP tuning *)
+getSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getB[t], pcv}]];
+(* This apparently doesn't have a name, but can also be used to find TOP tuning *)
+getLogSopfrComplexity[pcv_, t_] := Log[2, getSopfrComplexity[pcv, t]];
+(* AKA "Weil height" *)
+getIntegerLimitComplexity[pcv_, t_] := Module[{rational},
+  rational = pcvToRational[pcv];
+  Max[Numerator[rational], Denominator[rational]]
+];
+(* AKA "logarithmic Weil height", used for "Weil tuning" *)
+getLogIntegerLimitComplexity[pcv_, t_] := Log[2, getIntegerLimitComplexity[pcv, t]];
+(* AKA "Kees height" *)
+noTwos[pcv_] := MapIndexed[If[First[#2] == 1, 0, #1]&, pcv];
+getOddLimitComplexity[pcv_, t_] := getIntegerLimitComplexity[noTwos[pcv], t];
+(* AKA "Kees expressibility" , used for "Kees tuning" *)
+getLogOddLimitComplexity[pcv_, t_] := Log[2, getOddLimitComplexity[pcv, t]];

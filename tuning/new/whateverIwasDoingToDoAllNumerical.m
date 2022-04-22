@@ -126,7 +126,7 @@ In[1315]:=
 (*]*)(*;*)
 
 In[1317]:= (*optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d_, t_, ptm_, complexityWeighting_] := Module[{w, tima, weightedTima, unchangedIntervals, g, gtm},
-  w = If[complexityWeighting == "standardized", 1 / ptm, Table[1, d]];
+  w = If[complexityWeighting == "logProduct", 1 / ptm, Table[1, d]];
   tima = IdentityMatrix[d];
   
   optimizeGtmWithPseudoInverse[tima, w, t, ptm]
@@ -136,7 +136,7 @@ In[1317]:= (*optimizeGtmMinimaxPLimitPseudoInverseAnalytical[d_, t_, ptm_, compl
       gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
       ma = getA[getM[t]];
       tm = gtm.ma;
-      e = If[complexityWeighting == "standardized", tm / ptm - Table[1, d], tm - ptm];
+      e = If[complexityWeighting == "logProduct", tm / ptm - Table[1, d], tm - ptm];
       
       solution = NMinimize[Norm[e, dualPower[complexityPower]], gtm, Method -> "NelderMead",WorkingPrecision -> 15];
       gtm /. Last[solution] // N
@@ -383,7 +383,7 @@ In[1345]:=
       "optimizationPower" -> \[Infinity],
       "weighted" -> False,
       "damageWeightingSlope" -> "simplicityWeighted",
-      "complexityUnitsMultiplier" -> "standardized",
+      "complexityUnitsMultiplier" -> "logProduct",
       "complexityNormPower" -> 1,
       "tim" -> Null,
       "damage" -> "",
@@ -497,6 +497,6 @@ In[1349]:= getW[tima_, weighted_, weightingDirection_, complexityWeighting_, com
 ];
 
 In[1350]:= getComplexity[pcv_, complexityWeighting_, complexityPower_] := Module[{weightedPcv},
-  weightedPcv = If[complexityWeighting == "standardized", pcv * getPtm[Length[pcv]], pcv];
+  weightedPcv = If[complexityWeighting == "logProduct", pcv * getPtm[Length[pcv]], pcv];
   Norm[weightedPcv, complexityPower]
 ];

@@ -13,6 +13,17 @@ testClose[fn_, args___, expectation_] := Module[{actual},
     Print[ToString[SetAccuracy[actual, accuracy + 1]]];
   ]
 ];
+testCloseNotList[fn_, args___, expectation_] := Module[{actual},
+  actual = Apply[fn, {args}];
+  
+  If[
+    Abs[actual - expectation] < 10^-accuracy,
+    passes += 1,
+    failures += 1;
+    Print[Style[StringForm["``[``] != ``; actual result was:", fn, {args}, SetAccuracy[expectation, accuracy + 1]], 14, Red]];
+    Print[ToString[SetAccuracy[actual, accuracy + 1]]];
+  ]
+];
 testNotClose[fn_, args___, expectation_] := Module[{actual},
   actual = Apply[fn, {args}];
   
@@ -59,31 +70,31 @@ sensamagic = {{{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}}, "co"};
 
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
 
-testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1202.387, 697.173}];
-testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1202.726, 697.258}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", {1202.387, 697.173}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1202.726, 697.258}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.695, 697.563}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.596, 697.530}];
 
-testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1202.390, 697.174}];
-testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1202.607, 696.741}];
+testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", {1202.390, 697.174}];
+testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1202.607, 696.741}];
 testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.698, 697.563}];
 testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.397, 697.049}];
 
-testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1197.613, 694.787}];
-testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1197.437, 694.976}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", {1197.613, 694.787}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1197.437, 694.976}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", {1197.983, 694.712}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1198.160, 695.012}];
 
 
 testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "unweighted", {1199.022, 695.601}];
 
-testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1200.070, 696.005}];
-testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1200.742, 696.205}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", {1200.070, 696.005}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1200.742, 696.205}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", {1200.985, 696.904}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.127, 696.905}];
 
-testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1198.396, 695.289}];
-testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1198.244, 695.294}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", {1198.396, 695.289}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1198.244, 695.294}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", {1198.085, 694.930}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1197.930, 694.911}];
 
@@ -91,13 +102,13 @@ testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope
 (*testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];*)
 optimizeGtm[meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted"];
 
-testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1195.699, 693.352}];
-testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1195.699, 693.352}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", {1195.699, 693.352}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1195.699, 693.352}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", {1200.000, 696.578}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1200.000, 696.578}];
 
-testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", {1200.000, 696.578}];
-testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "unstandardized", "complexityNormPower" -> 2, {1200.000, 696.578}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", {1200.000, 696.578}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1200.000, 696.578}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", {1195.699, 693.352}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1195.699, 693.352}];
 
@@ -184,7 +195,6 @@ sources:
 [9] Scala - has TOP, RMS-TOP = TE, Frobenius, that's it
 [10] Discord history ... not checked yet
 *)
-(* TODO: I think I should go over the tests that are failing already and make them pass if they're close enough but note the discrepancies *)
 
 (* minimax *)
 testClose[optimizeTm, meantone, "originalTuningName" -> "minimax", {1199.022, 1894.623, 2782.403}]; (* [7a] says {1200.000, 1896.578, 2786.314} but I think that page might enforce pure octaves *)
@@ -227,7 +237,25 @@ testClose[optimizeTm, augene, "originalTuningName" -> "minimax", {1200.046, 1908
 (* sensamagic *)
 
 (* TOP / TIPTOP *)
-(* TODO: gather some *)
+(* TODO: resolve discrepancies *)
+accuracy = 1;
+testClose[optimizeGtm, meantone, "originalTuningName" -> "TOP", {1201.70, 1201.70 - 504.13}]; (* [5](Table 1) *)
+(*testClose[optimizeGtm, blackwood, "originalTuningName" -> "TOP", {238.87, 238.87*11 +158.78}]; (* [5](Table 1)*) (*this one is way off *) *)
+testClose[optimizeGtm, dicot, "originalTuningName" -> "TOP", {1207.66, 353.22}];(* [5](Table 1) *)
+(*testClose[optimizeGtm, augmented, "originalTuningName" -> "TOP", {399.02,399.02*5- 93.15}]; (* [5](Table 1) *) (* this one is way off *)*)
+testClose[optimizeGtm, mavila, "originalTuningName" -> "TOP", {1206.55, 1206.55 + 685.03}];(* [5](Table 1) *)
+testClose[optimizeGtm, porcupine, "originalTuningName" -> "TOP", {1196.91, 1034.59 - 1196.91}]; (* [5](Table 1) *)
+testClose[optimizeGtm, srutal, "originalTuningName" -> "TOP", {599.56, 599.56 * 4 - 494.86}];(* [5](Table 1) *)
+testClose[optimizeGtm, hanson, "originalTuningName" -> "TOP", {1200.29, 317.07}];(* [5](Table 1) *)
+testClose[optimizeGtm, magic, "originalTuningName" -> "TOP", {1201.28, 380.80}]; (* [5](Table 1) *)
+testClose[optimizeGtm, negri, "originalTuningName" -> "TOP", {1201.82, 1201.82 - 1075.68}]; (* [5] as "negripent" (Table 1) *)
+testClose[optimizeGtm, tetracot, "originalTuningName" -> "TOP", {1199.03, 176.11}]; (* [5](Table 1) *)
+testClose[optimizeGtm, meantone7, "originalTuningName" -> "TOP", {1201.70, 1201.70 * 2 - 504.13}]; (* [5](Table 2) *)
+testClose[optimizeGtm, magic7, "originalTuningName" -> "TOP", {1201.28, 380.80}]; (* [5] (Table 3) *)
+testClose[optimizeGtm, pajara, "originalTuningName" -> "TOP", {598.45, 598.45 - 491.88}];  (* [5](Table 2) *)
+testClose[optimizeGtm, augene, "originalTuningName" -> "TOP", {399.02, 399.02 * 5 - 90.59}]; (* [5] (Table 2) *)
+testClose[optimizeGtm, sensi, "originalTuningName" -> "TOP", {1198.39, 1198.39 - 755.23}]; (* [5] as "sensisept" (Table 2) *)
+accuracy = 3;
 
 (* TE *)
 testClose[optimizeTm, meantone, "originalTuningName" -> "TE", {1201.397, 1898.446, 2788.196}]; (* [1a] *)
@@ -250,6 +278,7 @@ testClose[optimizeTm, blackwood, "originalTuningName" -> "TE", {1194.308, 1910.8
 (* sensamagic *)
 
 (* Frobenius *)
+(* TODO: can grab from Flora's app; should be reliable because they'll all be unique *)
 
 (* POTE *)
 testClose[optimizeTm, meantone, "originalTuningName" -> "POTE", {1200, 1896.239, 2784.955}]; (* [1a] *)
@@ -292,8 +321,6 @@ Mapping: [⟨1 9 9 8], ⟨0 -10 -9 -7]]
 *)
 accuracy = 2;
 testClose[optimizeTm, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "POTOP", {1200., 1915.81, 2806.99, 3368.38, 4161.4}]; (* Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ but I agree with it, so it doesn't match the Kees tuning of it elsewhere in here *)
-accuracy = 3;
-
 accuracy = 1;
 testClose[optimizeGtm, {{{1, 2, 6, 2, 10}, {0, -1, - 9, 2, -16}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 490.4}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 testClose[optimizeGtm, {{{1, 2, 6, 2, 1}, {0, -1, -9, 2, 6}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 490.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
@@ -305,9 +332,6 @@ testClose[optimizeGtm, {{{1, 1, 0}, {0, 1, 4}}, "co"}, "originalTuningName" -> "
 testClose[optimizeGtm, {{{1, 1, 0, -3}, {0, 1, 4, 10}}, "co"}, "originalTuningName" -> "POTOP", {1200, 696.58}]; (* The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents. (some Facebook thing sorry I lost the link *)
 accuracy = 3;
 testClose[optimizeGtm, {{{1, 1, 4}, {0, 1, -2}}, "co", {2, 3, 7}}, "originalTuningName" -> "POTOP", {1200, 709.18447040211}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/1035558283251060/?comment_id=1041634519310103&reply_comment_id=1041649585975263 *)
-
-
-
 
 (* BOP *)
 (* TODO: resolve disagreement between Flora's results and mine... we disagree on ones with non-unique tunings, and I know that I take specific steps to contend with that while she doesn't, so I suspect that I'm the one who is correct here, but we'll see *)
@@ -407,7 +431,6 @@ testClose[optimizeTm, blackwood, "originalTuningName" -> "WE", {1194.254, 1910.8
 (* augene *)
 (* sensi *)
 (* sensamagic *)
-
 accuracy = 2;
 testClose[optimizeTm, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "Kees", {1200., 1915.93, 2806.79, 3368.14, 4161.36}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ *)
 accuracy = 3;
@@ -601,14 +624,33 @@ test[oddLimitFromD, 5, 11];
 test[oddLimitFromD, 6, 15];
 
 (* getComplexity *)
-test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "unstandardized", 1, 3];
-test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "unstandardized", 2, \[Sqrt]3];
-test[getComplexity, {1, 1, -1}, {{{1, 2, 3}, {0, 5, 6}}, "co"}, "standardized", 1, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
+dummy5limitTemp = {{{1, 2, 3}, {0, 5, 6}}, "co"};
+test[getComplexity, {1, 1, -1}, dummy5limitTemp, "noop", 1, 3];
+test[getComplexity, {1, 1, -1}, dummy5limitTemp, "noop", 2, \[Sqrt]3];
+test[getComplexity, {1, 1, -1}, dummy5limitTemp, "logProduct", 1, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
+
+pcv = {1, -2, 1};
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "noop", 1, 4];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "noop", 2, 2.449];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logProduct", 1, 6.492];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logProduct", 2, 4.055];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logIntegerLimit", 1, 3.322];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logIntegerLimit", 2, 2.103];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 1, 3.170];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 2, 2.389];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 1, 13];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 2, 8.062];
+
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "noop", 1, getCopfrComplexity[pcv]];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logProduct", 1, getLogProductComplexity[pcv]];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logIntegerLimit", 1, getLogIntegerLimitComplexity[pcv]];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 1, getLogOddLimitComplexity[pcv]];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 1, getProductComplexity[pcv]];
 
 (* getDamage *)
-test[getDamage, meantone, {1201.7, 697.564}, "originalTuningName" -> "TOP", 0.00141543];
-test[getDamage, meantone, {1199.02, 695.601}, "originalTuningName" -> "least squares", 0.0000729989];
-test[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 0.0179233];
+testCloseNotList[getDamage, meantone, {1201.7, 697.564}, "originalTuningName" -> "TOP", 0.00141543];
+testCloseNotList[getDamage, meantone, {1199.02, 695.601}, "originalTuningName" -> "least squares", 0.0000729989];
+testCloseNotList[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 0.0179233];
 (* TODO: I'm not sure this handles pure-octave stretch and interval basis properly *)
 
 

@@ -160,38 +160,38 @@ m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)*)
 
 1200 * getTuningLinearProgrammingStyle[m, \[Infinity]]
 
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "unstandardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "unstandardized", 2]
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "standardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "standardized", 2]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "noop", 1]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "logProduct", 1]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "logProduct", 2]
 
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "unstandardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "unstandardized", 2]
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "standardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "standardized", 2]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "noop", 1]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "logProduct", 1]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "logProduct", 2]
 
 
 1200 * getTuningLinearProgrammingStyle[m, 2]
 
-1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "unstandardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "unstandardized", 2]
-1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "standardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "standardized", 2]
+1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "noop", 1]
+1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "logProduct", 1]
+1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "logProduct", 2]
 
-1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "unstandardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "unstandardized", 2]
-1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "standardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "standardized", 2]
+1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "noop", 1]
+1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "logProduct", 1]
+1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "logProduct", 2]
 
 
 1200 * getTuningLinearProgrammingStyle[m, 1]
 
-1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "unstandardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "unstandardized", 2]
-1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "standardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "standardized", 2]
+1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "noop", 1]
+1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "logProduct", 1]
+1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "logProduct", 2]
 
-1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "unstandardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "unstandardized", 2]
-1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "standardized", 1]
-1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "standardized", 2]
+1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "noop", 1]
+1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "logProduct", 1]
+1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "logProduct", 2]

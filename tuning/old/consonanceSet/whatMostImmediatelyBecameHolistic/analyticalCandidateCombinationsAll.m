@@ -12,21 +12,21 @@ getGpt[m_] := Module[{ma, decomp, left, snf, right, gpt},
   gpt
 ];
 
-getMaxDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "unstandardized", complexityP_ : 1] := Module[{e, w},
+getMaxDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "noop", complexityP_ : 1] := Module[{e, w},
   e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
   w = getW[tima, weighting, complexityWeighting, complexityP];
   
   Max[Map[Abs, e * w]]
 ];
 
-getSumOfSquaresDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "unstandardized", complexityP_ : 1] := Module[{e, w},
+getSumOfSquaresDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "noop", complexityP_ : 1] := Module[{e, w},
   e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
   w = getW[tima, weighting, complexityWeighting, complexityP];
   
   Total[Map[#^2&, e * w]]
 ];
 
-getSumOfAbsolutesDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "unstandardized", complexityP_ : 1] := Module[{e, w},
+getSumOfAbsolutesDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "noop", complexityP_ : 1] := Module[{e, w},
   e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
   w = getW[tima, weighting, complexityWeighting, complexityP];
   
@@ -136,40 +136,40 @@ m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)
 
 1200 * getTuningCandidateStyle[m, \[Infinity]]
 
-1200 * getTuningCandidateStyle[m, \[Infinity], "simplicityWeighted", "unstandardized", 1]
-1200 * getTuningCandidateStyle[m, \[Infinity], "simplicityWeighted", "unstandardized", 2]
-1200 * getTuningCandidateStyle[m, \[Infinity], "simplicityWeighted", "standardized", 1]
-1200 * getTuningCandidateStyle[m, \[Infinity], "simplicityWeighted", "standardized", 2]
+1200 * getTuningCandidateStyle[m, \[Infinity], "simplicityWeighted", "noop", 1]
+1200 * getTuningCandidateStyle[m, \[Infinity], "simplicityWeighted", "noop", 2]
+1200 * getTuningCandidateStyle[m, \[Infinity], "simplicityWeighted", "logProduct", 1]
+1200 * getTuningCandidateStyle[m, \[Infinity], "simplicityWeighted", "logProduct", 2]
 
-1200 * getTuningCandidateStyle[m, \[Infinity], "complexityWeighted", "unstandardized", 1]
-1200 * getTuningCandidateStyle[m, \[Infinity], "complexityWeighted", "unstandardized", 2]
-1200 * getTuningCandidateStyle[m, \[Infinity], "complexityWeighted", "standardized", 1]
-1200 * getTuningCandidateStyle[m, \[Infinity], "complexityWeighted", "standardized", 2]
+1200 * getTuningCandidateStyle[m, \[Infinity], "complexityWeighted", "noop", 1]
+1200 * getTuningCandidateStyle[m, \[Infinity], "complexityWeighted", "noop", 2]
+1200 * getTuningCandidateStyle[m, \[Infinity], "complexityWeighted", "logProduct", 1]
+1200 * getTuningCandidateStyle[m, \[Infinity], "complexityWeighted", "logProduct", 2]
 
 
 1200 * getTuningCandidateStyle[m, 2]
 
-1200 * getTuningCandidateStyle[m, 2, "simplicityWeighted", "unstandardized", 1]
-1200 * getTuningCandidateStyle[m, 2, "simplicityWeighted", "unstandardized", 2]
-1200 * getTuningCandidateStyle[m, 2, "simplicityWeighted", "standardized", 1]
-1200 * getTuningCandidateStyle[m, 2, "simplicityWeighted", "standardized", 2]
+1200 * getTuningCandidateStyle[m, 2, "simplicityWeighted", "noop", 1]
+1200 * getTuningCandidateStyle[m, 2, "simplicityWeighted", "noop", 2]
+1200 * getTuningCandidateStyle[m, 2, "simplicityWeighted", "logProduct", 1]
+1200 * getTuningCandidateStyle[m, 2, "simplicityWeighted", "logProduct", 2]
 
-1200 * getTuningCandidateStyle[m, 2, "complexityWeighted", "unstandardized", 1]
-1200 * getTuningCandidateStyle[m, 2, "complexityWeighted", "unstandardized", 2]
-1200 * getTuningCandidateStyle[m, 2, "complexityWeighted", "standardized", 1]
-1200 * getTuningCandidateStyle[m, 2, "complexityWeighted", "standardized", 2]
+1200 * getTuningCandidateStyle[m, 2, "complexityWeighted", "noop", 1]
+1200 * getTuningCandidateStyle[m, 2, "complexityWeighted", "noop", 2]
+1200 * getTuningCandidateStyle[m, 2, "complexityWeighted", "logProduct", 1]
+1200 * getTuningCandidateStyle[m, 2, "complexityWeighted", "logProduct", 2]
 
 
 1200 * getTuningCandidateStyle[m, 1]
 
-1200 * getTuningCandidateStyle[m, 1, "simplicityWeighted", "unstandardized", 1]
-1200 * getTuningCandidateStyle[m, 1, "simplicityWeighted", "unstandardized", 2]
-1200 * getTuningCandidateStyle[m, 1, "simplicityWeighted", "standardized", 1]
-1200 * getTuningCandidateStyle[m, 1, "simplicityWeighted", "standardized", 2]
+1200 * getTuningCandidateStyle[m, 1, "simplicityWeighted", "noop", 1]
+1200 * getTuningCandidateStyle[m, 1, "simplicityWeighted", "noop", 2]
+1200 * getTuningCandidateStyle[m, 1, "simplicityWeighted", "logProduct", 1]
+1200 * getTuningCandidateStyle[m, 1, "simplicityWeighted", "logProduct", 2]
 
-1200 * getTuningCandidateStyle[m, 1, "complexityWeighted", "unstandardized", 1]
-1200 * getTuningCandidateStyle[m, 1, "complexityWeighted", "unstandardized", 2]
-1200 * getTuningCandidateStyle[m, 1, "complexityWeighted", "standardized", 1]
-1200 * getTuningCandidateStyle[m, 1, "complexityWeighted", "standardized", 2]
+1200 * getTuningCandidateStyle[m, 1, "complexityWeighted", "noop", 1]
+1200 * getTuningCandidateStyle[m, 1, "complexityWeighted", "noop", 2]
+1200 * getTuningCandidateStyle[m, 1, "complexityWeighted", "logProduct", 1]
+1200 * getTuningCandidateStyle[m, 1, "complexityWeighted", "logProduct", 2]
 
 

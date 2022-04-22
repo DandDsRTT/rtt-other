@@ -43,7 +43,7 @@ getW[tim_, unweighted_, gression_, weighting_, normNumber_] := Module[{complexit
 ];
 
 (*given a mapping, a target intervals matrix (currently defaults to 5-odd-limit diamond), which mean to take (minimax, least squares, least absolutes; currently hardcoded to minimax),and a weighting (unweighted, or {progressive/regressive, P/F/T, 1/2/\[Infinity]}; currently defaults to progressive P1 (partch))*)
-tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityWeighted", weighting_ : "standardized", normNumber_ : "1"] := Module[{r, d, tim, ma, gtm, mappedTim, complexities, solution},
+tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityWeighted", weighting_ : "logProduct", normNumber_ : "1"] := Module[{r, d, tim, ma, gtm, mappedTim, complexities, solution},
   r = getR[m];
   d = getD[m];
   tim = getDiamond[If[d == 3, 5, 7]];
@@ -59,7 +59,7 @@ tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityW
 
 
 
-partch = tune[m, \[Infinity], False, "complexityWeighted", "standardized", 1]
+partch = tune[m, \[Infinity], False, "complexityWeighted", "logProduct", 1]
 minimax = tune[m, \[Infinity], True]
 
 
@@ -100,7 +100,7 @@ minimax = tune[m, \[Infinity], True]
 ];*)
 
 (*given a mapping, a target intervals matrix (currently defaults to 5-odd-limit diamond), which mean to take (minimax, least squares, least absolutes; currently hardcoded to minimax),and a weighting (unweighted, or {progressive/regressive, P/F/T, 1/2/\[Infinity]}; currently defaults to progressive P1 (partch))*)
-tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityWeighted", weighting_ : "standardized", normNumber_ : "1"(*, tim_, mPower,weighting_*)] := Module[{thing, mappedTim, complexities},
+tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityWeighted", weighting_ : "logProduct", normNumber_ : "1"(*, tim_, mPower,weighting_*)] := Module[{thing, mappedTim, complexities},
   
   
   r = getR[m];
@@ -141,6 +141,6 @@ tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityW
 
 
 
-partch = tune[m, \[Infinity], False, "complexityWeighted", "standardized", 1]
+partch = tune[m, \[Infinity], False, "complexityWeighted", "logProduct", 1]
 minimax = tune[m, \[Infinity], True]
 *)
