@@ -55,7 +55,7 @@ test[primesInLockedRatio, {{{5, 8, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}, "co"}, Tr
 hasIndependentGenerator[m_] := Module[{},
   canonicalM = canonicalForm[m];
   
-  AnyTrue[canonicalM, TrueQ[Total[Abs[#]] == 1]&];
+  AnyTrue[getA[canonicalM], TrueQ[Total[Abs[#]] == 1]&]
 ];
 
 test[hasIndependentGenerator, {{{5, 8}}, "co"}, False];
@@ -70,3 +70,19 @@ test[hasIndependentGenerator, {{{5, 8, 12, 0}, {0, 0, 0, 1}}, "co"}, True];
 test[hasIndependentGenerator, {{{1, 0, 0, -5}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, False];
 test[hasIndependentGenerator, {{{1, 0, -4, 0}, {0, 1, 4, 0}, {0, 0, 0, 1}}, "co"}, True];
 test[hasIndependentGenerator, {{{5, 8, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}, "co"}, True];
+
+
+hasNonUniqueTuning[m_] := getR[m] > 0 && (hasIndependentGenerator[m] || primesInLockedRatio[m]);
+
+test[hasNonUniqueTuning, {{{5, 8}}, "co"}, False];
+test[hasNonUniqueTuning, {{{5, 8, 12}}, "co"}, False];
+test[hasNonUniqueTuning, {{{1, 0, -4}, {0, 1, 4}}, "co"}, False];
+test[hasNonUniqueTuning, {{{5, 8, 0}, {0, 0, 1}}, "co"}, True];
+test[hasNonUniqueTuning, {{{5, 8, 12, 14}}, "co"}, False];
+test[hasNonUniqueTuning, {{{1, 2, 3, 2}, {0, -3, -5, -6}}, "co"}, False];
+test[hasNonUniqueTuning, {{{3, 0, 7, 18}, {0, 1, 0, -2}}, "co"}, True];
+test[hasNonUniqueTuning, {{{3, 0, 7, 0}, {0, 4, 0, 7}}, "co"}, True];
+test[hasNonUniqueTuning, {{{5, 8, 12, 0}, {0, 0, 0, 1}}, "co"}, True];
+test[hasNonUniqueTuning, {{{1, 0, 0, -5}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, False];
+test[hasNonUniqueTuning, {{{1, 0, -4, 0}, {0, 1, 4, 0}, {0, 0, 0, 1}}, "co"}, True];
+test[hasNonUniqueTuning, {{{5, 8, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}, "co"}, True];
