@@ -68,7 +68,7 @@ sensamagic = {{{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}}, "co"};
 
 (* optimizeGtm, by individual tuning properties *)
 
-testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1200.000, 696.576}];
 
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", {1202.387, 697.173}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1202.726, 697.258}];
@@ -99,18 +99,17 @@ testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope
 testClose[optimizeGtm, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1197.930, 694.911}];
 
 
-(*testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];*)
-optimizeGtm[meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted"];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
 
-testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", {1195.699, 693.352}];
-testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1195.699, 693.352}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", {1200.000, 696.578}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1200.000, 696.578}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", {1200.000, 696.578}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1200.000, 696.578}];
 
 testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", {1200.000, 696.578}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1200.000, 696.578}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", {1195.699, 693.352}];
-testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1195.699, 693.352}];
+testClose[optimizeGtm, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1200.000, 696.578}];
 
 
 (* optimizeGtm, by "systematicTuningName" *)
@@ -148,23 +147,23 @@ testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-C", {600.655, 
 testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisos-EC", {600.263, 107.259}];
 
 
-testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-U", {600.000, 106.843}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-U", {599.450, 107.150}];
 
 testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MS", {597.851, 106.643}];
-testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MES", {598.310, 106.798}];
-testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-S", {598.436, 106.672}];
-testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-ES", {598.762, 106.835}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MES", {598.072, 107.807}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-S", {598.072, 107.807}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-ES", {600.000, 108.771}];
 
-testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MC", {601.397, 106.145}];
-testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MEC", {601.397, 106.145}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MC", {603.856, 108.771}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-MEC", {603.856, 108.771}];
 testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-C", {600.000, 106.843}];
-testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-EC", {600.000, 106.843}];
+testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-EC", {600.000, 108.771}];
 
 
 (* optimizeGtm, by "originalTuningName" *)
 
 (* this is simply some coverage that they match the above *)
-testClose[optimizeGtm, pajara, "originalTuningName" -> "minimax", {600.000, 106.843}];
+testClose[optimizeGtm, pajara, "originalTuningName" -> "minimax", {599.450, 107.150}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "least squares", {599.450, 107.15}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "TOP", {598.451, 106.578}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "TIPTOP", {598.451, 106.578}];
@@ -197,8 +196,8 @@ sources:
 *)
 
 (* minimax *)
-testClose[optimizeTm, meantone, "originalTuningName" -> "minimax", {1199.022, 1894.623, 2782.403}]; (* [7a] says {1200.000, 1896.578, 2786.314} but I think that page might enforce pure octaves *)
-(* TODO: gather some more; seems like a lot might be available on the xen wiki https://en.xen.wiki/index.php?title=Special:Search&limit=20&offset=20&profile=default&search=minimax *)
+(* TODO: gather some more; seems like a lot might be available on the xen wiki https://en.xen.wiki/index.php?title=Special:Search&limit=20&offset=20&profile=default&search=minimax but I think a lot of these might enforce pure octaves like the instructions on the Target tunings page do *)
+testClose[optimizeTm, meantone, "originalTuningName" -> "minimax", {1200.000, 1896.578, 2786.314}]; (* [7a] *)
 (* blackwood *)
 (* dicot *)
 (* augmented *)
@@ -212,12 +211,12 @@ testClose[optimizeTm, meantone, "originalTuningName" -> "minimax", {1199.022, 18
 (* meantone7 *)
 (* magic7 *)
 (* pajara *)
-testClose[optimizeTm, augene, "originalTuningName" -> "minimax", {1200.046, 1908.852, 2800.108, 3382.574}]; (* [7b] 708.798 is close enough I think, but these actual numbers testing against are mine. hmmm but I wonder if a lot of these minimax tunings assume pure octaves like the instructions on the Target tunings page do *)
+testClose[optimizeTm, augene, "originalTuningName" -> "minimax", {1200.000, 1908.771, 2800.000, 3382.458}]; (* [7b] 708.798 is all it says, and these actual numbers are mine;maybe try using the accuracy= trick now that I've developed it *)
 (* sensi *)
 (* sensamagic *)
 
 (* least squares *)
-(* TODO: gather some; some on wiki, but you may have to use a different set of temperaments than the above *)
+(* TODO: gather some; some on wiki, but you may have to use a different set of temperaments than the above, and again as with minimax I predict you'll find lot of these might enforce pure octaves like the instructions on the Target tunings page do *)
 (* meantone *)
 (* blackwood *)
 (* dicot *)
@@ -237,7 +236,7 @@ testClose[optimizeTm, augene, "originalTuningName" -> "minimax", {1200.046, 1908
 (* sensamagic *)
 
 (* TOP / TIPTOP *)
-(* TODO: resolve discrepancies *)
+(* TODO: resolve discrepancies; for these sorts of things, graphs would be really good, to visually point out reasonable answers *)
 accuracy = 1;
 testClose[optimizeGtm, meantone, "originalTuningName" -> "TOP", {1201.70, 1201.70 - 504.13}]; (* [5](Table 1) *)
 (*testClose[optimizeGtm, blackwood, "originalTuningName" -> "TOP", {238.87, 238.87*11 +158.78}]; (* [5](Table 1)*) (*this one is way off *) *)
@@ -260,65 +259,65 @@ accuracy = 3;
 (* TE *)
 testClose[optimizeTm, meantone, "originalTuningName" -> "TE", {1201.397, 1898.446, 2788.196}]; (* [1a] *)
 testClose[optimizeTm, blackwood, "originalTuningName" -> "TE", {1194.308, 1910.892, 2786.314}]; (* [1a] *)
-(* TODO: just grab them from Graham Breed's app *)
-(* dicot *)
-(* augmented *)
-(* mavila *)
-(* porcupine *)
-(* srutal *)
-(* hanson *)
-(* magic *)
-(* negri *)
-(* tetracot *)
-(* meantone7 *)
-(* magic7 *)
-(* pajara *)
-(* augene *)
-(* sensi *)
-(* sensamagic *)
+testClose[optimizeTm, dicot, "originalTuningName" -> "TE", {1206.410, 1907.322, 2763.276}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=3_7&limit=5 *)
+testClose[optimizeTm, augmented, "originalTuningName" -> "TE", {1197.053, 1901.955, 2793.123}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_3&limit=5 *)
+testClose[optimizeTm, mavila, "originalTuningName" -> "TE", {1208.380, 1892.933, 2779.860}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=7_2p&limit=5 *)
+testClose[optimizeTm, porcupine, "originalTuningName" -> "TE", {1199.562, 1907.453, 2779.234}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=7_15&limit=5 *)
+testClose[optimizeTm, srutal, "originalTuningName" -> "TE", {1198.823, 1903.030, 2787.467}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_34&limit=5 *)
+testClose[optimizeTm, hanson, "originalTuningName" -> "TE", {1200.166, 1902.303, 2785.418}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=53_19&limit=5 *)
+testClose[optimizeTm, magic, "originalTuningName" -> "TE", {1201.248, 1902.269, 2782.950}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=19_22&limit=5 *)
+testClose[optimizeTm, negri, "originalTuningName" -> "TE", {1202.347, 1900.691, 2782.698}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=19_10&limit=5 *)
+testClose[optimizeTm, tetracot, "originalTuningName" -> "TE", {1199.561, 1903.942, 2784.419}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=7_34&limit=5 *)
+testClose[optimizeTm, meantone7, "originalTuningName" -> "TE", {1201.242, 1898.458, 2788.863, 3368.432}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_19&limit=7 *)
+testClose[optimizeTm, magic7, "originalTuningName" -> "TE", {1201.082, 1903.476, 2782.860, 3367.259}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=19_22&limit=7 *)
+testClose[optimizeTm, pajara, "originalTuningName" -> "TE", {1197.719, 1903.422, 2780.608, 3379.468}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_10&limit=7 *)
+testClose[optimizeTm, augene, "originalTuningName" -> "TE", {1196.255, 1903.298, 2791.261, 3370.933}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_15&limit=7 *)
+testClose[optimizeTm, sensi, "originalTuningName" -> "TE", {1199.714, 1903.225, 2789.779, 3363.173}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=19_27&limit=7 *)
+testClose[optimizeTm, sensamagic, "originalTuningName" -> "TE", {1200.000, 1903.742, 2785.546, 3366.583}]; (* as "octorod" http://x31eq.com/cgi-bin/rt.cgi?ets=27_19_22&limit=7 *)
 
 (* Frobenius *)
-(* TODO: can grab from Flora's app; should be reliable because they'll all be unique *)
+testClose[optimizeTm, meantone, "originalTuningName" -> "Frobenius", {1202.6068, 1899.3482, 2786.9654}]; (* [4] *)
+testClose[optimizeTm, blackwood, "originalTuningName" -> "Frobenius", {1191.8899, 1907.0238, 2786.3137}]; (* [4] *)
+testClose[optimizeTm, dicot, "originalTuningName" -> "Frobenius", {1215.1441, 1907.0030, 2776.2177}]; (* [4] *)
+testClose[optimizeTm, augmented, "originalTuningName" -> "Frobenius", {1195.0446, 1901.9550, 2788.4374}]; (* [4] *)
+testClose[optimizeTm, mavila, "originalTuningName" -> "Frobenius", {1210.9365, 1897.2679, 2784.7514}]; (* [4] *)
+testClose[optimizeTm, porcupine, "originalTuningName" -> "Frobenius", {1198.5953, 1908.9787, 2782.0995}]; (* [4] *)
+testClose[optimizeTm, srutal, "originalTuningName" -> "Frobenius", {1198.4746, 1902.5097, 2786.5911}]; (* [4] *)
+testClose[optimizeTm, hanson, "originalTuningName" -> "Frobenius", {1200.5015, 1902.3729, 2785.8122}]; (* [4] *)
+testClose[optimizeTm, magic, "originalTuningName" -> "Frobenius", {1202.3503, 1902.1900, 2785.1386}]; (* [4] *)
+testClose[optimizeTm, negri, "originalTuningName" -> "Frobenius", {1203.2384, 1901.2611, 2785.3885}]; (* [4] *)
+testClose[optimizeTm, tetracot, "originalTuningName" -> "Frobenius", {1198.8664, 1903.9955, 2785.4068}]; (* [4] *)
+testClose[optimizeTm, meantone7, "originalTuningName" -> "Frobenius", {1201.3440, 1898.5615, 2788.8699, 3368.1428}]; (* [4] *)
+testClose[optimizeTm, magic7, "originalTuningName" -> "Frobenius", {1202.0285, 1904.1849, 2784.8940, 3368.0151}]; (* [4] *)
+testClose[optimizeTm, pajara, "originalTuningName" -> "Frobenius", {1196.6908, 1901.7292, 2778.3407, 3376.6861}]; (* [4] *)
+testClose[optimizeTm, augene, "originalTuningName" -> "Frobenius", {1195.2617, 1901.4887, 2788.9439, 3368.5928}]; (* [4] *)
+testClose[optimizeTm, sensi, "originalTuningName" -> "Frobenius", {1198.2677, 1904.0314, 2790.4025, 3364.8772}]; (* [4] *)
+testClose[optimizeTm, sensamagic, "originalTuningName" -> "Frobenius", {1200.0000, 1904.3201, 2785.8407, 3367.8799}]; (* [4] *)
 
 (* POTE *)
 testClose[optimizeTm, meantone, "originalTuningName" -> "POTE", {1200, 1896.239, 2784.955}]; (* [1a] *)
 testClose[optimizeTm, blackwood, "originalTuningName" -> "POTE", {1200, 1920, 2799.594}]; (* [1a] *)
-(* TODO: just grab them from Graham Breed's app *)
-(* dicot *)
-(* augmented *)
-(* mavila *)
-(* porcupine *)
-(* srutal *)
-(* hanson *)
-(* magic *)
-(* negri *)
-(* tetracot *)
-(* meantone7 *)
-(* magic7 *)
-(* pajara *)
-(* augene *)
-(* sensi *)
-(* sensamagic *)
+testClose[optimizeTm, dicot, "originalTuningName" -> "POTE", {1200.000, 1897.189, 2748.594}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=3_7&tuning=po *)
+testClose[optimizeTm, augmented, "originalTuningName" -> "POTE", {1200.000, 1906.638, 2800.000}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=12_3&tuning=po *)
+testClose[optimizeTm, mavila, "originalTuningName" -> "POTE", {1200.000, 1879.806, 2760.582}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=7_2p&tuning=po *)
+testClose[optimizeTm, porcupine, "originalTuningName" -> "POTE", {1200.000, 1908.149, 2780.248}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=7_15&tuning=po *)
+testClose[optimizeTm, srutal, "originalTuningName" -> "POTE", {1200.000, 1904.898, 2790.204}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=12_34&tuning=po *)
+testClose[optimizeTm, hanson, "originalTuningName" -> "POTE", {1200.000, 1902.039, 2785.033}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=53_19&tuning=po *)
+testClose[optimizeTm, magic, "originalTuningName" -> "POTE", {1200.000, 1900.292, 2780.058}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=19_22&tuning=po *)
+testClose[optimizeTm, negri, "originalTuningName" -> "POTE", {1200.000, 1896.980, 2777.265}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=19_10&tuning=po *)
+testClose[optimizeTm, tetracot, "originalTuningName" -> "POTE", {1200.000, 1904.639, 2785.438}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=7_34&tuning=po *)
+testClose[optimizeTm, meantone7, "originalTuningName" -> "POTE", {1200.000, 1896.495, 2785.980, 3364.949}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=12_19&tuning=po *)
+testClose[optimizeTm, magic7, "originalTuningName" -> "POTE", {1200.000, 1901.760, 2780.352, 3364.224}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=19_22&tuning=po *)
+testClose[optimizeTm, pajara, "originalTuningName" -> "POTE", {1200.000, 1907.048, 2785.905, 3385.905}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=12_10&tuning=po *)
+testClose[optimizeTm, augene, "originalTuningName" -> "POTE", {1200.000, 1909.257, 2800.000, 3381.486}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=12_15&tuning=po *)
+testClose[optimizeTm, sensi, "originalTuningName" -> "POTE", {1200.000, 1903.679, 2790.444, 3363.975}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=19_27&tuning=po *)
+testClose[optimizeTm, sensamagic, "originalTuningName" -> "POTE", {1200.000, 1903.742, 2785.546, 3366.583}]; (* as "octorod" http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=27_19_22&tuning=po *)
 
 (* POTOP / POTT *)
-(* TODO: this is everything we have on the wiki. nothing in Graham's site. nothing in Yahoo archives. *)
-(*
-https://en.xen.wiki/w/Chromatic_pairs#Voltage
-Subgroup: 2.7.13
-Mapping: [<1 4 4|, <0 -4 -1|]
-POTT generator: ~16/13 = 1200 - 300 log₂(7) (357.794)
-*)
-(*
-https://en.xen.wiki/w/Pajara#Tuning_spectrum
-706.843  7 and 11-limit POTT
-Gencom mapping: [⟨2 2 7 8 14 5], ⟨0 1 -2 -2 -6 2]]
-*)
-(*
-4/3  310.196  
-5-, 7-, 11- and 13-limit POTT
-https://en.xen.wiki/w/Myna#Tuning_spectrum
-Mapping: [⟨1 9 9 8], ⟨0 -10 -9 -7]]
-*)
+(* TODO: this is everything we have on the wiki and Facebook. nothing in Graham's site. nothing in Yahoo archives. resolve discrepancy too *)
+testClose[optimizeGtm, {{{1, 4, 4}, {0, -4, -1}}, "co", {2, 7, 13}}, "originalTuningName" -> "POTOP", {1200.000, 357.794}]; (* https://en.xen.wiki/w/Chromatic_pairs#Voltage *)
+testClose[optimizeGtm, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "originalTuningName" -> "POTOP", {600.000, 709.205}]; (* https://en.xen.wiki/w/Pajara#Tuning_spectrum has {600.000, 706.843} *)
+testClose[optimizeGtm, {{{1, -1, 0, 1}, {0, 10, 9, 7}}, "co"}, "originalTuningName" -> "POTOP", {1200.000, 310.196}]; (* https://en.xen.wiki/w/Myna#Tuning_spectrum *)
 accuracy = 2;
 testClose[optimizeTm, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "POTOP", {1200., 1915.81, 2806.99, 3368.38, 4161.4}]; (* Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ but I agree with it, so it doesn't match the Kees tuning of it elsewhere in here *)
 accuracy = 1;
@@ -375,7 +374,7 @@ testClose[optimizeTm, sensi, "originalTuningName" -> "BE", {1199.7904, 1902.7978
 testClose[optimizeTm, sensamagic, "originalTuningName" -> "BE", {1200.0000, 1903.3868, 2785.5183, 3365.7078}]; (* [4] *)
 
 (* Weil *)
-(* TODO: resolve disagreements *)
+(* TODO: resolve disagreements. hey wait, why are all of mine pure octave? that certainly seems wrong. *)
 testClose[optimizeTm, meantone, "originalTuningName" -> "Weil", {1200.0, 1896.578, 2786.314}]; (* [2a] *)
 testClose[optimizeTm, blackwood, "originalTuningName" -> "Weil", {1200.000, 1920.000, 2787.801}]; (* [2a] has  {1188.722, 1901.955, 2773.22} *)
 testClose[optimizeTm, dicot, "originalTuningName" -> "Weil", {1200.000, 1901.955, 2750.978}]; (* [2a] *)
@@ -394,7 +393,7 @@ testClose[optimizeTm, augene, "originalTuningName" -> "Weil", {1200.000, 1908.55
 testClose[optimizeTm, sensi, "originalTuningName" -> "Weil", {1200.000, 1906.291, 2793.803, 3368.826}]; (* [2a] has  {1196.783, 1901.181, 2786.314, 3359.796}*)
 
 (* WE *)
-(* TODO: gather more examples, though there may be none... *)
+(* TODO: gather more examples, though there may be none... none on Facebook, Yahoo, Xenwiki *)
 testClose[optimizeTm, meantone, "originalTuningName" -> "WE", {1201.391, 1898.436, 2788.182}]; (* [1a] *)
 testClose[optimizeTm, blackwood, "originalTuningName" -> "WE", {1194.254, 1910.807, 2786.189}]; (* [1a] *)
 (* dicot *)
@@ -414,6 +413,7 @@ testClose[optimizeTm, blackwood, "originalTuningName" -> "WE", {1194.254, 1910.8
 (* sensamagic *)
 
 (* Kees *)
+(* TODO: gather more examples, though there may be none... none on Facebook, Yahoo, Xenwiki  *)
 (* meantone *)
 (* blackwood *)
 (* dicot *)
@@ -635,9 +635,9 @@ testCloseNotList[getComplexity, pcv, dummy5limitTemp, "noop", 2, 2.449];
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logProduct", 1, 6.492];
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logProduct", 2, 4.055];
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logIntegerLimit", 1, 3.322];
-testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logIntegerLimit", 2, 2.103];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logIntegerLimit", 2, 2.029];
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 1, 3.170];
-testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 2, 2.389];
+testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 2, 2.010];
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 1, 13];
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 2, 8.062];
 
@@ -650,7 +650,7 @@ testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 1, getProductCo
 (* getDamage *)
 testCloseNotList[getDamage, meantone, {1201.7, 697.564}, "originalTuningName" -> "TOP", 0.00141543];
 testCloseNotList[getDamage, meantone, {1199.02, 695.601}, "originalTuningName" -> "least squares", 0.0000729989];
-testCloseNotList[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 0.0179233];
+testCloseNotList[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 0.004];
 (* TODO: I'm not sure this handles pure-octave stretch and interval basis properly *)
 
 
