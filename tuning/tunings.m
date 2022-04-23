@@ -97,7 +97,6 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
     If[
       optimizationPower == 2,
       optimizeGtmMinisos[tuningOptions],
-      (*  Print["step 1"];*)
       optimizeGtmMinisum[tuningOptions]
     ]
   ];
@@ -203,8 +202,7 @@ optimizeGtmTargetingAll[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNorm
     complexityUnitsMultiplier == "logOddLimit",
     (* covers KE *)
     optimizeGtmTargetingAllPseudoInverseAnalyticalKe[d, t, ptm, complexityUnitsMultiplier],
-    (* covers TE, Frobenius, WE, BE *) (* TODO: I think it might actuallly be the right idea in this case to comment the heck out of this code, every place any tuning goes *)
-    (*Print["we go here plz"];*)
+    (* covers TE, Frobenius, WE, BE *) (* TODO: I think it might actually be the right idea in this case to comment the heck out of this code, every place any tuning goes *)
     optimizeGtmTargetingAllPseudoInverseAnalytical[d, t, ptm, complexityUnitsMultiplier]
   ],
   (* covers TOP, L1 version of Frobenius, Weil, Kees, BOP *)
@@ -212,11 +210,9 @@ optimizeGtmTargetingAll[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNorm
 ];
 
 optimizeGtmTargetingAllPseudoInverseAnalytical[d_, t_, ptm_, complexityUnitsMultiplier_] := Module[{unitsMultiplierMatrix, timaAsPrimesIdentityMatrix, damageWeightingSlope, complexityNormPower},
-  (*Print["hey man nice shot"];*)
   timaAsPrimesIdentityMatrix = IdentityMatrix[d];
   complexityNormPower = 2; (* TODO: is it cleaner to just pass this in ? *)
   unitsMultiplierMatrix = getUnitsMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
-  (*Print["and it goes like this: ", unitsMultiplierMatrix, complexityUnitsMultiplier, complexityNormPower];*)
   optimizeGtmWithPseudoInverse[timaAsPrimesIdentityMatrix, unitsMultiplierMatrix, t, ptm]
 ];
 
@@ -232,15 +228,34 @@ optimizeGtmTargetingAllNumerical[d_, t_, ptm_, complexityUnitsMultiplier_, compl
   If[
     complexityUnitsMultiplier == "logIntegerLimit" || complexityUnitsMultiplier == "logOddLimit",
     (* covers Weil and Kees *)
-    (*  Print["um, still doing this"];*)
     optimizeGtmTargetingAllNumericalCustomDualNorm[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
     (* covers TOP, BOP, and L1-version of Frobenius *)
     optimizeGtmTargetingAllNumericalSimpleDualNorm[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm]
   ]
 ];
 
+optimizeGtmTargetingAllNumericalSimpleDualNorm[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := If[
+  hasNonUniqueTuning[getM[t]],
+  optimizeGtmTargetingAllNumericalSimpleDualNormNonUnique[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
+  optimizeGtmTargetingAllNumericalSimpleDualNormUnique[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm]
+];
+
+optimizeGtmTargetingAllNumericalSimpleDualNormUnique[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
+  {eₚ, unitsMultiplierMatrix, timaAsPrimesIdentityMatrix, solution, optimizationPower},
+  
+  eₚ = tm - ptm;
+  timaAsPrimesIdentityMatrix = IdentityMatrix[d];
+  unitsMultiplierMatrix = getUnitsMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
+  eₚ = unitsMultiplierMatrix.eₚ;
+  optimizationPower = dualPower[complexityNormPower];
+  
+  solution = NMinimize[Norm[eₚ, optimizationPower], gtm, WorkingPrecision -> 128];
+  
+  gtm /. Last[solution] // N
+];
+
 (* TODO: might be able to DRY it up with optimizeGtmTargetingListNumerical, or at least correlate their implementations as much as possible to illuminate the patterns, as you did with getW and getUnitsMultiplierMatrix *)
-optimizeGtmTargetingAllNumericalSimpleDualNorm[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
+optimizeGtmTargetingAllNumericalSimpleDualNormNonUnique[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
   {
     eₚ,
     unitsMultiplierMatrix,
@@ -257,7 +272,6 @@ optimizeGtmTargetingAllNumericalSimpleDualNorm[d_, t_, ptm_, complexityUnitsMult
   eₚ = tm - ptm;
   timaAsPrimesIdentityMatrix = IdentityMatrix[d];
   unitsMultiplierMatrix = getUnitsMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
-  (* Print["this doing okay? unitsMultiplierMatrix", unitsMultiplierMatrix];*)
   eₚ = unitsMultiplierMatrix.eₚ;
   optimizationPower = dualPower[complexityNormPower];
   previousPrimesErrorMagnitude = \[Infinity];
@@ -318,7 +332,45 @@ optimizeGtmMinisum[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlop
 
 (* SOLVER (USED BY NUMERICAL MINIMAX AND MINISUM) *)
 
-optimizeGtmTargetingListNumerical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
+optimizeGtmTargetingListNumerical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := If[
+  hasNonUniqueTuning[getM[t]],
+  optimizeGtmTargetingListNumericalUnique[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower],
+  optimizeGtmTargetingListNumericalNonUnique[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
+];
+
+optimizeGtmTargetingListNumericalUnique[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
+  {gtm, ma, mappedTima, pureTimaSizes, W, solution, e},
+  
+  gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
+  ma = getA[getM[t]];
+  
+  pureTimaSizes = Map[ptm.#&, tima];
+  W = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
+  mappedTima = Transpose[ma.Transpose[tima]];
+  e = Flatten[MapIndexed[
+    Function[
+      {mappedTi, tiIndex},
+      Abs[
+        Total[
+          MapThread[
+            Function[
+              {mappedTiEntry, gtmEntry},
+              mappedTiEntry * gtmEntry
+            ],
+            {mappedTi, gtm}
+          ]
+        ] - pureTimaSizes[[tiIndex]]
+      ] * Part[Part[W, tiIndex, tiIndex]]
+    ],
+    mappedTima
+  ]];
+  
+  solution = NMinimize[Norm[e, optimizationPower], gtm, WorkingPrecision -> 128];
+  
+  gtm /. Last[solution] // N
+];
+
+optimizeGtmTargetingListNumericalNonUnique[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
   {
     gtm,
     ma,
@@ -398,8 +450,6 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
     damagePowerSum
   },
   
-  (* Print["well I think we should be comign here, but what's fishy? ", complexityNormPower]*)
-  
   damagePowerSum = If[optimizationPower == 1, getSumDamage, getMaxDamage];
   r = getR[t];
   unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
@@ -420,7 +470,6 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
     projectedGenerators = minMeanP.gpt;
     ptm.projectedGenerators // N,
     
-    (*Print["this is a tied simplex analytical, falling back to numerical"]*)
     optimizeGtmTargetingListNumerical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
   ]
 ];
@@ -510,8 +559,6 @@ getDamage[t_, gtm_, OptionsPattern[]] := Module[
 getTid[t_, tm_, tima_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{e, W},
   e = N[tm.Transpose[tima]] - N[ptm.Transpose[tima]];
   W = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
-  (* Print["there some problem here maybe? W: ", W];*)
-  
   Abs[e].W
 ];
 
@@ -752,9 +799,6 @@ getUnitsMultiplierMatrix[t_, timaAsPrimesIdentityMatrix_, complexityUnitsMultipl
 getComplexity[pcv_, t_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{d, W},
   d = getD[t];
   W = getThing[t, complexityUnitsMultiplier];
-  
-  (* Print["so what is this anyway, W.pcv: ", W.pcv, N[W.pcv], complexityNormPower];*)
-  
   Norm[W.pcv, complexityNormPower]
 ];
 getThing[t_, complexityUnitsMultiplier_] := If[ (* note this is a different W than the one in getW, it is nested, this is to weight the quantities of the PC-vectors before taking a norm and getting an interval complexity *)
@@ -825,4 +869,55 @@ optimizeGtmWithPseudoInverse[timaOrPrimesIdentityMatrix_, WorUnitsMultiplierMatr
   g = Transpose[timaOrPrimesIdentityMatrix].WorUnitsMultiplierMatrix.Transpose[weightedTimaMapped].Inverse[weightedTimaMapped.Transpose[weightedTimaMapped]];
   gtm = ptm.g;
   gtm // N
+];
+
+
+(* non-unique tuning *)
+
+hasNonUniqueTuning[m_] := getR[m] > 1 && (hasIndependentGenerator[m] || primesInLockedRatio[m]);
+
+countNonzeroElements[l_] := Count[l, element_ /; element != 0];
+whichGeneratorIsTheSingleOneApproximatingThisPrime[generatorsApproximatingPrime_] := First[Position[generatorsApproximatingPrime, x_ /; x > 0, 1, 1]];
+
+primesInLockedRatio[m_] := Module[
+  {
+    canonicalM,
+    generatorsApproximatingEachPrime,
+    countGeneratorsInvolvedInApproximatingEachPrime,
+    whetherPrimesAreApproximatedBySingleGeneratorOrNot,
+    indexesOfPrimesApproximatedBySingleGenerators,
+    perGeneratorHowManyPrimesAreApproximatedOnlyByIt,
+    index,
+    hmmm, (* TODO: clean up *)
+    whetherGeneratorsApproximateMoreThanOnePrimeForWhichTheyAreItsSingleApproximatingGenerator
+  },
+  canonicalM = canonicalForm[m];
+  
+  generatorsApproximatingEachPrime = Transpose[getA[canonicalM]];
+  countGeneratorsInvolvedInApproximatingEachPrime = Map[countNonzeroElements, generatorsApproximatingEachPrime];
+  whetherPrimesAreApproximatedBySingleGeneratorOrNot = Map[# == 1&, countGeneratorsInvolvedInApproximatingEachPrime];
+  indexesOfPrimesApproximatedBySingleGenerators = {};
+  MapIndexed[If[#1 == True, AppendTo[indexesOfPrimesApproximatedBySingleGenerators, #2] ]&, whetherPrimesAreApproximatedBySingleGeneratorOrNot];
+  
+  perGeneratorHowManyPrimesAreApproximatedOnlyByIt = Association[];
+  Map[
+    Function[{indexOfPrimeApproximatedBySingleGenerator},
+      hmmm = First[Part[generatorsApproximatingEachPrime, indexOfPrimeApproximatedBySingleGenerator]];
+      index = whichGeneratorIsTheSingleOneApproximatingThisPrime[hmmm];
+      If[
+        KeyExistsQ[perGeneratorHowManyPrimesAreApproximatedOnlyByIt, index],
+        perGeneratorHowManyPrimesAreApproximatedOnlyByIt[index] = perGeneratorHowManyPrimesAreApproximatedOnlyByIt[index] + 1,
+        perGeneratorHowManyPrimesAreApproximatedOnlyByIt[index] = 1
+      ];
+    ],
+    indexesOfPrimesApproximatedBySingleGenerators
+  ];
+  whetherGeneratorsApproximateMoreThanOnePrimeForWhichTheyAreItsSingleApproximatingGenerator = Map[# > 1&, Values[perGeneratorHowManyPrimesAreApproximatedOnlyByIt]];
+  AnyTrue[whetherGeneratorsApproximateMoreThanOnePrimeForWhichTheyAreItsSingleApproximatingGenerator, TrueQ]
+];
+
+hasIndependentGenerator[m_] := Module[{},
+  canonicalM = canonicalForm[m];
+  
+  AnyTrue[getA[canonicalM], TrueQ[Total[Abs[#]] == 1]&]
 ];

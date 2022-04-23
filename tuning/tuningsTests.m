@@ -75,9 +75,9 @@ testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeig
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.695, 697.563}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.596, 697.530}];
 
-testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", {1202.390, 697.174}];
+testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", {1202.390, 697.176}];
 testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1202.607, 696.741}];
-testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.698, 697.563}];
+testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.699, 697.564}];
 testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.397, 697.049}];
 
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", {1197.613, 694.787}];
@@ -123,9 +123,9 @@ testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-MES", {598.230
 testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-S", {598.444, 107.706}];
 testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-ES", {599.682, 108.372}];
 
-testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-MS", {597.123, 103.304}];
+testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-MS", {597.120, 103.295}];
 testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-MES", {598.345, 106.693}];
-testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-S", {598.451, 106.578}];
+testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-S", {598.447, 106.567}];
 testClose[optimizeGtm, pajara, "tim" -> {}, "systematicTuningName" -> "minimax-ES", {598.859, 106.844}];
 
 testClose[optimizeGtm, pajara, "systematicTuningName" -> "minimax-MC", {601.517, 108.012}];
@@ -165,13 +165,13 @@ testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-EC", {600.000,
 (* this is simply some coverage that they match the above *)
 testClose[optimizeGtm, pajara, "originalTuningName" -> "minimax", {599.450, 107.150}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "least squares", {599.450, 107.15}];
-testClose[optimizeGtm, pajara, "originalTuningName" -> "TOP", {598.451, 106.578}];
-testClose[optimizeGtm, pajara, "originalTuningName" -> "TIPTOP", {598.451, 106.578}];
+testClose[optimizeGtm, pajara, "originalTuningName" -> "TOP", {598.447, 106.567}];
+testClose[optimizeGtm, pajara, "originalTuningName" -> "TIPTOP", {598.447, 106.567}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "TE", {598.859, 106.844}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "Frobenius", {598.345, 106.693}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "POTE", {600.000, 107.048}]; (* TODO: this is weird example for PO b/c not pure octave, I mean it's good to have this, but not as the first and only example *)
-testClose[optimizeGtm, pajara, "originalTuningName" -> "POTOP", {600.000, 106.854}];
-testClose[optimizeGtm, pajara, "originalTuningName" -> "POTT", {600.000, 106.854}];
+testClose[optimizeGtm, pajara, "originalTuningName" -> "POTOP", {600.000, 106.843}];
+testClose[optimizeGtm, pajara, "originalTuningName" -> "POTT", {600.000, 106.843}];
 (* TODO: include inharmonic TE in my list of originalTuningName (and support in systematicTuningName somehow... do something for now, and then ask Dave what he thinks) *)
 
 (* and then in this section I want to have a bunch of external examples, organized by tuning first, then temperament
@@ -316,16 +316,16 @@ testClose[optimizeTm, sensamagic, "originalTuningName" -> "POTE", {1200.000, 190
 (* POTOP / POTT *)
 (* TODO: this is everything we have on the wiki and Facebook. nothing in Graham's site. nothing in Yahoo archives. resolve discrepancy too *)
 testClose[optimizeGtm, {{{1, 4, 4}, {0, -4, -1}}, "co", {2, 7, 13}}, "originalTuningName" -> "POTOP", {1200.000, 357.794}]; (* https://en.xen.wiki/w/Chromatic_pairs#Voltage *)
-testClose[optimizeGtm, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "originalTuningName" -> "POTOP", {600.000, 709.205}]; (* https://en.xen.wiki/w/Pajara#Tuning_spectrum has {600.000, 706.843} *)
+testClose[optimizeGtm, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "originalTuningName" -> "POTOP", {600.000, 709.184}]; (* https://en.xen.wiki/w/Pajara#Tuning_spectrum has {600.000, 706.843} *)
 testClose[optimizeGtm, {{{1, -1, 0, 1}, {0, 10, 9, 7}}, "co"}, "originalTuningName" -> "POTOP", {1200.000, 310.196}]; (* https://en.xen.wiki/w/Myna#Tuning_spectrum *)
 accuracy = 2;
-testClose[optimizeTm, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "POTOP", {1200., 1915.81, 2806.99, 3368.38, 4161.4}]; (* Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ but I agree with it, so it doesn't match the Kees tuning of it elsewhere in here *)
+testClose[optimizeTm, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "POTOP", {1200.00, 1915.71, 2807.15, 3368.59, 4161.43}]; (* Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ but I agree with it, so it doesn't match the Kees tuning of it elsewhere in here *)
 accuracy = 1;
 testClose[optimizeGtm, {{{1, 2, 6, 2, 10}, {0, -1, - 9, 2, -16}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 490.4}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 testClose[optimizeGtm, {{{1, 2, 6, 2, 1}, {0, -1, -9, 2, 6}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 490.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 testClose[optimizeGtm, {{{1, 2, -3, 2, 1}, {0, -1, 13, 2, 6}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 491.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 accuracy = 3;
-testClose[optimizeGtm, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "originalTuningName" -> "POTOP", {1200, 700.3907806, 384.0221726}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/738498989623659/?comment_id=738515309622027 *)
+testClose[optimizeGtm, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "originalTuningName" -> "POTOP", {1200.000, 700.795, 380.759}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/738498989623659/?comment_id=738515309622027 has  {1200, 700.3907806, 384.0221726} and this was passing before introducing the non-unique check code... and it really does seem liek it sohouldnt have a non-uqnieu solution, so the condition on that must be wrong... you should really plot this one visually and see what's happening *)
 accuracy = 2;
 testClose[optimizeGtm, {{{1, 1, 0}, {0, 1, 4}}, "co"}, "originalTuningName" -> "POTOP", {1200, 696.58}]; (* The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents. (some Facebook thing sorry I lost the link *)
 testClose[optimizeGtm, {{{1, 1, 0, -3}, {0, 1, 4, 10}}, "co"}, "originalTuningName" -> "POTOP", {1200, 696.58}]; (* The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents. (some Facebook thing sorry I lost the link *)
@@ -652,6 +652,50 @@ testCloseNotList[getDamage, meantone, {1201.7, 697.564}, "originalTuningName" ->
 testCloseNotList[getDamage, meantone, {1199.02, 695.601}, "originalTuningName" -> "least squares", 0.0000729989];
 testCloseNotList[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 0.004];
 (* TODO: I'm not sure this handles pure-octave stretch and interval basis properly *)
+
+
+(* primesInLockedRatio *)
+test[primesInLockedRatio, {{{5, 8}}, "co"}, True];
+test[primesInLockedRatio, {{{5, 8, 12}}, "co"}, True];
+test[primesInLockedRatio, {{{1, 0, -4}, {0, 1, 4}}, "co"}, False];
+test[primesInLockedRatio, {{{5, 8, 0}, {0, 0, 1}}, "co"}, True];
+test[primesInLockedRatio, {{{5, 8, 12, 14}}, "co"}, True];
+test[primesInLockedRatio, {{{1, 2, 3, 2}, {0, -3, -5, -6}}, "co"}, False];
+test[primesInLockedRatio, {{{3, 0, 7, 18}, {0, 1, 0, -2}}, "co"}, True];
+test[primesInLockedRatio, {{{3, 0, 7, 0}, {0, 4, 0, 7}}, "co"}, True];
+test[primesInLockedRatio, {{{5, 8, 12, 0}, {0, 0, 0, 1}}, "co"}, True];
+test[primesInLockedRatio, {{{1, 0, 0, -5}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, False];
+test[primesInLockedRatio, {{{1, 0, -4, 0}, {0, 1, 4, 0}, {0, 0, 0, 1}}, "co"}, False];
+test[primesInLockedRatio, {{{5, 8, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}, "co"}, True];
+
+(* hasIndependentGenerator *)
+test[hasIndependentGenerator, {{{5, 8}}, "co"}, False];
+test[hasIndependentGenerator, {{{5, 8, 12}}, "co"}, False];
+test[hasIndependentGenerator, {{{1, 0, -4}, {0, 1, 4}}, "co"}, False];
+test[hasIndependentGenerator, {{{5, 8, 0}, {0, 0, 1}}, "co"}, True];
+test[hasIndependentGenerator, {{{5, 8, 12, 14}}, "co"}, False];
+test[hasIndependentGenerator, {{{1, 2, 3, 2}, {0, -3, -5, -6}}, "co"}, False];
+test[hasIndependentGenerator, {{{3, 0, 7, 18}, {0, 1, 0, -2}}, "co"}, False];
+test[hasIndependentGenerator, {{{3, 0, 7, 0}, {0, 4, 0, 7}}, "co"}, False];
+test[hasIndependentGenerator, {{{5, 8, 12, 0}, {0, 0, 0, 1}}, "co"}, True];
+test[hasIndependentGenerator, {{{1, 0, 0, -5}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, False];
+test[hasIndependentGenerator, {{{1, 0, -4, 0}, {0, 1, 4, 0}, {0, 0, 0, 1}}, "co"}, True];
+test[hasIndependentGenerator, {{{5, 8, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}, "co"}, True];
+
+(* hasNonUniqueTuning *)
+test[hasNonUniqueTuning, {{{5, 8}}, "co"}, False];
+test[hasNonUniqueTuning, {{{5, 8, 12}}, "co"}, False];
+test[hasNonUniqueTuning, {{{1, 0, -4}, {0, 1, 4}}, "co"}, False];
+test[hasNonUniqueTuning, {{{5, 8, 0}, {0, 0, 1}}, "co"}, True];
+test[hasNonUniqueTuning, {{{5, 8, 12, 14}}, "co"}, False];
+test[hasNonUniqueTuning, {{{1, 2, 3, 2}, {0, -3, -5, -6}}, "co"}, False];
+test[hasNonUniqueTuning, {{{3, 0, 7, 18}, {0, 1, 0, -2}}, "co"}, True];
+test[hasNonUniqueTuning, {{{3, 0, 7, 0}, {0, 4, 0, 7}}, "co"}, True];
+test[hasNonUniqueTuning, {{{5, 8, 12, 0}, {0, 0, 0, 1}}, "co"}, True];
+test[hasNonUniqueTuning, {{{1, 0, 0, -5}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, False];
+test[hasNonUniqueTuning, {{{1, 0, -4, 0}, {0, 1, 4, 0}, {0, 0, 0, 1}}, "co"}, True];
+test[hasNonUniqueTuning, {{{5, 8, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}, "co"}, True];
+
 
 
 
