@@ -72,7 +72,7 @@ test[hasIndependentGenerator, {{{1, 0, -4, 0}, {0, 1, 4, 0}, {0, 0, 0, 1}}, "co"
 test[hasIndependentGenerator, {{{5, 8, 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}}, "co"}, True];
 
 
-hasNonUniqueTuning[m_] := getR[m] > 0 && (hasIndependentGenerator[m] || primesInLockedRatio[m]);
+hasNonUniqueTuning[m_] := getR[m] > 1 && (hasIndependentGenerator[m] || primesInLockedRatio[m]);
 
 test[hasNonUniqueTuning, {{{5, 8}}, "co"}, False];
 test[hasNonUniqueTuning, {{{5, 8, 12}}, "co"}, False];
