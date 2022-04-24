@@ -80,6 +80,8 @@ testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity]
 testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.699, 697.564}];
 testClose[optimizeGtm, meantone, "tim" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.397, 697.049}];
 
+
+
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", {1197.613, 694.787}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityUnitsMultiplier" -> "noop", "complexityNormPower" -> 2, {1197.437, 694.976}];
 testClose[optimizeGtm, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", {1197.983, 694.712}];
@@ -162,16 +164,13 @@ testClose[optimizeGtm, pajara, "systematicTuningName" -> "minisum-EC", {600.000,
 
 (* optimizeGtm, by "originalTuningName" *)
 
-(* this is simply some coverage that they match the above *)
-testClose[optimizeGtm, pajara, "originalTuningName" -> "minimax", {599.450, 107.150}];
+(* this is simply some coverage that they match the above, to make sure that I dunno some of the originalTuningName things map to the correct options *)
+testClose[optimizeGtm, pajara, "originalTuningName" -> "minimax", {599.450, 107.150}]; (* TODO: wait how coudl this have been true yet also the above minimax-U =  {600.000, 108.125} be true? *)
 testClose[optimizeGtm, pajara, "originalTuningName" -> "least squares", {599.450, 107.15}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "TOP", {598.447, 106.567}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "TIPTOP", {598.447, 106.567}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "TE", {598.859, 106.844}];
 testClose[optimizeGtm, pajara, "originalTuningName" -> "Frobenius", {598.345, 106.693}];
-testClose[optimizeGtm, pajara, "originalTuningName" -> "POTE", {600.000, 107.048}]; (* TODO: this is weird example for PO b/c not pure octave, I mean it's good to have this, but not as the first and only example *)
-testClose[optimizeGtm, pajara, "originalTuningName" -> "POTOP", {600.000, 106.843}];
-testClose[optimizeGtm, pajara, "originalTuningName" -> "POTT", {600.000, 106.843}];
 (* TODO: include inharmonic TE in my list of originalTuningName (and support in systematicTuningName somehow... do something for now, and then ask Dave what he thinks) *)
 
 (* and then in this section I want to have a bunch of external examples, organized by tuning first, then temperament
@@ -454,6 +453,26 @@ testClose[optimizeTm, blackwood, "originalTuningName" -> "KE", {1200, 1920, 2795
 (* augene *)
 (* sensi *)
 (* sensamagic *)
+
+(* CTE *)
+(* TODO: un-inline all the links *)
+testClose[optimizeGtm, meantone, "originalTuningName" -> "CTE", {1200.000, 697.214}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=81%2F80&submit_comma=submit *)
+testClose[optimizeGtm, blackwood, "originalTuningName" -> "CTE", {240.000, 1200.000 * 2 + 386.314}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=256%2F243&submit_comma=submit *)
+testClose[optimizeGtm, dicot, "originalTuningName" -> "CTE", {1200.000, 354.664}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=25%2F24&submit_comma=submit *)
+testClose[optimizeGtm, augmented, "originalTuningName" -> "CTE", {400.000, 1200.000 + 701.955}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=128%2F125&submit_comma=submit *)
+testClose[optimizeGtm, mavila, "originalTuningName" -> "CTE", {1200.000, 1200.000 + 677.145}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=135%2F128&submit_comma=submit *)
+testClose[optimizeGtm, porcupine, "originalTuningName" -> "CTE", {1200.000, -164.166}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=250%2F243&submit_comma=submit *)
+testClose[optimizeGtm, srutal, "originalTuningName" -> "CTE", {600.000, 1200.000 + 705.136}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=2048%2F2025&submit_comma=submit *)
+testClose[optimizeGtm, hanson, "originalTuningName" -> "CTE", {1200.000, 317.059}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=15625%2F15552&submit_comma=submit *)
+testClose[optimizeGtm, magic, "originalTuningName" -> "CTE", {1200.000, 380.499}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=3125%2F3072&submit_comma=submit *)
+testClose[optimizeGtm, negri, "originalTuningName" -> "CTE", {1200.000, 125.396}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=16875%2F16384&submit_comma=submit *)
+testClose[optimizeGtm, tetracot, "originalTuningName" -> "CTE", {1200.000, 176.028}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=20000%2F19683&submit_comma=submit *)
+testClose[optimizeGtm, meantone7, "originalTuningName" -> "CTE", {1200.000, 1200.000 + 696.952}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=81%2F80%2C+126%2F125&submit_comma=submit *)
+testClose[optimizeGtm, magic7, "originalTuningName" -> "CTE", {1200.000, 380.651}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=225%2F224%2C+245%2F243&submit_comma=submit *)
+testClose[optimizeGtm, pajara, "originalTuningName" -> "CTE", {600.000, 600.000 * -1 + 708.356}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=50%2F49%2C+64%2F63&submit_comma=submit *)
+testClose[optimizeGtm, augene, "originalTuningName" -> "CTE", {400.000, 1200.000 + 709.595}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=64%2F63%2C+126%2F125&submit_comma=submit *)
+testClose[optimizeGtm, sensi, "originalTuningName" -> "CTE", {1200.000, 1200.000 - 756.683}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=126%2F125%2C+245%2F243&submit_comma=submit *)
+testClose[optimizeGtm, sensamagic, "originalTuningName" -> "CTE", {1200.000, 1200.000 + 703.742, 440.902}]; (*   https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=245%2F243&submit_comma=submit *)
 
 
 (* tuning equivalences *)
