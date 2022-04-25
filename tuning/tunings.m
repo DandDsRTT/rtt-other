@@ -214,34 +214,45 @@ optimizeGtmTargetingAll[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNorm
   If[
     Length[U] > 0,
     
-    (*    Print["should not be this"];*)
+    (* covers CTE *)
     optimizeGtmCte[d, t, ptm, complexityUnitsMultiplier, U],
     
     If[
       complexityUnitsMultiplier == "logOddLimit",
       
       (* covers KE *)
-      optimizeGtmTargetingAllPseudoInverseAnalyticalKe[d, t, ptm, complexityUnitsMultiplier],
+      optimizeGtmKe[d, t, ptm, complexityUnitsMultiplier],
       
-      (* covers TE, Frobenius, WE, BE *) (* TODO: I think it might actually be the right idea in this case to comment the heck out of this code, every place any tuning goes *)
-      (*      Print["yes 2"];*)
+      (* covers TE, Frobenius, WE, BE *)
       optimizeGtmTargetingAllPseudoInverseAnalytical[d, t, ptm, complexityUnitsMultiplier]
     ]
   ],
+  
   (* covers TOP, L1 version of Frobenius, Weil, Kees, BOP *)
-  (*  Print["yes going here"];*)
   optimizeGtmTargetingAllNumerical[d, t, ptm, complexityUnitsMultiplier, complexityNormPower]
 ];
 
-optimizeGtmTargetingAllPseudoInverseAnalytical[d_, t_, ptm_, complexityUnitsMultiplier_] := Module[{unitsMultiplierMatrix, timaAsPrimesIdentityMatrix, complexityNormPower},
+optimizeGtmTargetingAllPseudoInverseAnalytical[d_, t_, ptm_, complexityUnitsMultiplier_] := Module[{unitsCounterMultiplierMatrix, timaAsPrimesIdentityMatrix, complexityNormPower},
   timaAsPrimesIdentityMatrix = IdentityMatrix[d];
   complexityNormPower = 2; (* TODO: is it cleaner to just pass this in ? *)
-  unitsMultiplierMatrix = getUnitsMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
-  optimizeGtmWithPseudoInverse[timaAsPrimesIdentityMatrix, unitsMultiplierMatrix, t, ptm]
+  unitsCounterMultiplierMatrix = getUnitsCounterMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
+  optimizeGtmWithPseudoInverse[timaAsPrimesIdentityMatrix, unitsCounterMultiplierMatrix, t, ptm]
 ];
 
-optimizeGtmTargetingAllPseudoInverseAnalyticalKe[d_, t_, ptm_, complexityUnitsMultiplier_] := Module[{},
-  {1, 2, 3, 4, 5} (* TODO: I think this is where to implement this, following CTE style instructions *)
+optimizeGtmKe[d_, t_, ptm_, complexityUnitsMultiplier_] := Module[
+  {gtm, ma, tm, solution, augmentedThing, almostL1Norm, middleMan, minimizeSetup},
+  
+  gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
+  ma = getA[getM[t]];
+  tm = gtm.ma;
+  
+  middleMan = tm / ptm - Table[1, d];
+  augmentedThing = AppendTo[middleMan, 0]; (* maybe this 0 is the "junk" *)
+  almostL1Norm = Max[augmentedThing] - Min[augmentedThing];
+  minimizeSetup = {almostL1Norm, augmentedThing[[1]] == 0};
+  solution = NMinimize[minimizeSetup, gtm, WorkingPrecision -> 128];
+  
+  gtm /. Last[solution] // N
 ];
 
 optimizeGtmTargetingAllNumerical[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{gtm, ma, tm},
@@ -265,12 +276,12 @@ optimizeGtmTargetingAllNumericalSimpleDualNorm[d_, t_, ptm_, complexityUnitsMult
 ];
 
 optimizeGtmTargetingAllNumericalSimpleDualNormUnique[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
-  {eₚ, unitsMultiplierMatrix, timaAsPrimesIdentityMatrix, solution, optimizationPower},
+  {eₚ, unitsCounterMultiplierMatrix, timaAsPrimesIdentityMatrix, solution, optimizationPower},
   
   eₚ = tm - ptm;
   timaAsPrimesIdentityMatrix = IdentityMatrix[d];
-  unitsMultiplierMatrix = getUnitsMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
-  eₚ = unitsMultiplierMatrix.eₚ;
+  unitsCounterMultiplierMatrix = getUnitsCounterMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
+  eₚ = unitsCounterMultiplierMatrix.eₚ;
   optimizationPower = dualPower[complexityNormPower];
   
   solution = NMinimize[Norm[eₚ, optimizationPower], gtm, WorkingPrecision -> 128];
@@ -278,11 +289,11 @@ optimizeGtmTargetingAllNumericalSimpleDualNormUnique[d_, t_, ptm_, complexityUni
   gtm /. Last[solution] // N
 ];
 
-(* TODO: might be able to DRY it up with optimizeGtmTargetingListNumerical, or at least correlate their implementations as much as possible to illuminate the patterns, as you did with getW and getUnitsMultiplierMatrix *)
+(* TODO: might be able to DRY it up with optimizeGtmTargetingListNumerical, or at least correlate their implementations as much as possible to illuminate the patterns, as you did with getW and getUnitsCounterMultiplierMatrix *)
 optimizeGtmTargetingAllNumericalSimpleDualNormNonUnique[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
   {
     eₚ,
-    unitsMultiplierMatrix,
+    unitsCounterMultiplierMatrix,
     timaAsPrimesIdentityMatrix,
     solution,
     previousSolution,
@@ -295,8 +306,8 @@ optimizeGtmTargetingAllNumericalSimpleDualNormNonUnique[d_, t_, ptm_, complexity
   
   eₚ = tm - ptm;
   timaAsPrimesIdentityMatrix = IdentityMatrix[d];
-  unitsMultiplierMatrix = getUnitsMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
-  eₚ = unitsMultiplierMatrix.eₚ;
+  unitsCounterMultiplierMatrix = getUnitsCounterMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
+  eₚ = unitsCounterMultiplierMatrix.eₚ;
   optimizationPower = dualPower[complexityNormPower];
   previousPrimesErrorMagnitude = \[Infinity];
   primesErrorMagnitude = 1000000;
@@ -324,7 +335,7 @@ optimizeGtmTargetingAllNumericalCustomDualNorm[d_, t_, ptm_, complexityUnitsMult
   augmentedThing = AppendTo[middleMan, 0];
   almostL1Norm = Max[augmentedThing] - Min[augmentedThing];
   minimizeSetup = If[complexityUnitsMultiplier == "logOddLimit", {almostL1Norm, augmentedThing[[1]] == 0}, almostL1Norm];
-  solution = NMinimize[{almostL1Norm, augmentedThing[[1]] == 0}, gtm, WorkingPrecision -> 128];
+  solution = NMinimize[minimizeSetup, gtm, WorkingPrecision -> 128];
   
   gtm /. Last[solution] // N
 ];
@@ -596,7 +607,7 @@ getSumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope
 get2SumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_}] :=
     Total[Square[getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]]];
 
-getSumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_}] :=
+getMaxDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_}] :=
     Max[getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]];
 
 
@@ -676,8 +687,6 @@ processTuningOptions[
     ir
   },
   
-  (*  Print["it is not even PROCESSING tuning options?!?!?!?"];*)
-  
   optimizationPower = inputOptimizationPower;
   damageWeightingSlope = inputDamageWeightingSlope;
   complexityUnitsMultiplier = inputComplexityUnitsMultiplier;
@@ -689,11 +698,9 @@ processTuningOptions[
   pureOctaveStretch = inputPureOctaveStretch;
   U = inputU;
   
-  
-  
   If[
     originalTuningName === "minimax",
-    optimizationPower = 1; damageWeightingSlope = "unweighted";
+    optimizationPower = \[Infinity]; damageWeightingSlope = "unweighted";
   ];
   If[
     originalTuningName === "least squares",
@@ -701,7 +708,6 @@ processTuningOptions[
   ];
   If[
     originalTuningName === "TOP" || originalTuningName === "TIPTOP",
-    (*   Print["this happen"];*)
     tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logProduct";
   ];
   If[
@@ -746,8 +752,8 @@ processTuningOptions[
   ];
   If[
     originalTuningName === "CTE",
-    (*Print["not this happen"];*)
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct"; U = {Join[{1}, Table[0, getD[t] - 1]]}; (* TODO: this d might ocme out differnetly than the one that's calculated below.... figure out what to do about that *)
+    (* TODO: this d might come out differently than the one that's calculated below.... figure out what to do about that, when you have CTE on a subgroup temperament *)
+    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct"; U = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   
   If[
@@ -791,9 +797,8 @@ processTuningOptions[
     optimizationPower = 1;
   ];
   
-  (* note: this has to go below the systematictunign name gating so that tim has a change to be set to {} *)
+  (* note: this has to go below the systematic tuning name gating, so that tim has a change to be set to {} *)
   b = getB[t];
-  (*  Print["what the f is going wrong here", tim, forDamage, inputTim,!isStandardPrimeLimitB[b] && tuningIntervalBasis == "primes"];*)
   If[
     !isStandardPrimeLimitB[b] && tuningIntervalBasis == "primes",
     
@@ -816,10 +821,6 @@ processTuningOptions[
   If[!NumericQ[optimizationPower] && optimizationPower != \[Infinity], Throw["no optimization power"]];
   If[damageWeightingSlope == "", Throw["no damage weighting slope"]];
   
-  (*  Print["so confused right now", U];*)
-  
-  (*  Print["what the hell is happening", {optimizationPower, tima, d, tPossiblyWithChangedIntervalBasis, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, U}];*)
-  
   {optimizationPower, tima, d, tPossiblyWithChangedIntervalBasis, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, U}
 ];
 
@@ -828,6 +829,9 @@ getPtm[t_] := Log[2, getB[t]];
 getW[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{W},
   W = If[
     damageWeightingSlope != "unweighted",
+    (* TODO: should this, like, just use getUnitsMultiplierMatrix? i.e., should the latter accept 
+    a tima not just only a primes identity matrix? 
+    I feel like I might be being a bit wasteful / redundant / overwrought in how I've implemented this ... *)
     DiagonalMatrix[Map[getComplexity[#, t, complexityUnitsMultiplier, complexityNormPower]&, tima]],
     IdentityMatrix[Length[tima]]
   ];
@@ -835,57 +839,87 @@ getW[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNor
   If[damageWeightingSlope == "simplicityWeighted", PseudoInverse[W], W]
 ];
 
-getUnitsMultiplierMatrix[t_, timaAsPrimesIdentityMatrix_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{unitsMultiplierMatrix},
-  unitsMultiplierMatrix = getThing[t, complexityUnitsMultiplier]; (* TODO dont need args *)
+(* getW may be simplicity-weighted or complexity-weighted, but this is always essentially "simplicity-weighted" *)
+getUnitsCounterMultiplierMatrix[t_, timaAsPrimesIdentityMatrix_, complexityUnitsMultiplier_, complexityNormPower_] :=
+    PseudoInverse[getUnitsMultiplierMatrix[t, complexityUnitsMultiplier]];
+
+getComplexity[pcv_, t_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{W},
+  (* TODO: I'm afraid this might be computing over and over... might be a good way to save some computation *)
+  unitsMultiplierMatrix = getUnitsMultiplierMatrix[t, complexityUnitsMultiplier];
   
-  PseudoInverse[unitsMultiplierMatrix] (* getW may be simplicity-weighted or complexity-weighted, but this is always essentially "simplicity-weighted" *)
+  Norm[unitsMultiplierMatrix.pcv, complexityNormPower]
 ];
 
-(* TODO: verify that these weighting matrices result in the same formulae as appear in the "vector i form" of my spreadsheet: https://docs.google.com/spreadsheets/d/1BBcUCoe6seCC1PM2qaByyiMNNLdxkEsx5X_-XJ9BdpE/edit#gid=694229653 *)
-getComplexity[pcv_, t_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{d, W},
-  d = getD[t];
-  W = getThing[t, complexityUnitsMultiplier];
-  Norm[W.pcv, complexityNormPower]
-];
-getThing[t_, complexityUnitsMultiplier_] := If[ (* note this is a different W than the one in getW, it is nested, this is to weight the quantities of the PC-vectors before taking a norm and getting an interval complexity *)
-  (* when used by getUnitsMultiplierMatrix for optimizeGtmTargetingAllNumericalSimpleDualNorm, covers TOP; when used by getUnitsMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers TE; when used by getW by optimizeGtmMinisos, optimizeGtmTargetingListNumerical, or by getTid by getSumDamage or getMaxDamage by optimizeGtmSimplex, covers any targeting-list tuning using this as its damage's complexity *)
-  complexityUnitsMultiplier == "logProduct",
-  DiagonalMatrix[Map[getLogProductComplexity[#, t]&, IdentityMatrix[getD[t]]]], (* TODO: clean up d, t etc*)
+(* TODO: verify that these  matrices result in the same formulae as appear in the "vector i form" of my spreadsheet: 
+https://docs.google.com/spreadsheets/d/1BBcUCoe6seCC1PM2qaByyiMNNLdxkEsx5X_-XJ9BdpE/edit#gid=694229653 *)
+(* note this is different than the W gotten by getW, this is nested within it;
+this is to weight the quantities of the PC-vectors before taking a norm and getting an interval complexity, 
+which are then all taken for each interval and assembled as W *)
+getUnitsMultiplierMatrix[t_, complexityUnitsMultiplier_] := Module[{},
+  (* TODO: maybe this is actually a sort of F, formal primes matrix? 
+  or maybe eventually this is just going to be an additional one of the transformation matrices per property *)
+  baseMatrix = If[
+    complexityUnitsMultiplier == "logOddLimit", (* TODO: eventually this will just be the other property *)
+    DiagonalMatrix[Join[{0}, Table[1, getD[t] - 1]]],
+    IdentityMatrix[getD[t]]
+  ];
   
   If[
-    (* when used by getUnitsMultiplierMatrix for optimizeGtmTargetingAllNumericalSimpleDualNorm, covers BOP; when used by getUnitsMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers BE *)
-    complexityUnitsMultiplier == "product",
-    DiagonalMatrix[Map[getProductComplexity[#, t]&, IdentityMatrix[getD[t]]]],
+    (* when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllNumericalSimpleDualNorm, covers TOP; 
+    when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers TE; 
+    when used by getW by optimizeGtmMinisos, optimizeGtmTargetingListNumerical, 
+    or by getTid by getSumDamage or getMaxDamage by optimizeGtmSimplex, 
+    covers any targeting-list tuning using this as its damage's complexity *)
+    complexityUnitsMultiplier == "logProduct",
+    DiagonalMatrix[Map[getLogProductComplexity[#, t]&, baseMatrix]],
     
     If[
-      (* also covers TOP, TE, etc. (equivalent to "logProduct") *)
-      complexityUnitsMultiplier == "logSopfr",
-      DiagonalMatrix[Map[getLogSopfrComplexity[#, t]&, IdentityMatrix[getD[t]]]],
+      (* when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllNumericalSimpleDualNorm, covers BOP;
+      when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers BE *)
+      complexityUnitsMultiplier == "product",
+      DiagonalMatrix[Map[getProductComplexity[#, t]&, baseMatrix]],
       
       If[
-        (* also covers BOP, BE, etc. (equivalent to "product") *)
-        complexityUnitsMultiplier == "sopfr",
-        DiagonalMatrix[Map[getSopfrComplexity[#, t]&, IdentityMatrix[getD[t]]]],
+        (* also covers TOP, TE, etc. (equivalent to "logProduct") *)
+        complexityUnitsMultiplier == "logSopfr",
+        DiagonalMatrix[Map[getLogSopfrComplexity[#, t]&, baseMatrix]],
         
         If[
-          (* when Weil needs its dual norm, we actually go into optimizeGtmTargetingAllNumericalCustomDualNorm, where it's implemented separately (the min - max thing); when used by getUnitsMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers WE; when used by getW by optimizeGtmMinisos, optimizeGtmTargetingListNumerical, or by getTid by getSumDamage or getMaxDamage by optimizeGtmSimplex, should cover any targeting-list tuning using this as its damage's complexity *)
-          complexityUnitsMultiplier == "logIntegerLimit",
-          Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, IdentityMatrix[getD[t]]]], {Map[getLogProductComplexity[#, meantone]&, IdentityMatrix[getD[t]]]}] / 2,
+          (* also covers BOP, BE, etc. (equivalent to "product") *)
+          complexityUnitsMultiplier == "sopfr",
+          DiagonalMatrix[Map[getSopfrComplexity[#, t]&, baseMatrix]],
           
           If[
-            (* when Kees needs its dual norm, we actually go into optimizeGtmTargetingAllNumericalCustomDualNorm, where it's implemented separately (the min - max thing) with pure-octave constraint on the solver; ### still need to cover KE; when used by getW by optimizeGtmMinisos, optimizeGtmTargetingListNumerical, or by getTid by getSumDamage or getMaxDamage by optimizeGtmSimplex, should cover any targeting-list tuning using this as its damage's complexity *)
-            complexityUnitsMultiplier == "logOddLimit",
-            Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, DiagonalMatrix[Join[{0}, Table[1, getD[t] - 1]]]]], {Map[getLogProductComplexity[#, meantone]&, DiagonalMatrix[Join[{0}, Table[1, getD[t] - 1]]]]}] / 2, (* TODO: DRY up this DiagonalMatrix[Join[{0}, Table[1, d - 1]]] and IdentityMatrix[d] thing... the former is like a "no-twos primes" or soemthing *)
+            (* when Weil needs its dual norm, we actually go into optimizeGtmTargetingAllNumericalCustomDualNorm, 
+            where it's implemented separately (the min - max thing); 
+            when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers WE; 
+            when used by getW by optimizeGtmMinisos, optimizeGtmTargetingListNumerical, 
+            or by getTid by getSumDamage or getMaxDamage by optimizeGtmSimplex, 
+            should cover any targeting-list tuning using this as its damage's complexity *)
+            complexityUnitsMultiplier == "logIntegerLimit",
+            Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, baseMatrix]], {Map[getLogProductComplexity[#, meantone]&, baseMatrix]}] / 2,
             
-            (* when used by getUnitsMultiplierMatrix for optimizeGtmTargetingAllNumericalSimpleDualNorm, covers L1 version of Frobenius; when used by getUnitsMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers Frobenius *)
-            DiagonalMatrix[Map[1&, IdentityMatrix[getD[t]]]] (* TODO: should be copfrComplexity? *)
+            If[
+              (* when Kees needs its dual norm, we actually go into optimizeGtmTargetingAllNumericalCustomDualNorm, 
+              where it's implemented separately (the min - max thing) with pure-octave constraint on the solver; 
+              ### still need to cover KE; when used by getW by optimizeGtmMinisos, optimizeGtmTargetingListNumerical, 
+              or by getTid by getSumDamage or getMaxDamage by optimizeGtmSimplex, 
+              should cover any targeting-list tuning using this as its damage's complexity *)
+              complexityUnitsMultiplier == "logOddLimit",
+              Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, baseMatrix]], {Map[getLogProductComplexity[#, t]&, baseMatrix]}] / 2,
+              
+              (* when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllNumericalSimpleDualNorm, 
+              covers L1 version of Frobenius; 
+              when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, 
+              covers Frobenius *)
+              DiagonalMatrix[Map[1&, baseMatrix]] (* TODO: should be copfrComplexity? *)
+            ]
           ]
         ]
       ]
     ]
   ]
 ];
-(* TODO: I feel like I might be being a bit wasteful / redundant / overwrought in how I've implemented this ... *)
 getCopfrComplexity[pcv_, t_] := Total[Map[If[Abs[# > 0], 1, 0]&, pcv]];
 (* AKA "Benedetti height" *)
 getProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getB[t], pcv}];
@@ -920,18 +954,18 @@ optimizeGtmWithPseudoInverse[timaOrPrimesIdentityMatrix_, WorUnitsMultiplierMatr
 (* TODO eventually this should be able to just be a generic solver *)
 (* TODO for now it just assumes u is prime 2 and that's it, but eventually it can become an actual matrix like tim *)
 optimizeGtmCte[d_, t_, ptm_, complexityUnitsMultiplier_, U_](*,[timaOrPrimesIdentityMatrix_, WorUnitsMultiplierMatrix_, t_, ptm_, U_] *) := Module[
-  {gtm, ma, tm, eₚ, solution, optimizationPower, timaAsPrimesIdentityMatrix, complexityNormPower, unitsMultiplierMatrix},
+  {gtm, ma, tm, eₚ, solution, optimizationPower, timaAsPrimesIdentityMatrix, complexityNormPower, unitsCounterMultiplierMatrix},
   
   timaAsPrimesIdentityMatrix = IdentityMatrix[d];
   complexityNormPower = 2; (* TODO: is it cleaner to just pass this in ? *)
-  unitsMultiplierMatrix = getUnitsMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
+  unitsCounterMultiplierMatrix = getUnitsCounterMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower]; (* TODO: instead of counter-multiplier can it be like, units multiplier matrix for interval complexity, and units multiplier matrix for primes error magnitude? *)
   
   gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
   tm = gtm.ma;
   
   eₚ = tm - ptm;
-  eₚ = unitsMultiplierMatrix.eₚ;
+  eₚ = unitsCounterMultiplierMatrix.eₚ;
   optimizationPower = 2;
   
   (*Print["what happen!! gtm: ", gtm," ma: ", ma," tm: ", tm," eₚ: ", eₚ," opt pow: ", optimizationPower];*)
