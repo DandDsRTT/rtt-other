@@ -292,7 +292,7 @@ In[1332]:=
       oddsWithinLimit = Range[1, oddLimit, 2];
       rawDiamond = Map[Function[outer, Map[Function[inner, outer / inner], oddsWithinLimit]], oddsWithinLimit];
       
-      padD[Map[rationalToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
+      padD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
     ];
 
 In[1334]:= octaveReduce[inputI_] := Module[{i},

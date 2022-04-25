@@ -1,7 +1,7 @@
-wthThing[tima_, mappedTiIndex_] := Module[{ti, tiAsRational, tiAsOctaves},
+wthThing[tima_, mappedTiIndex_] := Module[{ti, tiAsQuotient, tiAsOctaves},
   ti = First[Part[tima, mappedTiIndex]];
-  tiAsRational = pcvToRational[ti];
-  tiAsOctaves = Log[2, pcvToRational[ti]]; 
+  tiAsQuotient = pcvToQuotient[ti];
+  tiAsOctaves = Log[2, pcvToQuotient[ti]]; 
   
   tiAsOctaves
 ];

@@ -531,7 +531,7 @@ getDiamond[d_] := Module[{oddLimit, oddsWithinLimit, rawDiamond},
   oddsWithinLimit = Range[1, oddLimit, 2];
   rawDiamond = Map[Function[outer, Map[Function[inner, outer / inner], oddsWithinLimit]], oddsWithinLimit];
   
-  padD[Map[rationalToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
+  padD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
 ];
 
 octaveReduce[inputI_] := Module[{i},
@@ -930,9 +930,9 @@ getSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getB[t], pcv}]];
 (* This apparently doesn't have a name, but can also be used to find TOP tuning *)
 getLogSopfrComplexity[pcv_, t_] := Log[2, getSopfrComplexity[pcv, t]];
 (* AKA "Weil height" *)
-getIntegerLimitComplexity[pcv_, t_] := Module[{rational},
-  rational = pcvToRational[pcv];
-  Max[Numerator[rational], Denominator[rational]]
+getIntegerLimitComplexity[pcv_, t_] := Module[{quotient},
+  quotient = pcvToQuotient[pcv];
+  Max[Numerator[quotient], Denominator[quotient]]
 ];
 (* AKA "logarithmic Weil height", used for "Weil tuning" *)
 getLogIntegerLimitComplexity[pcv_, t_] := Log[2, getIntegerLimitComplexity[pcv, t]];

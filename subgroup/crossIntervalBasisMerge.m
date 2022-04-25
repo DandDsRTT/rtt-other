@@ -4,8 +4,8 @@ passes = 0;
 getPrimes[count_] := Map[Prime, Range[count]];
 test[getPrimes, 5, {2, 3, 5, 7, 11}];
 
-rationalToI[rational_] := Module[{factorization, greatestPrime, count, primes, i, currentPrimeIndex},
-  factorization = FactorInteger[rational];
+quotientToI[quotient_] := Module[{factorization, greatestPrime, count, primes, i, currentPrimeIndex},
+  factorization = FactorInteger[quotient];
   greatestPrime = First[Last[factorization]];
   count = PrimePi[greatestPrime];
   primes = getPrimes[count];
@@ -23,20 +23,20 @@ rationalToI[rational_] := Module[{factorization, greatestPrime, count, primes, i
   
   i
 ];
-test[rationalToI, 22 / 5, {1, 0, -1, 0, 1}];
+test[quotientToI, 22 / 5, {1, 0, -1, 0, 1}];
 
-iToRational[v_] := Module[{rational, primeIndex},
-  rational = 1;
+iToQuotient[v_] := Module[{quotient, primeIndex},
+  quotient = 1;
   primeIndex = 1;
   Do[
-    rational = rational * Prime[primeIndex]^vEntry;
+    quotient = quotient * Prime[primeIndex]^vEntry;
     primeIndex += 1,
     {vEntry, v}
   ];
   
-  rational
+  quotient
 ];
-test[iToRational, {1, 0, -1, 0, 1}, 22 / 5];
+test[iToQuotient, {1, 0, -1, 0, 1}, 22 / 5];
 
 getDforB[l_] := PrimePi[Max[Map[First, Map[Last, Map[FactorInteger, l]]]]];
 test[getDforB, {2, 9, 7}, 4];
@@ -44,11 +44,11 @@ test[getDforB, {2, 9, 7}, 4];
 padD[a_, d_] := Map[PadRight[#, d]&, a];
 test[padD, {{1, 2, 3}, {4, 5, 6}}, 5, {{1, 2, 3, 0, 0}, {4, 5, 6, 0, 0}}];
 
-super[rational_] := If[rational < 1, Denominator[rational] / Numerator[rational], rational];
+super[quotient_] := If[quotient < 1, Denominator[quotient] / Numerator[quotient], quotient];
 test[super, 5 / 3, 5 / 3];
 test[super, 3 / 5, 5 / 3];
 
-canonicalB[b_] := Map[super, Map[iToRational, antiTranspose[removeAllZeroRows[hnf[antiTranspose[padD[Map[rationalToI, b], getDforB[b]]]]]]]];
+canonicalB[b_] := Map[super, Map[iToQuotient, antiTranspose[removeAllZeroRows[hnf[antiTranspose[padD[Map[quotientToI, b], getDforB[b]]]]]]]];
 (* order by prime-limit*)
 test[canonicalB, {2, 7, 9}, {2, 9, 7}];
 test[canonicalB, {2, 9 / 7, 5}, {2, 5, 9 / 7}];
@@ -91,9 +91,9 @@ test[canonicalB, {2, 7 / 5, 11 / 5, 13 / 5}, {2, 7 / 5, 11 / 5, 13 / 5}];
 (*their union-like thing, a superset or equal set to both of them; if doing comma-merge, would be what we want *)
 bMerge[bl___] := Module[{concatedB, factorizedConcatedB},
   concatedB = Apply[Join, {bl}];
-  factorizedConcatedB = padD[Map[rationalToI, concatedB], getDforB[concatedB]];
+  factorizedConcatedB = padD[Map[quotientToI, concatedB], getDforB[concatedB]];
   
-  canonicalB[Map[iToRational, factorizedConcatedB]]
+  canonicalB[Map[iToQuotient, factorizedConcatedB]]
 ];
 
 (* returns the supergroup, when one is a subgroup of the other *)
@@ -108,20 +108,20 @@ test[bMerge, {4}, {16}, {4}];
 test[bMerge, {25 / 9}, {5 / 3}, {5 / 3}];
 
 (*their intersection; if doing map-merge, would be what we want; we only care about mapping stuff relevant to both of the input t's commas *)
-rationalsShareRoot[rational1_, rational2_] := Module[{gcd},
-  gcd = getGcd[{rational1, rational2}];
+quotientsShareRoot[quotient1_, quotient2_] := Module[{gcd},
+  gcd = getGcd[{quotient1, quotient2}];
   
   If[
     gcd == 1,
     False,
-    IntegerQ[Log[gcd, rational1]] && IntegerQ[Log[gcd, rational2]]
+    IntegerQ[Log[gcd, quotient1]] && IntegerQ[Log[gcd, quotient2]]
   ]
 ];
 findFIfAnyInOtherIntervalBasisThatSharesRoot[b1f_, b2_] := Module[{fSharingRoot},
   fSharingRoot = Null;
   Do[
     If[
-      rationalsShareRoot[b1f, b2f],
+      quotientsShareRoot[b1f, b2f],
       fSharingRoot = LCM[b1f, b2f]
     ],
     {b2f, b2}
@@ -233,8 +233,8 @@ getIrForM[originalSuperspaceB_, targetSubspaceB_] := Module[
   },
   
   d = getDforB[Join[originalSuperspaceB, targetSubspaceB]];
-  factorizedTargetSubspaceB = padD[Map[rationalToI, targetSubspaceB], d];
-  factorizedOriginalSuperspaceB = padD[Map[rationalToI, originalSuperspaceB], d];
+  factorizedTargetSubspaceB = padD[Map[quotientToI, targetSubspaceB], d];
+  factorizedOriginalSuperspaceB = padD[Map[quotientToI, originalSuperspaceB], d];
   
   r = {};
   

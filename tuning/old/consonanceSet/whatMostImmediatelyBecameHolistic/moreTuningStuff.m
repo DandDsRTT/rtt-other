@@ -1,7 +1,7 @@
 jip[d_] := Map[Log2, Map[Prime, Range[d]]];
 
 complexity[i_, weighting_, normPower_] := Module[{pcv,d,  weightedPcv},
-  pcv = Map[Abs,rationalToPcv[i]];
+  pcv = Map[Abs, quotientToPcv[i]];
   d = Length[pcv];
   weightedPcv = If[
     weighting == "noop",
@@ -115,8 +115,8 @@ thing = Max[
       d = getD[m];
       ma = getA[m];
       Map[
-        (*getA[m].Transpose[{rationalToPcv[#]}]&,*)
-        ma.Transpose[padD[{rationalToPcv[#]}, d]]&,
+        (*getA[m].Transpose[{quotientToPcv[#]}]&,*)
+        ma.Transpose[padD[{quotientToPcv[#]}, d]]&,
         tim
       ]
     ];

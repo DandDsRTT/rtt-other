@@ -1,5 +1,5 @@
-rationalToV[rational_] := Module[{factorization, biggestPrime, count, primes, result, currentPrimeIndex},
-  factorization = FactorInteger[rational];
+quotientToV[quotient_] := Module[{factorization, biggestPrime, count, primes, result, currentPrimeIndex},
+  factorization = FactorInteger[quotient];
   biggestPrime = First[Last[factorization]];
   count = PrimePi[biggestPrime];
   primes = Map[Prime, Range[count]];
@@ -18,16 +18,16 @@ rationalToV[rational_] := Module[{factorization, biggestPrime, count, primes, re
   result
 ];
 
-vToRational[v_] := Module[{rational, primeIndex},
-  rational = 1;
+vToQuotient[v_] := Module[{quotient, primeIndex},
+  quotient = 1;
   primeIndex = 1;
   Do[
-    rational = rational * Prime[primeIndex]^vEntry;
+    quotient = quotient * Prime[primeIndex]^vEntry;
     primeIndex = primeIndex + 1,
     {vEntry, v}
   ];
   
-  rational
+  quotient
 ];
 
 changeS[t_, targetS_] := Module[{},
@@ -38,23 +38,23 @@ pLimit[a_] := PrimePi[Max[Map[First, Map[Last, Map[FactorInteger, a]]]]];
 
 padD[a_, d_] := Map[PadRight[#, d]&, a];
 
-canonicalS[s_] := Map[vToRational, removeAllZeroRows[hnf[padD[Map[rationalToV, s], pLimit[s]]]]];
+canonicalS[s_] := Map[vToQuotient, removeAllZeroRows[hnf[padD[Map[quotientToV, s], pLimit[s]]]]];
 
 sUnion[s1_, s2_] := Module[{d, factorizedS1, factorizedS2},
   d = pLimit[Join[s1, s2]];
-  factorizedS1 = padD[Map[rationalToV, s1], d];
-  factorizedS2 = padD[Map[rationalToV, s2], d];
+  factorizedS1 = padD[Map[quotientToV, s1], d];
+  factorizedS2 = padD[Map[quotientToV, s2], d];
   
-  canonicalS[Map[vToRational, Join[factorizedS1, factorizedS2]]]
+  canonicalS[Map[vToQuotient, Join[factorizedS1, factorizedS2]]]
 ];
 
-shareRoot[rational1_, rational2_] := Module[{gcd},
-  gcd = getGcd[rational1, rational2];
+shareRoot[quotient1_, quotient2_] := Module[{gcd},
+  gcd = getGcd[quotient1, quotient2];
   
   If[
     gcd == 1,
     False,
-    IntegerQ[Log[gcd, rational1]] && IntegerQ[Log[gcd, rational2]]
+    IntegerQ[Log[gcd, quotient1]] && IntegerQ[Log[gcd, quotient2]]
   ]
 ];
 
@@ -88,8 +88,8 @@ sIntersection[s1_, s2_] := Module[{result},
 ];
 
 
-test[rationalToV, 22 / 5, {1, 0, -1, 0, 1}];
-test[vToRational, {1, 0, -1, 0, 1}, 22 / 5];
+test[quotientToV, 22 / 5, {1, 0, -1, 0, 1}];
+test[vToQuotient, {1, 0, -1, 0, 1}, 22 / 5];
 
 t = {{{22, 35, 51, 76}}, "co", {2, 3, 5, 11}};
 targetS = {2, 9, 11};
