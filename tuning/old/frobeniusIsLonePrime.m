@@ -44,7 +44,7 @@ getWeightingMatrix[d_, weight_] := If[
 
 precision = 7;
 
-optimizeGtm[m_, norm_, weight_ : "flat"] := If[
+optimizeGeneratorsTuningMap[m_, norm_, weight_ : "flat"] := If[
   norm == 2,
   optimizeGtmWithPseudoinverse[m, weight],
   optimizeGtmWithMinimizer[m, norm, weight]
@@ -88,9 +88,9 @@ optimizeGtmWithMinimizer[m_, norm_, weight_] := Module[{r, d, ma, gtm, ptm, tm, 
 
 mapping = {{{1, 1, 0}, {0, 1, 4}}, "co"};
 
-1200 * optimizeGtm[mapping, 2, "flat"]
-1200 * optimizeGtm[mapping, 2, "prime-map"]
-1200 * optimizeGtm[mapping, 1, "prime-map"]
+1200 * optimizeGeneratorsTuningMap[mapping, 2, "flat"]
+1200 * optimizeGeneratorsTuningMap[mapping, 2, "prime-map"]
+1200 * optimizeGeneratorsTuningMap[mapping, 1, "prime-map"]
 
 
 (* meantone {{{1,1,0}, {0, 1,4}}, "co"}; *)

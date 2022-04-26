@@ -116,7 +116,7 @@ thing = Max[
       ma = getA[m];
       Map[
         (*getA[m].Transpose[{quotientToPcv[#]}]&,*)
-        ma.Transpose[padD[{quotientToPcv[#]}, d]]&,
+        ma.Transpose[padVectorsWithZerosUpToD[{quotientToPcv[#]}, d]]&,
         tim
       ]
     ];
@@ -188,7 +188,7 @@ tune[m_, meanPower_ : \[Infinity], unweighted_ : False, gression_ : "simplicityW
   
   Print["well let's see what we got", meanPower, unweighted, gression, weighting, normNumber, gtm, mappedTim];
   
-  guessRange =  1200*optimizeGtm[m, 2];
+  guessRange =  1200*optimizeGeneratorsTuningMap[m, 2];
   
   solution = NMinimize[(*thingFunction[gtm, complexities, tim, mappedTim, meanPower]*)
     {
@@ -247,7 +247,7 @@ getW[d_, weight_] := If[
 
 precision = 7;
 
-optimizeGtm[m_, norm_, weight_ : "noop"] := If[
+optimizeGeneratorsTuningMap[m_, norm_, weight_ : "noop"] := If[
   norm == 2,
   optimizeGtmWithPseudoinverse[m, weight],
   optimizeGtmWithMinimizer[m, norm, weight]
@@ -290,17 +290,17 @@ optimizeGtmWithMinimizer[m_, norm_, weight_] := Module[{r, d, ma, gtm, ptm, tm, 
   gtm /. Last[optimalGtmSolution] // N
 ];
 
-f1 = 1200*optimizeGtm[m, 1]
-f2 = 1200*optimizeGtm[m, 2]
-f\[Infinity] = 1200*optimizeGtm[m, \[Infinity]]
+f1 = 1200*optimizeGeneratorsTuningMap[m, 1]
+f2 = 1200*optimizeGeneratorsTuningMap[m, 2]
+f\[Infinity] = 1200*optimizeGeneratorsTuningMap[m, \[Infinity]]
 
-p1 = 1200*optimizeGtm[m, 1, "logProduct"]
-p2 = 1200*optimizeGtm[m, 2, "logProduct"]
-p\[Infinity] = 1200*optimizeGtm[m, \[Infinity], "logProduct"]
+p1 = 1200*optimizeGeneratorsTuningMap[m, 1, "logProduct"]
+p2 = 1200*optimizeGeneratorsTuningMap[m, 2, "logProduct"]
+p\[Infinity] = 1200*optimizeGeneratorsTuningMap[m, \[Infinity], "logProduct"]
 
-i1 = 1200*optimizeGtm[m, 1, "I"]
-i2 = 1200*optimizeGtm[m, 2, "I"]
-i\[Infinity] = 1200*optimizeGtm[m, \[Infinity], "I"]
+i1 = 1200*optimizeGeneratorsTuningMap[m, 1, "I"]
+i2 = 1200*optimizeGeneratorsTuningMap[m, 2, "I"]
+i\[Infinity] = 1200*optimizeGeneratorsTuningMap[m, \[Infinity], "I"]
 
 data = {
   {f1, "MS"},
@@ -317,4 +317,4 @@ data = {
 
 Show[ListPlot[MapThread[Callout[#1, #2, LabelVisibility->All]&,{Map[First,data], Map[Last, data]}], PlotRange->All], ImageSize ->1000]
 
-1200 *optimizeGtm[{{{1,1,0},{0,1,4}},"co"},1, "logProduct"]
+1200 *optimizeGeneratorsTuningMap[{{{1,1,0},{0,1,4}},"co"},1, "logProduct"]

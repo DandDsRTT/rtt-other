@@ -3,7 +3,7 @@
   GENERATORS PREIMAGE TRANSVERSAL
   
   
-  getGpt[t]
+  getGeneratorsPreimageTransversal[t]
   
   Given a representation of a temperament as a mapping or comma basis,
   returns a generators preimage transversal 
@@ -12,21 +12,21 @@
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        getGpt[meantoneM]
+        getGeneratorsPreimageTransversal[meantoneM]
     
   Out   {{{1, 0, 0}, {-1, 1, 0}}, "contra"}
   
 *)
-getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
+getGeneratorsPreimageTransversal[t_] := Module[{ma, decomp, left, snf, right, generatorsPreimageTransversal},
   ma = getA[getM[t]];
   decomp = SmithDecomposition[ma];
   left = Part[decomp, 1];
   snf = Part[decomp, 2];
   right = Part[decomp, 3];
   
-  gpt = right.Transpose[snf].left;
+  generatorsPreimageTransversal = right.Transpose[snf].left;
   
-  {Transpose[gpt], "contra"}
+  {Transpose[generatorsPreimageTransversal], "contra"}
 ];
 
 
@@ -35,7 +35,7 @@ getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
   TUNING
   
   
-  optimizeGtm[t]
+  optimizeGeneratorsTuningMap[t]
   
   Given a representation of a temperament as a mapping or comma basis,
   returns the optimal generator tuning map.
@@ -45,35 +45,35 @@ getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGtm[meantoneM, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"]
+        optimizeGeneratorsTuningMap[meantoneM, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"]
     
   Out   {1201.69, 697.563}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGtm[meantoneM, "originalTuningName" -> "TOP"]
+        optimizeGeneratorsTuningMap[meantoneM, "originalTuningName" -> "TOP"]
     
   Out   {1201.7, 697.563}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGtm[meantoneM, "systematicTuningName" -> "minisos-MEC"]
+        optimizeGeneratorsTuningMap[meantoneM, "systematicTuningName" -> "minisos-MEC"]
     
   Out   {1198.24, 695.294}
 *)
-Options[optimizeGtm] = tuningOptions;
-optimizeGtm[t_, OptionsPattern[]] := Module[
+Options[optimizeGeneratorsTuningMap] = tuningOptions;
+optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   {
     optimizationPower,
     damageWeightingSlope,
     complexityUnitsMultiplier,
     complexityNormPower,
-    tim,
+    targetedIntervals,
     tuningIntervalBasis,
     systematicTuningName,
     originalTuningName,
     pureOctaveStretch,
-    U,
+    unchangedIntervals,
     tuningOptions,
-    optimizedGtm,
+    optimizedGeneratorsTuningMap,
     tPossiblyWithChangedIntervalBasis
   },
   
@@ -81,48 +81,45 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
   damageWeightingSlope = OptionValue["damageWeightingSlope"];
   complexityUnitsMultiplier = OptionValue["complexityUnitsMultiplier"];
   complexityNormPower = OptionValue["complexityNormPower"];
-  tim = OptionValue["tim"];
+  targetedIntervals = OptionValue["targetedIntervals"];
   tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
   systematicTuningName = OptionValue["systematicTuningName"];
   originalTuningName = OptionValue["originalTuningName"];
   pureOctaveStretch = OptionValue["pureOctaveStretch"];
-  U = OptionValue["U"];
+  unchangedIntervals = OptionValue["unchangedIntervals"];
   
-  (*  Print["how? no. no no. not possible", U];*)
-  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, pureOctaveStretch, U, False];
+  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, targetedIntervals, tuningIntervalBasis, systematicTuningName, originalTuningName, pureOctaveStretch, unchangedIntervals, False];
   
   optimizationPower = Part[tuningOptions, 1];
   tPossiblyWithChangedIntervalBasis = Part[tuningOptions, 4];
   pureOctaveStretch = Part[tuningOptions, 9];
-  (*   Print["after at all, what's th e optimizationPower ", optimizationPower];*)
   
-  optimizedGtm = 1200 * If[
+  optimizedGeneratorsTuningMap = 1200 * If[
     optimizationPower == \[Infinity],
-    (*     Print["at least doing this optimizeGtmMinimax", optimizationPower, tPossiblyWithChangedIntervalBasis , pureOctaveStretch];*)
-    optimizeGtmMinimax[tuningOptions],
+    optimizeGeneratorsTuningMapMinimax[tuningOptions],
     If[
       optimizationPower == 2,
-      optimizeGtmMinisos[tuningOptions],
-      optimizeGtmMinisum[tuningOptions]
+      optimizeGeneratorsTuningMapMinisos[tuningOptions],
+      optimizeGeneratorsTuningMapMinisum[tuningOptions]
     ]
   ];
   
   If[
-    !isStandardPrimeLimitB[getB[t]] && tuningIntervalBasis == "primes",
-    optimizedGtm = retrievePrimesIntervalBasisGtm[optimizedGtm, t, tPossiblyWithChangedIntervalBasis]
+    !isStandardPrimeLimitIntervalBasis[getIntervalBasis[t]] && tuningIntervalBasis == "primes",
+    optimizedGeneratorsTuningMap = retrievePrimesIntervalBasisGeneratorsTuningMap[optimizedGeneratorsTuningMap, t, tPossiblyWithChangedIntervalBasis]
   ];
   
   If[
     pureOctaveStretch,
-    optimizedGtm = getPureOctaveStretchedGtm[optimizedGtm, t]
+    optimizedGeneratorsTuningMap = getPureOctaveStretchedGeneratorsTuningMap[optimizedGeneratorsTuningMap, t]
   ];
   
-  optimizedGtm
+  optimizedGeneratorsTuningMap
 ];
 
 
 (*
-  optimizeTm[t]
+  optimizeTuningMap[t]
   
   Given a representation of a temperament as a mapping or comma basis,
   returns the optimal tuning map.
@@ -132,57 +129,57 @@ optimizeGtm[t_, OptionsPattern[]] := Module[
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeTm[meantoneM, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"]
+        optimizeTuningMap[meantoneM, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"]
     
   Out   {1201.69, 1899.26, 2790.25}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeTm[meantoneM, "originalTuningName" -> "TOP"]
+        optimizeTuningMap[meantoneM, "originalTuningName" -> "TOP"]
     
   Out   {1201.7, 1899.26, 2790.25} 
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeTm[meantoneM, "systematicTuningName" -> "minisos-MEC"]
+        optimizeTuningMap[meantoneM, "systematicTuningName" -> "minisos-MEC"]
     
   Out   {1198.24, 1893.54, 2781.18} 
 *)
-Options[optimizeTm] = tuningOptions;
-optimizeTm[t_, OptionsPattern[]] := Module[
+Options[optimizeTuningMap] = tuningOptions; (* TODO: oh what if we just moved this below the tuningOptions def instead ? *)
+optimizeTuningMap[t_, OptionsPattern[]] := Module[
   {
     optimizationPower,
     damageWeightingSlope,
     complexityUnitsMultiplier,
     complexityNormPower,
-    tim,
+    targetedIntervals,
     tuningIntervalBasis,
     systematicTuningName,
     originalTuningName,
     pureOctaveStretch,
-    U
+    unchangedIntervals
   },
   
   optimizationPower = OptionValue["optimizationPower"];
   damageWeightingSlope = OptionValue["damageWeightingSlope"];
   complexityUnitsMultiplier = OptionValue["complexityUnitsMultiplier"];
   complexityNormPower = OptionValue["complexityNormPower"];
-  tim = OptionValue["tim"];
+  targetedIntervals = OptionValue["targetedIntervals"];
   tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
   systematicTuningName = OptionValue["systematicTuningName"];
   originalTuningName = OptionValue["originalTuningName"];
   pureOctaveStretch = OptionValue["pureOctaveStretch"];
-  U = OptionValue["U"];
+  unchangedIntervals = OptionValue["unchangedIntervals"];
   
-  optimizeGtm[t, {
+  optimizeGeneratorsTuningMap[t, {
     "optimizationPower" -> optimizationPower,
     "damageWeightingSlope" -> damageWeightingSlope,
     "complexityUnitsMultiplier" -> complexityUnitsMultiplier,
     "complexityNormPower" -> complexityNormPower,
-    "tim" -> tim,
+    "targetedIntervals" -> targetedIntervals,
     "tuningIntervalBasis" -> tuningIntervalBasis,
     "systematicTuningName" -> systematicTuningName,
     "originalTuningName" -> originalTuningName,
     "pureOctaveStretch" -> pureOctaveStretch,
-    "U" -> U
+    "unchangedIntervals" -> unchangedIntervals
   }].getA[getM[t]]
 ];
 
@@ -192,109 +189,108 @@ optimizeTm[t_, OptionsPattern[]] := Module[
 
 (* MINIMAX *)
 
-optimizeGtmMinimax[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_}] := If[
-  damageWeightingSlope == "simplicityWeighted" && Length[tima] == 0,
+optimizeGeneratorsTuningMapMinimax[{optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, unchangedIntervals_}] := If[
+  damageWeightingSlope == "simplicityWeighted" && Length[targetedIntervalsA] == 0,
+  optimizeGeneratorsTuningMapTargetingAll[d, t, primesTuningMap, complexityUnitsMultiplier, complexityNormPower, unchangedIntervals],
   
-  (* Print["please lord"];*)
-  optimizeGtmTargetingAll[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, U],
-  
-  (*Print["really thoough?", damageWeightingSlope, tima];*)
   If[
     damageWeightingSlope == "unweighted",
-    optimizeGtmMinimaxTargetingListAnalytical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, U], (* TODO: later support unchanged intervals in tunings other than CTE too *)
-    optimizeGtmTargetingListNumerical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
+    optimizeGeneratorsTuningMapMinimaxTargetingListAnalytical[optimizationPower, targetedIntervalsA, d, t, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, unchangedIntervals],
+    optimizeGeneratorsTuningMapTargetingListNumerical[optimizationPower, targetedIntervalsA, d, t, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
   ]
 ];
 
 
 (* TARGETING-ALL MINIMAX *)
 
-optimizeGtmTargetingAll[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, U_] := If[
+optimizeGeneratorsTuningMapTargetingAll[d_, t_, primesTuningMap_, complexityUnitsMultiplier_, complexityNormPower_, unchangedIntervals_] := If[
   complexityNormPower == 2,
   If[
-    Length[U] > 0,
+    Length[unchangedIntervals] > 0,
     
     (* covers CTE *)
-    optimizeGtmCte[d, t, ptm, complexityUnitsMultiplier, U],
+    optimizeGeneratorsTuningMapCte[d, t, primesTuningMap, complexityUnitsMultiplier, unchangedIntervals, complexityNormPower],
     
     If[
       complexityUnitsMultiplier == "logOddLimit",
       
       (* covers KE *)
-      optimizeGtmKe[d, t, ptm, complexityUnitsMultiplier],
+      optimizeGeneratorsTuningMapKe[d, t, primesTuningMap, complexityUnitsMultiplier, complexityNormPower],
       
       (* covers TE, Frobenius, WE, BE *)
-      optimizeGtmTargetingAllPseudoInverseAnalytical[d, t, ptm, complexityUnitsMultiplier]
+      optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical[d, t, primesTuningMap, complexityUnitsMultiplier, complexityNormPower]
     ]
   ],
   
   (* covers TOP, L1 version of Frobenius, Weil, Kees, BOP *)
-  optimizeGtmTargetingAllNumerical[d, t, ptm, complexityUnitsMultiplier, complexityNormPower]
+  optimizeGeneratorsTuningMapTargetingAllNumerical[d, t, primesTuningMap, complexityUnitsMultiplier, complexityNormPower]
 ];
 
-optimizeGtmTargetingAllPseudoInverseAnalytical[d_, t_, ptm_, complexityUnitsMultiplier_] := Module[{unitsCounterMultiplierMatrix, timaAsPrimesIdentityMatrix, complexityNormPower},
-  timaAsPrimesIdentityMatrix = IdentityMatrix[d];
-  complexityNormPower = 2; (* TODO: is it cleaner to just pass this in ? *)
-  unitsCounterMultiplierMatrix = getUnitsCounterMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
-  optimizeGtmWithPseudoInverse[timaAsPrimesIdentityMatrix, unitsCounterMultiplierMatrix, t, ptm]
-];
-
-optimizeGtmKe[d_, t_, ptm_, complexityUnitsMultiplier_] := Module[
-  {gtm, ma, tm, solution, augmentedThing, almostL1Norm, middleMan, minimizeSetup},
+optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical[d_, t_, primesTuningMap_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{unitsCounterMultiplierA, targetedIntervalsAsPrimesIdentityA},
+  targetedIntervalsAsPrimesIdentityA = IdentityMatrix[d];
+  unitsCounterMultiplierA = getUnitsCounterMultiplierA[t, targetedIntervalsAsPrimesIdentityA, complexityUnitsMultiplier, complexityNormPower];
   
-  gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
+  optimizeGeneratorsTuningMapWithPseudoInverse[targetedIntervalsAsPrimesIdentityA, unitsCounterMultiplierA, t, primesTuningMap]
+];
+
+optimizeGeneratorsTuningMapKe[d_, t_, primesTuningMap_, complexityUnitsMultiplier_, complexityNormPower_] := Module[ (* TODO: wait this can't be right... it's not actually doing anything L2-ish, right? *)
+  {generatorsTuningMap, ma, tuningMap, solution, augmentedThing, almostL1Norm, middleMan, minimizeSetup},
+  
+  generatorsTuningMap = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
-  tm = gtm.ma;
+  tuningMap = generatorsTuningMap.ma;
   
-  middleMan = tm / ptm - Table[1, d];
+  middleMan = tuningMap / primesTuningMap - Table[1, d];
   augmentedThing = AppendTo[middleMan, 0]; (* maybe this 0 is the "junk" *)
   almostL1Norm = Max[augmentedThing] - Min[augmentedThing];
   minimizeSetup = {almostL1Norm, augmentedThing[[1]] == 0};
-  solution = NMinimize[minimizeSetup, gtm, WorkingPrecision -> 128];
+  solution = NMinimize[minimizeSetup, generatorsTuningMap, WorkingPrecision -> 128];
   
-  gtm /. Last[solution] // N
+  generatorsTuningMap /. Last[solution] // N
 ];
 
-optimizeGtmTargetingAllNumerical[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{gtm, ma, tm},
-  gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
+optimizeGeneratorsTuningMapTargetingAllNumerical[d_, t_, primesTuningMap_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{generatorsTuningMap, ma, tuningMap},
+  generatorsTuningMap = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
-  tm = gtm.ma;
+  tuningMap = generatorsTuningMap.ma;
   
   If[
     complexityUnitsMultiplier == "logIntegerLimit" || complexityUnitsMultiplier == "logOddLimit",
+    
     (* covers Weil and Kees *)
-    optimizeGtmTargetingAllNumericalCustomDualNorm[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
+    optimizeGeneratorsTuningMapTargetingAllNumericalCustomDualNorm[d, t, primesTuningMap, complexityUnitsMultiplier, complexityNormPower, generatorsTuningMap, tuningMap],
+    
     (* covers TOP, BOP, and L1-version of Frobenius *)
-    optimizeGtmTargetingAllNumericalSimpleDualNorm[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm]
+    optimizeGeneratorsTuningMapTargetingAllNumericalSimpleDualNorm[d, t, primesTuningMap, complexityUnitsMultiplier, complexityNormPower, generatorsTuningMap, tuningMap]
   ]
 ];
 
-optimizeGtmTargetingAllNumericalSimpleDualNorm[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := If[
+optimizeGeneratorsTuningMapTargetingAllNumericalSimpleDualNorm[d_, t_, primesTuningMap_, complexityUnitsMultiplier_, complexityNormPower_, generatorsTuningMap_, tuningMap_] := If[
   hasNonUniqueTuning[getM[t]],
-  optimizeGtmTargetingAllNumericalSimpleDualNormNonUnique[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm],
-  optimizeGtmTargetingAllNumericalSimpleDualNormUnique[d, t, ptm, complexityUnitsMultiplier, complexityNormPower, gtm, tm]
+  optimizeGeneratorsTuningMapTargetingAllNumericalSimpleDualNormNonUnique[d, t, primesTuningMap, complexityUnitsMultiplier, complexityNormPower, generatorsTuningMap, tuningMap],
+  optimizeGeneratorsTuningMapTargetingAllNumericalSimpleDualNormUnique[d, t, primesTuningMap, complexityUnitsMultiplier, complexityNormPower, generatorsTuningMap, tuningMap]
 ];
 
-optimizeGtmTargetingAllNumericalSimpleDualNormUnique[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
-  {eₚ, unitsCounterMultiplierMatrix, timaAsPrimesIdentityMatrix, solution, optimizationPower},
+optimizeGeneratorsTuningMapTargetingAllNumericalSimpleDualNormUnique[d_, t_, primesTuningMap_, complexityUnitsMultiplier_, complexityNormPower_, generatorsTuningMap_, tuningMap_] := Module[
+  {primesErrorMap, unitsCounterMultiplierA, targetedIntervalsAsPrimesIdentityA, solution, optimizationPower},
   
-  eₚ = tm - ptm;
-  timaAsPrimesIdentityMatrix = IdentityMatrix[d];
-  unitsCounterMultiplierMatrix = getUnitsCounterMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
-  eₚ = unitsCounterMultiplierMatrix.eₚ;
+  primesErrorMap = tuningMap - primesTuningMap;
+  targetedIntervalsAsPrimesIdentityA = IdentityMatrix[d];
+  unitsCounterMultiplierA = getUnitsCounterMultiplierA[t, targetedIntervalsAsPrimesIdentityA, complexityUnitsMultiplier, complexityNormPower];
+  
   optimizationPower = dualPower[complexityNormPower];
   
-  solution = NMinimize[Norm[eₚ, optimizationPower], gtm, WorkingPrecision -> 128];
+  solution = NMinimize[Norm[unitsCounterMultiplierA.primesErrorMap, optimizationPower], generatorsTuningMap, WorkingPrecision -> 128];
   
-  gtm /. Last[solution] // N
+  generatorsTuningMap /. Last[solution] // N
 ];
 
-(* TODO: might be able to DRY it up with optimizeGtmTargetingListNumerical, or at least correlate their implementations as much as possible to illuminate the patterns, as you did with getW and getUnitsCounterMultiplierMatrix *)
-optimizeGtmTargetingAllNumericalSimpleDualNormNonUnique[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
+(* TODO: might be able to DRY it up with optimizeGeneratorsTuningMapTargetingListNumerical, or at least correlate their implementations as much as possible to illuminate the patterns, as you did with getDamagesWeightingA and getUnitsCounterMultiplierA *)
+optimizeGeneratorsTuningMapTargetingAllNumericalSimpleDualNormNonUnique[d_, t_, primesTuningMap_, complexityUnitsMultiplier_, complexityNormPower_, generatorsTuningMap_, tuningMap_] := Module[
   {
-    eₚ,
-    unitsCounterMultiplierMatrix,
-    timaAsPrimesIdentityMatrix,
+    primesErrorMap,
+    unitsCounterMultiplierA,
+    targetedIntervalsAsPrimesIdentityA,
     solution,
     previousSolution,
     optimizationPower,
@@ -304,10 +300,10 @@ optimizeGtmTargetingAllNumericalSimpleDualNormNonUnique[d_, t_, ptm_, complexity
     normPower
   },
   
-  eₚ = tm - ptm;
-  timaAsPrimesIdentityMatrix = IdentityMatrix[d];
-  unitsCounterMultiplierMatrix = getUnitsCounterMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower];
-  eₚ = unitsCounterMultiplierMatrix.eₚ;
+  primesErrorMap = tuningMap - primesTuningMap;
+  targetedIntervalsAsPrimesIdentityA = IdentityMatrix[d];
+  unitsCounterMultiplierA = getUnitsCounterMultiplierA[t, targetedIntervalsAsPrimesIdentityA, complexityUnitsMultiplier, complexityNormPower];
+  primesErrorMap = unitsCounterMultiplierA.primesErrorMap;
   optimizationPower = dualPower[complexityNormPower];
   previousPrimesErrorMagnitude = \[Infinity];
   primesErrorMagnitude = 1000000;
@@ -319,25 +315,25 @@ optimizeGtmTargetingAllNumericalSimpleDualNormNonUnique[d_, t_, ptm_, complexity
     
     previousPrimesErrorMagnitude = primesErrorMagnitude;
     previousSolution = solution;
-    solution = NMinimize[Norm[eₚ, normPower], gtm, WorkingPrecision -> 128];
+    solution = NMinimize[Norm[primesErrorMap, normPower], generatorsTuningMap, WorkingPrecision -> 128];
     primesErrorMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
   
-  gtm /. Last[previousSolution] // N
+  generatorsTuningMap /. Last[previousSolution] // N
 ];
 
-optimizeGtmTargetingAllNumericalCustomDualNorm[d_, t_, ptm_, complexityUnitsMultiplier_, complexityNormPower_, gtm_, tm_] := Module[
+optimizeGeneratorsTuningMapTargetingAllNumericalCustomDualNorm[d_, t_, primesTuningMap_, complexityUnitsMultiplier_, complexityNormPower_, generatorsTuningMap_, tuningMap_] := Module[
   {augmentedThing, almostL1Norm, solution, middleMan, minimizeSetup},
   
-  middleMan = tm / ptm - Table[1, d];
+  middleMan = tuningMap / primesTuningMap - Table[1, d];
   augmentedThing = AppendTo[middleMan, 0];
   almostL1Norm = Max[augmentedThing] - Min[augmentedThing];
   minimizeSetup = If[complexityUnitsMultiplier == "logOddLimit", {almostL1Norm, augmentedThing[[1]] == 0}, almostL1Norm];
-  solution = NMinimize[minimizeSetup, gtm, WorkingPrecision -> 128];
+  solution = NMinimize[minimizeSetup, generatorsTuningMap, WorkingPrecision -> 128];
   
-  gtm /. Last[solution] // N
+  generatorsTuningMap /. Last[solution] // N
 ];
 
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
@@ -345,109 +341,109 @@ dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
 (* TARGETING-LIST MINIMAX *)
 
-optimizeGtmMinimaxTargetingListAnalytical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_] :=
-    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, U];
+optimizeGeneratorsTuningMapMinimaxTargetingListAnalytical[optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, unchangedIntervals_] :=
+    optimizeGeneratorsTuningMapSimplex[optimizationPower, targetedIntervalsA, d, t, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, unchangedIntervals];
 
 
 (* MINISOS *)
 
-optimizeGtmMinisos[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_}] := Module[{W},
-  W = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
+optimizeGeneratorsTuningMapMinisos[{optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, unchangedIntervals_}] := Module[{damagesWeightingA},
+  damagesWeightingA = getDamagesWeightingA[t, targetedIntervalsA, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
   
-  optimizeGtmWithPseudoInverse[tima, W, t, ptm]
+  optimizeGeneratorsTuningMapWithPseudoInverse[targetedIntervalsA, damagesWeightingA, t, primesTuningMap]
 ];
 
 
 
 (* MINISUM *)
 
-optimizeGtmMinisum[{optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_}] :=
-    optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, U];
+optimizeGeneratorsTuningMapMinisum[{optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, unchangedIntervals_}] :=
+    optimizeGeneratorsTuningMapSimplex[optimizationPower, targetedIntervalsA, d, t, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, unchangedIntervals];
 
 
 (* SOLVER (USED BY NUMERICAL MINIMAX AND MINISUM) *)
 
-optimizeGtmTargetingListNumerical[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := If[
+optimizeGeneratorsTuningMapTargetingListNumerical[optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := If[
   hasNonUniqueTuning[getM[t]],
-  optimizeGtmTargetingListNumericalUnique[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower],
-  optimizeGtmTargetingListNumericalNonUnique[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
+  optimizeGeneratorsTuningMapTargetingListNumericalUnique[optimizationPower, targetedIntervalsA, d, t, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower],
+  optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[optimizationPower, targetedIntervalsA, d, t, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
 ];
 
-optimizeGtmTargetingListNumericalUnique[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
-  {gtm, ma, mappedTima, pureTimaSizes, W, solution, e},
+optimizeGeneratorsTuningMapTargetingListNumericalUnique[optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
+  {generatorsTuningMap, ma, mappedTargetedIntervalsA, pureTargetedIntervalsASizes, damagesWeightingA, solution, targetedIntervalErrorsL},
   
-  gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
+  generatorsTuningMap = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
   
-  pureTimaSizes = Map[ptm.#&, tima];
-  W = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
-  mappedTima = Transpose[ma.Transpose[tima]];
-  e = Flatten[MapIndexed[
+  pureTargetedIntervalsASizes = Map[primesTuningMap.#&, targetedIntervalsA];
+  damagesWeightingA = getDamagesWeightingA[t, targetedIntervalsA, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
+  mappedTargetedIntervalsA = Transpose[ma.Transpose[targetedIntervalsA]];
+  targetedIntervalErrorsL = Flatten[MapIndexed[
     Function[
-      {mappedTi, tiIndex},
+      {mappedTargetedInterval, targetedIntervalIndex},
       Abs[
         Total[
           MapThread[
             Function[
-              {mappedTiEntry, gtmEntry},
-              mappedTiEntry * gtmEntry
+              {mappedTargetedIntervalEntry, gtmEntry},
+              mappedTargetedIntervalEntry * gtmEntry
             ],
-            {mappedTi, gtm}
+            {mappedTargetedInterval, generatorsTuningMap}
           ]
-        ] - pureTimaSizes[[tiIndex]]
-      ] * Part[Part[W, tiIndex, tiIndex]]
+        ] - pureTargetedIntervalsASizes[[targetedIntervalIndex]]
+      ] * Part[Part[damagesWeightingA, targetedIntervalIndex, targetedIntervalIndex]]
     ],
-    mappedTima
+    mappedTargetedIntervalsA
   ]];
   
-  solution = NMinimize[Norm[e, optimizationPower], gtm, WorkingPrecision -> 128];
+  solution = NMinimize[Norm[targetedIntervalErrorsL, optimizationPower], generatorsTuningMap, WorkingPrecision -> 128];
   
-  gtm /. Last[solution] // N
+  generatorsTuningMap /. Last[solution] // N
 ];
 
-optimizeGtmTargetingListNumericalNonUnique[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
+optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
   {
-    gtm,
+    generatorsTuningMap,
     ma,
-    mappedTima,
-    pureTimaSizes,
-    W,
+    mappedTargetedIntervalsA,
+    pureTargetedIntervalsASizes,
+    damagesWeightingA,
     solution,
     errorMagnitude,
     previousErrorMagnitude,
     normPower,
     normPowerPower,
-    e,
+    targetedIntervalErrorsL,
     previousSolution
   },
   
-  gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
+  generatorsTuningMap = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
   
-  pureTimaSizes = Map[ptm.#&, tima];
-  W = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
-  mappedTima = Transpose[ma.Transpose[tima]];
+  pureTargetedIntervalsASizes = Map[primesTuningMap.#&, targetedIntervalsA];
+  damagesWeightingA = getDamagesWeightingA[t, targetedIntervalsA, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
+  mappedTargetedIntervalsA = Transpose[ma.Transpose[targetedIntervalsA]];
   
   previousErrorMagnitude = \[Infinity];
   errorMagnitude = 1000000;
   normPowerPower = 1;
   normPower = 2;
-  e = Flatten[MapIndexed[
+  targetedIntervalErrorsL = Flatten[MapIndexed[
     Function[
-      {mappedTi, tiIndex},
+      {mappedTargetedInterval, targetedIntervalIndex},
       Abs[
         Total[
           MapThread[
             Function[
-              {mappedTiEntry, gtmEntry},
-              mappedTiEntry * gtmEntry
+              {mappedTargetedIntervalEntry, gtmEntry},
+              mappedTargetedIntervalEntry * gtmEntry
             ],
-            {mappedTi, gtm}
+            {mappedTargetedInterval, generatorsTuningMap}
           ]
-        ] - pureTimaSizes[[tiIndex]]
-      ] * Part[Part[W, tiIndex, tiIndex]]
+        ] - pureTargetedIntervalsASizes[[targetedIntervalIndex]]
+      ] * Part[Part[damagesWeightingA, targetedIntervalIndex, targetedIntervalIndex]]
     ],
-    mappedTima
+    mappedTargetedIntervalsA
   ]];
   
   While[
@@ -455,70 +451,70 @@ optimizeGtmTargetingListNumericalNonUnique[optimizationPower_, tima_, d_, t_, pt
     
     previousErrorMagnitude = errorMagnitude;
     previousSolution = solution;
-    solution = NMinimize[Norm[e, normPower], gtm, WorkingPrecision -> 128];
+    solution = NMinimize[Norm[targetedIntervalErrorsL, normPower], generatorsTuningMap, WorkingPrecision -> 128];
     errorMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
   
-  gtm /. Last[previousSolution] // N
+  generatorsTuningMap /. Last[previousSolution] // N
 ];
 
 
 (* SIMPLEX (USED BY ANALYTICAL MINIMAX AND MINISUM) *)
 
-optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_] := Module[
+optimizeGeneratorsTuningMapSimplex[optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, unchangedIntervals_] := Module[
   {
     r,
     unchangedIntervalSetIndices,
     potentialUnchangedIntervalSets,
     normalizedPotentialUnchangedIntervalSets,
     filteredNormalizedPotentialUnchangedIntervalSets,
-    potentialPs,
-    potentialTms,
+    potentialProjectionAs,
+    potentialTuningMaps,
     powerSumOfDamages,
     minMeanIndices,
     minMeanIndex,
     minMeanP,
-    gpt,
+    generatorsPreimageTransversal,
     projectedGenerators,
     damagePowerSum
   },
   
   damagePowerSum = If[optimizationPower == 1, getSumDamage, getMaxDamage];
   r = getR[t];
-  unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
-  potentialUnchangedIntervalSets = Map[Map[tima[[#]]&, #]&, unchangedIntervalSetIndices];
+  unchangedIntervalSetIndices = Subsets[Range[Length[targetedIntervalsA]], {r}];
+  potentialUnchangedIntervalSets = Map[Map[targetedIntervalsA[[#]]&, #]&, unchangedIntervalSetIndices];
   normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, potentialUnchangedIntervalSets];
   filteredNormalizedPotentialUnchangedIntervalSets = Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&];
-  potentialPs = Select[Map[getPFromUnchangedIntervals[t, #]&, filteredNormalizedPotentialUnchangedIntervalSets], Not[# === Null]&];
-  potentialTms = Map[ptm.#&, potentialPs];
-  powerSumOfDamages = Map[damagePowerSum[#, {optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, U}]&, potentialTms];
+  potentialProjectionAs = Select[Map[getProjectionAFromUnchangedIntervals[t, #]&, filteredNormalizedPotentialUnchangedIntervalSets], Not[# === Null]&];
+  potentialTuningMaps = Map[primesTuningMap.#&, potentialProjectionAs];
+  powerSumOfDamages = Map[damagePowerSum[#, {optimizationPower, targetedIntervalsA, d, t, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, unchangedIntervals}]&, potentialTuningMaps];
   
   minMeanIndices = Position[powerSumOfDamages, Min[powerSumOfDamages]];
   If[
     Length[minMeanIndices] == 1,
     
     minMeanIndex = First[First[Position[powerSumOfDamages, Min[powerSumOfDamages]]]];
-    minMeanP = potentialPs[[minMeanIndex]];
-    gpt = Transpose[getA[getGpt[t]]];
-    projectedGenerators = minMeanP.gpt;
-    ptm.projectedGenerators // N,
+    minMeanP = potentialProjectionAs[[minMeanIndex]];
+    generatorsPreimageTransversal = Transpose[getA[getGeneratorsPreimageTransversal[t]]];
+    projectedGenerators = minMeanP.generatorsPreimageTransversal;
+    primesTuningMap.projectedGenerators // N,
     
-    optimizeGtmTargetingListNumerical[optimizationPower, tima, d, t, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
+    optimizeGeneratorsTuningMapTargetingListNumerical[optimizationPower, targetedIntervalsA, d, t, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]
   ]
 ];
 
-getPFromUnchangedIntervals[t_, unchangedIntervalEigenvectors_] := Module[{commaEigenvectors, eigenvectors, diagonalEigenvalueMatrix},
+getProjectionAFromUnchangedIntervals[t_, unchangedIntervalEigenvectors_] := Module[{commaEigenvectors, eigenvectors, diagonalEigenvalueA},
   commaEigenvectors = getA[getC[t]];
   eigenvectors = Transpose[Join[unchangedIntervalEigenvectors, commaEigenvectors]];
   
-  diagonalEigenvalueMatrix = getDiagonalEigenvalueMatrix[unchangedIntervalEigenvectors, commaEigenvectors];
+  diagonalEigenvalueA = getDiagonalEigenvalueA[unchangedIntervalEigenvectors, commaEigenvectors];
   
-  If[Det[eigenvectors] == 0, Null, eigenvectors.diagonalEigenvalueMatrix.Inverse[eigenvectors]]
+  If[Det[eigenvectors] == 0, Null, eigenvectors.diagonalEigenvalueA.Inverse[eigenvectors]]
 ];
 
-getDiagonalEigenvalueMatrix[unchangedIntervalEigenvectors_, commaEigenvectors_] := DiagonalMatrix[Join[
+getDiagonalEigenvalueA[unchangedIntervalEigenvectors_, commaEigenvectors_] := DiagonalMatrix[Join[
   Table[1, Length[unchangedIntervalEigenvectors]],
   Table[0, Length[commaEigenvectors]]
 ]];
@@ -531,7 +527,7 @@ getDiamond[d_] := Module[{oddLimit, oddsWithinLimit, rawDiamond},
   oddsWithinLimit = Range[1, oddLimit, 2];
   rawDiamond = Map[Function[outer, Map[Function[inner, outer / inner], oddsWithinLimit]], oddsWithinLimit];
   
-  padD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
+  padVectorsWithZerosUpToD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
 ];
 
 octaveReduce[inputI_] := Module[{i},
@@ -548,20 +544,20 @@ oddLimitFromD[d_] := Prime[d + 1] - 2;
 (* DAMAGE *)
 
 Options[getDamage] = tuningOptions;
-getDamage[t_, gtm_, OptionsPattern[]] := Module[
+getDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Module[
   {
     optimizationPower,
     damageWeightingSlope,
     complexityUnitsMultiplier,
     complexityNormPower,
-    tim,
+    targetedIntervals,
     tuningIntervalBasis,
     systematicTuningName,
     originalTuningName,
     pureOctaveStretch,
-    U,
+    unchangedIntervals,
     ma,
-    tm,
+    tuningMap,
     tuningOptions
   },
   
@@ -569,68 +565,72 @@ getDamage[t_, gtm_, OptionsPattern[]] := Module[
   damageWeightingSlope = OptionValue["damageWeightingSlope"];
   complexityUnitsMultiplier = OptionValue["complexityUnitsMultiplier"];
   complexityNormPower = OptionValue["complexityNormPower"];
-  tim = OptionValue["tim"];
+  targetedIntervals = OptionValue["targetedIntervals"];
   tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
   systematicTuningName = OptionValue["systematicTuningName"];
   originalTuningName = OptionValue["originalTuningName"];
   pureOctaveStretch = OptionValue["pureOctaveStretch"];
-  U = OptionValue["U"];
+  unchangedIntervals = OptionValue["unchangedIntervals"];
   
-  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, tim, tuningIntervalBasis, systematicTuningName, originalTuningName, pureOctaveStretch, U, True];
+  tuningOptions = processTuningOptions[t, optimizationPower, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, targetedIntervals, tuningIntervalBasis, systematicTuningName, originalTuningName, pureOctaveStretch, unchangedIntervals, True];
   optimizationPower = Part[tuningOptions, 1];
   
   ma = getA[getM[t]];
-  tm = (gtm / 1200).ma;
+  tuningMap = (generatorsTuningMap / 1200).ma;
   
   If[
     optimizationPower == \[Infinity],
-    getMaxDamage[tm, tuningOptions],
+    getMaxDamage[tuningMap, tuningOptions],
     If[
       optimizationPower == 2,
-      get2SumDamage[tm, tuningOptions],
-      getSumDamage[tm, tuningOptions]
+      get2SumDamage[tuningMap, tuningOptions],
+      getSumDamage[tuningMap, tuningOptions]
     ]
   ]
 ];
 
-getTid[t_, tm_, tima_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{e, W},
-  e = N[tm.Transpose[tima]] - N[ptm.Transpose[tima]];
-  W = getW[t, tima, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
-  Abs[e].W
+getTid[t_, tuningMap_, targetedIntervalsA_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[
+  {targetedIntervalErrorsList, targetedIntervalDamagesList, damageWeightingA},
+  
+  targetedIntervalErrorsList = N[tuningMap.Transpose[targetedIntervalsA]] - N[primesTuningMap.Transpose[targetedIntervalsA]];
+  targetedIntervalDamagesList = Abs[targetedIntervalErrorsList];
+  damageWeightingA = getDamagesWeightingA[t, targetedIntervalsA, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower];
+  
+  targetedIntervalDamagesList.damageWeightingA
 ];
 
 Square[n_] := n^2;
 
-getSumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_}] :=
-    Total[getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]];
+getSumDamage[tuningMap_, {optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, unchangedIntervals_}] :=
+    Total[getTid[t, tuningMap, targetedIntervalsA, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]];
 
-get2SumDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_}] :=
-    Total[Square[getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]]];
+get2SumDamage[tuningMap_, {optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, unchangedIntervals_}] :=
+    Total[Square[getTid[t, tuningMap, targetedIntervalsA, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]]];
 
-getMaxDamage[tm_, {optimizationPower_, tima_, d_, t_, ptm_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, U_}] :=
-    Max[getTid[t, tm, tima, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]];
+getMaxDamage[tuningMap_, {optimizationPower_, targetedIntervalsA_, d_, t_, primesTuningMap_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_, pureOctaveStretch_, unchangedIntervals_}] :=
+    Max[getTid[t, tuningMap, targetedIntervalsA, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower]];
 
 
 (* INTERVAL BASIS *)
 
-retrievePrimesIntervalBasisGtm[optimizedGtm_, originalT_, t_] := Module[
-  {ma, optimizedTm, gpt, f},
+retrievePrimesIntervalBasisGeneratorsTuningMap[optimizedGeneratorsTuningMap_, originalT_, t_] := Module[
+  {ma, optimizedTm, generatorsPreimageTransversal, f},
   
   ma = getA[getM[t]];
-  optimizedTm = optimizedGtm.ma;
-  gpt = Transpose[getA[getGpt[originalT]]];
-  f = Transpose[getF[originalT]];
+  optimizedTm = optimizedGeneratorsTuningMap.ma;
+  generatorsPreimageTransversal = Transpose[getA[getGeneratorsPreimageTransversal[originalT]]];
+  f = Transpose[getFormalPrimesA[originalT]];
   
-  optimizedTm.f.gpt
+  optimizedTm.f.generatorsPreimageTransversal
 ];
 
 
 (* PURE-OCTAVE STRETCH *)
 
-getPureOctaveStretchedGtm[optimizedGtm_, t_] := Module[{periodsPerOctave},
+getPureOctaveStretchedGeneratorsTuningMap[optimizedGeneratorsTuningMap_, t_] := Module[{periodsPerOctave},
   periodsPerOctave = First[First[getA[getM[t]]]];
   
-  (1200 / periodsPerOctave) * (optimizedGtm / First[optimizedGtm])
+  (1200 / periodsPerOctave) * (optimizedGeneratorsTuningMap / First[optimizedGeneratorsTuningMap])
 ];
 
 
@@ -638,7 +638,7 @@ getPureOctaveStretchedGtm[optimizedGtm_, t_] := Module[{periodsPerOctave},
 (* SHARED *)
 
 tuningOptions = {
-  "tim" -> Null, (* trait 0 *)
+  "targetedIntervals" -> Null, (* trait 0 *)
   "optimizationPower" -> Null, (* trait 1 *)
   "damageWeightingSlope" -> "", (* trait 2 *)
   "complexityNormPower" -> 1, (* trait 3 *)
@@ -647,8 +647,8 @@ tuningOptions = {
   "systematicTuningName" -> "",
   "originalTuningName" -> "",
   "pureOctaveStretch" -> False,
-  "U" -> {}
-}; (* TODO: okay I think any time you cahnge these options, that's when the defaulting stops working ... wait is forDamage supposed to be in these options or something somehow maybe? *)
+  "unchangedIntervals" -> {}
+};
 
 processTuningOptions[
   t_,
@@ -656,47 +656,47 @@ processTuningOptions[
   inputDamageWeightingSlope_,
   inputComplexityUnitsMultiplier_,
   inputComplexityNormPower_,
-  inputTim_,
+  inputTargetedIntervals_,
   inputTuningIntervalBasis_,
   inputSystematicTuningName_,
   inputOriginalTuningName_,
   inputPureOctaveStretch_,
-  inputU_,
+  inputUnchangedIntervals_,
   forDamage_ : False
 ] := Module[
   {
-    tima,
+    targetedIntervalsA,
     d,
-    ptm,
+    primesTuningMap,
     optimizationPower,
     damageWeightingSlope,
     complexityUnitsMultiplier,
     complexityNormPower,
-    tim,
+    targetedIntervals,
     tuningIntervalBasis,
     systematicTuningName,
     originalTuningName,
     pureOctaveStretch,
-    U,
+    unchangedIntervals,
     commaBasisInNonstandardIntervalBasis,
     primeLimitIntervalBasis,
     commaBasisInPrimeLimitIntervalBasis,
     mappingInPrimeLimitIntervalBasis,
     tPossiblyWithChangedIntervalBasis,
-    b,
-    ir
+    intervalBasis,
+    intervalRebase
   },
   
   optimizationPower = inputOptimizationPower;
   damageWeightingSlope = inputDamageWeightingSlope;
   complexityUnitsMultiplier = inputComplexityUnitsMultiplier;
   complexityNormPower = inputComplexityNormPower;
-  tim = inputTim;
+  targetedIntervals = inputTargetedIntervals;
   tuningIntervalBasis = inputTuningIntervalBasis;
   systematicTuningName = inputSystematicTuningName;
   originalTuningName = inputOriginalTuningName;
   pureOctaveStretch = inputPureOctaveStretch;
-  U = inputU;
+  unchangedIntervals = inputUnchangedIntervals;
   
   If[
     originalTuningName === "minimax",
@@ -708,52 +708,51 @@ processTuningOptions[
   ];
   If[
     originalTuningName === "TOP" || originalTuningName === "TIPTOP",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logProduct";
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logProduct";
   ];
   If[
     originalTuningName === "TE" || originalTuningName === "Tenney-Euclidean",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct";
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct";
   ];
   If[
     originalTuningName === "Frobenius",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "noop";
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "noop";
   ];
   If[
     originalTuningName === "BOP",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "product";
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "product";
   ];
   If[
     originalTuningName === "BE" || originalTuningName === "Benedetti-Euclidean",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "product";
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "product";
   ];
   If[
     originalTuningName === "Kees",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logOddLimit";
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logOddLimit";
   ];
   If[
     originalTuningName === "KE" || originalTuningName === "Kees-Euclidean",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logOddLimit";
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logOddLimit";
   ];
   If[
     originalTuningName === "Weil",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logIntegerLimit";
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logIntegerLimit";
   ];
   If[
     originalTuningName === "WE" || originalTuningName === "Weil-Euclidean",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logIntegerLimit";
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logIntegerLimit";
   ];
   If[
     originalTuningName === "POTOP" || originalTuningName === "POTT",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logProduct"; pureOctaveStretch = True;
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityUnitsMultiplier = "logProduct"; pureOctaveStretch = True;
   ];
   If[
     originalTuningName === "POTE",
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct"; pureOctaveStretch = True;
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct"; pureOctaveStretch = True;
   ];
   If[
     originalTuningName === "CTE",
-    (* TODO: this d might come out differently than the one that's calculated below.... figure out what to do about that, when you have CTE on a subgroup temperament *)
-    tim = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct"; U = {Join[{1}, Table[0, getD[t] - 1]]};
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 2; complexityUnitsMultiplier = "logProduct"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   
   If[
@@ -797,122 +796,119 @@ processTuningOptions[
     optimizationPower = 1;
   ];
   
-  (* note: this has to go below the systematic tuning name gating, so that tim has a change to be set to {} *)
-  b = getB[t];
+  (* note: this has to go below the systematic tuning name gating, so that targetedIntervals has a change to be set to {} *)
+  intervalBasis = getIntervalBasis[t];
   If[
-    !isStandardPrimeLimitB[b] && tuningIntervalBasis == "primes",
+    !isStandardPrimeLimitIntervalBasis[intervalBasis] && tuningIntervalBasis == "primes",
     
     commaBasisInNonstandardIntervalBasis = getC[t];
-    primeLimitIntervalBasis = getPrimes[getDp[b]];
-    commaBasisInPrimeLimitIntervalBasis = changeB[commaBasisInNonstandardIntervalBasis, primeLimitIntervalBasis];
-    ir = getIrForC[b, primeLimitIntervalBasis];
-    tima = If[tim === Null, getDiamond[d], If[Length[tim] == 0, If[forDamage, ir.getA[getC[t]], {}], ir.getA[tim]]];
+    primeLimitIntervalBasis = getPrimes[getIntervalBasisDimension[intervalBasis]];
+    commaBasisInPrimeLimitIntervalBasis = changeIntervalBasis[commaBasisInNonstandardIntervalBasis, primeLimitIntervalBasis];
+    intervalRebase = getIntervalRebaseForC[intervalBasis, primeLimitIntervalBasis];
+    targetedIntervalsA = If[targetedIntervals === Null, getDiamond[d], If[Length[targetedIntervals] == 0, If[forDamage, intervalRebase.getA[getC[t]], {}], intervalRebase.getA[targetedIntervals]]];
     mappingInPrimeLimitIntervalBasis = getM[commaBasisInPrimeLimitIntervalBasis];
     tPossiblyWithChangedIntervalBasis = mappingInPrimeLimitIntervalBasis;
     d = getD[tPossiblyWithChangedIntervalBasis];
-    ptm = getPtm[tPossiblyWithChangedIntervalBasis],
+    primesTuningMap = getPrimesTuningMap[tPossiblyWithChangedIntervalBasis],
     
     tPossiblyWithChangedIntervalBasis = t;
     d = getD[tPossiblyWithChangedIntervalBasis];
-    ptm = getPtm[tPossiblyWithChangedIntervalBasis];
-    tima = If[tim === Null, getDiamond[d], If[Length[tim] == 0, If[forDamage, getA[getC[t]], {}], getA[tim]]];
+    primesTuningMap = getPrimesTuningMap[tPossiblyWithChangedIntervalBasis];
+    targetedIntervalsA = If[targetedIntervals === Null, getDiamond[d], If[Length[targetedIntervals] == 0, If[forDamage, getA[getC[t]], {}], getA[targetedIntervals]]];
   ];
   
   If[!NumericQ[optimizationPower] && optimizationPower != \[Infinity], Throw["no optimization power"]];
   If[damageWeightingSlope == "", Throw["no damage weighting slope"]];
   
-  {optimizationPower, tima, d, tPossiblyWithChangedIntervalBasis, ptm, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, U}
+  {optimizationPower, targetedIntervalsA, d, tPossiblyWithChangedIntervalBasis, primesTuningMap, damageWeightingSlope, complexityUnitsMultiplier, complexityNormPower, pureOctaveStretch, unchangedIntervals}
 ];
 
-getPtm[t_] := Log[2, getB[t]];
+getPrimesTuningMap[t_] := Log[2, getIntervalBasis[t]];
 
-getW[t_, tima_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{W},
-  W = If[
+getDamagesWeightingA[t_, targetedIntervalsA_, damageWeightingSlope_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{damagesWeightingA},
+  damagesWeightingA = If[
     damageWeightingSlope != "unweighted",
-    (* TODO: should this, like, just use getUnitsMultiplierMatrix? i.e., should the latter accept 
-    a tima not just only a primes identity matrix? 
-    I feel like I might be being a bit wasteful / redundant / overwrought in how I've implemented this ... *)
-    DiagonalMatrix[Map[getComplexity[#, t, complexityUnitsMultiplier, complexityNormPower]&, tima]],
-    IdentityMatrix[Length[tima]]
+    DiagonalMatrix[Map[getComplexity[#, t, complexityUnitsMultiplier, complexityNormPower]&, targetedIntervalsA]],
+    IdentityMatrix[Length[targetedIntervalsA]]
   ];
   
-  If[damageWeightingSlope == "simplicityWeighted", PseudoInverse[W], W]
+  If[damageWeightingSlope == "simplicityWeighted", PseudoInverse[damagesWeightingA], damagesWeightingA]
 ];
 
-(* getW may be simplicity-weighted or complexity-weighted, but this is always essentially "simplicity-weighted" *)
-getUnitsCounterMultiplierMatrix[t_, timaAsPrimesIdentityMatrix_, complexityUnitsMultiplier_, complexityNormPower_] :=
-    PseudoInverse[getUnitsMultiplierMatrix[t, complexityUnitsMultiplier]];
+(* getDamagesWeightingA may be simplicity-weighted or complexity-weighted, but this is always essentially "simplicity-weighted" *)
+getUnitsCounterMultiplierA[t_, targetedIntervalsAsPrimesIdentityA_, complexityUnitsMultiplier_, complexityNormPower_] :=
+    PseudoInverse[getUnitsMultiplierA[t, complexityUnitsMultiplier]];
 
-getComplexity[pcv_, t_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{W},
+getComplexity[pcv_, t_, complexityUnitsMultiplier_, complexityNormPower_] := Module[{unitsMultiplierA},
   (* TODO: I'm afraid this might be computing over and over... might be a good way to save some computation *)
-  unitsMultiplierMatrix = getUnitsMultiplierMatrix[t, complexityUnitsMultiplier];
+  unitsMultiplierA = getUnitsMultiplierA[t, complexityUnitsMultiplier];
   
-  Norm[unitsMultiplierMatrix.pcv, complexityNormPower]
+  Norm[unitsMultiplierA.pcv, complexityNormPower]
 ];
 
 (* TODO: verify that these  matrices result in the same formulae as appear in the "vector i form" of my spreadsheet: 
 https://docs.google.com/spreadsheets/d/1BBcUCoe6seCC1PM2qaByyiMNNLdxkEsx5X_-XJ9BdpE/edit#gid=694229653 *)
-(* note this is different than the W gotten by getW, this is nested within it;
+(* note this is different than the damagesWeightingA gotten by getDamagesWeightingA, this is nested within it;
 this is to weight the quantities of the PC-vectors before taking a norm and getting an interval complexity, 
-which are then all taken for each interval and assembled as W *)
-getUnitsMultiplierMatrix[t_, complexityUnitsMultiplier_] := Module[{},
+which are then all taken for each interval and assembled as damagesWeightingA *)
+getUnitsMultiplierA[t_, complexityUnitsMultiplier_] := Module[{},
   (* TODO: maybe this is actually a sort of F, formal primes matrix? 
   or maybe eventually this is just going to be an additional one of the transformation matrices per property *)
-  baseMatrix = If[
+  baseA = If[
     complexityUnitsMultiplier == "logOddLimit", (* TODO: eventually this will just be the other property *)
     DiagonalMatrix[Join[{0}, Table[1, getD[t] - 1]]],
     IdentityMatrix[getD[t]]
   ];
   
   If[
-    (* when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllNumericalSimpleDualNorm, covers TOP; 
-    when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers TE; 
-    when used by getW by optimizeGtmMinisos, optimizeGtmTargetingListNumerical, 
-    or by getTid by getSumDamage or getMaxDamage by optimizeGtmSimplex, 
+    (* when used by getUnitsCounterMultiplierA for optimizeGeneratorsTuningMapTargetingAllNumericalSimpleDualNorm, covers TOP; 
+    when used by getUnitsCounterMultiplierA for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical, covers TE; 
+    when used by getDamagesWeightingA by optimizeGeneratorsTuningMapMinisos, optimizeGeneratorsTuningMapTargetingListNumerical, 
+    or by getTid by getSumDamage or getMaxDamage by optimizeGeneratorsTuningMapSimplex, 
     covers any targeting-list tuning using this as its damage's complexity *)
     complexityUnitsMultiplier == "logProduct",
-    DiagonalMatrix[Map[getLogProductComplexity[#, t]&, baseMatrix]],
+    DiagonalMatrix[Map[getLogProductComplexity[#, t]&, baseA]],
     
     If[
-      (* when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllNumericalSimpleDualNorm, covers BOP;
-      when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers BE *)
+      (* when used by getUnitsCounterMultiplierA for optimizeGeneratorsTuningMapTargetingAllNumericalSimpleDualNorm, covers BOP;
+      when used by getUnitsCounterMultiplierA for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical, covers BE *)
       complexityUnitsMultiplier == "product",
-      DiagonalMatrix[Map[getProductComplexity[#, t]&, baseMatrix]],
+      DiagonalMatrix[Map[getProductComplexity[#, t]&, baseA]],
       
       If[
         (* also covers TOP, TE, etc. (equivalent to "logProduct") *)
         complexityUnitsMultiplier == "logSopfr",
-        DiagonalMatrix[Map[getLogSopfrComplexity[#, t]&, baseMatrix]],
+        DiagonalMatrix[Map[getLogSopfrComplexity[#, t]&, baseA]],
         
         If[
           (* also covers BOP, BE, etc. (equivalent to "product") *)
           complexityUnitsMultiplier == "sopfr",
-          DiagonalMatrix[Map[getSopfrComplexity[#, t]&, baseMatrix]],
+          DiagonalMatrix[Map[getSopfrComplexity[#, t]&, baseA]],
           
           If[
-            (* when Weil needs its dual norm, we actually go into optimizeGtmTargetingAllNumericalCustomDualNorm, 
+            (* when Weil needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalCustomDualNorm, 
             where it's implemented separately (the min - max thing); 
-            when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, covers WE; 
-            when used by getW by optimizeGtmMinisos, optimizeGtmTargetingListNumerical, 
-            or by getTid by getSumDamage or getMaxDamage by optimizeGtmSimplex, 
+            when used by getUnitsCounterMultiplierA for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical, covers WE; 
+            when used by getDamagesWeightingA by optimizeGeneratorsTuningMapMinisos, optimizeGeneratorsTuningMapTargetingListNumerical, 
+            or by getTid by getSumDamage or getMaxDamage by optimizeGeneratorsTuningMapSimplex, 
             should cover any targeting-list tuning using this as its damage's complexity *)
             complexityUnitsMultiplier == "logIntegerLimit",
-            Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, baseMatrix]], {Map[getLogProductComplexity[#, meantone]&, baseMatrix]}] / 2,
+            Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, baseA]], {Map[getLogProductComplexity[#, meantone]&, baseA]}] / 2,
             
             If[
-              (* when Kees needs its dual norm, we actually go into optimizeGtmTargetingAllNumericalCustomDualNorm, 
+              (* when Kees needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalCustomDualNorm, 
               where it's implemented separately (the min - max thing) with pure-octave constraint on the solver; 
-              ### still need to cover KE; when used by getW by optimizeGtmMinisos, optimizeGtmTargetingListNumerical, 
-              or by getTid by getSumDamage or getMaxDamage by optimizeGtmSimplex, 
+              ### still need to cover KE; when used by getDamagesWeightingA by optimizeGeneratorsTuningMapMinisos, optimizeGeneratorsTuningMapTargetingListNumerical, 
+              or by getTid by getSumDamage or getMaxDamage by optimizeGeneratorsTuningMapSimplex, 
               should cover any targeting-list tuning using this as its damage's complexity *)
               complexityUnitsMultiplier == "logOddLimit",
-              Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, baseMatrix]], {Map[getLogProductComplexity[#, t]&, baseMatrix]}] / 2,
+              Join[DiagonalMatrix[Map[getLogProductComplexity[#, t]&, baseA]], {Map[getLogProductComplexity[#, t]&, baseA]}] / 2,
               
-              (* when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllNumericalSimpleDualNorm, 
+              (* when used by getUnitsCounterMultiplierA for optimizeGeneratorsTuningMapTargetingAllNumericalSimpleDualNorm, 
               covers L1 version of Frobenius; 
-              when used by getUnitsCounterMultiplierMatrix for optimizeGtmTargetingAllPseudoInverseAnalytical, 
+              when used by getUnitsCounterMultiplierA for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical, 
               covers Frobenius *)
-              DiagonalMatrix[Map[1&, baseMatrix]] (* TODO: should be copfrComplexity? *)
+              DiagonalMatrix[Map[1&, baseA]] (* TODO: should be copfrComplexity? *)
             ]
           ]
         ]
@@ -922,11 +918,11 @@ getUnitsMultiplierMatrix[t_, complexityUnitsMultiplier_] := Module[{},
 ];
 getCopfrComplexity[pcv_, t_] := Total[Map[If[Abs[# > 0], 1, 0]&, pcv]];
 (* AKA "Benedetti height" *)
-getProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getB[t], pcv}];
+getProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getIntervalBasis[t], pcv}];
 (* AKA "Tenney height" *)
 getLogProductComplexity[pcv_, t_] := Log[2, getProductComplexity[pcv, t]];
 (* AKA "Wilson height", can also be used to find BOP tuning *)
-getSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getB[t], pcv}]];
+getSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getIntervalBasis[t], pcv}]];
 (* This apparently doesn't have a name, but can also be used to find TOP tuning *)
 getLogSopfrComplexity[pcv_, t_] := Log[2, getSopfrComplexity[pcv, t]];
 (* AKA "Weil height" *)
@@ -942,37 +938,34 @@ getOddLimitComplexity[pcv_, t_] := getIntegerLimitComplexity[noTwos[pcv], t];
 (* AKA "Kees expressibility" , used for "Kees tuning" *)
 getLogOddLimitComplexity[pcv_, t_] := Log[2, getOddLimitComplexity[pcv, t]];
 
-optimizeGtmWithPseudoInverse[timaOrPrimesIdentityMatrix_, WorUnitsMultiplierMatrix_, t_, ptm_] := Module[{ma, weightedTimaMapped, g, gtm},
+optimizeGeneratorsTuningMapWithPseudoInverse[timaOrPrimesIdentityA_, WorUnitsMultiplierA_, t_, primesTuningMap_] := Module[{ma, weightedTargetedIntervalsAMapped, generatorsA, generatorsTuningMap},
   ma = getA[getM[t]];
-  weightedTimaMapped = ma.Transpose[timaOrPrimesIdentityMatrix].WorUnitsMultiplierMatrix;
-  (* TODO: if we're constantly transposing tima, maybe just do it once up front? or have getA respect the co/contra? *)
-  g = Transpose[timaOrPrimesIdentityMatrix].WorUnitsMultiplierMatrix.Transpose[weightedTimaMapped].Inverse[weightedTimaMapped.Transpose[weightedTimaMapped]];
-  gtm = ptm.g;
-  gtm // N
+  weightedTargetedIntervalsAMapped = ma.Transpose[timaOrPrimesIdentityA].WorUnitsMultiplierA;
+  (* TODO: if we're constantly transposing targetedIntervalsA, maybe just do it once up front? or have getA respect the co/contra? *)
+  generatorsA = Transpose[timaOrPrimesIdentityA].WorUnitsMultiplierA.Transpose[weightedTargetedIntervalsAMapped].Inverse[weightedTargetedIntervalsAMapped.Transpose[weightedTargetedIntervalsAMapped]];
+  generatorsTuningMap = primesTuningMap.generatorsA;
+  generatorsTuningMap // N
 ];
 
 (* TODO eventually this should be able to just be a generic solver *)
-(* TODO for now it just assumes u is prime 2 and that's it, but eventually it can become an actual matrix like tim *)
-optimizeGtmCte[d_, t_, ptm_, complexityUnitsMultiplier_, U_](*,[timaOrPrimesIdentityMatrix_, WorUnitsMultiplierMatrix_, t_, ptm_, U_] *) := Module[
-  {gtm, ma, tm, eₚ, solution, optimizationPower, timaAsPrimesIdentityMatrix, complexityNormPower, unitsCounterMultiplierMatrix},
+(* TODO for now it just assumes unchangedIntervals is prime 2 and that's it, but eventually it can become an actual matrix like targetedIntervals *)
+optimizeGeneratorsTuningMapCte[d_, t_, primesTuningMap_, complexityUnitsMultiplier_, unchangedIntervals_, complexityNormPower_] := Module[
+  {generatorsTuningMap, ma, tuningMap, primesErrorMap, solution, optimizationPower, targetedIntervalsAsPrimesIdentityA, unitsCounterMultiplierA},
   
-  timaAsPrimesIdentityMatrix = IdentityMatrix[d];
-  complexityNormPower = 2; (* TODO: is it cleaner to just pass this in ? *)
-  unitsCounterMultiplierMatrix = getUnitsCounterMultiplierMatrix[t, timaAsPrimesIdentityMatrix, complexityUnitsMultiplier, complexityNormPower]; (* TODO: instead of counter-multiplier can it be like, units multiplier matrix for interval complexity, and units multiplier matrix for primes error magnitude? *)
+  targetedIntervalsAsPrimesIdentityA = IdentityMatrix[d];
+  unitsCounterMultiplierA = getUnitsCounterMultiplierA[t, targetedIntervalsAsPrimesIdentityA, complexityUnitsMultiplier, complexityNormPower]; (* TODO: instead of counter-multiplier can it be like, units multiplier matrix for interval complexity, and units multiplier matrix for primes error magnitude? *)
   
-  gtm = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
+  generatorsTuningMap = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
-  tm = gtm.ma;
+  tuningMap = generatorsTuningMap.ma;
   
-  eₚ = tm - ptm;
-  eₚ = unitsCounterMultiplierMatrix.eₚ;
+  primesErrorMap = tuningMap - primesTuningMap;
+  primesErrorMap = unitsCounterMultiplierA.primesErrorMap;
   optimizationPower = 2;
   
-  (*Print["what happen!! gtm: ", gtm," ma: ", ma," tm: ", tm," eₚ: ", eₚ," opt pow: ", optimizationPower];*)
-  (*  Print["just checking we do this"];*)
-  solution = NMinimize[{Norm[eₚ, optimizationPower], eₚ[[1]] == 0}, gtm, WorkingPrecision -> 128];
+  solution = NMinimize[{Norm[primesErrorMap, optimizationPower], primesErrorMap[[1]] == 0}, generatorsTuningMap, WorkingPrecision -> 128];
   
-  gtm /. Last[solution] // N
+  generatorsTuningMap /. Last[solution] // N
 ];
 
 

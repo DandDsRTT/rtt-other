@@ -1,5 +1,5 @@
-outer[u_, v_] := Transpose[u].v;
-wedge[u_, v_] := outer[u, v] - outer[v, u];
+outer[unchangedIntervals_, v_] := Transpose[u].v;
+wedge[unchangedIntervals_, v_] := outer[u, v] - outer[v, u];
 
 (* examples *)
 

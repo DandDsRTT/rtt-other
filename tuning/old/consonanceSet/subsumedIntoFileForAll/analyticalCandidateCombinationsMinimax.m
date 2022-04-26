@@ -1,13 +1,13 @@
-getGpt[m_] := Module[{ma, decomp, left, snf, right, gpt},
+getGeneratorsPreimageTransversal[m_] := Module[{ma, decomp, left, snf, right, generatorsPreimageTransversal},
   ma = getA[m];
   decomp = SmithDecomposition[ma];
   left = Part[decomp, 1];
   snf = Part[decomp, 2];
   right = Part[decomp, 3];
   
-  gpt = right.Transpose[snf].left;
+  generatorsPreimageTransversal = right.Transpose[snf].left;
   
-  gpt
+  generatorsPreimageTransversal
 ];
 
 getMaxDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "noop", complexityP_ : 1] := Module[{e, w},
@@ -46,7 +46,7 @@ getMinimaxTuning[m_, weighting_ : "unweighted", complexityWeighting_ : Null, com
     maxDamages,
     minimaxIndex,
     minimaxP,
-    gpt,
+    generatorsPreimageTransversal,
     projectedGenerators
   },
   
@@ -54,7 +54,7 @@ getMinimaxTuning[m_, weighting_ : "unweighted", complexityWeighting_ : Null, com
   r = getR[m];
   
   tima = If[tim === Null, getDiamond[d], getA[tim]];
-  ptm = getPtm[d];
+  ptm = getPrimesTuningMap[d];
   
   unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
   potentialUnchangedIntervalSets = Map[Map[tima[[#]]&, #]&, unchangedIntervalSetIndices];
@@ -68,8 +68,8 @@ getMinimaxTuning[m_, weighting_ : "unweighted", complexityWeighting_ : Null, com
   
   Print["min of maxDamage", Min[maxDamages]];
   
-  gpt = getGpt[m];
-  projectedGenerators = minimaxP.gpt;
+  generatorsPreimageTransversal = getGeneratorsPreimageTransversal[m];
+  projectedGenerators = minimaxP.generatorsPreimageTransversal;
   ptm.projectedGenerators // N
 ];
 

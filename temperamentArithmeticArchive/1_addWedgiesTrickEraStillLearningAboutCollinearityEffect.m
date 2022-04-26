@@ -1,4 +1,4 @@
-addWedgies[w1_, w2_] := {eaGetLm[w1] + eaGetLm[w2], eaGetGrade[w1], eaGetV[w1]};
+addWedgies[w1_, w2_] := {eaGetLargestMinorsL[w1] + eaGetLargestMinorsL[w2], eaGetGrade[w1], eaGetV[w1]};
 randomMapping[] := {RandomInteger[{-9, 9}, {r, d}], "co"};
 r = 2;
 d = 5;

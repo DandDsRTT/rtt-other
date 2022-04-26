@@ -27,21 +27,21 @@ LeastSquares[Transpose[{{1, 1, 1}, {1, 2, 3}}], {7, 7, 8}]
 (*LeastSquares[{{1,1,1},{1,2,3}},Transpose[{7,7,8}]]*)
 LeastSquares[Transpose[{{1, 1, 0}, {0, 1, 4}}], {0, 0, 0}]
 
-getGpt[m_] := Module[{decomp, left, snf, right, gpt},
+getGeneratorsPreimageTransversal[m_] := Module[{decomp, left, snf, right, generatorsPreimageTransversal},
   ma = getA[m];
   decomp = SmithDecomposition[ma];
   left = Part[decomp, 1];
   snf = Part[decomp, 2];
   right = Part[decomp, 3];
   
-  gpt = right.Transpose[snf].left;
+  generatorsPreimageTransversal = right.Transpose[snf].left;
   
-  gpt
+  generatorsPreimageTransversal
 ];
 
 jip[d_] := Map[Log2, Map[Prime, Range[d]]];
 
-leastSquaresSomethingOld[m_] := Module[{T, diamondThing, unchangedIntervalEigenvectors, commaEigenvectors, eigenvectors, diagonalEigenvalueMatrix, P, gpt, projectedGens},
+leastSquaresSomethingOld[m_] := Module[{T, diamondThing, unchangedIntervalEigenvectors, commaEigenvectors, eigenvectors, diagonalEigenvalueMatrix, P, generatorsPreimageTransversal, projectedGens},
   ma = getA[m];
   
   T = Transpose[{{1, 1, -1}, {-2, 0, 1}, {2, -1, 0}, {-1, 1, 0}, {3, 0, -1}, {0, -1, 1}}];
@@ -55,8 +55,8 @@ leastSquaresSomethingOld[m_] := Module[{T, diamondThing, unchangedIntervalEigenv
   diagonalEigenvalueMatrix = {{1, 0, 0}, {0, 1, 0}, {0, 0, 0}};
   P = eigenvectors.diagonalEigenvalueMatrix.Inverse[eigenvectors];
   
-  gpt = getGpt[m];
-  projectedGens = P.gpt;
+  generatorsPreimageTransversal = getGeneratorsPreimageTransversal[m];
+  projectedGens = P.generatorsPreimageTransversal;
   1200 * jip[getD[m]].projectedGens // N
 ];
 
@@ -66,7 +66,7 @@ leastSquaresSomethingOld[{{{1, 1, 0}, {0, 1, 4}}, "co"}]
 
 
 canonicalForm[{{{1, 0, -9}, {0, 1, 4}}, "co"}]
-(*getLm[getA[%]]*)
+(*getLargestMinorsL[getA[%]]*)
 
 {{1, 1, 0}, {0, 1, 4}}.Transpose[{{-6, -2, 4}}]
 
@@ -118,23 +118,23 @@ maxError[pm_, tima_, justIntervals_, p_] := Module[{errors},
   Max[Map[Abs, errors]]
 ];
 
-getGpt[m_] := Module[{decomp, left, snf, right, gpt},
+getGeneratorsPreimageTransversal[m_] := Module[{decomp, left, snf, right, generatorsPreimageTransversal},
   ma = getA[m];
   decomp = SmithDecomposition[ma];
   left = Part[decomp, 1];
   snf = Part[decomp, 2];
   right = Part[decomp, 3];
   
-  gpt = right.Transpose[snf].left;
+  generatorsPreimageTransversal = right.Transpose[snf].left;
   
-  gpt
+  generatorsPreimageTransversal
 ];
 
 jip[d_] := Map[Log2, Map[Prime, Range[d]]];
 
-gFromMAndPm[m_, pm_] := Module[{gpt, projectedGens},
-  gpt = getGpt[m];
-  projectedGens = pm.gpt;
+gFromMAndPm[m_, pm_] := Module[{generatorsPreimageTransversal, projectedGens},
+  generatorsPreimageTransversal = getGeneratorsPreimageTransversal[m];
+  projectedGens = pm.generatorsPreimageTransversal;
   1200 * jip[getD[m]].projectedGens // N
 ];
 

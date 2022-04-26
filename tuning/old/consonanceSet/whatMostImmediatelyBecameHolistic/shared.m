@@ -1,11 +1,11 @@
-getPtm[d_] := Map[Log2, Map[Prime, Range[d]]];
+getPrimesTuningMap[d_] := Map[Log2, Map[Prime, Range[d]]];
 
 getDiamond[d_] := Module[{oddLimit, oddsWithinLimit, rawDiamond},
   oddLimit = oddLimitFromD[d];
   oddsWithinLimit = Range[1, oddLimit, 2];
   rawDiamond = Map[Function[outer, Map[Function[inner, outer / inner], oddsWithinLimit]], oddsWithinLimit];
   
-  padD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
+  padVectorsWithZerosUpToD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
 ];
 
 getDiamond[3]
@@ -27,10 +27,10 @@ getComplexity[pcv_, complexityWeighting_ : "noop", complexityP_ : 1] := Module[{
     pcv,
     If[
       complexityWeighting == "logProduct",
-      pcv * getPtm[d],
+      pcv * getPrimesTuningMap[d],
       If[
         complexityWeighting == "I",
-        pcv / getPtm[d]
+        pcv / getPrimesTuningMap[d]
       ]
     ]
   ];

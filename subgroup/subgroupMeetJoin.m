@@ -36,14 +36,14 @@ changeS[t_, targetS_] := Module[{},
 
 pLimit[a_] := PrimePi[Max[Map[First, Map[Last, Map[FactorInteger, a]]]]];
 
-padD[a_, d_] := Map[PadRight[#, d]&, a];
+padVectorsWithZerosUpToD[a_, d_] := Map[PadRight[#, d]&, a];
 
-canonicalS[s_] := Map[vToQuotient, removeAllZeroRows[hnf[padD[Map[quotientToV, s], pLimit[s]]]]];
+canonicalS[s_] := Map[vToQuotient, removeAllZeroRows[hnf[padVectorsWithZerosUpToD[Map[quotientToV, s], pLimit[s]]]]];
 
 sUnion[s1_, s2_] := Module[{d, factorizedS1, factorizedS2},
   d = pLimit[Join[s1, s2]];
-  factorizedS1 = padD[Map[quotientToV, s1], d];
-  factorizedS2 = padD[Map[quotientToV, s2], d];
+  factorizedS1 = padVectorsWithZerosUpToD[Map[quotientToV, s1], d];
+  factorizedS2 = padVectorsWithZerosUpToD[Map[quotientToV, s2], d];
   
   canonicalS[Map[vToQuotient, Join[factorizedS1, factorizedS2]]]
 ];

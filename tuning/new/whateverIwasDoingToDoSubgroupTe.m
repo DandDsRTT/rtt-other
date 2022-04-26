@@ -3,7 +3,7 @@
   GENERATORS PREIMAGE TRANSVERSAL
   
   
-  getGpt[t]
+  getGeneratorsPreimageTransversal[t]
   
   Given a representation of a temperament as a mapping or comma basis,
   returns a generators preimage transversal 
@@ -12,21 +12,21 @@
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        getGpt[meantoneM]
+        getGeneratorsPreimageTransversal[meantoneM]
     
   Out   {{{1, 0, 0}, {-1, 1, 0}}, "contra"}
   
 *)
-getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
+getGeneratorsPreimageTransversal[t_] := Module[{ma, decomp, left, snf, right, generatorsPreimageTransversal},
   ma = getA[getM[t]];
   decomp = SmithDecomposition[ma];
   left = Part[decomp, 1];
   snf = Part[decomp, 2];
   right = Part[decomp, 3];
   
-  gpt = right.Transpose[snf].left;
+  generatorsPreimageTransversal = right.Transpose[snf].left;
   
-  {Transpose[gpt], "contra"}
+  {Transpose[generatorsPreimageTransversal], "contra"}
 ];
 
 
@@ -35,7 +35,7 @@ getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
   TUNING
   
   
-  optimizeGtm[t]
+  optimizeGeneratorsTuningMap[t]
   
   Given a representation of a temperament as a mapping or comma basis,
   returns the optimal generator tuning map.
@@ -45,22 +45,22 @@ getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGtm[meantoneM]
+        optimizeGeneratorsTuningMap[meantoneM]
     
   Out   {1200., 696.578}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGtm[meantoneM, "originalTuningName" -> "TOP"]
+        optimizeGeneratorsTuningMap[meantoneM, "originalTuningName" -> "TOP"]
     
   Out   {1201.7, 697.564}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGtm[meantoneM, "systematicTuningName" -> "minisos-MEC"]
+        optimizeGeneratorsTuningMap[meantoneM, "systematicTuningName" -> "minisos-MEC"]
     
   Out   {1198.24, 695.294}
 *)
-Options[optimizeGtm] = tuningOptions;
-optimizeGtm[t_, OptionsPattern[]] := Module[
+Options[optimizeGeneratorsTuningMap] = tuningOptions;
+optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   {
     optimizationPower,
     weighted,
@@ -274,7 +274,7 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, weighted_, weighting
     tiedTms,
     tiedPs,
     minMeanP,
-    gpt,
+    generatorsPreimageTransversal,
     projectedGenerators
   },
   
@@ -300,8 +300,8 @@ optimizeGtmSimplex[optimizationPower_, tima_, d_, t_, ptm_, weighted_, weighting
     minMeanP = tiedPs[[minMeanIndex]]
   ];
   
-  gpt = Transpose[getA[getGpt[t]]];
-  projectedGenerators = minMeanP.gpt;
+  generatorsPreimageTransversal = Transpose[getA[getGeneratorsPreimageTransversal[t]]];
+  projectedGenerators = minMeanP.generatorsPreimageTransversal;
   ptm.projectedGenerators // N
 ];
 
@@ -327,7 +327,7 @@ getDiamond[d_] := Module[{oddLimit, oddsWithinLimit, rawDiamond},
   oddsWithinLimit = Range[1, oddLimit, 2];
   rawDiamond = Map[Function[outer, Map[Function[inner, outer / inner], oddsWithinLimit]], oddsWithinLimit];
   
-  padD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
+  padVectorsWithZerosUpToD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
 ];
 
 octaveReduce[inputI_] := Module[{i},
@@ -510,7 +510,7 @@ processTuningOptions[t_, inputMeanPower_, inputWeighted_, inputWeightingDirectio
   ];
   
   d = getD[t];
-  ptm = getPtm[d];
+  ptm = getPrimesTuningMap[d];
   
   tima = If[tim === Null, getDiamond[d], If[Length[tim] == 0, If[forDamage, getA[getC[t]], {}], getA[tim]]];
   Print["tima", tima];
@@ -518,8 +518,8 @@ processTuningOptions[t_, inputMeanPower_, inputWeighted_, inputWeightingDirectio
   {optimizationPower, tima, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}
 ];
 
-(*getPtm[d_] := Log[2, getPrimes[d]];*)
-getPtm[d_] := Log[2, {2, 9, 5, 21}];
+(*getPrimesTuningMap[d_] := Log[2, getPrimes[d]];*)
+getPrimesTuningMap[d_] := Log[2, {2, 9, 5, 21}];
 
 getW[tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w},
   w = If[
@@ -532,17 +532,17 @@ getW[tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPowe
 ];
 
 getComplexity[pcv_, complexityWeighting_, complexityPower_] := Module[{weightedPcv},
-  weightedPcv = If[complexityWeighting == "logProduct", pcv * getPtm[Length[pcv]], pcv];
+  weightedPcv = If[complexityWeighting == "logProduct", pcv * getPrimesTuningMap[Length[pcv]], pcv];
   Norm[weightedPcv, complexityPower]
 ];
 
 
-optimizeGtm[{{{12, 19, 28}}, "co"}, {"tim" -> {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}, "contra"}}]
+optimizeGeneratorsTuningMap[{{{12, 19, 28}}, "co"}, {"tim" -> {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}, "contra"}}]
 
-optimizeGtm[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co"}, {"originalTuningName" -> "TE"}]
+optimizeGeneratorsTuningMap[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co"}, {"originalTuningName" -> "TE"}]
 
-changeB[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}}, {2, 3, 5, 7}]
-changeB[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 3, 5, 7}}, {2, 9, 5, 21}]
+changeIntervalBasis[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}}, {2, 3, 5, 7}]
+changeIntervalBasis[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 3, 5, 7}}, {2, 9, 5, 21}]
 
 weightedTranslation = {{1, 0, 0, 0}, {0, 2 * Log[2, 3], 0, 0}, {0, 0, 1 * Log[2, 5], 0}, {0, 1 * Log[2, 3], 0, 1 * Log[2, 7]}} // N
 

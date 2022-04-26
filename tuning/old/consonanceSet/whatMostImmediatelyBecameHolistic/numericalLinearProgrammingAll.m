@@ -124,7 +124,7 @@ getTuningLinearProgrammingStyle[m_, meanP_, weighting_ : "unweighted", complexit
   mappedTima = Transpose[ ma.Transpose[tima]];
   w = getW[tima, weighting, complexityWeighting, complexityP];
   
-  (* bestGuess =optimizeGtm[m, 2] // N;
+  (* bestGuess =optimizeGeneratorsTuningMap[m, 2] // N;
    Print["bestGeuss", bestGuess];*)
   
   solution = If[

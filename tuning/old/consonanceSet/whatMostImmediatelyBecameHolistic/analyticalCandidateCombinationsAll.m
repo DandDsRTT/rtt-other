@@ -1,15 +1,15 @@
 (* I think this only agrees in the case of damage mean power 1... wait but isn't that least absolutes, the one we've barely looked at yet? *)
 
-getGpt[m_] := Module[{ma, decomp, left, snf, right, gpt},
+getGeneratorsPreimageTransversal[m_] := Module[{ma, decomp, left, snf, right, generatorsPreimageTransversal},
   ma = getA[m];
   decomp = SmithDecomposition[ma];
   left = Part[decomp, 1];
   snf = Part[decomp, 2];
   right = Part[decomp, 3];
   
-  gpt = right.Transpose[snf].left;
+  generatorsPreimageTransversal = right.Transpose[snf].left;
   
-  gpt
+  generatorsPreimageTransversal
 ];
 
 getMaxDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "noop", complexityP_ : 1] := Module[{e, w},
@@ -70,7 +70,7 @@ getTuningCandidateStyle[m_, meanP_, weighting_ : "unweighted", complexityWeighti
     minMeanIndex,
     tiedPs,
     minMeanP,
-    gpt,
+    generatorsPreimageTransversal,
     projectedGenerators
   },
   
@@ -78,7 +78,7 @@ getTuningCandidateStyle[m_, meanP_, weighting_ : "unweighted", complexityWeighti
   r = getR[m];
   
   tima = If[tim === Null, getDiamond[d], getA[tim]];
-  ptm = getPtm[d];
+  ptm = getPrimesTuningMap[d];
   
   unchangedIntervalSetIndices = Subsets[Range[Length[tima]], {r}];
   potentialUnchangedIntervalSets = Map[Map[tima[[#]]&, #]&, unchangedIntervalSetIndices];
@@ -110,8 +110,8 @@ getTuningCandidateStyle[m_, meanP_, weighting_ : "unweighted", complexityWeighti
   
   
   
-  gpt = getGpt[m];
-  projectedGenerators = minMeanP.gpt;
+  generatorsPreimageTransversal = getGeneratorsPreimageTransversal[m];
+  projectedGenerators = minMeanP.generatorsPreimageTransversal;
   solution = ptm.projectedGenerators // N;
   
   Print[meanP, weighting, complexityWeighting, complexityP];

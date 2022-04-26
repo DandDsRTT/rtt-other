@@ -1,6 +1,6 @@
 (*getLeastSquaresTuning[m_, tim_ : Null] := Module[{d, ptm, ma, tima, unchangedIntervals, p, result},
   d = getD[m];
-  ptm = getPtm[d];
+  ptm = getPrimesTuningMap[d];
   ma = getA[m];
   tima = If[tim === Null, getDiamond[d], getA[tim]];
   
@@ -24,7 +24,7 @@
 
 getLeastSquaresTuningWeighted[m_, weighting_ : "unweighted", complexityWeighting_ : Null, complexityP_ : Null, tim_ : Null] := Module[{d, ptm, ma, tima, w, unchangedIntervals, p, result },
   d = getD[m];
-  ptm = getPtm[d];
+  ptm = getPrimesTuningMap[d];
   ma = getA[m];
   tima = If[tim === Null, getDiamond[d], getA[tim]];
   w = getW[tima, weighting, complexityWeighting, complexityP];

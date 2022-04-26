@@ -3,7 +3,7 @@ In[1308]:= (*
   GENERATORS PREIMAGE TRANSVERSAL
   
   
-  getGpt[t]
+  getGeneratorsPreimageTransversal[t]
   
   Given a representation of a temperament as a mapping or comma basis,
   returns a generators preimage transversal 
@@ -12,21 +12,21 @@ In[1308]:= (*
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        getGpt[meantoneM]
+        getGeneratorsPreimageTransversal[meantoneM]
     
   Out   {{{1, 0, 0}, {-1, 1, 0}}, "contra"}
   
 *)
-    getGpt[t_] := Module[{ma, decomp, left, snf, right, gpt},
+    getGeneratorsPreimageTransversal[t_] := Module[{ma, decomp, left, snf, right, generatorsPreimageTransversal},
       ma = getA[getM[t]];
       decomp = SmithDecomposition[ma];
       left = Part[decomp, 1];
       snf = Part[decomp, 2];
       right = Part[decomp, 3];
       
-      gpt = right.Transpose[snf].left;
+      generatorsPreimageTransversal = right.Transpose[snf].left;
       
-      {Transpose[gpt], "contra"}
+      {Transpose[generatorsPreimageTransversal], "contra"}
     ];
 
 In[1309]:=
@@ -35,7 +35,7 @@ In[1309]:=
       TUNING
       
       
-      optimizeGtm[t]
+      optimizeGeneratorsTuningMap[t]
       
       Given a representation of a temperament as a mapping or comma basis,
       returns the optimal generator tuning map.
@@ -45,22 +45,22 @@ In[1309]:=
       Examples:
       
       In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-            optimizeGtm[meantoneM]
+            optimizeGeneratorsTuningMap[meantoneM]
         
       Out   {1200., 696.578}
       
       In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-            optimizeGtm[meantoneM, "originalTuningName" -> "TOP"]
+            optimizeGeneratorsTuningMap[meantoneM, "originalTuningName" -> "TOP"]
         
       Out   {1201.7, 697.564}
       
       In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-            optimizeGtm[meantoneM, "optimization" -> "minisos", "damage" -> "MEC"]
+            optimizeGeneratorsTuningMap[meantoneM, "optimization" -> "minisos", "damage" -> "MEC"]
         
       Out   {1198.24, 695.294}
     *)
-    Options[optimizeGtm] = tuningOptions;
-optimizeGtm[t_, OptionsPattern[]] := Module[
+    Options[optimizeGeneratorsTuningMap] = tuningOptions;
+optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   {
     meanPower,
     weighted,
@@ -239,7 +239,7 @@ In[1328]:=
         tiedTms,
         tiedPs,
         minMeanP,
-        gpt,
+        generatorsPreimageTransversal,
         projectedGenerators
       },
       
@@ -265,8 +265,8 @@ In[1328]:=
         minMeanP = tiedPs[[minMeanIndex]]
       ];
       
-      gpt = Transpose[getA[getGpt[t]]];
-      projectedGenerators = minMeanP.gpt;
+      generatorsPreimageTransversal = Transpose[getA[getGeneratorsPreimageTransversal[t]]];
+      projectedGenerators = minMeanP.generatorsPreimageTransversal;
       ptm.projectedGenerators // N
     ];
 
@@ -292,7 +292,7 @@ In[1332]:=
       oddsWithinLimit = Range[1, oddLimit, 2];
       rawDiamond = Map[Function[outer, Map[Function[inner, outer / inner], oddsWithinLimit]], oddsWithinLimit];
       
-      padD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
+      padVectorsWithZerosUpToD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
     ];
 
 In[1334]:= octaveReduce[inputI_] := Module[{i},
@@ -477,14 +477,14 @@ In[1347]:= processTuningOptions[t_, inputMeanPower_, inputWeighted_, inputWeight
   ];
   
   d = getD[t];
-  ptm = getPtm[d];
+  ptm = getPrimesTuningMap[d];
   
   tima = If[tim === Null, getDiamond[d], If[Length[tim] == 0, If[forDamage, getA[getC[t]], {}], getA[tim]]];
   
   {meanPower, tima, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower}
 ];
 
-In[1348]:= getPtm[d_] := Log[2, getPrimes[d]];
+In[1348]:= getPrimesTuningMap[d_] := Log[2, getPrimes[d]];
 
 In[1349]:= getW[tima_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] := Module[{w},
   w = If[
@@ -497,6 +497,6 @@ In[1349]:= getW[tima_, weighted_, weightingDirection_, complexityWeighting_, com
 ];
 
 In[1350]:= getComplexity[pcv_, complexityWeighting_, complexityPower_] := Module[{weightedPcv},
-  weightedPcv = If[complexityWeighting == "logProduct", pcv * getPtm[Length[pcv]], pcv];
+  weightedPcv = If[complexityWeighting == "logProduct", pcv * getPrimesTuningMap[Length[pcv]], pcv];
   Norm[weightedPcv, complexityPower]
 ];

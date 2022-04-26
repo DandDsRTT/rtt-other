@@ -18,7 +18,7 @@ getWeightingMatrix[d_, weight_] := If[
 
 precision = 7;
 
-optimizeGtm[m_, norm_, weight_ : "unweighted"] := If[
+optimizeGeneratorsTuningMap[m_, norm_, weight_ : "unweighted"] := If[
   norm == 2,
   optimizeGtmWithPseudoinverse[m, weight],
   optimizeGtmWithMinimizer[m, norm, weight]
@@ -62,9 +62,9 @@ optimizeGtmWithMinimizer[m_, norm_, weight_] := Module[{r, d, ma, gtm, ptm, tm, 
 ];
 
 
-optimizeGtm[sensamagic, 1]
-optimizeGtm[sensamagic, 1, "TOP"]
-optimizeGtm[sensamagic, 2]
-optimizeGtm[sensamagic, 2, "TOP"]
-optimizeGtm[sensamagic, Infinity]
-optimizeGtm[sensamagic, Infinity, "TOP"]
+optimizeGeneratorsTuningMap[sensamagic, 1]
+optimizeGeneratorsTuningMap[sensamagic, 1, "TOP"]
+optimizeGeneratorsTuningMap[sensamagic, 2]
+optimizeGeneratorsTuningMap[sensamagic, 2, "TOP"]
+optimizeGeneratorsTuningMap[sensamagic, Infinity]
+optimizeGeneratorsTuningMap[sensamagic, Infinity, "TOP"]

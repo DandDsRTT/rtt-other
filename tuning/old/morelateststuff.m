@@ -18,7 +18,7 @@ getWeightingMatrix[d_, weight_] := If[
 
 precision = 7;
 
-optimizeGtm[m_, norm_, weight_ : "unweighted"] := If[
+optimizeGeneratorsTuningMap[m_, norm_, weight_ : "unweighted"] := If[
   norm == 2,
   optimizeGtmWithPseudoinverse[m, weight],
   optimizeGtmWithMinimizer[m, norm, weight]
@@ -64,17 +64,17 @@ optimizeGtmWithMinimizer[m_, norm_, weight_] := Module[{r, d, ma, gtm, ptm, tm, 
 sensamagic = {{{1, 1, 0}, {0, 1, 4}}, "co"}; (* this is actually meantone *)
 sensamagic = {{{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}}, "co"};
 
-optimizeGtm[sensamagic, 1]
+optimizeGeneratorsTuningMap[sensamagic, 1]
 
-optimizeGtm[sensamagic, 1, "TOP"]
+optimizeGeneratorsTuningMap[sensamagic, 1, "TOP"]
 
-optimizeGtm[sensamagic, 2]
+optimizeGeneratorsTuningMap[sensamagic, 2]
 
-optimizeGtm[sensamagic, 2, "TOP"]
+optimizeGeneratorsTuningMap[sensamagic, 2, "TOP"]
 
-optimizeGtm[sensamagic, Infinity]
+optimizeGeneratorsTuningMap[sensamagic, Infinity]
 
-optimizeGtm[sensamagic, Infinity, "TOP"]
+optimizeGeneratorsTuningMap[sensamagic, Infinity, "TOP"]
 
 d = 4;
 ma = {{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}};
@@ -90,9 +90,9 @@ tm = gtm.ma;
 ptm = Log[2, getPrimes[d]];
 e = tm - ptm
 
-optimizeGtm[{{{12, 19, 28}}, "co"}, 1, "TOP"]
+optimizeGeneratorsTuningMap[{{{12, 19, 28}}, "co"}, 1, "TOP"]
 
-optimizeGtm[{{{5, 8, 0}, {0, 0, 1}}, "co"}, 1, "TOP"]
+optimizeGeneratorsTuningMap[{{{5, 8, 0}, {0, 0, 1}}, "co"}, 1, "TOP"]
 
 dual[{{{1, 0, 0, -5}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}]
 dual[{{{1, 2, -3, 1}}, "contra"}]
@@ -101,15 +101,15 @@ dual[{{{1, 2, -3, 1}}, "contra"}]
 
 mapping = {{{2, 0, 11, 12}, {0, 1, -2, -2}}, "co"};
 mapping = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-1200 * optimizeGtm[mapping, 1, "unweighted"]
-1200 * optimizeGtm[mapping, 2, "unweighted"]
-1200 * optimizeGtm[mapping, Infinity, "unweighted"]
-1200 * optimizeGtm[mapping, 1, "TOP"]
-1200 * optimizeGtm[mapping, 2, "TOP"]
-1200 * optimizeGtm[mapping, Infinity, "TOP"]
-1200 * optimizeGtm[mapping, 1, "Partch"]
-1200 * optimizeGtm[mapping, 2, "Partch"]
-1200 * optimizeGtm[mapping, Infinity, "Partch"]
+1200 * optimizeGeneratorsTuningMap[mapping, 1, "unweighted"]
+1200 * optimizeGeneratorsTuningMap[mapping, 2, "unweighted"]
+1200 * optimizeGeneratorsTuningMap[mapping, Infinity, "unweighted"]
+1200 * optimizeGeneratorsTuningMap[mapping, 1, "TOP"]
+1200 * optimizeGeneratorsTuningMap[mapping, 2, "TOP"]
+1200 * optimizeGeneratorsTuningMap[mapping, Infinity, "TOP"]
+1200 * optimizeGeneratorsTuningMap[mapping, 1, "Partch"]
+1200 * optimizeGeneratorsTuningMap[mapping, 2, "Partch"]
+1200 * optimizeGeneratorsTuningMap[mapping, Infinity, "Partch"]
 
 
 
@@ -119,7 +119,7 @@ First[Part[{{1, 0, -4, -13}, {0, 1, 4, 10}}.Transpose[{{0, 0, -1, 1}}], 2]]
 
 (*dual[{{{0,-5,1,2},{0,3,-2,0}},"contra"}]*)
 dual[{{{0, -5, 1, 2}, {0, 22, -15, 0}}, "contra"}]
-(*getLm[getA[%]]*)
+(*getLargestMinorsL[getA[%]]*)
 
 {{1, 0, 0, 0}, {0, 30, 44, 53}}.Transpose[{{0, -1, 1, 0}}]
 
@@ -132,7 +132,7 @@ dual[{{{0, -5, 1, 2}, {0, 22, -15, 0}}, "contra"}]
 
 
 
-optimizeGtm[{{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"}, 2]
+optimizeGeneratorsTuningMap[{{{2, 3, 5, 6}, {0, 1, -2, -2}}, "co"}, 2]
 
 {0.498621149017398`, 1.5847743690701703`} * 1200
 
