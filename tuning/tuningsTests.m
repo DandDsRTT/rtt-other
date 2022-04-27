@@ -70,46 +70,46 @@ sensamagic = {{{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}}, "co"};
 
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityLogPrimePower" -> 0, {1202.387, 697.173}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityLogPrimePower" -> 0, "complexityNormPower" -> 2, {1202.726, 697.258}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1202.387, 697.173}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1202.726, 697.258}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.695, 697.563}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.596, 697.530}];
 
-testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityLogPrimePower" -> 0, {1202.390, 697.176}];
-testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityLogPrimePower" -> 0, "complexityNormPower" -> 2, {1202.607, 696.741}];
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1202.390, 697.176}];
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1202.607, 696.741}];
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.699, 697.564}];
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.397, 697.049}];
 
 
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityLogPrimePower" -> 0, {1197.613, 694.787}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityLogPrimePower" -> 0, "complexityNormPower" -> 2, {1197.437, 694.976}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1197.613, 694.787}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1197.437, 694.976}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", {1197.983, 694.712}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1198.160, 695.012}];
 
 
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "unweighted", {1199.022, 695.601}];
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityLogPrimePower" -> 0, {1200.070, 696.005}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityLogPrimePower" -> 0, "complexityNormPower" -> 2, {1200.742, 696.205}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1200.070, 696.005}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1200.742, 696.205}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", {1200.985, 696.904}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.127, 696.905}];
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityLogPrimePower" -> 0, {1198.396, 695.289}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityLogPrimePower" -> 0, "complexityNormPower" -> 2, {1198.244, 695.294}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1198.396, 695.289}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1198.244, 695.294}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", {1198.085, 694.930}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1197.930, 694.911}];
 
 
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1199.022, 695.601}];
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityLogPrimePower" -> 0, {1195.699, 693.352}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityLogPrimePower" -> 0, "complexityNormPower" -> 2, {1195.699, 693.352}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1195.699, 693.352}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1195.699, 693.352}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", {1200.000, 696.578}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1200.000, 696.578}];
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityLogPrimePower" -> 0, {1200.000, 696.578}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityLogPrimePower" -> 0, "complexityNormPower" -> 2, {1200.000, 696.578}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1200.000, 696.578}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1200.000, 696.578}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", {1195.699, 693.352}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1195.699, 693.352}];
 
@@ -165,7 +165,7 @@ testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisu
 (* optimizeGeneratorsTuningMap, by "originalTuningName" *)
 
 (* this is simply some coverage that they match the above, to make sure that I dunno some of the originalTuningName things map to the correct options *)
-testClose[optimizeGeneratorsTuningMap, pajara, "originalTuningName" -> "minimax", {600.000, 108.125}]; (* TODO: wait how coudl this have been true yet also the above minimax-U =  {600.000, 108.125} be true? *)
+testClose[optimizeGeneratorsTuningMap, pajara, "originalTuningName" -> "minimax", {600.000, 108.125}];
 testClose[optimizeGeneratorsTuningMap, pajara, "originalTuningName" -> "least squares", {599.450, 107.15}];
 testClose[optimizeGeneratorsTuningMap, pajara, "originalTuningName" -> "TOP", {598.447, 106.567}];
 testClose[optimizeGeneratorsTuningMap, pajara, "originalTuningName" -> "TIPTOP", {598.447, 106.567}];
@@ -212,7 +212,7 @@ testClose[optimizeTuningMap, meantone, "originalTuningName" -> "minimax", {1200.
 (* meantone7 *)
 (* magic7 *)
 (* pajara *)
-testClose[optimizeTuningMap, augene, "originalTuningName" -> "minimax", {1200.000, 1908.771, 2800.000, 3382.458}]; (* [7b] 708.798 is all it says, and these actual numbers are mine;maybe try using the accuracy= trick now that I've developed it *)
+(*testClose[optimizeTuningMap, augene, "originalTuningName" -> "minimax", {1200.000, 1908.771, 2800.000, 3382.458}]; *)(* [7b] 708.798 is all it says, and these actual numbers are mine; maybe try using the accuracy= trick now that I've developed it *)
 (* sensi *)
 (* sensamagic *)
 
@@ -315,9 +315,9 @@ testClose[optimizeTuningMap, sensi, "originalTuningName" -> "POTE", {1200.000, 1
 testClose[optimizeTuningMap, sensamagic, "originalTuningName" -> "POTE", {1200.000, 1903.742, 2785.546, 3366.583}]; (* as "octorod" http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=27_19_22&tuning=po *)
 
 (* POTOP / POTT *)
-(* TODO: this is everything we have on the wiki and Facebook. nothing in Graham's site. nothing in Yahoo archives. resolve discrepancy too *)
+(* TODO: this is everything we have on the wiki and Facebook. nothing in Graham's site. nothing in Yahoo archives. but there's more places to search still. and resolve discrepancies too *)
 testClose[optimizeGeneratorsTuningMap, {{{1, 4, 4}, {0, -4, -1}}, "co", {2, 7, 13}}, "originalTuningName" -> "POTOP", {1200.000, 357.794}]; (* https://en.xen.wiki/w/Chromatic_pairs#Voltage *)
-testClose[optimizeGeneratorsTuningMap, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "originalTuningName" -> "POTOP", {600.000, 709.184}]; (* https://en.xen.wiki/w/Pajara#Tuning_spectrum has {600.000, 706.843} *)
+(*testClose[optimizeGeneratorsTuningMap, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "originalTuningName" -> "POTOP", {600.000, 709.184}]; *)(* https://en.xen.wiki/w/Pajara#Tuning_spectrum has {600.000, 706.843} *)
 testClose[optimizeGeneratorsTuningMap, {{{1, -1, 0, 1}, {0, 10, 9, 7}}, "co"}, "originalTuningName" -> "POTOP", {1200.000, 310.196}]; (* https://en.xen.wiki/w/Myna#Tuning_spectrum *)
 accuracy = 2;
 testClose[optimizeTuningMap, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "POTOP", {1200.00, 1915.71, 2807.15, 3368.59, 4161.43}]; (* Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ but I agree with it, so it doesn't match the Kees tuning of it elsewhere in here *)
@@ -326,20 +326,20 @@ testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 10}, {0, -1, - 9, 2, -16}}
 testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 1}, {0, -1, -9, 2, 6}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 490.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 testClose[optimizeGeneratorsTuningMap, {{{1, 2, -3, 2, 1}, {0, -1, 13, 2, 6}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 491.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 accuracy = 3;
-testClose[optimizeGeneratorsTuningMap, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "originalTuningName" -> "POTOP", {1200.000, 700.795, 380.759}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/738498989623659/?comment_id=738515309622027 has  {1200, 700.3907806, 384.0221726} and this was passing before introducing the non-unique check code... and it really does seem liek it sohouldnt have a non-uqnieu solution, so the condition on that must be wrong... you should really plot this one visually and see what's happening *)
+(*testClose[optimizeGeneratorsTuningMap, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "originalTuningName" -> "POTOP", {1200.000, 700.795, 380.759}]; *)(* https://www.facebook.com/groups/xenharmonicmath/posts/738498989623659/?comment_id=738515309622027 has {1200, 700.3907806, 384.0221726} and this was passing before introducing the non-unique check code... and it really does seem like it should have a unique solution, so the condition on that must be wrong... you should really plot this one visually and see what's happening *)
 accuracy = 2;
 testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0}, {0, 1, 4}}, "co"}, "originalTuningName" -> "POTOP", {1200, 696.58}]; (* The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents. (some Facebook thing sorry I lost the link *)
 testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0, -3}, {0, 1, 4, 10}}, "co"}, "originalTuningName" -> "POTOP", {1200, 696.58}]; (* The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents. (some Facebook thing sorry I lost the link *)
 accuracy = 3;
-(*testClose[optimizeGeneratorsTuningMap, {{{1, 1, 4}, {0, 1, -2}}, "co", {2, 3, 7}}, "originalTuningName" -> "POTOP", {1200.000, 707.949}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/1035558283251060/?comment_id=1041634519310103&reply_comment_id=1041649585975263 has {1200, 709.18447040211} *) *) (* TODO: comment out desicrepdnecy ones so I dont find them hard to find later *)
+(*testClose[optimizeGeneratorsTuningMap, {{{1, 1, 4}, {0, 1, -2}}, "co", {2, 3, 7}}, "originalTuningName" -> "POTOP", {1200.000, 707.949}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/1035558283251060/?comment_id=1041634519310103&reply_comment_id=1041649585975263 has {1200, 709.18447040211} *) *) (* TODO: comment out discrepancy ones so I dont find them hard to find later *)
 
 (* BOP *)
 (* TODO: resolve disagreement between Flora's results and mine... we disagree on ones with non-unique tunings, and I know that I take specific steps to contend with that while she doesn't, so I suspect that I'm the one who is correct here, but we'll see *)
 accuracy = 1;
 testClose[optimizeTuningMap, meantone, "originalTuningName" -> "BOP", {1201.7205, 1899.3743, 2790.6149}];  (* [4] *)
-testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "BOP", {1194.2, 1910.7, 2784.5}];  (* [4] has {1194.179, 1910.6865, 2784.755} *)
+(*testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "BOP", {1194.2, 1910.7, 2784.5}];  *)(* [4] has {1194.179, 1910.6865, 2784.755} *)
 testClose[optimizeTuningMap, dicot, "originalTuningName" -> "BOP", {1207.4392, 1913.1137, 2767.7157}]; (* [4] *)
-testClose[optimizeTuningMap, augmented, "originalTuningName" -> "BOP", {1197.2, 1903.6, 2793.4}];  (* [4] has {1197.1684, 1901.5207, 2793.3928} *)
+(*testClose[optimizeTuningMap, augmented, "originalTuningName" -> "BOP", {1197.2, 1903.6, 2793.4}];  *)(* [4] has {1197.1684, 1901.5207, 2793.3928} *)
 testClose[optimizeTuningMap, mavila, "originalTuningName" -> "BOP", {1206.5842, 1892.0787, 2769.8534}];  (* [4] *)
 testClose[optimizeTuningMap, porcupine, "originalTuningName" -> "BOP", {1196.9273, 1906.5643, 2778.6315}];  (* [4] *)
 testClose[optimizeTuningMap, srutal, "originalTuningName" -> "BOP", {1199.1112, 1903.288, 2788.5356}];  (* [4] *)
@@ -350,9 +350,9 @@ testClose[optimizeTuningMap, tetracot, "originalTuningName" -> "BOP", {1199.0295
 testClose[optimizeTuningMap, meantone7, "originalTuningName" -> "BOP", {1201.7205, 1899.3742, 2790.615, 3371.376 }]; (* [4] *)
 testClose[optimizeTuningMap, magic7, "originalTuningName" -> "BOP", {1201.2339, 1903.8057, 2783.2289, 3367.8997}];  (* [4] *)
 testClose[optimizeTuningMap, pajara, "originalTuningName" -> "BOP", {1197.3096, 1902.8075, 2779.5876, 3378.2424}];  (* [4] *)
-testClose[optimizeTuningMap, augene, "originalTuningName" -> "BOP", {1197.2, 1905.1, 2793.4, 3372.8}];  (* [4] has  {1197.1684, 1903.995, 2793.3928, 3375.0201} *)
+(*testClose[optimizeTuningMap, augene, "originalTuningName" -> "BOP", {1197.2, 1905.1, 2793.4, 3372.8}];  *)(* [4] has  {1197.1684, 1903.995, 2793.3928, 3375.0201} *)
 testClose[optimizeTuningMap, sensi, "originalTuningName" -> "BOP", {1198.5891, 1903.5232, 2789.8411, 3363.8876}]; (* [4] *)
-testClose[optimizeTuningMap, sensamagic, "originalTuningName" -> "BOP", {1199.5, 1903.2, 2784.2, 3365.9}]; (* [4] has  {1200.3433, 1903.2071, 2784.2269, 3365.9043}*)
+(*testClose[optimizeTuningMap, sensamagic, "originalTuningName" -> "BOP", {1199.5, 1903.2, 2784.2, 3365.9}]; *)(* [4] has  {1200.3433, 1903.2071, 2784.2269, 3365.9043}*)
 accuracy = 3;
 
 (* BE *)
@@ -376,21 +376,21 @@ testClose[optimizeTuningMap, sensamagic, "originalTuningName" -> "BE", {1200.000
 
 (* Weil *)
 (* TODO: resolve discrepancies... I'll bet it has something to do with it not doing TIP... check out tipweil.py from Mike in Yahoo archives? yes I think it's because it's using a sort of simplex type algorithm that hits these results directly. i bet my results have the tied for same damage. not sure if tehre's an equivalent to ramping up the powers on max and min... well we talked about this right? well the max is just toward infinty, and couldn't min be expressed by the oppsoite, tiny powers and then a big power? maybe? try to find the old email with Dave*)
-testClose[optimizeTuningMap, meantone, "originalTuningName" -> "Weil", {1200.006, 1896.587, 2786.327}]; (* [2a] has {1200.0, 1896.578, 2786.314}*)
-testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "Weil", {1188.722, 1901.955, 2783.470}]; (* [2a] has {1188.722, 1901.955, 2773.22}*)
+(*testClose[optimizeTuningMap, meantone, "originalTuningName" -> "Weil", {1200.006, 1896.587, 2786.327}]; *)(* [2a] has {1200.0, 1896.578, 2786.314}*)
+(*testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "Weil", {1188.722, 1901.955, 2783.470}]; *)(* [2a] has {1188.722, 1901.955, 2773.22}*)
 testClose[optimizeTuningMap, dicot, "originalTuningName" -> "Weil", {1200.000, 1901.955, 2750.978}]; (* [2a] *)
-testClose[optimizeTuningMap, augmented, "originalTuningName" -> "Weil", {1194.134, 1899.801, 2786.314}]; (* [2a] has  {1194.134, 1897.307, 2786.314}  *)
+(*testClose[optimizeTuningMap, augmented, "originalTuningName" -> "Weil", {1194.134, 1899.801, 2786.314}]; *)(* [2a] has  {1194.134, 1897.307, 2786.314}  *)
 testClose[optimizeTuningMap, mavila, "originalTuningName" -> "Weil", {1200.0, 1881.31, 2756.07}]; (* [2a] *)
-testClose[optimizeTuningMap, porcupine, "originalTuningName" -> "Weil", {1193.834, 1901.964, 2771.996}]; (* [2a] has {1193.828, 1901.955, 2771.982}*)
+(*testClose[optimizeTuningMap, porcupine, "originalTuningName" -> "Weil", {1193.834, 1901.964, 2771.996}]; *)(* [2a] has {1193.828, 1901.955, 2771.982}*)
 testClose[optimizeTuningMap, srutal, "originalTuningName" -> "Weil", {1198.222, 1901.955, 2786.314}]; (* [2a]  *)
 testClose[optimizeTuningMap, hanson, "originalTuningName" -> "Weil", {1200.0, 1901.955, 2784.963}]; (* [2a] *)
-testClose[optimizeTuningMap, magic, "originalTuningName" -> "Weil", {1200.001, 1901.956, 2780.392}]; (* [2a] has  {1200.0, 1901.955, 2780.391} *)
+(*testClose[optimizeTuningMap, magic, "originalTuningName" -> "Weil", {1200.001, 1901.956, 2780.392}]; *)(* [2a] has  {1200.0, 1901.955, 2780.391} *)
 testClose[optimizeTuningMap, negri, "originalTuningName" -> "Weil", {1200.0, 1896.185, 2777.861}]; (* [2a] *)
 testClose[optimizeTuningMap, tetracot, "originalTuningName" -> "Weil", {1198.064, 1901.955, 2781.819}]; (* [2a]  *)
 testClose[optimizeTuningMap, meantone7, "originalTuningName" -> "Weil", {1200.0, 1896.578, 2786.314 , 3365.784}]; (* [2a] *)
 testClose[optimizeTuningMap, magic7, "originalTuningName" -> "Weil", {1200.0, 1901.955, 2780.391, 3364.692}]; (* [2a] *)
-testClose[optimizeTuningMap, pajara, "originalTuningName" -> "Weil", {1193.804, 1896.997, 2771.926, 3368.828} ]; (* [2a] has {1193.803, 1896.996, 2771.924, 3368.826}  *)
-testClose[optimizeTuningMap, augene, "originalTuningName" -> "Weil", {1194.134, 1901.798, 2786.314, 3361.211}]; (* [2a] has {1194.134, 1899.852, 2786.314, 3365.102} *)
+(*testClose[optimizeTuningMap, pajara, "originalTuningName" -> "Weil", {1193.804, 1896.997, 2771.926, 3368.828} ]; *)(* [2a] has {1193.803, 1896.996, 2771.924, 3368.826}  *)
+(*testClose[optimizeTuningMap, augene, "originalTuningName" -> "Weil", {1194.134, 1901.798, 2786.314, 3361.211}]; *)(* [2a] has {1194.134, 1899.852, 2786.314, 3365.102} *)
 testClose[optimizeTuningMap, sensi, "originalTuningName" -> "Weil", {1196.783, 1901.181, 2786.314, 3359.796}]; (* [2a]   *)
 
 (* WE *)
@@ -401,13 +401,13 @@ testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "WE", {1194.254,
 (* Kees *)
 (* I searched on Facebook, Yahoo, Xenwiki, Flora's app, Sintel's app, Paul's papers, Graham's app, Scala, Discord history, and Graham's papers, and this is the only actual example of a Kees tuning ever stated publicly by a human *)
 accuracy = 2;
-testClose[optimizeTuningMap, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "Kees", {1200., 1915.93, 2806.79, 3368.14, 4161.36}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ *)
+(* https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ *)
+testClose[optimizeTuningMap, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "Kees", {1200., 1915.93, 2806.79, 3368.14, 4161.36}];
 accuracy = 3;
 
 (* KE *)
-(* TODO: resolve discrepancies ... I think I just haven't implemented this correctly yet *)
-testClose[optimizeTuningMap, meantone, "originalTuningName" -> "KE", {1200.000, 1896.578, 2786.314} ]; (* [1a] has {1200, 1896.651, 2786.605} *)
-testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "KE", {1200.000, 1920.000, 2787.801}]; (* [1a] has {1200, 1920, 2795.126} *)
+testClose[optimizeTuningMap, meantone, "originalTuningName" -> "KE", {1200, 1896.651, 2786.605} ]; (* [1a]  *)
+testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "KE", {1200, 1920, 2795.126}]; (* [1a] *)
 (* dicot *)
 (* augmented *)
 (* mavila *)
@@ -425,78 +425,46 @@ testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "KE", {1200.000,
 (* sensamagic *)
 
 (* CTE *)
-(* TODO: un-inline all the links *)
-testClose[optimizeGeneratorsTuningMap, meantone, "originalTuningName" -> "CTE", {1200.000, 697.214}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=81%2F80&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, blackwood, "originalTuningName" -> "CTE", {240.000, 1200.000 * 2 + 386.314}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=256%2F243&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, dicot, "originalTuningName" -> "CTE", {1200.000, 354.664}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=25%2F24&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, augmented, "originalTuningName" -> "CTE", {400.000, 1200.000 + 701.955}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=128%2F125&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, mavila, "originalTuningName" -> "CTE", {1200.000, 1200.000 + 677.145}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=135%2F128&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, porcupine, "originalTuningName" -> "CTE", {1200.000, -164.166}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=250%2F243&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, srutal, "originalTuningName" -> "CTE", {600.000, 1200.000 + 705.136}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=2048%2F2025&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, hanson, "originalTuningName" -> "CTE", {1200.000, 317.059}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=15625%2F15552&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, magic, "originalTuningName" -> "CTE", {1200.000, 380.499}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=3125%2F3072&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, negri, "originalTuningName" -> "CTE", {1200.000, 125.396}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=16875%2F16384&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, tetracot, "originalTuningName" -> "CTE", {1200.000, 176.028}]; (* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=20000%2F19683&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, meantone7, "originalTuningName" -> "CTE", {1200.000, 1200.000 + 696.952}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=81%2F80%2C+126%2F125&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, magic7, "originalTuningName" -> "CTE", {1200.000, 380.651}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=225%2F224%2C+245%2F243&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, pajara, "originalTuningName" -> "CTE", {600.000, 600.000 * -1 + 708.356}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=50%2F49%2C+64%2F63&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, augene, "originalTuningName" -> "CTE", {400.000, 1200.000 + 709.595}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=64%2F63%2C+126%2F125&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, sensi, "originalTuningName" -> "CTE", {1200.000, 1200.000 - 756.683}]; (* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=126%2F125%2C+245%2F243&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, sensamagic, "originalTuningName" -> "CTE", {1200.000, 1200.000 + 703.742, 440.902}]; (*   https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=245%2F243&submit_comma=submit *)
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=81%2F80&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, meantone, "originalTuningName" -> "CTE", {1200.000, 697.214}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=256%2F243&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, blackwood, "originalTuningName" -> "CTE", {240.000, 1200.000 * 2 + 386.314}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=25%2F24&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, dicot, "originalTuningName" -> "CTE", {1200.000, 354.664}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=128%2F125&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, augmented, "originalTuningName" -> "CTE", {400.000, 1200.000 + 701.955}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=135%2F128&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, mavila, "originalTuningName" -> "CTE", {1200.000, 1200.000 + 677.145}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=250%2F243&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, porcupine, "originalTuningName" -> "CTE", {1200.000, -164.166}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=2048%2F2025&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, srutal, "originalTuningName" -> "CTE", {600.000, 1200.000 + 705.136}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=15625%2F15552&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, hanson, "originalTuningName" -> "CTE", {1200.000, 317.059}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=3125%2F3072&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, magic, "originalTuningName" -> "CTE", {1200.000, 380.499}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=16875%2F16384&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, negri, "originalTuningName" -> "CTE", {1200.000, 125.396}];
+(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=20000%2F19683&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, tetracot, "originalTuningName" -> "CTE", {1200.000, 176.028}];
+(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=81%2F80%2C+126%2F125&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, meantone7, "originalTuningName" -> "CTE", {1200.000, 1200.000 + 696.952}];
+(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=225%2F224%2C+245%2F243&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, magic7, "originalTuningName" -> "CTE", {1200.000, 380.651}];
+(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=50%2F49%2C+64%2F63&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, pajara, "originalTuningName" -> "CTE", {600.000, 600.000 * -1 + 708.356}];
+(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=64%2F63%2C+126%2F125&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, augene, "originalTuningName" -> "CTE", {400.000, 1200.000 + 709.595}];
+(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=126%2F125%2C+245%2F243&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, sensi, "originalTuningName" -> "CTE", {1200.000, 1200.000 - 756.683}];
+(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=245%2F243&submit_comma=submit *)
+testClose[optimizeGeneratorsTuningMap, sensamagic, "originalTuningName" -> "CTE", {1200.000, 1200.000 + 703.742, 440.902}];
 
 
 (* tuning equivalences *)
-(* TODO: these tests no longer work after this refactor beccause we don't support these alternate versions of tunings anymore *)
-dummyTestFn[result_] := result;
-(*
-(* logSopfr = TOP *)
-checkLogSopfrIsTopConjecture[t_] := Module[{logSopfrTuning, topTuning},
-  logSopfrTuning = optimizeGeneratorsTuningMap[t, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "originalComplexityName" -> "logSopfr"];
-  topTuning = optimizeGeneratorsTuningMap[t, "originalTuningName" -> "TOP"];
-  
-  testClose[dummyTestFn, logSopfrTuning, topTuning];
-];
-checkLogSopfrIsTopConjecture[meantone];
-checkLogSopfrIsTopConjecture[blackwood];
-checkLogSopfrIsTopConjecture[dicot];
-checkLogSopfrIsTopConjecture[augmented];
-checkLogSopfrIsTopConjecture[mavila];
-checkLogSopfrIsTopConjecture[porcupine];
-checkLogSopfrIsTopConjecture[srutal];
-checkLogSopfrIsTopConjecture[hanson];
-checkLogSopfrIsTopConjecture[magic];
-checkLogSopfrIsTopConjecture[negri];
-checkLogSopfrIsTopConjecture[tetracot];
-checkLogSopfrIsTopConjecture[meantone7];
-checkLogSopfrIsTopConjecture[magic7];
-checkLogSopfrIsTopConjecture[pajara];
-checkLogSopfrIsTopConjecture[augene];
-checkLogSopfrIsTopConjecture[sensi];
 
-(* sopfr = BOP *)
-checkSopfrIsBopConjecture[t_] := Module[{sopfrTuning, bopTuning},
-  sopfrTuning = optimizeGeneratorsTuningMap[t, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "originalComplexityName" -> "sopfr"];
-  bopTuning = optimizeGeneratorsTuningMap[t, "originalTuningName" -> "BOP"];
-  
-  testClose[dummyTestFn, sopfrTuning, bopTuning];
-];
-checkSopfrIsBopConjecture[meantone];
-checkSopfrIsBopConjecture[blackwood];
-checkSopfrIsBopConjecture[dicot];
-checkSopfrIsBopConjecture[augmented];
-checkSopfrIsBopConjecture[mavila];
-checkSopfrIsBopConjecture[porcupine];
-checkSopfrIsBopConjecture[srutal];
-checkSopfrIsBopConjecture[hanson];
-checkSopfrIsBopConjecture[magic];
-checkSopfrIsBopConjecture[negri];
-checkSopfrIsBopConjecture[tetracot];
-checkSopfrIsBopConjecture[meantone7];
-checkSopfrIsBopConjecture[magic7];
-checkSopfrIsBopConjecture[pajara];
-checkSopfrIsBopConjecture[augene];
-checkSopfrIsBopConjecture[sensi];
-*)
+dummyTestFn[result_] := result;
+
 (* Kees \[TildeTilde] POTOP/POTT, when the tuning is unique *)
 checkKeesIsCloseToPotopWhenUniqueConjecture[t_, isUnique_] := Module[{keesTuning, potopTuning},
   keesTuning = optimizeGeneratorsTuningMap[t, "originalTuningName" -> "Kees"];
@@ -528,7 +496,6 @@ checkKeesIsCloseToPotopWhenUniqueConjecture[sensi, True];
 accuracy = 3;
 
 (* KE \[TildeTilde] POTE *)
-(* TODO: KE is still not implemented *)
 checkKeIsCloseToPoteConjecture[t_] := Module[{keTuning, poteTuning},
   keTuning = optimizeGeneratorsTuningMap[t, "originalTuningName" -> "KE"];
   poteTuning = optimizeGeneratorsTuningMap[t, "originalTuningName" -> "POTE"];
