@@ -84,7 +84,7 @@ optimizeGeneratorsTuningMapTargetingAllNumerical[
   complexitySizeFactor != 0 && complexityNormPower == 1,
   
   (* covers Weil and Kees *)
-  optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm[
+  optimizeGeneratorsTuningMapTargetingAllNumericalDualNormOfIntegerLimit[
     t,
     unchangedIntervals, (* trait -1 *)
     complexityNormPower, (* trait 3 *)
@@ -152,8 +152,9 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormUnique[
     
     targetedIntervalsAsPrimesIdentityA,
     
-    normPower,
     damagesL,
+    normFn,
+    normPower,
     periodsPerOctave,
     minimizedNorm,
     solution
@@ -174,13 +175,15 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormUnique[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
+  normFn = Norm;
   normPower = dualPower[complexityNormPower];
   
   periodsPerOctave = getPeriodsPerOctave[t];
+  
   minimizedNorm = If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-    {Norm[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-    Norm[damagesL, normPower]
+    {normFn[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+    normFn[damagesL, normPower]
   ];
   solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
   generatorsTuningMap /. Last[solution]
@@ -208,8 +211,9 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
     normPower,
     normPowerPower,
     
-    normPowerLimit,
     damagesL,
+    normFn,
+    normPowerLimit,
     periodsPerOctave,
     minimizedNorm,
     solution
@@ -230,6 +234,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
+  normFn = Norm;
   normPowerLimit = dualPower[complexityNormPower];
   
   damagesMagnitude = 1000000;
@@ -240,22 +245,19 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
   periodsPerOctave = getPeriodsPerOctave[t];
   
   While[
-    (* the != bit, while seemingly unnecessary, prevented a certain type of crash *)
     normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
-    
     previousDamagesMagnitude = damagesMagnitude;
     previousSolution = solution;
     minimizedNorm = If[
       Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {Norm[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      Norm[damagesL, normPower]
+      {normFn[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+      normFn[damagesL, normPower]
     ];
     solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
     damagesMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
-  
   generatorsTuningMap /. Last[previousSolution]
 ];
 (* TODO: if you look at this diff, I don't think I was actually finding any TIPTOP tunings! 
@@ -270,7 +272,7 @@ like actually while condition on the normpower and make it < 128 if need be
 and also I think ... wow, yeah, there was at least one of these where I wasn't actually taking the Abs of the error!
 that seems to be both the targeting-all ones
 so that certainly would have affected anything where the norm power wasn't even...
-also I think you should really not leave the below optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm
+also I think you should really not leave the below optimizeGeneratorsTuningMapTargetingAllNumericalDualNormOfIntegerLimit
 in the dust w/r/t to this refactor
 think about how it can work knowing
 yeah it's
@@ -280,7 +282,7 @@ that's how to achieve minimum in the limit
 and the old email was in the "TIP" email thread
 *)
 
-optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm[
+optimizeGeneratorsTuningMapTargetingAllNumericalDualNormOfIntegerLimit[
   t_,
   unchangedIntervals_, (* trait -1 *)
   complexityNormPower_, (* trait 3 *)
@@ -292,35 +294,57 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm[
   {
     tuningMappings,
     generatorsTuningMap,
-    ma,
     tuningMap,
-    primesTuningMap,
+    
+    damagesL,
+    normFn,
     periodsPerOctave,
-    adjustedPrimesErrorMap,
     minimizedNorm,
     solution
   },
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
   tuningMap = Part[tuningMappings, 3];
-  primesTuningMap = Part[tuningMappings, 4];
+  
+  damagesL = getAugmentedDualMultipliedPrimesErrorL[
+    tuningMap,
+    t
+  ];
+  normFn = dualNormOfIntegerLimit;
   
   periodsPerOctave = getPeriodsPerOctave[t];
   
-  adjustedPrimesErrorMap = tuningMap / primesTuningMap - Table[1, getD[t]];
-  adjustedPrimesErrorMap = AppendTo[adjustedPrimesErrorMap, 0];
-  
   minimizedNorm = If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-    {Max[adjustedPrimesErrorMap] - Min[adjustedPrimesErrorMap], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-    Max[adjustedPrimesErrorMap] - Min[adjustedPrimesErrorMap]
+    {normFn[damagesL], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+    normFn[damagesL]
   ];
   solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
-  
   generatorsTuningMap /. Last[solution]
 ];
+
+getAugmentedDualMultipliedPrimesErrorL[
+  tuningMap_,
+  t_
+] := Module[
+  {primesTuningMap, damagesL},
+  
+  (* TODO: for simplicity, keep it this way for now, 
+  but I don't like the inconsistency in this dividing tuning map by primes tuning map and subtracting 1's...
+  what's the difference between that and, well...
+  confirm whether multiplying by the appropriate dual multiplier would work out the same *)
+  primesTuningMap = getPrimesTuningMap[t];
+  
+  damagesL = tuningMap / primesTuningMap - Table[1, getD[t]];
+  
+  (* TODO: see if you can reconsolidate this now, that is no formerly-known-as "middleMan" shenanigans necessary
+  but also you should extract following the pattern of the other two *)
+  AppendTo[damagesL, 0]
+];
+
+(* as described here: https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space#Dual_Norms *)
+dualNormOfIntegerLimit[vector_] := Max[vector] - Min[vector];
 
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 

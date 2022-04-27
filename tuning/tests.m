@@ -94,7 +94,7 @@ testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "dama
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1197.930, 694.911}];
 
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1195.699, 693.352}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
 
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1195.699, 693.352}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1195.699, 693.352}];
@@ -114,7 +114,7 @@ testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "dama
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-U", {599.995, 108.072}];
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NS", {596.393, 105.964}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.177, 107.111}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.177, 106.910}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-S", {598.402, 107.653}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {599.667, 108.278}];
 

@@ -422,8 +422,9 @@ optimizeGeneratorsTuningMapTargetingListNumericalUnique[
     generatorsTuningMap,
     tuningMap,
     
-    normPower,
     damagesL,
+    normFn,
+    normPower,
     periodsPerOctave,
     minimizedNorm,
     solution
@@ -444,13 +445,15 @@ optimizeGeneratorsTuningMapTargetingListNumericalUnique[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
+  normFn = Norm;
   normPower = optimizationPower;
   
   periodsPerOctave = getPeriodsPerOctave[t];
+  
   minimizedNorm = If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-    {Norm[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-    Norm[damagesL, normPower]
+    {normFn[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+    normFn[damagesL, normPower]
   ];
   solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
   generatorsTuningMap /. Last[solution]
@@ -479,8 +482,9 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
     normPower,
     normPowerPower,
     
-    normPowerLimit,
     damagesL,
+    normFn,
+    normPowerLimit,
     periodsPerOctave,
     minimizedNorm,
     solution
@@ -501,6 +505,7 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
+  normFn = Norm;
   normPowerLimit = optimizationPower;
   
   damagesMagnitude = 1000000;
@@ -512,20 +517,18 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
   
   While[
     normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
-    
     previousDamagesMagnitude = damagesMagnitude;
     previousSolution = solution;
     minimizedNorm = If[
       Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {Norm[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      Norm[damagesL, normPower]
+      {normFn[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+      normFn[damagesL, normPower]
     ];
     solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
     damagesMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
-  
   generatorsTuningMap /. Last[previousSolution]
 ];
 
@@ -840,7 +843,8 @@ getTargetedIntervalDamagesL[
     complexityMakeOdd (* trait 4d *)
   ];
   
-  Abs[N[tuningMap - primesTuningMap].Transpose[targetedIntervalsA].damageWeights]
+  (* TODO: yeah now you really need to clarify the relation between this and the WorkingPreicsion *)
+  Abs[N[tuningMap - primesTuningMap, 256].Transpose[targetedIntervalsA].damageWeights]
 ];
 
 Square[n_] := n^2;
@@ -1071,14 +1075,14 @@ hasIndependentGenerator[m_] := Module[{},
 tuningOptions = {
   "unchangedIntervals" -> {}, (* trait -1 *)
   "targetedIntervals" -> Null, (* trait 0 *)
-  "optimizationPower" -> Null, (* trait 1 *)
-  "damageWeightingSlope" -> "", (* trait 2 *)
-  "complexityNormPower" -> 1, (* trait 3 *)
+  "optimizationPower" -> Null, (* trait 1: \[Infinity] = minimax, 2 = minisos, 1 = minisum *)
+  "damageWeightingSlope" -> "", (* trait 2: unweighted, complexity-weighted, or simplicity-weighted *)
+  "complexityNormPower" -> 1, (* trait 3: what Mike Battaglia refers to as `p` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space *)
   "complexityNegateLogPrimeCoordination" -> False, (* trait 4a: False = do nothing, True = negate the multiplication by logs of primes *)
   "complexityPrimePower" -> 0, (* trait 4b: what Mike Battaglia refers to as `s` in https://en.xen.wiki/w/BOP_tuning; 0 = nothing, equiv to copfr when log prime coordination is negated and otherwise defaults; 1 = product complexity, equiv to sopfr when log prime coordination is negated and otherwise defaults; >1 = pth power of those *)
   "complexitySizeFactor" -> 0, (* trait 4c: what Mike Battaglia refers to as `k` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space; 0 = no augmentation to factor in span, 1 = Weil style, etc. *)
   "complexityMakeOdd" -> False, (* trait 4d: False = do nothing, True = achieve Kees from Weil, KE from WE, etc. *)
-  "tuningIntervalBasis" -> "primes",
+  "tuningIntervalBasis" -> "primes", (* Graham Breed calls this "inharmonic" vs "subgroup" notion in the context of TE tuning, but it can be used for any tuning *)
   "pureOctaveStretch" -> False,
   "systematicTuningName" -> "",
   "originalTuningName" -> "",
