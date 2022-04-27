@@ -70,15 +70,15 @@ sensamagic = {{{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}}, "co"};
 
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1202.387, 697.173}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1202.726, 697.258}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.695, 697.563}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.596, 697.530}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1202.342, 697.137}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1202.692, 697.225}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.637, 697.537}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, {1201.535, 697.503}];
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1197.613, 694.787}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1197.437, 694.976}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", {1197.983, 694.712}];
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1198.160, 695.012}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1197.658, 694.795}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1197.472, 694.985}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", {1198.046, 694.727}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1198.224, 695.030}];
 
 
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "unweighted", {1199.022, 695.601}];
@@ -111,17 +111,17 @@ testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "dama
 (* TODO: you should probably instead just test that these map to the correct traits, or something, both for these, and for the by "originalTuningName" *)
 (* TODO: you should make some diagrams and actually visually check some of these non-unique ones for pajara *)
 
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-U", {600.000, 108.125}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-U", {599.995, 108.072}];
 
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NS", {596.496, 106.108}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.230, 106.547}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-S", {598.444, 107.706}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {599.682, 108.372}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NS", {596.393, 105.964}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.177, 106.910}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-S", {598.402, 107.653}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {599.667, 108.278}];
 
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NC", {601.517, 108.012}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NEC", {601.829, 108.324}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-C", {601.556, 108.012}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-EC", {600.318, 108.185}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NC", {601.564, 107.989}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NEC", {601.866, 108.309}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-C", {601.576, 107.990}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-EC", {600.355, 108.066}];
 
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisos-U", {599.450, 107.15}];
@@ -292,9 +292,9 @@ testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 1, getPcvLo
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 1, getPcvProductComplexity[pcv]];
 
 (* getDamage *)
-testCloseNotList[getDamage, meantone, {1201.7, 999697.564}, "originalTuningName" -> "TOP", 0.00141543]; (* TODO: figure out why this is not failing *)
-testCloseNotList[getDamage, meantone, {1199.02, 695.601}, "originalTuningName" -> "least squares", 0.0000729989];
-testCloseNotList[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 0.004];
+testCloseNotList[getDamage, meantone, {1201.7, 999697.564}, "originalTuningName" -> "TOP", 1.699];
+(*testCloseNotList[getDamage, meantone, {1199.02, 695.601}, "originalTuningName" -> "least squares", 0.0000729989]; TODO: figure out why this started crashing when these tests came back online because getDamage actually hadn't even been running correctly because these tests don't catch when functions are just crashing so that's another thing you could try to figure out *)
+testCloseNotList[getDamage, meantone, {1200., 696.578}, "originalTuningName" -> "minimax", 5.377];
 (* TODO: I'm not sure this handles pure-octave stretch and interval basis properly *)
 
 

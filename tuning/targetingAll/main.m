@@ -151,14 +151,15 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormAndHasUniqueR
     ma,
     tuningMap,
     primesTuningMap,
-    primesErrorMap,
+    
     dualMultiplier,
     targetedIntervalsAsPrimesIdentityA,
-    solution,
-    optimizationPower,
-    dualMultipliedPrimesErrorMap,
+    
+    normPower,
+    errorsMap,
+    periodsPerOctave,
     minimizedNorm,
-    periodsPerOctave
+    solution
   },
   
   tuningMappings = getTuningMappings[t];
@@ -167,9 +168,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormAndHasUniqueR
   tuningMap = Part[tuningMappings, 3];
   primesTuningMap = Part[tuningMappings, 4];
   
-  primesErrorMap = tuningMap - primesTuningMap;
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
-  
   dualMultiplier = getDualMultiplier[
     t,
     targetedIntervalsAsPrimesIdentityA, (* trait 0 *)
@@ -179,17 +178,16 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormAndHasUniqueR
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
-  periodsPerOctave = getPeriodsPerOctave[t];
+  errorsMap = Abs[(tuningMap - primesTuningMap).targetedIntervalsAsPrimesIdentityA.dualMultiplier];
+  normPower = dualPower[complexityNormPower];
   
-  dualMultipliedPrimesErrorMap = primesErrorMap.dualMultiplier;
-  optimizationPower = dualPower[complexityNormPower];
+  periodsPerOctave = getPeriodsPerOctave[t];
   minimizedNorm = If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-    {Norm[dualMultipliedPrimesErrorMap, optimizationPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-    Norm[dualMultipliedPrimesErrorMap, optimizationPower]
+    {Norm[errorsMap, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+    Norm[errorsMap, normPower]
   ];
-  solution = NMinimize[ minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
-  
+  solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
   generatorsTuningMap /. Last[solution]
 ];
 
@@ -208,19 +206,21 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUnique
     ma,
     tuningMap,
     primesTuningMap,
-    primesErrorMap,
+    
     dualMultiplier,
     targetedIntervalsAsPrimesIdentityA,
-    solution,
+    
+    errorMagnitude,
+    previousErrorMagnitude,
     previousSolution,
-    optimizationPower,
-    previousPrimesErrorMagnitude,
-    primesErrorMagnitude,
-    normPowerPower,
     normPower,
-    dualMultipliedPrimesErrorMap,
+    normPowerPower,
+    
+    normPowerLimit,
+    errorsMap,
+    periodsPerOctave,
     minimizedNorm,
-    periodsPerOctave
+    solution
   },
   
   tuningMappings = getTuningMappings[t];
@@ -229,7 +229,6 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUnique
   tuningMap = Part[tuningMappings, 3];
   primesTuningMap = Part[tuningMappings, 4];
   
-  primesErrorMap = tuningMap - primesTuningMap;
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
   dualMultiplier = getDualMultiplier[
     t,
@@ -240,32 +239,48 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUnique
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
-  dualMultipliedPrimesErrorMap = primesErrorMap.dualMultiplier;
-  optimizationPower = dualPower[complexityNormPower];
-  previousPrimesErrorMagnitude = \[Infinity];
-  primesErrorMagnitude = 1000000;
-  normPowerPower = 1;
+  errorsMap = Abs[(tuningMap - primesTuningMap).targetedIntervalsAsPrimesIdentityA.dualMultiplier];
+  normPowerLimit = dualPower[complexityNormPower];
+  
+  errorMagnitude = 1000000;
+  previousErrorMagnitude = \[Infinity];
   normPower = 2;
+  normPowerPower = 1;
+  
   periodsPerOctave = getPeriodsPerOctave[t];
   
   While[
-    normPowerPower <= 10 && previousPrimesErrorMagnitude != primesErrorMagnitude && previousPrimesErrorMagnitude - primesErrorMagnitude > 0,
+    (* the != bit, while seemingly unnecessary, prevented a certain type of crash *)
+    normPowerPower <= 6 && previousErrorMagnitude != errorMagnitude && previousErrorMagnitude - errorMagnitude > 0,
     
-    previousPrimesErrorMagnitude = primesErrorMagnitude;
+    previousErrorMagnitude = errorMagnitude;
     previousSolution = solution;
     minimizedNorm = If[
       Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {Norm[dualMultipliedPrimesErrorMap, optimizationPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      Norm[dualMultipliedPrimesErrorMap, optimizationPower]
+      {Norm[errorsMap, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+      Norm[errorsMap, normPower]
     ];
     solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
-    primesErrorMagnitude = First[solution];
+    errorMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
-    normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
+    normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
   
   generatorsTuningMap /. Last[previousSolution]
 ];
+(* TODO: if you look at this diff, I don't think I was actually finding any TIPTOP tunings! 
+because I was always just plugging the optimizationPower in, 
+not the actual normPower that I was supposed to be iterating...
+whoops!
+I also think the normpowerpower max of 10 was too high... constantly veering off into too much error introduced by huge powers computation
+note how it's related to the workingprecision
+it never goes above working precision
+I should realize that
+like actually while condition on the normpower and make it < 128 if need be
+and also I think ... wow, yeah, there was at least one of these where I wasn't actually taking the Abs of the error!
+that seems to be both the targeting-all ones
+so that certainly would have affected anything where the norm power wasn't even...
+*)
 
 optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm[
   t_,
