@@ -4,7 +4,7 @@ complexity[i_, weighting_, normPower_] := Module[{pcv,d,  weightedPcv},
   pcv = Map[Abs, quotientToPcv[i]];
   d = Length[pcv];
   weightedPcv = If[
-    weighting == "noop",
+    weighting == "copfr",
     pcv,
     If[
       weighting == "logProduct",
@@ -238,7 +238,7 @@ getW[d_, weight_] := If[
     weight == "logProduct",
     DiagonalMatrix[1 / jip[d]],
     If[
-      weight == "noop",
+      weight == "copfr",
       DiagonalMatrix[Table[1, d]],
       Error
     ]
@@ -247,7 +247,7 @@ getW[d_, weight_] := If[
 
 precision = 7;
 
-optimizeGeneratorsTuningMap[m_, norm_, weight_ : "noop"] := If[
+optimizeGeneratorsTuningMap[m_, norm_, weight_ : "copfr"] := If[
   norm == 2,
   optimizeGtmWithPseudoinverse[m, weight],
   optimizeGtmWithMinimizer[m, norm, weight]

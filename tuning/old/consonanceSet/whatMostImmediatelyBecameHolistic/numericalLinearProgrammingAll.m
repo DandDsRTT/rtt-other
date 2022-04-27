@@ -160,38 +160,38 @@ m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)*)
 
 1200 * getTuningLinearProgrammingStyle[m, \[Infinity]]
 
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "noop", 1]
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "copfr", 1]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "copfr", 2]
 1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "logProduct", 1]
 1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "simplicityWeighted", "logProduct", 2]
 
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "noop", 1]
-1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "copfr", 1]
+1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "copfr", 2]
 1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "logProduct", 1]
 1200 * getTuningLinearProgrammingStyle[m, \[Infinity], "complexityWeighted", "logProduct", 2]
 
 
 1200 * getTuningLinearProgrammingStyle[m, 2]
 
-1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "noop", 1]
-1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "copfr", 1]
+1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "copfr", 2]
 1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "logProduct", 1]
 1200 * getTuningLinearProgrammingStyle[m, 2, "simplicityWeighted", "logProduct", 2]
 
-1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "noop", 1]
-1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "copfr", 1]
+1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "copfr", 2]
 1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "logProduct", 1]
 1200 * getTuningLinearProgrammingStyle[m, 2, "complexityWeighted", "logProduct", 2]
 
 
 1200 * getTuningLinearProgrammingStyle[m, 1]
 
-1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "noop", 1]
-1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "copfr", 1]
+1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "copfr", 2]
 1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "logProduct", 1]
 1200 * getTuningLinearProgrammingStyle[m, 1, "simplicityWeighted", "logProduct", 2]
 
-1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "noop", 1]
-1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "noop", 2]
+1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "copfr", 1]
+1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "copfr", 2]
 1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "logProduct", 1]
 1200 * getTuningLinearProgrammingStyle[m, 1, "complexityWeighted", "logProduct", 2]

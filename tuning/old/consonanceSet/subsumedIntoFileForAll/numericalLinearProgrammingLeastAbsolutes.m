@@ -69,12 +69,12 @@ m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)*)
 
 1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m]
 
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "noop", 1]
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "noop", 2]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "copfr", 1]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "copfr", 2]
 1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "logProduct", 1]
 1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "simplicityWeighted", "logProduct", 2]
 
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "noop", 1]
-1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "noop", 2]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "copfr", 1]
+1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "copfr", 2]
 1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "logProduct", 1]
 1200 * getLeastAbsolutesTuningLinearProgrammingStyle[m, "complexityWeighted", "logProduct", 2]

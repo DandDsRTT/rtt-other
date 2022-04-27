@@ -77,7 +77,7 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   meanPower = OptionValue["optimizationPower"];
   weighted = OptionValue["weighted"];
   weightingDirection = OptionValue["damageWeightingSlope"];
-  complexityWeighting = OptionValue["complexityUnitsMultiplier"];
+  complexityWeighting = OptionValue["originalComplexityName"];
   complexityPower = OptionValue["complexityNormPower"];
   tim = OptionValue["tim"];
   damage = OptionValue["damage"];
@@ -328,7 +328,7 @@ getDamage[t_, gtm_, OptionsPattern[]] := Module[
   meanPower = OptionValue["optimizationPower"];
   weighted = OptionValue["weighted"];
   weightingDirection = OptionValue["damageWeightingSlope"];
-  complexityWeighting = OptionValue["complexityUnitsMultiplier"];
+  complexityWeighting = OptionValue["originalComplexityName"];
   complexityPower = OptionValue["complexityNormPower"];
   tim = OptionValue["tim"];
   damage = OptionValue["damage"];
@@ -383,7 +383,7 @@ In[1345]:=
       "optimizationPower" -> \[Infinity],
       "weighted" -> False,
       "damageWeightingSlope" -> "simplicityWeighted",
-      "complexityUnitsMultiplier" -> "logProduct",
+      "originalComplexityName" -> "logProduct",
       "complexityNormPower" -> 1,
       "tim" -> Null,
       "damage" -> "",

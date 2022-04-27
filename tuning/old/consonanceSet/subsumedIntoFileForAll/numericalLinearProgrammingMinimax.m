@@ -66,12 +66,12 @@ m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)*)
 
 1200 * getMinimaxTuningLinearProgrammingStyle[m]
 
-1200 * getMinimaxTuningLinearProgrammingStyle[m, "simplicityWeighted", "noop", 1]
-1200 * getMinimaxTuningLinearProgrammingStyle[m, "simplicityWeighted", "noop", 2]
+1200 * getMinimaxTuningLinearProgrammingStyle[m, "simplicityWeighted", "copfr", 1]
+1200 * getMinimaxTuningLinearProgrammingStyle[m, "simplicityWeighted", "copfr", 2]
 1200 * getMinimaxTuningLinearProgrammingStyle[m, "simplicityWeighted", "logProduct", 1]
 1200 * getMinimaxTuningLinearProgrammingStyle[m, "simplicityWeighted", "logProduct", 2]
 
-1200 * getMinimaxTuningLinearProgrammingStyle[m, "complexityWeighted", "noop", 1]
-1200 * getMinimaxTuningLinearProgrammingStyle[m, "complexityWeighted", "noop", 2]
+1200 * getMinimaxTuningLinearProgrammingStyle[m, "complexityWeighted", "copfr", 1]
+1200 * getMinimaxTuningLinearProgrammingStyle[m, "complexityWeighted", "copfr", 2]
 1200 * getMinimaxTuningLinearProgrammingStyle[m, "complexityWeighted", "logProduct", 1]
 1200 * getMinimaxTuningLinearProgrammingStyle[m, "complexityWeighted", "logProduct", 2]

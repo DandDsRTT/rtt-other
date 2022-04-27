@@ -20,10 +20,10 @@ octaveReduce[inputI_] := Module[{i},
 
 oddLimitFromD[d_] := Prime[d + 1] - 2;
 
-getComplexity[pcv_, complexityWeighting_ : "noop", complexityP_ : 1] := Module[{d, weightedPcv},
+getComplexity[pcv_, complexityWeighting_ : "copfr", complexityP_ : 1] := Module[{d, weightedPcv},
   d = Length[pcv];
   weightedPcv = If[
-    complexityWeighting == "noop",
+    complexityWeighting == "copfr",
     pcv,
     If[
       complexityWeighting == "logProduct",

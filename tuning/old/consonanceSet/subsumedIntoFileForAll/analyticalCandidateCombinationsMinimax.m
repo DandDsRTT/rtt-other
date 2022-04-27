@@ -10,7 +10,7 @@ getGeneratorsPreimageTransversal[m_] := Module[{ma, decomp, left, snf, right, ge
   generatorsPreimageTransversal
 ];
 
-getMaxDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "noop", complexityP_ : 1] := Module[{e, w},
+getMaxDamage[p_, tima_, ptm_, weighting_ : "unweighted", complexityWeighting_ : "copfr", complexityP_ : 1] := Module[{e, w},
   e = N[ptm.p.Transpose[tima]] - N[ptm.Transpose[tima]];
   w = getW[tima, weighting, complexityWeighting, complexityP];
   
@@ -83,12 +83,12 @@ m = {{{5, 8, 12}, {0, 0, -1}}, "co"}; (* blackwood *)*)
 
 1200 * getMinimaxTuning[m]
 
-1200 * getMinimaxTuning[m, "simplicityWeighted", "noop", 1]
-1200 * getMinimaxTuning[m, "simplicityWeighted", "noop", 2]
+1200 * getMinimaxTuning[m, "simplicityWeighted", "copfr", 1]
+1200 * getMinimaxTuning[m, "simplicityWeighted", "copfr", 2]
 1200 * getMinimaxTuning[m, "simplicityWeighted", "logProduct", 1]
 1200 * getMinimaxTuning[m, "simplicityWeighted", "logProduct", 2]
 
-1200 * getMinimaxTuning[m, "complexityWeighted", "noop", 1]
-1200 * getMinimaxTuning[m, "complexityWeighted", "noop", 2]
+1200 * getMinimaxTuning[m, "complexityWeighted", "copfr", 1]
+1200 * getMinimaxTuning[m, "complexityWeighted", "copfr", 2]
 1200 * getMinimaxTuning[m, "complexityWeighted", "logProduct", 1]
 1200 * getMinimaxTuning[m, "complexityWeighted", "logProduct", 2]
