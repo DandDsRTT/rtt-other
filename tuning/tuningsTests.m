@@ -320,9 +320,9 @@ testClose[optimizeGeneratorsTuningMap, {{{1, 4, 4}, {0, -4, -1}}, "co", {2, 7, 1
 (*testClose[optimizeGeneratorsTuningMap, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "originalTuningName" -> "POTOP", {600.000, 709.184}]; *)(* https://en.xen.wiki/w/Pajara#Tuning_spectrum has {600.000, 706.843} *)
 testClose[optimizeGeneratorsTuningMap, {{{1, -1, 0, 1}, {0, 10, 9, 7}}, "co"}, "originalTuningName" -> "POTOP", {1200.000, 310.196}]; (* https://en.xen.wiki/w/Myna#Tuning_spectrum *)
 accuracy = 2;
-testClose[optimizeTuningMap, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "POTOP", {1200.00, 1915.71, 2807.15, 3368.59, 4161.43}]; (* Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ but I agree with it, so it doesn't match the Kees tuning of it elsewhere in here *)
+testClose[optimizeTuningMap, {{{1, 3, 0, 0, 3}, {0, -3, 5, 6, 1}}, "co"}, "originalTuningName" -> "POTOP", {1200.00, 1915.71, 2807.15, 3368.59, 4161.43}]; (* Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ but I agree with it, so it doesn't match the Kees tuning of it elsewhere in here *)
 accuracy = 1;
-testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 10}, {0, -1, - 9, 2, -16}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 490.4}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 10}, {0, -1, -9, 2, -16}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 490.4}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 1}, {0, -1, -9, 2, 6}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 490.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 testClose[optimizeGeneratorsTuningMap, {{{1, 2, -3, 2, 1}, {0, -1, 13, 2, 6}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 491.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 accuracy = 3;
@@ -387,7 +387,7 @@ testClose[optimizeTuningMap, hanson, "originalTuningName" -> "Weil", {1200.0, 19
 (*testClose[optimizeTuningMap, magic, "originalTuningName" -> "Weil", {1200.001, 1901.956, 2780.392}]; *)(* [2a] has  {1200.0, 1901.955, 2780.391} *)
 testClose[optimizeTuningMap, negri, "originalTuningName" -> "Weil", {1200.0, 1896.185, 2777.861}]; (* [2a] *)
 testClose[optimizeTuningMap, tetracot, "originalTuningName" -> "Weil", {1198.064, 1901.955, 2781.819}]; (* [2a]  *)
-testClose[optimizeTuningMap, meantone7, "originalTuningName" -> "Weil", {1200.0, 1896.578, 2786.314 , 3365.784}]; (* [2a] *)
+testClose[optimizeTuningMap, meantone7, "originalTuningName" -> "Weil", {1200.0, 1896.578, 2786.314, 3365.784}]; (* [2a] *)
 testClose[optimizeTuningMap, magic7, "originalTuningName" -> "Weil", {1200.0, 1901.955, 2780.391, 3364.692}]; (* [2a] *)
 (*testClose[optimizeTuningMap, pajara, "originalTuningName" -> "Weil", {1193.804, 1896.997, 2771.926, 3368.828} ]; *)(* [2a] has {1193.803, 1896.996, 2771.924, 3368.826}  *)
 (*testClose[optimizeTuningMap, augene, "originalTuningName" -> "Weil", {1194.134, 1901.798, 2786.314, 3361.211}]; *)(* [2a] has {1194.134, 1899.852, 2786.314, 3365.102} *)
@@ -402,7 +402,7 @@ testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "WE", {1194.254,
 (* I searched on Facebook, Yahoo, Xenwiki, Flora's app, Sintel's app, Paul's papers, Graham's app, Scala, Discord history, and Graham's papers, and this is the only actual example of a Kees tuning ever stated publicly by a human *)
 accuracy = 2;
 (* https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ *)
-testClose[optimizeTuningMap, {{{1, 3, 0 , 0 , 3}, {0, -3 , 5 , 6, 1}}, "co"}, "originalTuningName" -> "Kees", {1200., 1915.93, 2806.79, 3368.14, 4161.36}];
+testClose[optimizeTuningMap, {{{1, 3, 0, 0, 3}, {0, -3, 5, 6, 1}}, "co"}, "originalTuningName" -> "Kees", {1200., 1915.93, 2806.79, 3368.14, 4161.36}];
 accuracy = 3;
 
 (* KE *)
