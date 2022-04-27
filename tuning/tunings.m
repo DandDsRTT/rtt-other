@@ -1357,23 +1357,23 @@ getPcvCopfrComplexity[pcv_, t_] := Total[Map[If[Abs[# > 0], 1, 0]&, pcv]];
 (* AKA "Benedetti height" *)
 getPcvProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getIntervalBasis[t], pcv}];
 (* AKA "Tenney height" *)
-getPcvLogProductComplexity[pcv_, t_] := Log[2, getPcvProductComplexity[pcv, t]];
+getPcvLogProductComplexity[pcv_, t_] := Log2[getPcvProductComplexity[pcv, t]];
 (* AKA "Wilson height", can also be used to find BOP tuning *)
 getPcvSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getIntervalBasis[t], pcv}]];
 (* This apparently doesn't have a name, but can also be used to find TOP tuning *)
-getPcvLogSopfrComplexity[pcv_, t_] := Log[2, getPcvSopfrComplexity[pcv, t]];
+getPcvLogSopfrComplexity[pcv_, t_] := Log2[getPcvSopfrComplexity[pcv, t]];
 (* AKA "Weil height" *)
 getPcvIntegerLimitComplexity[pcv_, t_] := Module[{quotient},
   quotient = pcvToQuotient[pcv];
   Max[Numerator[quotient], Denominator[quotient]]
 ];
 (* AKA "logarithmic Weil height", used for "Weil tuning" *)
-getPcvLogIntegerLimitComplexity[pcv_, t_] := Log[2, getPcvIntegerLimitComplexity[pcv, t]];
+getPcvLogIntegerLimitComplexity[pcv_, t_] := Log2[getPcvIntegerLimitComplexity[pcv, t]];
 (* AKA "Kees height" *)
 removePowersOfTwoFromPcv[pcv_] := MapIndexed[If[First[#2] == 1, 0, #1]&, pcv];
 getPcvOddLimitComplexity[pcv_, t_] := getPcvIntegerLimitComplexity[removePowersOfTwoFromPcv[pcv], t];
 (* AKA "Kees expressibility" , used for "Kees tuning" *)
-getPcvLogOddLimitComplexity[pcv_, t_] := Log[2, getPcvOddLimitComplexity[pcv, t]];
+getPcvLogOddLimitComplexity[pcv_, t_] := Log2[getPcvOddLimitComplexity[pcv, t]];
 
 
 (* INTERVAL BASIS *)
@@ -1756,7 +1756,7 @@ processTuningOptions[
   }
 ];
 
-getPrimesTuningMap[t_] := Log[2, getIntervalBasis[t]];
+getPrimesTuningMap[t_] := Log2[getIntervalBasis[t]];
 
 (* This is different than the damageWeights, this is nested within it;
 this is to weight the quantities of the PC-vectors before taking a norm and getting an interval complexity, 
