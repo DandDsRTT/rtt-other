@@ -420,14 +420,10 @@ optimizeGeneratorsTuningMapTargetingListNumericalUnique[
   {
     tuningMappings,
     generatorsTuningMap,
-    ma,
     tuningMap,
-    primesTuningMap,
-    
-    damageWeights,
     
     normPower,
-    errorsMap,
+    damagesL,
     periodsPerOctave,
     minimizedNorm,
     solution
@@ -435,12 +431,10 @@ optimizeGeneratorsTuningMapTargetingListNumericalUnique[
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
   tuningMap = Part[tuningMappings, 3];
-  primesTuningMap = Part[tuningMappings, 4];
-
-  (* HERE HERE HERE *)
-  damageWeights = getDamageWeights[
+  
+  damagesL = getTargetedIntervalDamagesL[
+    tuningMap,
     t,
     targetedIntervalsA, (* trait 0 *)
     damageWeightingSlope, (* trait 2 *)
@@ -450,14 +444,13 @@ optimizeGeneratorsTuningMapTargetingListNumericalUnique[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
-  errorsMap = Abs[(tuningMap - primesTuningMap).Transpose[targetedIntervalsA].damageWeights];
   normPower = optimizationPower;
   
   periodsPerOctave = getPeriodsPerOctave[t];
   minimizedNorm = If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-    {Norm[errorsMap, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-    Norm[errorsMap, normPower]
+    {Norm[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+    Norm[damagesL, normPower]
   ];
   solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
   generatorsTuningMap /. Last[solution]
@@ -478,20 +471,16 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
   {
     tuningMappings,
     generatorsTuningMap,
-    ma,
     tuningMap,
-    primesTuningMap,
     
-    damageWeights,
-    
-    errorMagnitude,
-    previousErrorMagnitude,
+    damagesMagnitude,
+    previousDamagesMagnitude,
     previousSolution,
     normPower,
     normPowerPower,
     
     normPowerLimit,
-    errorsMap,
+    damagesL,
     periodsPerOctave,
     minimizedNorm,
     solution
@@ -499,11 +488,10 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
   tuningMap = Part[tuningMappings, 3];
-  primesTuningMap = Part[tuningMappings, 4];
   
-  damageWeights = getDamageWeights[
+  damagesL = getTargetedIntervalDamagesL[
+    tuningMap,
     t,
     targetedIntervalsA, (* trait 0 *)
     damageWeightingSlope, (* trait 2 *)
@@ -513,29 +501,27 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
-  errorsMap = Abs[(tuningMap - primesTuningMap).Transpose[targetedIntervalsA].damageWeights];
   normPowerLimit = optimizationPower;
   
-  errorMagnitude = 1000000;
-  previousErrorMagnitude = \[Infinity];
+  damagesMagnitude = 1000000;
+  previousDamagesMagnitude = \[Infinity];
   normPower = 2;
   normPowerPower = 1;
   
   periodsPerOctave = getPeriodsPerOctave[t];
   
   While[
-    (* the != bit, while seemingly unnecessary, prevented a certain type of crash *)
-    normPowerPower <= 6 && previousErrorMagnitude != errorMagnitude && previousErrorMagnitude - errorMagnitude > 0,
+    normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
     
-    previousErrorMagnitude = errorMagnitude;
+    previousDamagesMagnitude = damagesMagnitude;
     previousSolution = solution;
     minimizedNorm = If[
       Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {Norm[errorsMap, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      Norm[errorsMap, normPower]
+      {Norm[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+      Norm[damagesL, normPower]
     ];
     solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
-    errorMagnitude = First[solution];
+    damagesMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
@@ -785,9 +771,8 @@ getDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Module[
   complexitySizeFactor = Part[tuningOptions, 9]; (* trait 4c *)
   complexityMakeOdd = Part[tuningOptions, 10];(* trait 4d *)
   
-  tuningMap = generatorsTuningMap. getA[getM[t]] / 1200; (* TODO: you should have getDamage for GTM and for TM *)
+  tuningMap = generatorsTuningMap. getA[getM[t]] / 1200;
   
-  (* TODO: so this lost me a lot of time.  I didn't realize that these functions assume the tuning map passed in is in octaves, not cents *)
   1200 * If[
     optimizationPower == \[Infinity],
     getMaxDamage[
@@ -829,7 +814,8 @@ getDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Module[
   ]
 ];
 
-getTargetedIntervalDamages[
+(* compare with getDualMultipliedPrimesErrorL *)
+getTargetedIntervalDamagesL[
   tuningMap_,
   t_,
   targetedIntervalsA_, (* trait 0 *)
@@ -840,12 +826,9 @@ getTargetedIntervalDamages[
   complexitySizeFactor_, (* trait 4c *)
   complexityMakeOdd_ (* trait 4d *)
 ] := Module[
-  {primesTuningMap, targetedIntervalErrorsList, targetedIntervalDamagesList, damageWeights},
+  {primesTuningMap, damageWeights},
   
   primesTuningMap = getPrimesTuningMap[t];
-  
-  targetedIntervalErrorsList = N[tuningMap.Transpose[targetedIntervalsA]] - N[primesTuningMap.Transpose[targetedIntervalsA]];
-  targetedIntervalDamagesList = Abs[targetedIntervalErrorsList];
   damageWeights = getDamageWeights[
     t,
     targetedIntervalsA, (* trait 0 *)
@@ -857,7 +840,7 @@ getTargetedIntervalDamages[
     complexityMakeOdd (* trait 4d *)
   ];
   
-  targetedIntervalDamagesList.damageWeights (*TODO: wait a tic... isn't this like, exactly what we do elsewhere, except not as nice? all these variable names are crappy, the transposed targeted intervals can be factored out, the ,,, yes okay so you should actually use this function in the optimizeGeneratorsTuningMapTargetingListNumericalUnique function*)
+  Abs[N[tuningMap - primesTuningMap].Transpose[targetedIntervalsA].damageWeights]
 ];
 
 Square[n_] := n^2;
@@ -872,7 +855,7 @@ getSumDamage[
   complexityPrimePower_, (* trait 4b *)
   complexitySizeFactor_, (* trait 4c *)
   complexityMakeOdd_ (* trait 4d *)
-] := Total[getTargetedIntervalDamages[
+] := Total[getTargetedIntervalDamagesL[
   tuningMap,
   t,
   targetedIntervalsA, (* trait 0 *)
@@ -894,7 +877,7 @@ get2SumDamage[
   complexityPrimePower_, (* trait 4b *)
   complexitySizeFactor_, (* trait 4c *)
   complexityMakeOdd_ (* trait 4d *)
-] := Total[Square[getTargetedIntervalDamages[
+] := Total[Square[getTargetedIntervalDamagesL[
   t,
   tuningMap,
   targetedIntervalsA, (* trait 0 *)
@@ -916,7 +899,7 @@ getMaxDamage[
   complexityPrimePower_, (* trait 4b *)
   complexitySizeFactor_, (* trait 4c *)
   complexityMakeOdd_ (* trait 4d *)
-] := Max[getTargetedIntervalDamages[
+] := Max[getTargetedIntervalDamagesL[
   tuningMap,
   t,
   targetedIntervalsA, (* trait 0 *)
@@ -1395,7 +1378,7 @@ getComplexityMultiplier[
   (* When used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm, covers TOP; 
 when used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical, covers TE; 
 when used by getDamageWeights by optimizeGeneratorsTuningMapMinisos, optimizeGeneratorsTuningMapTargetingListNumerical, 
-or by getTargetedIntervalDamages by getSumDamage or getMaxDamage by optimizeGeneratorsTuningMapSimplex, 
+or by getTargetedIntervalDamagesL by getSumDamage or getMaxDamage by optimizeGeneratorsTuningMapSimplex, 
 covers any targeting-list tuning using this as its damage's complexity *)
   complexityMultiplier = getLogPrimeCoordinationA[t];
   
@@ -1421,7 +1404,7 @@ covers any targeting-list tuning using this as its damage's complexity *)
     when used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical, covers WE or KE
     (surprisingly KE does not use the below; it instead uses this and applies an unchanged octave constraint); 
     when used by getDamageWeights by optimizeGeneratorsTuningMapMinisos, optimizeGeneratorsTuningMapTargetingListNumerical, 
-    or by getTargetedIntervalDamages by getSumDamage or getMaxDamage by optimizeGeneratorsTuningMapSimplex, 
+    or by getTargetedIntervalDamagesL by getSumDamage or getMaxDamage by optimizeGeneratorsTuningMapSimplex, 
     should cover any targeting-list tuning using this as its damage's complexity *)
     complexitySizeFactor > 0,
     complexityMultiplier = (Join[getPrimesIdentityA[t], {Table[complexitySizeFactor, getD[t]]}] / (1 + complexitySizeFactor)).complexityMultiplier
@@ -1432,7 +1415,7 @@ covers any targeting-list tuning using this as its damage's complexity *)
     where it's implemented separately (the min - max thing) with pure-octave constraint on the solver; 
     note again that this is is not used for KE; see note above;
     when used by getDamageWeights by optimizeGeneratorsTuningMapMinisos, optimizeGeneratorsTuningMapTargetingListNumerical, 
-    or by getTargetedIntervalDamages by getSumDamage or getMaxDamage by optimizeGeneratorsTuningMapSimplex, 
+    or by getTargetedIntervalDamagesL by getSumDamage or getMaxDamage by optimizeGeneratorsTuningMapSimplex, 
     should cover any targeting-list tuning using this as its damage's complexity *)
     complexityMakeOdd == True,
     complexityMultiplier = complexityMultiplier.DiagonalMatrix[Join[{complexityMakeOdd}, Table[1, getD[t] - 1]]]

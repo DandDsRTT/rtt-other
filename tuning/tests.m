@@ -94,7 +94,7 @@ testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "dama
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1197.930, 694.911}];
 
 
-testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1199.022, 695.601}];
+testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1195.699, 693.352}];
 
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1195.699, 693.352}];
 testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1195.699, 693.352}];
@@ -114,7 +114,7 @@ testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "dama
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-U", {599.995, 108.072}];
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NS", {596.393, 105.964}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.177, 106.910}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.177, 107.111}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-S", {598.402, 107.653}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {599.667, 108.278}];
 
@@ -240,11 +240,11 @@ test[dualPower, 1, \[Infinity]];
 test[dualPower, 2, 2];
 test[dualPower, \[Infinity], 1];
 
-(* getPFromUnchangedIntervals *)
-test[getPFromUnchangedIntervals, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {{1, 0, 0}, {-2, 0, 1}}, {{1, 1, 0}, {0, 0, 0}, {0,FractionBox["1", "4"], 1}}];
+(* getProjectionAFromUnchangedIntervals *)
+test[getProjectionAFromUnchangedIntervals, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {{1, 0, 0}, {-2, 0, 1}}, {{1, 1, 0}, {0, 0, 0}, {0,FractionBox["1", "4"], 1}}];
 
-(* getDiagonalEigenvalueMatrix *)
-test[getDiagonalEigenvalueMatrix, {{1, 0, 0}, {-2, 0, 1}}, {{-4, 4, -1}}, {{1, 0, 0}, {0, 1, 0}, {0, 0, 0}}];
+(* getDiagonalEigenvalueA *)
+test[getDiagonalEigenvalueA, {{1, 0, 0}, {-2, 0, 1}}, {{-4, 4, -1}}, {{1, 0, 0}, {0, 1, 0}, {0, 0, 0}}];
 
 (* getPrimesTuningMap *)
 test[getPrimesTuningMap, {{{12, 19, 28}}, "co", {2, 3, 5}}, {Log2[2], Log2[3], Log2[5]}];
@@ -269,9 +269,9 @@ test[oddLimitFromD, 6, 15];
 
 (* getComplexity *)
 dummy5limitTemp = {{{1, 2, 3}, {0, 5, 6}}, "co"};
-test[getComplexity, {1, 1, -1}, dummy5limitTemp, "copfr", 1, 3];
-test[getComplexity, {1, 1, -1}, dummy5limitTemp, "copfr", 2, \[Sqrt]3];
-test[getComplexity, {1, 1, -1}, dummy5limitTemp, "logProduct", 1, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
+test[getComplexity, {1, 1, -1}, dummy5limitTemp, 1, True, 0, 0, False, 3];
+test[getComplexity, {1, 1, -1}, dummy5limitTemp, 2, True, 0, 0, False, \[Sqrt]3];
+test[getComplexity, {1, 1, -1}, dummy5limitTemp, 1, False, 0, 0, False, 1 +FractionBox[RowBox[{"Log", "[", "3", "]"}], RowBox[{"Log", "[", "2", "]"}]]+FractionBox[RowBox[{"Log", "[", "5", "]"}], RowBox[{"Log", "[", "2", "]"}]]];
 
 pcv = {1, -2, 1};
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "copfr", 1, 4];

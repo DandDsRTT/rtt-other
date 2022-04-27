@@ -116,7 +116,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm[
   complexityMakeOdd_ (* trait 4d *)
 ] := If[
   complexityNormPower != 2 && hasNonUniqueTuning[getM[t]],
-  optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUniqueResult[
+  optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
     t,
     unchangedIntervals, (* trait -1 *)
     complexityNormPower, (* trait 3 *)
@@ -125,7 +125,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ],
-  optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormAndHasUniqueResult[
+  optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormUnique[
     t,
     unchangedIntervals, (* trait -1 *)
     complexityNormPower, (* trait 3 *)
@@ -136,7 +136,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm[
   ]
 ];
 
-optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormAndHasUniqueResult[
+optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormUnique[
   t_,
   unchangedIntervals_, (* trait -1 *)
   complexityNormPower_, (* trait 3 *)
@@ -148,15 +148,12 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormAndHasUniqueR
   {
     tuningMappings,
     generatorsTuningMap,
-    ma,
     tuningMap,
-    primesTuningMap,
     
-    dualMultiplier,
     targetedIntervalsAsPrimesIdentityA,
     
     normPower,
-    errorsMap,
+    damagesL,
     periodsPerOctave,
     minimizedNorm,
     solution
@@ -164,12 +161,11 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormAndHasUniqueR
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
   tuningMap = Part[tuningMappings, 3];
-  primesTuningMap = Part[tuningMappings, 4];
   
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
-  dualMultiplier = getDualMultiplier[
+  damagesL = getDualMultipliedPrimesErrorL[
+    tuningMap,
     t,
     targetedIntervalsAsPrimesIdentityA, (* trait 0 *)
     complexityNormPower, (* trait 3 *)
@@ -178,20 +174,19 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormAndHasUniqueR
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
-  errorsMap = Abs[(tuningMap - primesTuningMap).targetedIntervalsAsPrimesIdentityA.dualMultiplier];
   normPower = dualPower[complexityNormPower];
   
   periodsPerOctave = getPeriodsPerOctave[t];
   minimizedNorm = If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-    {Norm[errorsMap, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-    Norm[errorsMap, normPower]
+    {Norm[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+    Norm[damagesL, normPower]
   ];
   solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
   generatorsTuningMap /. Last[solution]
 ];
 
-optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUniqueResult[
+optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
   t_,
   unchangedIntervals_, (* trait -1 *)
   complexityNormPower_, (* trait 3 *)
@@ -203,21 +198,18 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUnique
   {
     tuningMappings,
     generatorsTuningMap,
-    ma,
     tuningMap,
-    primesTuningMap,
     
-    dualMultiplier,
     targetedIntervalsAsPrimesIdentityA,
     
-    errorMagnitude,
-    previousErrorMagnitude,
+    damagesMagnitude,
+    previousDamagesMagnitude,
     previousSolution,
     normPower,
     normPowerPower,
     
     normPowerLimit,
-    errorsMap,
+    damagesL,
     periodsPerOctave,
     minimizedNorm,
     solution
@@ -225,12 +217,11 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUnique
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
   tuningMap = Part[tuningMappings, 3];
-  primesTuningMap = Part[tuningMappings, 4];
   
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
-  dualMultiplier = getDualMultiplier[
+  damagesL = getDualMultipliedPrimesErrorL[
+    tuningMap,
     t,
     targetedIntervalsAsPrimesIdentityA, (* trait 0 *)
     complexityNormPower, (* trait 3 *)
@@ -239,11 +230,10 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUnique
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
-  errorsMap = Abs[(tuningMap - primesTuningMap).targetedIntervalsAsPrimesIdentityA.dualMultiplier];
   normPowerLimit = dualPower[complexityNormPower];
   
-  errorMagnitude = 1000000;
-  previousErrorMagnitude = \[Infinity];
+  damagesMagnitude = 1000000;
+  previousDamagesMagnitude = \[Infinity];
   normPower = 2;
   normPowerPower = 1;
   
@@ -251,17 +241,17 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUnique
   
   While[
     (* the != bit, while seemingly unnecessary, prevented a certain type of crash *)
-    normPowerPower <= 6 && previousErrorMagnitude != errorMagnitude && previousErrorMagnitude - errorMagnitude > 0,
+    normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
     
-    previousErrorMagnitude = errorMagnitude;
+    previousDamagesMagnitude = damagesMagnitude;
     previousSolution = solution;
     minimizedNorm = If[
       Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {Norm[errorsMap, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      Norm[errorsMap, normPower]
+      {Norm[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+      Norm[damagesL, normPower]
     ];
     solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
-    errorMagnitude = First[solution];
+    damagesMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
@@ -280,6 +270,14 @@ like actually while condition on the normpower and make it < 128 if need be
 and also I think ... wow, yeah, there was at least one of these where I wasn't actually taking the Abs of the error!
 that seems to be both the targeting-all ones
 so that certainly would have affected anything where the norm power wasn't even...
+also I think you should really not leave the below optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm
+in the dust w/r/t to this refactor
+think about how it can work knowing
+yeah it's
+https://en.wikipedia.org/wiki/Mean#Power_mean
+lim goes to NEGATIVE infinity power
+that's how to achieve minimum in the limit
+and the old email was in the "TIP" email thread
 *)
 
 optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm[
@@ -343,3 +341,32 @@ getDualMultiplier[
   complexitySizeFactor, (* trait 4c *)
   complexityMakeOdd (* trait 4d *)
 ]];
+
+(* being dual multiplied, it's essentially weighted and thus essentially a damage, and we'll assign it to 
+a variable with that name for purposes of generic implementation; compare with getTargetedIntervalDamagesL *)
+getDualMultipliedPrimesErrorL[
+  tuningMap_,
+  t_,
+  targetedIntervalsAsPrimesIdentityA_, (* trait 0 *)
+  complexityNormPower_, (* trait 3 *)
+  complexityNegateLogPrimeCoordination_, (* trait 4a *)
+  complexityPrimePower_, (* trait 4b *)
+  complexitySizeFactor_, (* trait 4c *)
+  complexityMakeOdd_ (* trait 4d *)
+] := Module[
+  {primesTuningMap, dualMultiplier},
+  
+  primesTuningMap = getPrimesTuningMap[t];
+  dualMultiplier = getDualMultiplier[
+    t,
+    targetedIntervalsAsPrimesIdentityA, (* trait 0 *)
+    (* always essentially simplicity-weighted *)
+    complexityNormPower, (* trait 3 *)
+    complexityNegateLogPrimeCoordination, (* trait 4a *)
+    complexityPrimePower, (* trait 4b *)
+    complexitySizeFactor, (* trait 4c *)
+    complexityMakeOdd (* trait 4d *)
+  ];
+  
+  Abs[(tuningMap - primesTuningMap).targetedIntervalsAsPrimesIdentityA.dualMultiplier]
+];
