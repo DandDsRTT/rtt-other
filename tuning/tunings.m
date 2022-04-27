@@ -152,7 +152,7 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
     optimizedGeneratorsTuningMap = getPureOctaveStretchedGeneratorsTuningMap[optimizedGeneratorsTuningMap, t]
   ];
   
-  SetAccuracy[optimizedGeneratorsTuningMap, 4]
+  SetAccuracy[N[optimizedGeneratorsTuningMap], 4]
 ];
 
 
@@ -217,7 +217,7 @@ optimizeTuningMap[t_, OptionsPattern[]] := Module[
   systematicComplexityName = OptionValue["systematicComplexityName"];
   originalComplexityName = OptionValue["originalComplexityName"];
   
-  SetAccuracy[optimizeGeneratorsTuningMap[t, {
+  optimizeGeneratorsTuningMap[t, {
     "unchangedIntervals" -> unchangedIntervals, (* trait -1 *)
     "targetedIntervals" -> targetedIntervals, (* trait 0 *)
     "optimizationPower" -> optimizationPower, (* trait 1 *)
@@ -233,7 +233,7 @@ optimizeTuningMap[t_, OptionsPattern[]] := Module[
     "originalTuningName" -> originalTuningName,
     "originalComplexityName" -> originalComplexityName,
     "systematicComplexityName" -> systematicComplexityName
-  }].getA[getM[t]], 4]
+  }].getA[getM[t]]
 ];
 
 
@@ -482,7 +482,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormAndHasUniqueR
   ];
   solution = NMinimize[ minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
   
-  generatorsTuningMap /. Last[solution] // N
+  generatorsTuningMap /. Last[solution]
 ];
 
 optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUniqueResult[
@@ -556,7 +556,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormWithoutUnique
     normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
   
-  generatorsTuningMap /. Last[previousSolution] // N
+  generatorsTuningMap /. Last[previousSolution]
 ];
 
 optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm[
@@ -598,7 +598,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm[
   ];
   solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
   
-  generatorsTuningMap /. Last[solution] // N
+  generatorsTuningMap /. Last[solution]
 ];
 
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
@@ -813,7 +813,7 @@ optimizeGeneratorsTuningMapTargetingListNumericalUnique[
   
   solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
   
-  generatorsTuningMap /. Last[solution] // N
+  generatorsTuningMap /. Last[solution]
 ];
 
 optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
@@ -907,7 +907,7 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
     normPower = If[optimizationPower == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
   
-  generatorsTuningMap /. Last[previousSolution] // N
+  generatorsTuningMap /. Last[previousSolution]
 ];
 
 
@@ -985,7 +985,7 @@ optimizeGeneratorsTuningMapSimplex[
     minDamageProjectionA = potentialProjectionAs[[minDamageTuningMapIndex]];
     generatorsPreimageTransversal = Transpose[getA[getGeneratorsPreimageTransversal[t]]];
     projectedGenerators = minDamageProjectionA.generatorsPreimageTransversal;
-    primesTuningMap.projectedGenerators // N,
+    primesTuningMap.projectedGenerators,
     
     (* result is not unique; fallback to numerical solution *)
     optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
@@ -1052,7 +1052,7 @@ optimizeGeneratorsTuningMapWithPseudoInverse[
   
   generatorsTuningMap = primesTuningMap.generatorsA;
   
-  generatorsTuningMap // N
+  generatorsTuningMap
 ];
 
 
