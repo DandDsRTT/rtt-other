@@ -12,6 +12,8 @@ testClose[optimizeGeneratorsTuningMap, pajara, "targetedIntervals" -> {}, "syste
 testClose[optimizeGeneratorsTuningMap, pajara, "targetedIntervals" -> {}, "systematicTuningName" -> "minimax-S", {598.447, 106.567}];
 testClose[optimizeGeneratorsTuningMap, pajara, "targetedIntervals" -> {}, "systematicTuningName" -> "minimax-ES", {598.859, 106.844}];
 
+
+
 (* interval basis *)
 (* TODO: find and include more examples of this *)
 t = {{{1, 1, 5}, {0, -1, -3}}, "co", {2, 7 / 5, 11}};
@@ -27,9 +29,9 @@ testClose[optimizeGeneratorsTuningMap, t, "targetedIntervals" -> {}, "optimizati
 (* I had to fudge the factors to make mapping forms match in some places, due to rounding errors those matching factors introduced *)
 accuracy = 2;
 testClose[optimizeGeneratorsTuningMap, meantone, "originalTuningName" -> "TOP", {1201.70, 1201.70 - 504.13}]; (* [5](Table 1) *)
-testClose[optimizeGeneratorsTuningMap, blackwood, "originalTuningName" -> "TOP", {238.87, 238.86 * 11.0001 + 158.78}]; (* [5](Table 1) *)
+testClose[optimizeGeneratorsTuningMap, blackwood, "originalTuningName" -> "TOP", {238.87, 238.86 * 11.0003 + 158.78}]; (* [5](Table 1) *)
 testClose[optimizeGeneratorsTuningMap, dicot, "originalTuningName" -> "TOP", {1207.66, 353.22}];(* [5](Table 1) *)
-testClose[optimizeGeneratorsTuningMap, augmented, "originalTuningName" -> "TOP", {399.02, 399.018 * 4.99999 - 93.15}]; (* [5](Table 1) *)
+testClose[optimizeGeneratorsTuningMap, augmented, "originalTuningName" -> "TOP", {399.02, 399.018 * 5.00005 - 93.15}]; (* [5](Table 1) *)
 testClose[optimizeGeneratorsTuningMap, mavila, "originalTuningName" -> "TOP", {1206.55, 1206.55 + 685.03}];(* [5](Table 1) *)
 testClose[optimizeGeneratorsTuningMap, porcupine, "originalTuningName" -> "TOP", {1196.91, 1034.59 - 1196.91}]; (* [5](Table 1) *)
 testClose[optimizeGeneratorsTuningMap, srutal, "originalTuningName" -> "TOP", {599.56, 599.56 * 3.99999 - 494.86}];(* [5](Table 1) *)
@@ -114,20 +116,22 @@ testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 10}, {0, -1, -9, 2, -16}},
 testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 1}, {0, -1, -9, 2, 6}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 490.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 testClose[optimizeGeneratorsTuningMap, {{{1, 2, -3, 2, 1}, {0, -1, 13, 2, 6}}, "co"}, "originalTuningName" -> "POTOP", {1200.0, 491.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
 accuracy = 3;
-(*testClose[optimizeGeneratorsTuningMap, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "originalTuningName" -> "POTOP", {1200.000, 700.795, 380.759}]; *)(* https://www.facebook.com/groups/xenharmonicmath/posts/738498989623659/?comment_id=738515309622027 has {1200, 700.3907806, 384.0221726} and this was passing before introducing the non-unique check code... and it really does seem like it should have a unique solution, so the condition on that must be wrong... you should really plot this one visually and see what's happening *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "originalTuningName" -> "POTOP", {1200.000, 700.795, 380.759}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/738498989623659/?comment_id=738515309622027 has {1200, 700.3907806, 384.0221726} and this was passing before introducing the non-unique check code... and it really does seem like it should have a unique solution, so the condition on that must be wrong... you should really plot this one visually and see what's happening *)
 accuracy = 2;
 testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0}, {0, 1, 4}}, "co"}, "originalTuningName" -> "POTOP", {1200, 696.58}]; (* The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents. (some Facebook thing sorry I lost the link *)
 testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0, -3}, {0, 1, 4, 10}}, "co"}, "originalTuningName" -> "POTOP", {1200, 696.58}]; (* The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents. (some Facebook thing sorry I lost the link *)
 accuracy = 3;
-(*testClose[optimizeGeneratorsTuningMap, {{{1, 1, 4}, {0, 1, -2}}, "co", {2, 3, 7}}, "originalTuningName" -> "POTOP", {1200.000, 707.949}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/1035558283251060/?comment_id=1041634519310103&reply_comment_id=1041649585975263 has {1200, 709.18447040211} *) *) (* TODO: comment out discrepancy ones so I dont find them hard to find later *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 1, 4}, {0, 1, -2}}, "co", {2, 3, 7}}, "originalTuningName" -> "POTOP", {1200, 709.18447040211}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/1035558283251060/?comment_id=1041634519310103&reply_comment_id=1041649585975263  *)
 
 (* BOP *)
 (* TODO: resolve disagreement between Flora's results and mine... we disagree on ones with non-unique tunings, and I know that I take specific steps to contend with that while she doesn't, so I suspect that I'm the one who is correct here, but we'll see *)
 accuracy = 1;
 testClose[optimizeTuningMap, meantone, "originalTuningName" -> "BOP", {1201.7205, 1899.3743, 2790.6149}];  (* [4] *)
-(*testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "BOP", {1194.2, 1910.7, 2784.5}];  *)(* [4] has {1194.179, 1910.6865, 2784.755} *)
+(*testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "BOP", {1194.2, 1910.7, 2786.3}];  (* [4] has {1194.179, 1910.6865, 2784.755} *)*)
 testClose[optimizeTuningMap, dicot, "originalTuningName" -> "BOP", {1207.4392, 1913.1137, 2767.7157}]; (* [4] *)
-(*testClose[optimizeTuningMap, augmented, "originalTuningName" -> "BOP", {1197.2, 1903.6, 2793.4}];  *)(* [4] has {1197.1684, 1901.5207, 2793.3928} *)
+accuracy = 0;
+testClose[optimizeTuningMap, augmented, "originalTuningName" -> "BOP", {1197.2, 1902.0, 2793.4}];  (* [4] has {1197.1684, 1901.5207, 2793.3928} *)
+accuracy = 1;
 testClose[optimizeTuningMap, mavila, "originalTuningName" -> "BOP", {1206.5842, 1892.0787, 2769.8534}];  (* [4] *)
 testClose[optimizeTuningMap, porcupine, "originalTuningName" -> "BOP", {1196.9273, 1906.5643, 2778.6315}];  (* [4] *)
 testClose[optimizeTuningMap, srutal, "originalTuningName" -> "BOP", {1199.1112, 1903.288, 2788.5356}];  (* [4] *)
@@ -138,9 +142,10 @@ testClose[optimizeTuningMap, tetracot, "originalTuningName" -> "BOP", {1199.0295
 testClose[optimizeTuningMap, meantone7, "originalTuningName" -> "BOP", {1201.7205, 1899.3742, 2790.615, 3371.376 }]; (* [4] *)
 testClose[optimizeTuningMap, magic7, "originalTuningName" -> "BOP", {1201.2339, 1903.8057, 2783.2289, 3367.8997}];  (* [4] *)
 testClose[optimizeTuningMap, pajara, "originalTuningName" -> "BOP", {1197.3096, 1902.8075, 2779.5876, 3378.2424}];  (* [4] *)
-(*testClose[optimizeTuningMap, augene, "originalTuningName" -> "BOP", {1197.2, 1905.1, 2793.4, 3372.8}];  *)(* [4] has  {1197.1684, 1903.995, 2793.3928, 3375.0201} *)
+(*testClose[optimizeTuningMap, augene, "originalTuningName" -> "BOP", {1197.2, 1904.3, 2793.4, 3374.4}];*)  (* [4] has  {1197.1684, 1903.995, 2793.3928, 3375.0201} *)
 testClose[optimizeTuningMap, sensi, "originalTuningName" -> "BOP", {1198.5891, 1903.5232, 2789.8411, 3363.8876}]; (* [4] *)
-(*testClose[optimizeTuningMap, sensamagic, "originalTuningName" -> "BOP", {1199.5, 1903.2, 2784.2, 3365.9}]; *)(* [4] has  {1200.3433, 1903.2071, 2784.2269, 3365.9043}*)
+accuracy = 0;
+testClose[optimizeTuningMap, sensamagic, "originalTuningName" -> "BOP", {1200.0, 1903.2, 2784.2, 3365.9}]; (* [4] *)
 accuracy = 3;
 
 (* BE *)
@@ -163,9 +168,10 @@ testClose[optimizeTuningMap, sensi, "originalTuningName" -> "BE", {1199.7904, 19
 testClose[optimizeTuningMap, sensamagic, "originalTuningName" -> "BE", {1200.0000, 1903.3868, 2785.5183, 3365.7078}]; (* [4] *)
 
 (* Weil *)
-(* TODO: resolve discrepancies... I'll bet it has something to do with it not doing TIP... check out tipweil.py from Mike in Yahoo archives? yes I think it's because it's using a sort of simplex type algorithm that hits these results directly. i bet my results have the tied for same damage. not sure if tehre's an equivalent to ramping up the powers on max and min... well we talked about this right? well the max is just toward infinty, and couldn't min be expressed by the oppsoite, tiny powers and then a big power? maybe? try to find the old email with Dave*)
-(*testClose[optimizeTuningMap, meantone, "originalTuningName" -> "Weil", {1200.006, 1896.587, 2786.327}]; *)(* [2a] has {1200.0, 1896.578, 2786.314}*)
-(*testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "Weil", {1188.722, 1901.955, 2783.470}]; *)(* [2a] has {1188.722, 1901.955, 2773.22}*)
+accuracy = 3;
+(* TODO: resolve discrepancies... I'll bet it has something to do with it not doing TIP... check out tipweil.py from Mike in Yahoo archives? yes I think it's because it's using a sort of simplex type algorithm that hits these results directly. i bet my results have the tied for same damage. not sure if tehre's an equivalent to ramping up the powers on max and min... well we talked about this right? well the max is just toward infinty, and couldn't min be expressed by the oppsoite, tiny powers and then a big power? maybe? try to find the old email with Dave. arlgith so I've got tiptop.py Keenan's thing implmented but I haven't yet told the code to plug into it if non unique while on the non-power norm path*)
+testClose[optimizeTuningMap, meantone, "originalTuningName" -> "Weil", {1200.006, 1896.587, 2786.327}]; (* [2a] has {1200.0, 1896.578, 2786.314}*)
+(*testClose[optimizeTuningMap, blackwood, "originalTuningName" -> "Weil", {1188.722, 1901.955, 2783.470}];*) (* [2a] has {1188.722, 1901.955, 2773.22}*)
 testClose[optimizeTuningMap, dicot, "originalTuningName" -> "Weil", {1200.000, 1901.955, 2750.978}]; (* [2a] *)
 (*testClose[optimizeTuningMap, augmented, "originalTuningName" -> "Weil", {1194.134, 1899.801, 2786.314}]; *)(* [2a] has  {1194.134, 1897.307, 2786.314}  *)
 testClose[optimizeTuningMap, mavila, "originalTuningName" -> "Weil", {1200.0, 1881.31, 2756.07}]; (* [2a] *)

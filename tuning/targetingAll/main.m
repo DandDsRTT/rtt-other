@@ -116,15 +116,29 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm[
   complexityMakeOdd_ (* trait 4d *)
 ] := If[
   complexityNormPower != 2 && hasNonUniqueTuning[getM[t]],
-  optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
+  (*Print["no?"];*)
+  keenanBinding[
     t,
     unchangedIntervals, (* trait -1 *)
+    IdentityMatrix[getD[t]], (* trait 0 *)
+    \[Infinity], (* trait 1 *)
+    "simplicityWeighted", (* trait 2 *)
     complexityNormPower, (* trait 3 *)
     complexityNegateLogPrimeCoordination, (* trait 4a *)
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
+    
+    (*optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[*)
+    (*  t,
+      unchangedIntervals, (* trait -1 *)
+      complexityNormPower, (* trait 3 *)
+      complexityNegateLogPrimeCoordination, (* trait 4a *)
+      complexityPrimePower, (* trait 4b *)
+      complexitySizeFactor, (* trait 4c *)
+      complexityMakeOdd (* trait 4d *)*)
   ],
+  (* Print["think it has unique"];*)
   optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormUnique[
     t,
     unchangedIntervals, (* trait -1 *)
@@ -298,6 +312,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormOfIntegerLimit[
     
     damagesL,
     normFn,
+    normPower,
     periodsPerOctave,
     minimizedNorm,
     solution
