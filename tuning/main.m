@@ -580,7 +580,7 @@ optimizeGeneratorsTuningMapSimplex[
   unchangedIntervalSetIndices = Subsets[Range[Length[targetedIntervalsA]], {r}];
   potentialUnchangedIntervalSets = Map[Map[targetedIntervalsA[[#]]&, #]&, unchangedIntervalSetIndices];
   normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, potentialUnchangedIntervalSets];
-  filteredNormalizedPotentialUnchangedIntervalSets = Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&];
+  filteredNormalizedPotentialUnchangedIntervalSets = DeleteDuplicates[Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&]];
   potentialProjectionAs = Select[Map[
     getProjectionAFromUnchangedIntervals[t, #]&,
     filteredNormalizedPotentialUnchangedIntervalSets
@@ -610,6 +610,7 @@ optimizeGeneratorsTuningMapSimplex[
     primesTuningMap.projectedGenerators,
     
     (* result is not unique; fallback to numerical solution *)
+    (* note this only happens for minimax, not for minisum or other powers *)
     optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
       t,
       unchangedIntervals, (* trait -1 *)

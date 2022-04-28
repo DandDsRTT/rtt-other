@@ -139,10 +139,10 @@ testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "miniso
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-U", {600.000, 106.843}];
 
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-NS", {597.851, 106.643}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-NES", {598.310, 106.798}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-S", {598.436, 106.672}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-ES", {598.762, 106.835}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-NS", {596.741, 105.214}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-NES", {596.741, 105.214}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-S", {596.741, 105.214}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-ES", {596.741, 105.214}];
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-NC", {601.397, 106.145}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisum-NEC", {601.397, 106.145}];
