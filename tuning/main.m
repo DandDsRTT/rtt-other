@@ -392,7 +392,7 @@ optimizeGeneratorsTuningMapTargetingListNumerical[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ],
-  keenanBinding[
+  optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
     t,
     unchangedIntervals, (* trait -1 *)
     targetedIntervalsA, (* trait 0 *)
@@ -460,6 +460,52 @@ optimizeGeneratorsTuningMapTargetingListNumericalUnique[
   generatorsTuningMap /. Last[solution]
 ];
 
+getTuningPolytopeVertexConstraintAs[r_, c_] := Module[ (* TODO: still need to massage these var names *)
+  {tuningPolytopeConstraintA, tuningPolytopeConstraintAs},
+  
+  tuningPolytopeConstraintAs = {};
+  
+  Do[
+    Do[
+      tuningPolytopeConstraintA = Table[Table[0, c], r];
+      
+      Do[
+        tuningPolytopeConstraintA[[i, Part[indices, 1]]] = 1;
+        tuningPolytopeConstraintA[[i, Part[indices, i + 1]]] = Part[signs, i],
+        
+        {i, Range[r]}
+      ];
+      
+      AppendTo[tuningPolytopeConstraintAs, tuningPolytopeConstraintA],
+      
+      {signs, Tuples[{1, -1}, r]}
+    ],
+    
+    {indices, DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, c], r + 1], DuplicateFreeQ[#]&]]]}
+  ];
+  
+  If[
+    r == 1,
+    (*Print["could this be throwing it off?"];*)
+    Do[
+      tuningPolytopeConstraintA = {Table[0, c]};
+      tuningPolytopeConstraintA[[1, i]] = 1;
+      
+      (*Print["counting..."];*)
+      AppendTo[tuningPolytopeConstraintAs, tuningPolytopeConstraintA],
+      
+      {i, Range[c]}
+    ]
+  ];
+  
+  (*  Print["indices count: ", Length[ DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, c], r + 1], DuplicateFreeQ[#]&]]]]];*)
+  (*  Print["signs count: ", Length[ Tuples[{1, -1}, r]]];*)
+  (*  Print["tuningPolytopeConstraintAs count (should be the product of those two, well, plus whichever other ones from when r == 1): ", Length[tuningPolytopeConstraintAs]];*)
+  
+  tuningPolytopeConstraintAs
+];
+
+(* TODO: actually if anything this was designed for the TargetingAll case... you probably want a different version there with different words etc *)
 optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
   t_,
   unchangedIntervals_, (* trait -1 *)
@@ -474,29 +520,29 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
 ] := Module[
   {
     tuningMappings,
-    generatorsTuningMap,
+    ma,
     tuningMap,
+    primesTuningMap,
     
-    damagesMagnitude,
-    previousDamagesMagnitude,
-    previousSolution,
-    normPower,
-    normPowerPower,
+    damageWeights,
     
-    damagesL,
-    normFn,
-    normPowerLimit,
-    periodsPerOctave,
-    minimizedNorm,
-    solution
+    modifiedMa,
+    modifiedPrimesTuningMap,
+    candidateGeneratorTuningMaps,
+    maModificationUndoA,
+    primesTuningMapModificationUndoA,
+    furtherModification,
+    mysteriousNumber
   },
   
   tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
+  ma = Part[tuningMappings, 2];
   tuningMap = Part[tuningMappings, 3];
+  primesTuningMap = Part[tuningMappings, 4];
   
-  damagesL = getTargetedIntervalDamagesL[
-    tuningMap,
+  (*  Print["this number is probably important, Length[targetedIntervalsA]: ", Length[targetedIntervalsA]];*)
+  
+  damageWeights = getDamageWeights[
     t,
     targetedIntervalsA, (* trait 0 *)
     damageWeightingSlope, (* trait 2 *)
@@ -506,146 +552,143 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
-  normFn = Norm;
-  normPowerLimit = optimizationPower;
   
-  damagesMagnitude = 1000000;
-  previousDamagesMagnitude = \[Infinity];
-  normPower = 2;
-  normPowerPower = 1;
+  (* Print["so help me god",Dimensions[ma], Dimensions[Transpose[targetedIntervalsA]], Dimensions[targetedIntervalsA], Dimensions[damageWeights]];*)
   
-  periodsPerOctave = getPeriodsPerOctave[t];
+  modifiedMa = Transpose[ma.Transpose[targetedIntervalsA].damageWeights]; (* oh so the next line is actually the pure tuned weighted intervals, and these are the tempered weighted intervals, the difference being the damage *)
+  modifiedPrimesTuningMap = Transpose[{primesTuningMap.Transpose[targetedIntervalsA].damageWeights}];
+  candidateGeneratorTuningMaps = getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa, modifiedPrimesTuningMap, 0]; (* TODO: make that 0 a mysterious number pass *)
+  mysteriousNumber = Last[Dimensions[modifiedMa]] + 1;
+  
+  maModificationUndoA = IdentityMatrix[Last[Dimensions[modifiedMa]]];
+  primesTuningMapModificationUndoA = Table[{0}, Last[Dimensions[modifiedMa]]];
+  
+  (*  Print["maybe we're not supposed to have dupes: ", N[candidateGeneratorTuningMaps, 3]];*)
   
   While[
-    normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
-    previousDamagesMagnitude = damagesMagnitude;
-    previousSolution = solution;
-    minimizedNorm = If[
-      Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {normFn[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      normFn[damagesL, normPower]
-    ];
-    solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
-    damagesMagnitude = First[solution];
-    normPowerPower = normPowerPower += 1;
-    normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
+    Length[candidateGeneratorTuningMaps] > 1,
+    
+    (*   modifiedPrimesTuningMap = modifiedPrimesTuningMap - modifiedMa.First[candidateGeneratorTuningMaps];*)
+    
+    (*    Print["\n\n\n     COUNTING DOWN, candidates remaining: ", Length[candidateGeneratorTuningMaps]];*)
+    
+    (*    Print["modifiedPrimesTuningMap, with lenght ", Length[modifiedPrimesTuningMap], " before: ", N[modifiedPrimesTuningMap, 3]];*)
+    modifiedPrimesTuningMap = modifiedPrimesTuningMap - modifiedMa.First[candidateGeneratorTuningMaps]; (* this 2nd term here is the tuning map *)
+    
+    furtherModification = Map[Flatten, Transpose[Map[ (* # these are the differences between the FIRST (not necessarily best?) candidate and each other candidate generator tuning map, so it should always match up with the shape of A. *)
+      (*  Print*)
+      Part[candidateGeneratorTuningMaps, #] - Part[candidateGeneratorTuningMaps, 1]&,
+      Range[2, (*Last[Dimensions[modifiedMa]]*) Length[candidateGeneratorTuningMaps]]
+    ]]];
+    
+    (*    Print["just tell me what it is now, furtherModification: ", furtherModification, Dimensions[modifiedMa], Dimensions[furtherModification]];*)
+    
+    (*   Print["so uh, this thinig is always 2 steps shorter?  Length[furtherModification]: ", Length[furtherModification]," vs Length[candidateGeneratorTuningMaps]: ", Length[candidateGeneratorTuningMaps]];*)
+    
+    (*    Print["just cruious what this looks like before I attempt to massage it, ", Map[*)
+    (*    Part[candidateGeneratorTuningMaps, #] - Part[candidateGeneratorTuningMaps, 1]&,*)
+    (*    Range[2, Length[candidateGeneratorTuningMaps]]*)
+    (*  ];*)
+    
+    (*    Print["modifiedPrimesTuningMap, with lenght " , Length[modifiedPrimesTuningMap], " after : ", N[modifiedPrimesTuningMap, 3]];*)
+    (*    Print["furtherModification: ", furtherModification];*)
+    (*    Print["modifiedMa: ", modifiedMa];*)
+    (*    Print["modifiedMa.First[candidateGeneratorTuningMaps]: ", N[modifiedMa.First[candidateGeneratorTuningMaps], 3]];*)
+    (*    Print["candidateGeneratorTuningMaps: ", N[ candidateGeneratorTuningMaps, 3]];*)
+    (*    Print["primesTuningMapModificationUndoA: ", primesTuningMapModificationUndoA];*)
+    (*    Print["maModificationUndoA: ", maModificationUndoA];*)
+    (*    Print["whats the discrepancy dimensionally? ", Dimensions[modifiedMa], Dimensions[furtherModification]];*)
+    
+    modifiedMa = modifiedMa.furtherModification; (* TODO: ah-ha, I think I understand what this is now. this is Keenan's clever way of crossing off the already achieved max from the task list *)
+    primesTuningMapModificationUndoA = maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA;
+    maModificationUndoA = maModificationUndoA.furtherModification;
+    
+    candidateGeneratorTuningMaps = getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa, modifiedPrimesTuningMap, mysteriousNumber];
+    mysteriousNumber += Last[Dimensions[modifiedMa]] + 1;
   ];
-  generatorsTuningMap /. Last[previousSolution]
+  
+  N[Flatten[maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA], 16]
 ];
 
-optimizeGeneratorsTuningMapTargetingListNumericalNonUniqueKeenanStyle[
-  t_,
-  unchangedIntervals_, (* trait -1 *)
-  targetedIntervalsA_, (* trait 0 *)
-  optimizationPower_, (* trait 1 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Module[
-  {
-    tuningMappings,
-    generatorsTuningMap,
-    tuningMap,
-    
-    damagesMagnitude,
-    constraints,
-    
-    damagesL,
-    normFn,
-    normPower,
-    normPowerLimit,
-    periodsPerOctave,
-    minimizedNorm,
-    solution,
-    
-    prevMax,
-    thisMax,
-    newConstraints,
-    resolvedDamagesLFilteredForPreviousMax,
-    maxDamageTargetedIntervalIndices,
-    constrainedIndices
-  },
+getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa_, modifiedPrimesTuningMap_, mysteriousNumber_] := Module[
+  {n, m, candidateGeneratorTuningMaps, damages, minDamage, newCandidateGeneratorTuningMaps, newDamages},
   
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
-  tuningMap = Part[tuningMappings, 3];
+  (* TODO: see if that's actually rank and dimension or not; would be if targeted intervals were only primes. 
+  but even then you might get it wrong since the modification maybe transposes things *)
+  n = First[Dimensions[modifiedMa]];
+  m = Last[Dimensions[modifiedMa]];
   
-  damagesL = getTargetedIntervalDamagesL[
-    tuningMap,
-    t,
-    targetedIntervalsA, (* trait 0 *)
-    damageWeightingSlope, (* trait 2 *)
-    complexityNormPower, (* trait 3 *)
-    complexityNegateLogPrimeCoordination, (* trait 4a *)
-    complexityPrimePower, (* trait 4b *)
-    complexitySizeFactor, (* trait 4c *)
-    complexityMakeOdd (* trait 4d *)
+  candidateGeneratorTuningMaps = {};
+  Do[
+    AppendTo[
+      candidateGeneratorTuningMaps,
+      Quiet[Check[
+        LinearSolve[tuningPolytopeConstraintA.modifiedMa, tuningPolytopeConstraintA.modifiedPrimesTuningMap],
+        "err"
+      ]
+      ]],
+    {tuningPolytopeConstraintA, getTuningPolytopeVertexConstraintAs[m, n]}
   ];
-  normFn = Norm;
-  normPower = optimizationPower; (* TODO: this is always \[Infinity] *)
-  prevMax = \[Infinity];
-  constrainedIndices = {};
+  candidateGeneratorTuningMaps = Select[candidateGeneratorTuningMaps, !TrueQ[# == "err"]&];
+  (*  Print["oka... but I don't end up with thousnads here do i, after just filtering hout the no solution ones? ", Length[candidateGeneratorTuningMaps]];*)
   
-  periodsPerOctave = getPeriodsPerOctave[t];
-  constraints = If[
-    Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-    {generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-    {}
-  ];
+  damages = Quiet[Map[
+    Function[
+      {candidateGeneratorTuningMap},
+      ReverseSort[N[Flatten[Abs[modifiedMa.candidateGeneratorTuningMap - modifiedPrimesTuningMap]], 16]]
+    ],
+    candidateGeneratorTuningMaps
+  ]];
+  (*  Print["then length of corresponding damdages should be the same as previous ", Length[damages]];*)
   
-  (* Print[Map[pcvToQuotient, targetedIntervalsA]];*)
-  
-  While[
-    Length[constraints] < Length[damagesL],
-    
-    (*Print["going for a go. ",  Length[constraints], "/", Length[damagesL], " constraints set."];*)
-    minimizedNorm = Join[{normFn[damagesL, normPower]}, constraints];
-    (* Print["constraints: ", N[constraints, 5]];*)
-    
-    solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 8];
-    
-    newConstraints = {};
-    
-    resolvedDamagesLFilteredForPreviousMax = damagesL /. Last[solution];
-    
-    If[
-      Length[constrainedIndices] > 0, (* TODO: this doesn't seem necessary *)
+  Do[
+    minDamage = Min[
       Map[
         Function[
-          {constrainedIndex},
-          resolvedDamagesLFilteredForPreviousMax[[constrainedIndex]] = 0;
+          {rowIndex},
+          Part[damages, rowIndex, colIndex]
         ],
-        
-        constrainedIndices
+        Range[Length[damages]]
       ]
     ];
+    newCandidateGeneratorTuningMaps = {};
+    newDamages = {};
     
-    thisMax = Max[resolvedDamagesLFilteredForPreviousMax];
-    damagesMagnitude = First[solution];
-    prevMax = damagesMagnitude;
-    maxDamageTargetedIntervalIndices = Flatten[ Position[resolvedDamagesLFilteredForPreviousMax, el_ /; Abs[el - thisMax] < 0.0001]]; (* TODO: maybe tie that 256 constant to a global accuracy setting somewhere *)
+    (*    Print["um well whats minDamage then? ", minDamage, " and that's the min of this ", Map[*)
+    (*      Function[*)
+    (*        {rowIndex},*)
+    (*        Part[damages, rowIndex, colIndex]*)
+    (*      ],*)
+    (*      Range[Length[damages]]*)
+    (*    ]];*)
     
-    
-    Map[
-      AppendTo[newConstraints, Part[damagesL, #] == thisMax]&,
-      maxDamageTargetedIntervalIndices
+    Do[
+      (*      If[Length[candidateGeneratorTuningMaps] < 20, Print["checking this one, ", Part[damages, rowIndex, colIndex] ]];*)
+      If[
+        Part[damages, rowIndex, colIndex] <= minDamage + 0.000000001, (* so this row index col index stuff is pretty heady but basically we end up slicing down one target at a time, across all the candidates and their corresponding damages, and they're sorted... eh i'm too lazy and it's too hard to expalin *)
+        
+        AppendTo[newCandidateGeneratorTuningMaps, Part[candidateGeneratorTuningMaps, rowIndex]];
+        AppendTo[newDamages, Part[damages, rowIndex]]
+      ],
+      
+      {rowIndex, Range[Length[candidateGeneratorTuningMaps]]}
     ];
     
-    constrainedIndices = Join[constrainedIndices, maxDamageTargetedIntervalIndices];
+    candidateGeneratorTuningMaps = newCandidateGeneratorTuningMaps;
+    damages = newDamages, (* aka a list of primes error maps *)
     
-    (* Print["alrighty then. so we've got resolvedDamagesL: ", N[resolvedDamagesLFilteredForPreviousMax, 5], " and constrainedIndices: ", constrainedIndices];*)
-    
-    constraints = SetPrecision[Join[constraints, newConstraints], 10]
+    {colIndex, Range[Min[mysteriousNumber + m + 1, n]]} (* TODO: oh it must be this mysterious number that tries to make things match dimensionality... nah I still don't totally get it, but the n is the length of the targeted interval list so you can never grab more than that is what this accomplishes, but then why you can take this exact number fewer than that, this mysterious number mysteriously plus a couple other things, now that I have no idea about *)
   ];
   
-  generatorsTuningMap /. Last[solution]
+  (*  Print["mysteriousNumber: ", mysteriousNumber];*)
+  (*  Print["m: ", m];*)
+  (*  Print["n: ", n];*)
+  (*  Print["Min[mysteriousNumber + m + 1, n]: ", Min[mysteriousNumber + m + 1, n]];*)
+  (*  Print["and so this is the range we just went across: ", Range[Min[mysteriousNumber + m + 1, n]]];*)
+  (*  Print["and this is how many candidateGeneratorTuningMaps we're returning... it's just however many of those were tied for min damage: ", Length[ candidateGeneratorTuningMaps]];*)
+  
+  DeleteDuplicates[candidateGeneratorTuningMaps]
 ];
-
-
-
 
 (* ANALYTICAL  *)
 
@@ -725,7 +768,7 @@ optimizeGeneratorsTuningMapSimplex[
     
     (* result is not unique; fallback to numerical solution *)
     (* note this only happens for minimax, not for minisum or other powers *)
-    keenanBinding[ (* TODO: almost forgot to switch it here too !!! *)
+    optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
       t,
       unchangedIntervals, (* trait -1 *)
       targetedIntervalsA, (* trait 0 *)
@@ -958,7 +1001,7 @@ getTargetedIntervalDamagesL[
     complexityMakeOdd (* trait 4d *)
   ];
   
-  (* TODO: yeah now you really need to clarify the relation between this and the WorkingPreicsion *)
+  (* TODO: yeah now you really need to clarify the relation between this and the WorkingPrecision *)
   Abs[N[tuningMap - primesTuningMap, 256].Transpose[targetedIntervalsA].damageWeights]
 ];
 
@@ -1560,227 +1603,4 @@ getTuningMappings[t_] := Module[
   primesTuningMap = getPrimesTuningMap[t];
   
   {generatorsTuningMap, ma, tuningMap, primesTuningMap}
-];
-
-
-(* TODO: clean up and move this *)
-
-constraintMatrices[r_, c_] := Module[
-  {ret, rets},
-  
-  rets = {};
-  
-  Do[
-    Do[
-      ret = Table[Table[0, c], r];
-      
-      Do[
-        ret[[ i, Part[indices, 1]]] = 1;
-        ret[[ i, Part[indices, i + 1]]] = Part[signs, i],
-        
-        {i, Range[r]}
-      ];
-      
-      AppendTo[rets, ret],
-      
-      {signs, Tuples[{1, -1}, r]}
-    ],
-    
-    {indices, DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, c], r + 1], DuplicateFreeQ[#]&]]]}
-  ];
-  
-  If[
-    r == 1,
-    
-    Do[
-      ret = {Table[0, c]};
-      ret[[1, i]] = 1;
-      
-      AppendTo[rets, ret],
-      
-      {i, Range[c]}
-    ]
-  ];
-  
-  rets
-];
-
-candidates[A_, b_, tol_, numAlready_] := Module[
-  {shape, n, m, xs, residuals, minError, newXs, newRes(*, x*)},
-  
-  shape = Dimensions[A];
-  n = First[shape];
-  m = Last[shape];
-  
-  xs = {};
-  Do[
-    (*Print["hALP"];*)
-    AppendTo[xs, Quiet[Check[LinearSolve[C.A, C.b], "err"]]],
-    (*Print["got an x ", x];
-    Print["and something else"];
-    If[
-    x =="failedToSolve",
-    
-    Print["fuck you", x],
-    
-    Print["woo hoo", x];
-    AppendTo[xs, x]
-    (*x ==  "failedToSolve",
-    Print["this fao;e"],
-    AppendTo[xs,x];
-    Print["success"]*)*)
-    (*]*)
-    (*],*)
-    {C, constraintMatrices[m, n]}
-  ];
-  (*Print["before", xs];*)
-  xs = Select[xs, !TrueQ[# == "err"]&];
-  (*Print["and so xs ", xs];*)
-  
-  residuals = Quiet[ Map[Function[{x}, ReverseSort[N[Flatten[Abs[A.x - b]], 16]]], xs]];
-  (*Print["now i could swore this was something. and it appears to be! ", N[residuals], " and its lenght is ", Length[residuals]];*)
-  
-  Do[
-    (*Print["this i ", i];
-    Print["okay well first of all", Range[Length[residuals]]];
-    Print["i just cna't figure out what this is ",N[ Map[Function[{j}, Part[residuals,j,i]],Range[Length[residuals]]]]];*)
-    minError = Min[Map[Function[{j}, Part[residuals, j, i]], Range[Length[residuals]]]];
-    (*Print["minError ",N[minError]];*)
-    newXs = {};
-    newRes = {};
-    Do[
-      (*Print[N[Part[residuals,j,i]], " <= than ", minError + tol];*)
-      If[
-        Part[residuals, j, i] <= minError + tol,
-        (*Print["YES DIDIT"];*)
-        AppendTo[newXs, Part[xs, j]];
-        AppendTo[newRes, Part[residuals, j]]
-      ],
-      
-      {j, Range[Length[xs]]}
-    ];
-    xs = newXs;
-    residuals = newRes,
-    
-    {i, Range[Min[numAlready + m + 1, n]]}
-  ];
-  
-  xs
-];
-
-tiptop[primes_, mapping_, tol_, weight_] := Module[
-  {A, b, xs, ABack, bBack, X},
-  
-  (*weight = DiagonalMatrix[1 / Log2[primes]];*)
-  A = Transpose[mapping.weight] / 1200;
-  (* Print["A: ", A];*)
-  b = Transpose[{Log2[primes].weight}];(*Table[{1}, First[Dimensions[A]]];*)
-  (*Print["b, remind me: ", b];*)
-  xs = candidates[A, b, tol, 0];
-  numAlready = Last[Dimensions[A]] + 1;
-  (*Print["weight: ",N[ weight]];
-  Print["A: ", N[A]];
-  Print["b: ", N[b]];*)
-  
-  ABack = IdentityMatrix[Last[Dimensions[A]]];
-  bBack = Table[{0}, Last[Dimensions[A]]];
-  (*Print["ABack: ", ABack];
-  Print["bBack: ", bBack];*)
-  
-  While[
-    Length[xs] > 1,
-    
-    (*Print["this is happening"];*)
-    b = b - A.First[xs];
-    (*Print["b ",N[b]];*)
-    
-    X = Flatten[Map[Part[xs, #] - Part[xs, 1]&, Range[2, Length[xs]]], 1];
-    (*Print["X ",N[X]];*)
-    
-    A = A.X;
-    (*Print["well this cand be where it is can it, because xs gotta be betigger than 1"];*)
-    bBack = ABack.First[xs] + bBack;
-    ABack = ABack.X;
-    
-    xs = candidates[A, b, tol, numAlready];
-    numAlready += Last[Dimensions[A]] + 1;
-  ];
-  
-  (*Print["we are just happening here thern?"];*)
-  {ABack.First[xs] + bBack, A.First[xs] - b}
-];
-
-doKeenanTuning[primes_, mapping_, tol_, weight_] := Module[{},
-  result = tiptop[primes, mapping, tol, weight];
-  generators = Part[result, 1];
-  residual = Part[result, 2];
-  
-  (*  Print["The TOP generators are: "];
-    Print[N[generators,16]];
-    Print["The errors of each prime are: "];
-    Print[Quiet[Map[Function[{i},Log2[Part[primes,i]]*1200*N[Part[residual, i],16]], Range[Length[residual]]]]];
-    Print["(Or weighted, in cents per octave:)"]; (* TODO: note to Dave another example of cents per octave *)
-    Print[Quiet[Map[1200*N[#,16]&,residual]]];
-    Print["So the TOP damage is: ", Quiet[1200*N[Max[Abs[residual]],16]], " cents per octave."];*)
-  
-  Flatten[N[generators, 16]]
-];
-
-mapping = {{2, 3, 5, 6}, {0, 1, -2, -2}};
-primes = {2, 3, 5, 7};
-
-(*mapping = {{12, 19, 28}};
-primes = {2, 3, 5};*)
-
-(*mapping = {{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}};
-primes = {2,3,5,7};
-mapping = {{3,0,7,18},{0,1,0,-2}};
-primes = {2,3,5,7};*)
-
-tol = 0.000000001;
-weight = DiagonalMatrix[1 / Log2[primes]];
-
-doKeenanTuning[primes, mapping, tol, weight];
-
-
-
-
-
-keenanBinding[
-  t_,
-  unchangedIntervals_, (* trait -1 *)
-  targetedIntervalsA_, (* trait 0 *)
-  optimizationPower_, (* trait 1 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Module[
-  {
-    tuningMappings,
-    ma,
-    tuningMap,
-    damageWeights
-  },
-  
-  tuningMappings = getTuningMappings[t];
-  ma = Part[tuningMappings, 2];
-  tuningMap = Part[tuningMappings, 3];
-  
-  damageWeights = getDamageWeights[
-    t,
-    targetedIntervalsA, (* trait 0 *)
-    damageWeightingSlope, (* trait 2 *)
-    complexityNormPower, (* trait 3 *)
-    complexityNegateLogPrimeCoordination, (* trait 4a *)
-    complexityPrimePower, (* trait 4b *)
-    complexitySizeFactor, (* trait 4c *)
-    complexityMakeOdd (* trait 4d *)
-  ];
-  (*Print["check one tw33o"];*)
-  
-  doKeenanTuning[getIntervalBasis[t], ma, 0.000000001, Transpose[targetedIntervalsA]. damageWeights] / 1200
-];
-
+]; 

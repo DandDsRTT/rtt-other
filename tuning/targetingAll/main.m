@@ -116,29 +116,17 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm[
   complexityMakeOdd_ (* trait 4d *)
 ] := If[
   complexityNormPower != 2 && hasNonUniqueTuning[getM[t]],
-  (*Print["no?"];*)
-  keenanBinding[
+  (* Print["Good!",getM[t], hasNonUniqueTuning[getM[t]] ];*)
+  optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
     t,
     unchangedIntervals, (* trait -1 *)
-    IdentityMatrix[getD[t]], (* trait 0 *)
-    \[Infinity], (* trait 1 *)
-    "simplicityWeighted", (* trait 2 *)
     complexityNormPower, (* trait 3 *)
     complexityNegateLogPrimeCoordination, (* trait 4a *)
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
-    
-    (*optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[*)
-    (*  t,
-      unchangedIntervals, (* trait -1 *)
-      complexityNormPower, (* trait 3 *)
-      complexityNegateLogPrimeCoordination, (* trait 4a *)
-      complexityPrimePower, (* trait 4b *)
-      complexitySizeFactor, (* trait 4c *)
-      complexityMakeOdd (* trait 4d *)*)
   ],
-  (* Print["think it has unique"];*)
+  (*  Print["Bad!"];*)
   optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormUnique[
     t,
     unchangedIntervals, (* trait -1 *)
@@ -215,64 +203,71 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
   {
     tuningMappings,
     generatorsTuningMap,
+    ma,
     tuningMap,
+    primesTuningMap,
     
     targetedIntervalsAsPrimesIdentityA,
+    dualMultiplier,
     
-    damagesMagnitude,
-    previousDamagesMagnitude,
-    previousSolution,
-    normPower,
-    normPowerPower,
-    
-    damagesL,
-    normFn,
-    normPowerLimit,
-    periodsPerOctave,
-    minimizedNorm,
-    solution
+    modifiedMa,
+    modifiedPrimesTuningMap,
+    candidateGeneratorTuningMaps,
+    maModificationUndoA,
+    primesTuningMapModificationUndoA,
+    furtherModification,
+    mysteriousNumber
   },
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
+  ma = Part[tuningMappings, 2];
   tuningMap = Part[tuningMappings, 3];
+  primesTuningMap = Part[tuningMappings, 4];
   
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
-  damagesL = getDualMultipliedPrimesErrorL[
-    tuningMap,
+  dualMultiplier = getDualMultiplier[
     t,
     targetedIntervalsAsPrimesIdentityA, (* trait 0 *)
+    (* always essentially simplicity-weighted *)
     complexityNormPower, (* trait 3 *)
     complexityNegateLogPrimeCoordination, (* trait 4a *)
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ];
-  normFn = Norm;
-  normPowerLimit = dualPower[complexityNormPower];
   
-  damagesMagnitude = 1000000;
-  previousDamagesMagnitude = \[Infinity];
-  normPower = 2;
-  normPowerPower = 1;
+  modifiedMa = Transpose[ma.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier];
+  modifiedPrimesTuningMap = Transpose[{primesTuningMap.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier}];
+  candidateGeneratorTuningMaps = getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa, modifiedPrimesTuningMap, 0];
+  mysteriousNumber = Last[Dimensions[modifiedMa]] + 1;
   
-  periodsPerOctave = getPeriodsPerOctave[t];
+  maModificationUndoA = IdentityMatrix[Last[Dimensions[modifiedMa]]];
+  primesTuningMapModificationUndoA = Table[{0}, Last[Dimensions[modifiedMa]]];
   
+  (* Print["yeah baby", Length[candidateGeneratorTuningMaps] ];*)
   While[
-    normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
-    previousDamagesMagnitude = damagesMagnitude;
-    previousSolution = solution;
-    minimizedNorm = If[
-      Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {normFn[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      normFn[damagesL, normPower]
-    ];
-    solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
-    damagesMagnitude = First[solution];
-    normPowerPower = normPowerPower += 1;
-    normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
+    Length[candidateGeneratorTuningMaps] > 1,
+    
+    modifiedPrimesTuningMap = modifiedPrimesTuningMap - modifiedMa.First[candidateGeneratorTuningMaps];
+    
+    furtherModification = Map[Flatten, Transpose[Map[
+      Part[candidateGeneratorTuningMaps, #] - Part[candidateGeneratorTuningMaps, 1]&,
+      Range[2, Length[candidateGeneratorTuningMaps]]
+    ]]]; (* TODO: maybe don't need any resizing here...? *)
+    
+    (*    Print["X ", N[furtherModification]];*)
+    (*    Print["A before ", N[modifiedMa]];*)
+    modifiedMa = modifiedMa.furtherModification;
+    (*    Print["A after ", N[modifiedMa]];*)
+    primesTuningMapModificationUndoA = maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA;
+    maModificationUndoA = maModificationUndoA.furtherModification;
+    
+    candidateGeneratorTuningMaps = getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa, modifiedPrimesTuningMap, mysteriousNumber];
+    mysteriousNumber += Last[Dimensions[modifiedMa]] + 1;
   ];
-  generatorsTuningMap /. Last[previousSolution]
+  
+  N[Flatten[maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA], 16]
 ];
 (* TODO: if you look at this diff, I don't think I was actually finding any TIPTOP tunings! 
 because I was always just plugging the optimizationPower in, 

@@ -2,6 +2,11 @@ failures = 0;
 passes = 0;
 accuracy = 3;
 
+(* dualPower *)
+test[dualPower, 1, \[Infinity]];
+test[dualPower, 2, 2];
+test[dualPower, \[Infinity], 1];
+
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1202.390, 697.176}];
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1202.607, 696.741}];
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", {1201.699, 697.564}];

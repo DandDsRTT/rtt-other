@@ -110,19 +110,19 @@ testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "dama
 (* optimizeGeneratorsTuningMap, by "systematicTuningName" *)
 (* TODO: you should probably instead just test that these map to the correct traits, or something, both for these, and for the by "originalTuningName" *)
 (* TODO: you should make some diagrams and actually visually check some of these non-unique ones for pajara *)
-(* TODO: I'm not sure why pajara isn't playing nicely with the new Keenan version of TIPping but it's just in the way for now I feel ike *)
 
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-U", {599.995, 108.072}];*)
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-U", {600.000, 108.128}];
 
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NS", {596.393, 105.964}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.177, 106.910}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-S", {598.402, 107.653}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {599.667, 108.278}];*)
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NS", {596.502, 106.058}];
+(* TODO: alright so now a couple of these pass again ... the others you're going to need to figure out if they're just timing out or if there's actuallly some sort of infinite loop crashing them *)
+(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.177, 106.910}];*)
+(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-S", {598.402, 107.653}];*)
+(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {599.667, 108.278}];*)
 
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NC", {601.564, 107.989}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NEC", {601.866, 108.309}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-C", {601.576, 107.990}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-EC", {600.355, 108.066}];*)
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NC", {601.515, 108.014}];
+(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NEC", {601.866, 108.309}];*)
+(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-C", {601.576, 107.990}];*)
+(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-EC", {600.355, 108.066}];*)
 
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisos-U", {599.450, 107.15}];
@@ -235,11 +235,6 @@ testClose[optimizeTuningMap, meantone, "originalTuningName" -> "minimax", {1200.
 (* ___ PRIVATE ___ *)
 
 
-
-(* dualPower *)
-test[dualPower, 1, \[Infinity]];
-test[dualPower, 2, 2];
-test[dualPower, \[Infinity], 1];
 
 (* getProjectionAFromUnchangedIntervals *)
 test[getProjectionAFromUnchangedIntervals, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {{1, 0, 0}, {-2, 0, 1}}, {{1, 1, 0}, {0, 0, 0}, {0,FractionBox["1", "4"], 1}}];
