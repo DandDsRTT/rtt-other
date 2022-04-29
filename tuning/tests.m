@@ -114,15 +114,15 @@ testClose[optimizeGeneratorsTuningMap, meantone, "optimizationPower" -> 1, "dama
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-U", {600.000, 108.128}];
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NS", {596.502, 106.058}];
-(* TODO: alright so now a couple of these pass again ... the others you're going to need to figure out if they're just timing out or if there's actuallly some sort of infinite loop crashing them *)
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.177, 106.910}];*)
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-S", {598.402, 107.653}];*)
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {599.667, 108.278}];*)
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", {598.233, 106.938}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-S", {598.447, 107.711}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {599.682, 108.375}];
 
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NC", {601.515, 108.014}];
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NEC", {601.866, 108.309}];*)
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-C", {601.576, 107.990}];*)
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-EC", {600.355, 108.066}];*)
+(*TODO: seems to be some bug here ... First {} has zero length and no first element ... like it doesn't find any candidates maybe? *)
+(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NC", {601.515, 108.014}];*)
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NEC", {601.826, 108.325}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-C", {601.553, 108.015}];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-EC", {600.318, 108.188}];
 
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minisos-U", {599.450, 107.15}];

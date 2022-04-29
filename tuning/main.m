@@ -607,7 +607,7 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
     mysteriousNumber += Last[Dimensions[modifiedMa]] + 1;
   ];
   
-  N[Flatten[maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA], 16]
+  SetAccuracy[Flatten[maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA], 10]
 ];
 
 getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa_, modifiedPrimesTuningMap_, mysteriousNumber_] := Module[
@@ -623,7 +623,7 @@ getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa_, modifiedPrimesTuningM
     AppendTo[
       candidateGeneratorTuningMaps,
       Quiet[Check[
-        LinearSolve[tuningPolytopeConstraintA.modifiedMa, tuningPolytopeConstraintA.modifiedPrimesTuningMap],
+        LinearSolve[N[tuningPolytopeConstraintA.modifiedMa, 10], N[tuningPolytopeConstraintA.modifiedPrimesTuningMap, 10]],
         "err"
       ]
       ]],
@@ -635,7 +635,7 @@ getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa_, modifiedPrimesTuningM
   damages = Quiet[Map[
     Function[
       {candidateGeneratorTuningMap},
-      ReverseSort[N[Flatten[Abs[modifiedMa.candidateGeneratorTuningMap - modifiedPrimesTuningMap]], 16]]
+      ReverseSort[SetAccuracy[Flatten[Abs[modifiedMa.candidateGeneratorTuningMap - modifiedPrimesTuningMap]], 10]]
     ],
     candidateGeneratorTuningMaps
   ]];
