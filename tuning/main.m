@@ -1501,6 +1501,12 @@ processTuningOptions[
     originalTuningName === "CTE",
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted";  systematicComplexityName = "E"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
+
+  (* trait 0 *)
+  If[
+    StringMatchQ[systematicTuningName, "*targeting-all*"],
+    targetedIntervals = {};
+  ];
   
   (* trait 1 *)
   If[
