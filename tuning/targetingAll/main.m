@@ -116,7 +116,6 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm[
   complexityMakeOdd_ (* trait 4d *)
 ] := If[
   complexityNormPower != 2 && hasNonUniqueTuning[getM[t]],
-  (* Print["Good!",getM[t], hasNonUniqueTuning[getM[t]] ];*)
   optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
     t,
     unchangedIntervals, (* trait -1 *)
@@ -126,7 +125,6 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd (* trait 4d *)
   ],
-  (*  Print["Bad!"];*)
   optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormUnique[
     t,
     unchangedIntervals, (* trait -1 *)
@@ -202,7 +200,6 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
 ] := Module[
   {
     tuningMappings,
-    generatorsTuningMap,
     ma,
     tuningMap,
     primesTuningMap,
@@ -210,17 +207,19 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
     targetedIntervalsAsPrimesIdentityA,
     dualMultiplier,
     
-    modifiedMa,
-    modifiedPrimesTuningMap,
-    candidateGeneratorTuningMaps,
-    maModificationUndoA,
-    primesTuningMapModificationUndoA,
-    furtherModification,
-    mysteriousNumber
+    mappedSide,
+    justSide,
+    generatorCount,
+    maxCountOfNestedMinimaxibleDamages,
+    minimaxTunings,
+    minimaxLockForMappedSide,
+    minimaxLockForJustSide,
+    undoMinimaxLocksForMappedSide,
+    undoMinimaxLocksForJustSide,
+    uniqueOptimalTuning
   },
   
   tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
   ma = Part[tuningMappings, 2];
   tuningMap = Part[tuningMappings, 3];
   primesTuningMap = Part[tuningMappings, 4];
@@ -237,59 +236,42 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
     complexityMakeOdd (* trait 4d *)
   ];
   
-  modifiedMa = Transpose[ma.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier];
-  modifiedPrimesTuningMap = Transpose[{primesTuningMap.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier}];
-  candidateGeneratorTuningMaps = getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa, modifiedPrimesTuningMap, 0];
-  mysteriousNumber = Last[Dimensions[modifiedMa]] + 1;
+  mappedSide = Transpose[ma.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier];
+  justSide = Transpose[{primesTuningMap.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier}];
   
-  maModificationUndoA = IdentityMatrix[Last[Dimensions[modifiedMa]]];
-  primesTuningMapModificationUndoA = Table[{0}, Last[Dimensions[modifiedMa]]];
+  (* everything after here will probably be DRYed up with optimizeGeneratorsTuningMapTargetingListNumericalNonUnique eventually 
+  so no need to re-explain it here. you can see all the comments over there for how this stuff works. *)
+  generatorCount = Last[Dimensions[mappedSide]];
+  maxCountOfNestedMinimaxibleDamages = 0;
+  minimaxTunings = findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide, justSide, maxCountOfNestedMinimaxibleDamages];
+  maxCountOfNestedMinimaxibleDamages = generatorCount + 1;
+  undoMinimaxLocksForMappedSide = IdentityMatrix[generatorCount];
+  undoMinimaxLocksForJustSide = Table[{0}, generatorCount];
   
-  (* Print["yeah baby", Length[candidateGeneratorTuningMaps] ];*)
   While[
-    Length[candidateGeneratorTuningMaps] > 1,
+    Length[minimaxTunings] > 1,
     
-    modifiedPrimesTuningMap = modifiedPrimesTuningMap - modifiedMa.First[candidateGeneratorTuningMaps];
+    minimaxLockForJustSide = First[minimaxTunings];
+    minimaxLockForMappedSide = Map[Flatten, Transpose[Map[
+      Part[minimaxTunings, #] - minimaxLockForJustSide&,
+      Range[2, Length[minimaxTunings]]
+    ]]];
     
-    furtherModification = Map[Flatten, Transpose[Map[
-      Part[candidateGeneratorTuningMaps, #] - Part[candidateGeneratorTuningMaps, 1]&,
-      Range[2, Length[candidateGeneratorTuningMaps]]
-    ]]]; (* TODO: maybe don't need any resizing here...? *)
+    justSide -= mappedSide.minimaxLockForJustSide;
+    undoMinimaxLocksForJustSide += undoMinimaxLocksForMappedSide.minimaxLockForJustSide;
     
-    (*    Print["X ", N[furtherModification]];*)
-    (*    Print["A before ", N[modifiedMa]];*)
-    modifiedMa = modifiedMa.furtherModification;
-    (*    Print["A after ", N[modifiedMa]];*)
-    primesTuningMapModificationUndoA = maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA;
-    maModificationUndoA = maModificationUndoA.furtherModification;
+    mappedSide = mappedSide.minimaxLockForMappedSide;
+    undoMinimaxLocksForMappedSide = undoMinimaxLocksForMappedSide.minimaxLockForMappedSide;
     
-    candidateGeneratorTuningMaps = getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa, modifiedPrimesTuningMap, mysteriousNumber];
-    mysteriousNumber += Last[Dimensions[modifiedMa]] + 1;
+    minimaxTunings = findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide, justSide, maxCountOfNestedMinimaxibleDamages];
+    maxCountOfNestedMinimaxibleDamages += generatorCount + 1;
   ];
   
-  N[Flatten[maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA], 16]
+  uniqueOptimalTuning = First[minimaxTunings];
+  SetAccuracy[Flatten[
+    undoMinimaxLocksForMappedSide.uniqueOptimalTuning + undoMinimaxLocksForJustSide
+  ], 10]
 ];
-(* TODO: if you look at this diff, I don't think I was actually finding any TIPTOP tunings! 
-because I was always just plugging the optimizationPower in, 
-not the actual normPower that I was supposed to be iterating...
-whoops!
-I also think the normpowerpower max of 10 was too high... constantly veering off into too much error introduced by huge powers computation
-note how it's related to the workingprecision
-it never goes above working precision
-I should realize that
-like actually while condition on the normpower and make it < 128 if need be
-and also I think ... wow, yeah, there was at least one of these where I wasn't actually taking the Abs of the error!
-that seems to be both the targeting-all ones
-so that certainly would have affected anything where the norm power wasn't even...
-also I think you should really not leave the below optimizeGeneratorsTuningMapTargetingAllNumericalDualNormOfIntegerLimit
-in the dust w/r/t to this refactor
-think about how it can work knowing
-yeah it's
-https://en.wikipedia.org/wiki/Mean#Power_mean
-lim goes to NEGATIVE infinity power
-that's how to achieve minimum in the limit
-and the old email was in the "TIP" email thread
-*)
 
 optimizeGeneratorsTuningMapTargetingAllNumericalDualNormOfIntegerLimit[
   t_,

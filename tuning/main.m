@@ -379,7 +379,6 @@ optimizeGeneratorsTuningMapTargetingListNumerical[
   complexityMakeOdd_ (* trait 4d *)
 ] := If[
   hasNonUniqueTuning[getM[t]],
-  (*Print["unique numerical"];*)
   optimizeGeneratorsTuningMapTargetingListNumericalUnique[
     t,
     unchangedIntervals, (* trait -1 *)
@@ -460,52 +459,7 @@ optimizeGeneratorsTuningMapTargetingListNumericalUnique[
   generatorsTuningMap /. Last[solution]
 ];
 
-getTuningPolytopeVertexConstraintAs[r_, c_] := Module[ (* TODO: still need to massage these var names *)
-  {tuningPolytopeConstraintA, tuningPolytopeConstraintAs},
-  
-  tuningPolytopeConstraintAs = {};
-  
-  Do[
-    Do[
-      tuningPolytopeConstraintA = Table[Table[0, c], r];
-      
-      Do[
-        tuningPolytopeConstraintA[[i, Part[indices, 1]]] = 1;
-        tuningPolytopeConstraintA[[i, Part[indices, i + 1]]] = Part[signs, i],
-        
-        {i, Range[r]}
-      ];
-      
-      AppendTo[tuningPolytopeConstraintAs, tuningPolytopeConstraintA],
-      
-      {signs, Tuples[{1, -1}, r]}
-    ],
-    
-    {indices, DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, c], r + 1], DuplicateFreeQ[#]&]]]}
-  ];
-  
-  If[
-    r == 1,
-    (*Print["could this be throwing it off?"];*)
-    Do[
-      tuningPolytopeConstraintA = {Table[0, c]};
-      tuningPolytopeConstraintA[[1, i]] = 1;
-      
-      (*Print["counting..."];*)
-      AppendTo[tuningPolytopeConstraintAs, tuningPolytopeConstraintA],
-      
-      {i, Range[c]}
-    ]
-  ];
-  
-  (*  Print["indices count: ", Length[ DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, c], r + 1], DuplicateFreeQ[#]&]]]]];*)
-  (*  Print["signs count: ", Length[ Tuples[{1, -1}, r]]];*)
-  (*  Print["tuningPolytopeConstraintAs count (should be the product of those two, well, plus whichever other ones from when r == 1): ", Length[tuningPolytopeConstraintAs]];*)
-  
-  tuningPolytopeConstraintAs
-];
-
-(* TODO: actually if anything this was designed for the TargetingAll case... you probably want a different version there with different words etc *)
+(* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
 optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
   t_,
   unchangedIntervals_, (* trait -1 *)
@@ -526,21 +480,22 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
     
     damageWeights,
     
-    modifiedMa,
-    modifiedPrimesTuningMap,
-    candidateGeneratorTuningMaps,
-    maModificationUndoA,
-    primesTuningMapModificationUndoA,
-    furtherModification,
-    mysteriousNumber
+    mappedSide,
+    justSide,
+    generatorCount,
+    maxCountOfNestedMinimaxibleDamages,
+    minimaxTunings,
+    minimaxLockForMappedSide,
+    minimaxLockForJustSide,
+    undoMinimaxLocksForMappedSide,
+    undoMinimaxLocksForJustSide,
+    uniqueOptimalTuning
   },
   
   tuningMappings = getTuningMappings[t];
   ma = Part[tuningMappings, 2];
   tuningMap = Part[tuningMappings, 3];
   primesTuningMap = Part[tuningMappings, 4];
-  
-  (*  Print["this number is probably important, Length[targetedIntervalsA]: ", Length[targetedIntervalsA]];*)
   
   damageWeights = getDamageWeights[
     t,
@@ -553,142 +508,264 @@ optimizeGeneratorsTuningMapTargetingListNumericalNonUnique[
     complexityMakeOdd (* trait 4d *)
   ];
   
-  (* Print["so help me god",Dimensions[ma], Dimensions[Transpose[targetedIntervalsA]], Dimensions[targetedIntervalsA], Dimensions[damageWeights]];*)
+  (*   
+  our goal is to find the generator tuning map not merely with minimaxed damage, 
+  but where the next-highest damage is minimaxed as well, and in fact every next-highest damage is minimaxed, all the way down.
+  the tuning which has all damages minimaxed within minimaxed all the way down like this we can call a "nested-minimax".
+  it's the only sensible optimum given a desire for minimax damage, so in general we can simply still call it "minimax".
+  though people have sometimes distinguished this tuning from the range of minimax tunings with a prefix, 
+  such as "TIPTOP tuning" versus "TOP tunings", although there is no value in "TOP tunings" given the existence of "TIPTOP",
+  so you may as well just keep calling it "TOP" and refine its definition. anyway...
   
-  modifiedMa = Transpose[ma.Transpose[targetedIntervalsA].damageWeights]; (* oh so the next line is actually the pure tuned weighted intervals, and these are the tempered weighted intervals, the difference being the damage *)
-  modifiedPrimesTuningMap = Transpose[{primesTuningMap.Transpose[targetedIntervalsA].damageWeights}];
-  candidateGeneratorTuningMaps = getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa, modifiedPrimesTuningMap, 0]; (* TODO: make that 0 a mysterious number pass *)
-  mysteriousNumber = Last[Dimensions[modifiedMa]] + 1;
+  the `findAllNestedMinimaxTuningsFromPolytopeVertices` function this function calls is capable of finding such a nested-minimax true optimum.
+  however, even it may still come back with more than one result.
+  that's because we can only minimax so many targets at a time, at least the way it does it.
+  for example, (5-limit) meantone minimaxing (log-prime-)simplicity-weighted damage to the odd-limit tonality diamond has a non-unique result 
+  using the fully analytical polytope method this code base uses, so it comes here next, but it can find a unique nested-minimax tuning
+  using only one pass of `findAllNestedMinimaxTuningsFromPolytopeVertices`. 
+  in contrast, (7-limit) pajara requires more than one run of `findAllNestedMinimaxTuningsFromPolytopeVertices`. 
+  so when cases like pajara happen, this `optimizeGeneratorsTuningMapTargetingListNumericalNonUnique` function here has a way to keep going.
   
-  maModificationUndoA = IdentityMatrix[Last[Dimensions[modifiedMa]]];
-  primesTuningMapModificationUndoA = Table[{0}, Last[Dimensions[modifiedMa]]];
+  the clever way we compute this uses the same polytope vertex searching method used for the that first pass, but now with a twist.
+  so in the basic case, this method finds the vertices of a tuning polytope for a temperament.
+  this is the area inside of which the targeted intervals are as close as possible to just (by the definition of minimax damage, anyway).
+  so now, instead of running it on the case of the original temperament versus JI, we run it on a transformed version of this case.
+  specifically, we run it on a case transformed so that the previous minimaxes are locked down.
   
-  (*  Print["maybe we're not supposed to have dupes: ", N[candidateGeneratorTuningMaps, 3]];*)
+  we achieve this by picking one of these minimax tunings and offset the just side by it. 
+  it doesn't matter which minimax tuning we choose, by the way; they're not sorted, and we simply take the first one.
+  the corresponding transformation to the mapped side is trickier, 
+  involving the differences between this arbitrarily-chosen minimax tuning and each of the other minimax tunings.
+  note that after this transformation, the original rank and dimensionality of the temperament will no longer be recognizable.
+  
+  we then we search for polytope vertices of this minimax-locked transformed situation.
+  and we repeatedly do this until we eventually find a unique, nested-minimax optimum. 
+  once we've done that, though, our result isn't in the form of a generators tuning map yet. it's still transformed.
+  well, with each iteration, we've been keeping track of the transformation applied, so that in the end we could undo them all.
+  after undoing those, voilà, we're done!
+  
+  for a more technically-minded explanation of what happens here, see Keenan Pepper's own explanations:
+  https://yahootuninggroupsultimatebackup.github.io/tuning-math/topicId_20405#20412
+  https://yahootuninggroupsultimatebackup.github.io/tuning-math/topicId_21022#21027
+  *)
+  
+  (* the mapped and weighted targeted intervals on one side, and the just and weighted targeted intervals on the other;
+  note that just side goes all the way down to tuning map level (logs of primes) 
+  while the tempered side isn't tuned, but merely mapped. that's so we can solve for the rest of it, i.e. its tunings *)
+  mappedSide = Transpose[ma.Transpose[targetedIntervalsA].damageWeights];
+  justSide = Transpose[{primesTuningMap.Transpose[targetedIntervalsA].damageWeights}];
+  
+  (* the same as rank here, but named this for correlation with elsewhere in this code *)
+  generatorCount = Last[Dimensions[mappedSide]];
+  
+  (* this is too complicated to be explained here and will be explained later *)
+  maxCountOfNestedMinimaxibleDamages = 0;
+  
+  (* the candidate generator tuning maps which minimax damage to the targets*)
+  minimaxTunings = findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide, justSide, maxCountOfNestedMinimaxibleDamages];
+  maxCountOfNestedMinimaxibleDamages = generatorCount + 1;
+  
+  (* no minimax-damage-locking transformations yet, so the transformation trackers are identities 
+  per their respective operations of matrix multiplication and addition *)
+  undoMinimaxLocksForMappedSide = IdentityMatrix[generatorCount];
+  undoMinimaxLocksForJustSide = Table[{0}, generatorCount];
   
   While[
-    Length[candidateGeneratorTuningMaps] > 1,
+    (* a unique optimum has not yet been found *)
+    Length[minimaxTunings] > 1,
     
-    (*   modifiedPrimesTuningMap = modifiedPrimesTuningMap - modifiedMa.First[candidateGeneratorTuningMaps];*)
-    
-    (*    Print["\n\n\n     COUNTING DOWN, candidates remaining: ", Length[candidateGeneratorTuningMaps]];*)
-    
-    (*    Print["modifiedPrimesTuningMap, with lenght ", Length[modifiedPrimesTuningMap], " before: ", N[modifiedPrimesTuningMap, 3]];*)
-    modifiedPrimesTuningMap = modifiedPrimesTuningMap - modifiedMa.First[candidateGeneratorTuningMaps]; (* this 2nd term here is the tuning map *)
-    
-    furtherModification = Map[Flatten, Transpose[Map[ (* # these are the differences between the FIRST (not necessarily best?) candidate and each other candidate generator tuning map, so it should always match up with the shape of A. *)
-      (*  Print*)
-      Part[candidateGeneratorTuningMaps, #] - Part[candidateGeneratorTuningMaps, 1]&,
-      Range[2, (*Last[Dimensions[modifiedMa]]*) Length[candidateGeneratorTuningMaps]]
+    (* arbitrarily pick one of the minimax damage generator tuning maps; the first one from this unsorted list *)
+    minimaxLockForJustSide = First[minimaxTunings];
+    (* list of differences between each other minimax generator tuning map and the first one; 
+    note how the range starts on index 2 in order to skip the first one *)
+    minimaxLockForMappedSide = Map[Flatten, Transpose[Map[
+      Part[minimaxTunings, #] - minimaxLockForJustSide&,
+      Range[2, Length[minimaxTunings]]
     ]]];
     
-    (*    Print["just tell me what it is now, furtherModification: ", furtherModification, Dimensions[modifiedMa], Dimensions[furtherModification]];*)
+    (* apply the minimax-damage-locking transformation to the just side, and track it to undo later *)
+    justSide -= mappedSide.minimaxLockForJustSide;
+    undoMinimaxLocksForJustSide += undoMinimaxLocksForMappedSide.minimaxLockForJustSide;
     
-    (*   Print["so uh, this thinig is always 2 steps shorter?  Length[furtherModification]: ", Length[furtherModification]," vs Length[candidateGeneratorTuningMaps]: ", Length[candidateGeneratorTuningMaps]];*)
+    (* apply the minimax-damage-locking transformation to the mapped side, and track it to undo later *)
+    (* this would be a .= if Wolfram supported an analog to += and -= *)
+    (* unlike how it is with the justSide, the undo operation is not inverted here; 
+    that's because we essentially invert it in the end by left-multiplying rather than right-multiplying *)
+    mappedSide = mappedSide.minimaxLockForMappedSide;
+    undoMinimaxLocksForMappedSide = undoMinimaxLocksForMappedSide.minimaxLockForMappedSide;
     
-    (*    Print["just cruious what this looks like before I attempt to massage it, ", Map[*)
-    (*    Part[candidateGeneratorTuningMaps, #] - Part[candidateGeneratorTuningMaps, 1]&,*)
-    (*    Range[2, Length[candidateGeneratorTuningMaps]]*)
-    (*  ];*)
-    
-    (*    Print["modifiedPrimesTuningMap, with lenght " , Length[modifiedPrimesTuningMap], " after : ", N[modifiedPrimesTuningMap, 3]];*)
-    (*    Print["furtherModification: ", furtherModification];*)
-    (*    Print["modifiedMa: ", modifiedMa];*)
-    (*    Print["modifiedMa.First[candidateGeneratorTuningMaps]: ", N[modifiedMa.First[candidateGeneratorTuningMaps], 3]];*)
-    (*    Print["candidateGeneratorTuningMaps: ", N[ candidateGeneratorTuningMaps, 3]];*)
-    (*    Print["primesTuningMapModificationUndoA: ", primesTuningMapModificationUndoA];*)
-    (*    Print["maModificationUndoA: ", maModificationUndoA];*)
-    (*    Print["whats the discrepancy dimensionally? ", Dimensions[modifiedMa], Dimensions[furtherModification]];*)
-    
-    modifiedMa = modifiedMa.furtherModification; (* TODO: ah-ha, I think I understand what this is now. this is Keenan's clever way of crossing off the already achieved max from the task list *)
-    primesTuningMapModificationUndoA = maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA;
-    maModificationUndoA = maModificationUndoA.furtherModification;
-    
-    candidateGeneratorTuningMaps = getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa, modifiedPrimesTuningMap, mysteriousNumber];
-    mysteriousNumber += Last[Dimensions[modifiedMa]] + 1;
+    (* search again, now in this transformed state *)
+    minimaxTunings = findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide, justSide, maxCountOfNestedMinimaxibleDamages];
+    maxCountOfNestedMinimaxibleDamages += generatorCount + 1;
   ];
   
-  SetAccuracy[Flatten[maModificationUndoA.First[candidateGeneratorTuningMaps] + primesTuningMapModificationUndoA], 10]
+  uniqueOptimalTuning = First[minimaxTunings];
+  SetAccuracy[Flatten[
+    (* here's that left-multiplication mentioned earlier *)
+    undoMinimaxLocksForMappedSide.uniqueOptimalTuning + undoMinimaxLocksForJustSide
+  ], 10]
 ];
 
-getCandidatePolytopeVertexGeneratorTuningMaps[modifiedMa_, modifiedPrimesTuningMap_, mysteriousNumber_] := Module[
-  {n, m, candidateGeneratorTuningMaps, damages, minDamage, newCandidateGeneratorTuningMaps, newDamages},
+findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide_, justSide_, maxCountOfNestedMinimaxibleDamages_] := Module[
+  {
+    targetCount,
+    generatorCount,
+    nthmostMinDamage,
+    vertexConstraintAs,
+    targetIndices,
+    candidateTunings,
+    sortedDamagesByCandidateTuning,
+    candidateTuning,
+    sortedDamagesForThisCandidateTuning,
+    newCandidateTunings,
+    newSortedDamagesByCandidateTuning
+  },
   
-  (* TODO: see if that's actually rank and dimension or not; would be if targeted intervals were only primes. 
-  but even then you might get it wrong since the modification maybe transposes things *)
-  n = First[Dimensions[modifiedMa]];
-  m = Last[Dimensions[modifiedMa]];
+  (* in the basic case where no minimax-damage-locking transformations have been applied, 
+  these will be the same as the count of original targeted intervals and the rank of the temperament, respectively *)
+  targetCount = First[Dimensions[mappedSide]];
+  generatorCount = Last[Dimensions[mappedSide]];
   
-  candidateGeneratorTuningMaps = {};
+  (* here's the meat of it: solving a linear problem for each vertex of the of tuning polytope *)
+  candidateTunings = {};
+  vertexConstraintAs = getTuningPolytopeVertexConstraintAs[generatorCount, targetCount];
   Do[
     AppendTo[
-      candidateGeneratorTuningMaps,
+      candidateTunings,
       Quiet[Check[
-        LinearSolve[N[tuningPolytopeConstraintA.modifiedMa, 10], N[tuningPolytopeConstraintA.modifiedPrimesTuningMap, 10]],
+        LinearSolve[N[vertexConstraintA.mappedSide, 10], N[vertexConstraintA.justSide, 10]],
         "err"
       ]
       ]],
-    {tuningPolytopeConstraintA, getTuningPolytopeVertexConstraintAs[m, n]}
+    {vertexConstraintA, vertexConstraintAs}
   ];
-  candidateGeneratorTuningMaps = Select[candidateGeneratorTuningMaps, !TrueQ[# == "err"]&];
-  (*  Print["oka... but I don't end up with thousnads here do i, after just filtering hout the no solution ones? ", Length[candidateGeneratorTuningMaps]];*)
+  (* ignore the problems that are singular and therefore have no solution *)
+  candidateTunings = Select[candidateTunings, !TrueQ[# == "err"]&];
   
-  damages = Quiet[Map[
+  (* each damages list is sorted in descending order; 
+  the list of lists itself is sorted corresponding to the candidate tunings*)
+  sortedDamagesByCandidateTuning = Quiet[Map[
     Function[
-      {candidateGeneratorTuningMap},
-      ReverseSort[SetAccuracy[Flatten[Abs[modifiedMa.candidateGeneratorTuningMap - modifiedPrimesTuningMap]], 10]]
+      {minimaxTuning},
+      (* note that because of being sorted by size, this is no longer sorted by which target the damage applies to *)
+      ReverseSort[SetAccuracy[Flatten[Abs[mappedSide.minimaxTuning - justSide]], 10]]
     ],
-    candidateGeneratorTuningMaps
+    candidateTunings
   ]];
-  (*  Print["then length of corresponding damdages should be the same as previous ", Length[damages]];*)
   
+  (*     
+  here we're iterating by index of the targeted intervals, 
+  repeatedly updating the lists candidate tunings and their damages,
+  (each pass the list gets shorter, hopefully eventually hitting length 1, at which point a unique tuning has been found,
+  but this doesn't necessarily happen, and if it does, it's handled by the function that calls this function)
+  until by the final pass they are what we want to return.
+  
+  there's an inner loop by candidate tuning, and since that list is shrinking each time, the size of the inner loop changes.
+  in other words, we're not covering an m \[Times] n rectangular grid's worth of possibilities; more like a jagged triangle.
+  
+  note that because the damages have all been sorted in descending order,
+  these target "indices" do not actually correspond to an individual targeted interval.
+  that's okay though because here it's not important which target each of these damages is for.
+  all that matters is the size of the damages.
+  once we find the tuning we want, we can easily compute its damages list sorted by target when we need it later; that info is not lost.
+  
+  and note that we don't iterate over *every* target "index".
+  we only check as many targets as we could possibly nested-minimax by this point.
+  that's why this method doesn't simply always return a unique nested-minimax tuning each time.
+  this is also why the damages have been sorted in this way
+  so first we compare each tuning's actual minimum damage,
+  then we compare each tuning's second-closest-to-minimum damage,
+  then compare each third-closest-to-minimum, etc.
+  the count of target indices we iterate over is a running total; 
+  each time it is increased, it goes up by the present generator count plus 1.
+  why it increases by that amount is a bit of a mystery to me, but perhaps someone can figure it out and let me know.
+  *)
+  targetIndices = Range[Min[maxCountOfNestedMinimaxibleDamages + generatorCount + 1, targetCount]];
   Do[
-    minDamage = Min[
-      Map[
-        Function[
-          {rowIndex},
-          Part[damages, rowIndex, colIndex]
-        ],
-        Range[Length[damages]]
-      ]
-    ];
-    newCandidateGeneratorTuningMaps = {};
-    newDamages = {};
+    newCandidateTunings = {};
+    newSortedDamagesByCandidateTuning = {};
     
-    (*    Print["um well whats minDamage then? ", minDamage, " and that's the min of this ", Map[*)
-    (*      Function[*)
-    (*        {rowIndex},*)
-    (*        Part[damages, rowIndex, colIndex]*)
-    (*      ],*)
-    (*      Range[Length[damages]]*)
-    (*    ]];*)
+    (* this is the nth-most minimum damage across all candidate tunings,
+    where the actual minimum is found in the 1st index, the 2nd-most minimum in the 2nd index,
+    and we index it by target index *)
+    nthmostMinDamage = Min[Map[Part[#, targetIndex]&, sortedDamagesByCandidateTuning]];
     
     Do[
-      (*      If[Length[candidateGeneratorTuningMaps] < 20, Print["checking this one, ", Part[damages, rowIndex, colIndex] ]];*)
+      (* having found the minimum damage for this target index, we now iterate by candidate tuning index *)
+      candidateTuning = Part[candidateTunings, minimaxTuningIndex];
+      sortedDamagesForThisCandidateTuning = Part[sortedDamagesByCandidateTuning, minimaxTuningIndex];
+      
       If[
-        Part[damages, rowIndex, colIndex] <= minDamage + 0.000000001, (* so this row index col index stuff is pretty heady but basically we end up slicing down one target at a time, across all the candidates and their corresponding damages, and they're sorted... eh i'm too lazy and it's too hard to expalin *)
+        (* and if this is one of the tunings which is tied for this nth-most minimum damage,
+        add it to the list of those that we'll check on the next iteration of the outer loop 
+        (and add its damages to the corresponding list) 
+        note the tiny tolerance factor added to accommodate computer arithmetic error problems *)
+        Part[sortedDamagesForThisCandidateTuning, targetIndex] <= nthmostMinDamage + 0.000000001,
         
-        AppendTo[newCandidateGeneratorTuningMaps, Part[candidateGeneratorTuningMaps, rowIndex]];
-        AppendTo[newDamages, Part[damages, rowIndex]]
+        AppendTo[newCandidateTunings, candidateTuning];
+        AppendTo[newSortedDamagesByCandidateTuning, sortedDamagesForThisCandidateTuning]
       ],
       
-      {rowIndex, Range[Length[candidateGeneratorTuningMaps]]}
+      {minimaxTuningIndex, Range[Length[candidateTunings]]}
     ];
     
-    candidateGeneratorTuningMaps = newCandidateGeneratorTuningMaps;
-    damages = newDamages, (* aka a list of primes error maps *)
+    candidateTunings = newCandidateTunings;
+    sortedDamagesByCandidateTuning = newSortedDamagesByCandidateTuning,
     
-    {colIndex, Range[Min[mysteriousNumber + m + 1, n]]} (* TODO: oh it must be this mysterious number that tries to make things match dimensionality... nah I still don't totally get it, but the n is the length of the targeted interval list so you can never grab more than that is what this accomplishes, but then why you can take this exact number fewer than that, this mysterious number mysteriously plus a couple other things, now that I have no idea about *)
+    {targetIndex, targetIndices}
   ];
   
-  (*  Print["mysteriousNumber: ", mysteriousNumber];*)
-  (*  Print["m: ", m];*)
-  (*  Print["n: ", n];*)
-  (*  Print["Min[mysteriousNumber + m + 1, n]: ", Min[mysteriousNumber + m + 1, n]];*)
-  (*  Print["and so this is the range we just went across: ", Range[Min[mysteriousNumber + m + 1, n]]];*)
-  (*  Print["and this is how many candidateGeneratorTuningMaps we're returning... it's just however many of those were tied for min damage: ", Length[ candidateGeneratorTuningMaps]];*)
-  
-  DeleteDuplicates[candidateGeneratorTuningMaps]
+  (* if duplicates are not deleted, then when differences are checked between tunings,
+  some will come out to all zeroes, and this causes a crash *)
+  DeleteDuplicates[candidateTunings]
 ];
+
+(* TODO: explain what happens in here and name variables better *)
+getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
+  {vertexConstraintA, vertexConstraintAs, targetCombinations},
+  
+  vertexConstraintAs = {};
+  
+  targetCombinations = DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, targetCount], generatorCount + 1], DuplicateFreeQ[#]&]]];
+
+  Do[
+    signPermutations = Tuples[{1, -1}, generatorCount];
+
+    Do[
+      vertexConstraintA = Table[Table[0, targetCount], generatorCount];
+      
+      Do[
+        vertexConstraintA[[i, Part[targetCombination, 1]]] = 1;
+        vertexConstraintA[[i, Part[targetCombination, i + 1]]] = Part[signPermutation, i],
+        
+        {i, Range[generatorCount]}
+      ];
+
+      AppendTo[vertexConstraintAs, vertexConstraintA],
+      
+      {signPermutation, signPermutations}
+    ],
+    
+    {targetCombination, targetCombinations}
+  ];
+  
+  If[
+    generatorCount == 1,
+    Do[
+      vertexConstraintA = {Table[0, targetCount]};
+      vertexConstraintA[[1, i]] = 1;
+      
+      AppendTo[vertexConstraintAs, vertexConstraintA],
+      
+      {i, Range[targetCount]}
+    ]
+  ];
+  
+  (* count should be the product of the indices count and the signs count, plus the r == 1 ones *)
+  vertexConstraintAs
+];
+
+
 
 (* ANALYTICAL  *)
 
@@ -1219,13 +1296,11 @@ primesInLockedRatio[m_] := Module[
   ];
   whetherGeneratorsApproximateMoreThanOnePrimeForWhichTheyAreItsSingleApproximatingGenerator = Map[# > 1&, Values[perGeneratorHowManyPrimesAreApproximatedOnlyByIt]];
   
-  (* Print["locked primes?" ,  AnyTrue[whetherGeneratorsApproximateMoreThanOnePrimeForWhichTheyAreItsSingleApproximatingGenerator, TrueQ]];*)
   AnyTrue[whetherGeneratorsApproximateMoreThanOnePrimeForWhichTheyAreItsSingleApproximatingGenerator, TrueQ]
 ];
 
 hasIndependentGenerator[m_] := Module[{},
   canonicalM = canonicalForm[m];
-  (*  Print["indy gne?", AnyTrue[getA[canonicalM], TrueQ[Total[Abs[#]] == 1]&]];*)
   AnyTrue[getA[canonicalM], TrueQ[Total[Abs[#]] == 1]&]
 ];
 
