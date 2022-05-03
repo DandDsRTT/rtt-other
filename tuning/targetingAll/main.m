@@ -31,6 +31,7 @@ optimizeGeneratorsTuningMapTargetingAll[{
         complexityMakeOdd (* trait 4d *)
       ],
       
+      (* TODO: this too needs to follow the pattern of optimizeGeneratorsTuningMapTargetingList *)
       (* covers TOP, L1 version of Frobenius, BOP, Weil, Kees, KE, CTE *)
       optimizeGeneratorsTuningMapTargetingAllNumerical[
         t,
@@ -239,38 +240,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
   mappedSide = Transpose[ma.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier];
   justSide = Transpose[{primesTuningMap.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier}];
   
-  (* everything after here will probably be DRYed up with optimizeGeneratorsTuningMapTargetingListNumericalNonUnique eventually 
-  so no need to re-explain it here. you can see all the comments over there for how this stuff works. *)
-  generatorCount = Last[Dimensions[mappedSide]];
-  maxCountOfNestedMinimaxibleDamages = 0;
-  minimaxTunings = findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide, justSide, maxCountOfNestedMinimaxibleDamages];
-  maxCountOfNestedMinimaxibleDamages = generatorCount + 1;
-  undoMinimaxLocksForMappedSide = IdentityMatrix[generatorCount];
-  undoMinimaxLocksForJustSide = Table[{0}, generatorCount];
-  
-  While[
-    Length[minimaxTunings] > 1,
-    
-    minimaxLockForJustSide = First[minimaxTunings];
-    minimaxLockForMappedSide = Map[Flatten, Transpose[Map[
-      Part[minimaxTunings, #] - minimaxLockForJustSide&,
-      Range[2, Length[minimaxTunings]]
-    ]]];
-    
-    justSide -= mappedSide.minimaxLockForJustSide;
-    undoMinimaxLocksForJustSide += undoMinimaxLocksForMappedSide.minimaxLockForJustSide;
-    
-    mappedSide = mappedSide.minimaxLockForMappedSide;
-    undoMinimaxLocksForMappedSide = undoMinimaxLocksForMappedSide.minimaxLockForMappedSide;
-    
-    minimaxTunings = findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide, justSide, maxCountOfNestedMinimaxibleDamages];
-    maxCountOfNestedMinimaxibleDamages += generatorCount + 1;
-  ];
-  
-  uniqueOptimalTuning = First[minimaxTunings];
-  SetAccuracy[Flatten[
-    undoMinimaxLocksForMappedSide.uniqueOptimalTuning + undoMinimaxLocksForJustSide
-  ], 10]
+  optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[mappedSide, justSide]
 ];
 
 optimizeGeneratorsTuningMapTargetingAllNumericalDualNormOfIntegerLimit[
