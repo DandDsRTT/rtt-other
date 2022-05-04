@@ -199,31 +199,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
   complexitySizeFactor_, (* trait 4c *)
   complexityMakeOdd_ (* trait 4d *)
 ] := Module[
-  {
-    tuningMappings,
-    ma,
-    tuningMap,
-    primesTuningMap,
-    
-    targetedIntervalsAsPrimesIdentityA,
-    dualMultiplier,
-    
-    mappedSide,
-    justSide,
-    generatorCount,
-    maxCountOfNestedMinimaxibleDamages,
-    minimaxTunings,
-    minimaxLockForMappedSide,
-    minimaxLockForJustSide,
-    undoMinimaxLocksForMappedSide,
-    undoMinimaxLocksForJustSide,
-    uniqueOptimalTuning
-  },
-  
-  tuningMappings = getTuningMappings[t];
-  ma = Part[tuningMappings, 2];
-  tuningMap = Part[tuningMappings, 3];
-  primesTuningMap = Part[tuningMappings, 4];
+  {targetedIntervalsAsPrimesIdentityA, dualMultiplier},
   
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
   dualMultiplier = getDualMultiplier[
@@ -237,10 +213,7 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNormNonUnique[
     complexityMakeOdd (* trait 4d *)
   ];
   
-  mappedSide = Transpose[ma.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier];
-  justSide = Transpose[{primesTuningMap.Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier}];
-  
-  optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[mappedSide, justSide]
+  optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t, targetedIntervalsAsPrimesIdentityA, dualMultiplier]
 ];
 
 optimizeGeneratorsTuningMapTargetingAllNumericalDualNormOfIntegerLimit[
@@ -259,7 +232,6 @@ optimizeGeneratorsTuningMapTargetingAllNumericalDualNormOfIntegerLimit[
     
     damagesL,
     normFn,
-    normPower,
     periodsPerOctave,
     minimizedNorm,
     solution
