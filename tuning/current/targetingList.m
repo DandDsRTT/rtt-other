@@ -1,6 +1,8 @@
 optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
   {unchangedIntervals, optimizationPower, complexityMakeOdd},
   
+  If[tuningOption[tuningOptions, "debug"], Print["targeting-list"]];
+  
   unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"];
   optimizationPower = tuningOption[tuningOptions, "optimizationPower"];
   complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
@@ -41,6 +43,8 @@ optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
 optimizeGeneratorsTuningMapMinimax[tuningOptions_] := Module[
   {t, targetedIntervalsA, damageWeights},
   
+  If[tuningOption[tuningOptions, "debug"], Print["minimax"]];
+  
   t = tuningOption[tuningOptions, "t"];
   targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
   damageWeights = getDamageWeights[tuningOptions];
@@ -60,13 +64,16 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
     targetedIntervalDamagesL
   },
   
+  If[tuningOption[tuningOptions, "debug"], Print["minisum"]];
+  
   t = tuningOption[tuningOptions, "t"];
   targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
   
   (* if the solution from the sum polytope is non-unique, fall back to a power limit solution *)
   Check[
     optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions, targetedIntervalsA, getSumDamage],
-    
+  
+    If[tuningOption[tuningOptions, "debug"], Print["non-unique solution → power limit solver"]];
     optimizationPower = tuningOption[tuningOptions, "optimizationPower"];
     tuningMappings = getTuningMappings[t];
     tuningMap = Part[tuningMappings, 3];
@@ -78,6 +85,8 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
 (* covers least squares *)
 optimizeGeneratorsTuningMapMinisos[tuningOptions_] := Module[
   {t, targetedIntervalsA, damageWeights},
+  
+  If[tuningOption[tuningOptions, "debug"], Print["minisos"]];
   
   t = tuningOption[tuningOptions, "t"];
   targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
@@ -97,6 +106,8 @@ optimizeGeneratorsTuningMapMinisop[tuningOptions_] := Module[
     
     targetedIntervalDamagesL
   },
+  
+  If[tuningOption[tuningOptions, "debug"], Print["minisop"]];
   
   t = tuningOption[tuningOptions, "t"];
   optimizationPower = tuningOption[tuningOptions, "optimizationPower"];

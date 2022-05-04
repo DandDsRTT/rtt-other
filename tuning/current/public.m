@@ -77,10 +77,11 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
     originalTuningName,
     systematicComplexityName,
     originalComplexityName,
+    debug,
+    forDamage,
     tuningOptions,
     optimizedGeneratorsTuningMap,
     tPossiblyWithChangedIntervalBasis,
-    forDamage,
     targetedIntervalsA
   },
   
@@ -99,6 +100,7 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   originalTuningName = OptionValue["originalTuningName"];
   systematicComplexityName = OptionValue["systematicComplexityName"];
   originalComplexityName = OptionValue["originalComplexityName"];
+  debug = OptionValue["debug"];
   
   forDamage = False;
   
@@ -119,6 +121,7 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
     originalTuningName,
     systematicComplexityName,
     originalComplexityName,
+    debug,
     forDamage
   ];
   
@@ -192,7 +195,8 @@ optimizeTuningMap[t_, OptionsPattern[]] := Module[
     systematicTuningName,
     originalTuningName,
     systematicComplexityName,
-    originalComplexityName
+    originalComplexityName,
+    debug
   },
   
   unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait -1 *)
@@ -210,6 +214,7 @@ optimizeTuningMap[t_, OptionsPattern[]] := Module[
   originalTuningName = OptionValue["originalTuningName"];
   systematicComplexityName = OptionValue["systematicComplexityName"];
   originalComplexityName = OptionValue["originalComplexityName"];
+  debug = OptionValue["debug"];
   
   optimizeGeneratorsTuningMap[t, {
     "unchangedIntervals" -> unchangedIntervals, (* trait -1 *)
@@ -225,7 +230,8 @@ optimizeTuningMap[t_, OptionsPattern[]] := Module[
     "pureOctaveStretch" -> pureOctaveStretch,
     "systematicTuningName" -> systematicTuningName,
     "originalTuningName" -> originalTuningName,
+    "systematicComplexityName" -> systematicComplexityName,
     "originalComplexityName" -> originalComplexityName,
-    "systematicComplexityName" -> systematicComplexityName
+    "debug" -> debug
   }].getA[getM[t]]
 ];

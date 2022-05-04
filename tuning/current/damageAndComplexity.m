@@ -18,11 +18,10 @@ getDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Module[
     originalTuningName,
     systematicComplexityName,
     originalComplexityName,
-    tuningMap,
-    tuningOptions,
-    targetedIntervalsA,
+    debug,
     forDamage,
-    tPossiblyWithChangedIntervalBasis
+    tuningOptions,
+    tuningMap
   },
   
   unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait -1 *)
@@ -40,6 +39,7 @@ getDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Module[
   originalTuningName = OptionValue["originalTuningName"];
   systematicComplexityName = OptionValue["systematicComplexityName"];
   originalComplexityName = OptionValue["originalComplexityName"];
+  debug = OptionValue["debug"];
   
   forDamage = True;
   
@@ -60,6 +60,7 @@ getDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Module[
     originalTuningName,
     systematicComplexityName,
     originalComplexityName,
+    debug,
     forDamage
   ];
   

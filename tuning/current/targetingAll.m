@@ -10,6 +10,8 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
     complexityMakeOdd
   },
   
+  If[tuningOption[tuningOptions, "debug"], Print["targeting-all"]];
+  
   optimizationPower = tuningOption[tuningOptions, "optimizationPower"];
   If[
     optimizationPower != \[Infinity],
@@ -62,6 +64,8 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
 optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions_] := Module[
   {t, targetedIntervalsAsPrimesIdentityA, dualMultiplier},
   
+  If[tuningOption[tuningOptions, "debug"], Print["primes maximum norm"]];
+  
   t = tuningOption[tuningOptions, "t"];
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
   dualMultiplier = getDualMultiplier[tuningOptions];
@@ -83,13 +87,16 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
     primesErrorMagnitudeNormPower
   },
   
+  If[tuningOption[tuningOptions, "debug"], Print["primes taxicab norm"]];
+  
   t = tuningOption[tuningOptions, "t"];
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
   
   (* if the solution from the sum polytope is non-unique, fall back to a power limit solution *)
   Check[
     optimizeGeneratorsTuningMapAnalyticalSumPolytope[t, targetedIntervalsA, getSumPrimesAbsError],
-    
+  
+    If[tuningOption[tuningOptions, "debug"], Print["non-unique solution → power limit solver"]];
     complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"];
     tuningMappings = getTuningMappings[t];
     tuningMap = Part[tuningMappings, 3];
@@ -103,6 +110,8 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
 (* covers TE, POTE, Frobenius, WE, BE *)
 optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
   {t, targetedIntervalsAsPrimesIdentityA, dualMultiplier},
+  
+  If[tuningOption[tuningOptions, "debug"], Print["primes Euclidean norm"]];
   
   t = tuningOption[tuningOptions, "t"];
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
@@ -124,6 +133,8 @@ optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions_] := Module[
     dualMultipliedPrimesErrorL,
     primesErrorMagnitudeNormPower
   },
+  
+  If[tuningOption[tuningOptions, "debug"], Print["primes power norm"]];
   
   t = tuningOption[tuningOptions, "t"];
   complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"];

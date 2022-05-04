@@ -15,7 +15,8 @@ tuningOptions = {
   "systematicTuningName" -> "",
   "originalTuningName" -> "",
   "systematicComplexityName" -> "",
-  "originalComplexityName" -> ""
+  "originalComplexityName" -> "",
+  "debug" -> False
 };
 
 processTuningOptions[
@@ -35,6 +36,7 @@ processTuningOptions[
   inputOriginalTuningName_,
   inputSystematicComplexityName_,
   inputOriginalComplexityName_,
+  inputDebug_,
   forDamage_ : False
 ] := Module[
   {
@@ -53,6 +55,7 @@ processTuningOptions[
     originalTuningName,
     systematicComplexityName,
     originalComplexityName,
+    debug,
     tPossiblyWithChangedIntervalBasis,
     targetedIntervalsA,
     commaBasisInNonstandardIntervalBasis,
@@ -78,6 +81,7 @@ processTuningOptions[
   originalTuningName = inputOriginalTuningName;
   systematicComplexityName = inputSystematicComplexityName;
   originalComplexityName = inputOriginalComplexityName;
+  debug = inputDebug;
   
   If[
     originalTuningName === "minimax",
@@ -297,7 +301,8 @@ processTuningOptions[
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
-    pureOctaveStretch
+    pureOctaveStretch,
+    debug
   }
 ];
 
@@ -315,7 +320,8 @@ tuningOption[tuningOptions_, optionName_] := Module[
     "complexityPrimePower" -> 8, (* trait 4b *)
     "complexitySizeFactor" -> 9, (* trait 4c *)
     "complexityMakeOdd" -> 10, (* trait 4d *)
-    "pureOctaveStretch" -> 11
+    "pureOctaveStretch" -> 11,
+    "debug" -> 12
   |>;
   
   Part[tuningOptions, tuningOptionsPartsByOptionName[optionName]]
