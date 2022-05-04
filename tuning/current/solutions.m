@@ -274,19 +274,10 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
 
 (* MINISUM *)
 
-optimizeGeneratorsTuningMapAnalyticalSumPolytope[
-  t_,
-  unchangedIntervals_, (* trait -1 *)
-  targetedIntervalsA_, (* trait 0 *)
-  optimizationPower_, (* trait 1 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Module[
+optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions_] := Module[
   {
+    t,
+    targetedIntervalsA,
     tuningMappings,
     generatorsTuningMap,
     ma,
@@ -304,9 +295,11 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[
     minDamageTuningMapIndex,
     minDamageProjectionA,
     generatorsPreimageTransversal,
-    projectedGenerators,
-    damagePowerSum
+    projectedGenerators
   },
+  
+  t = tuningOption[tuningOptions, "t"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
@@ -314,7 +307,6 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[
   tuningMap = Part[tuningMappings, 3];
   primesTuningMap = Part[tuningMappings, 4];
   
-  damagePowerSum = If[optimizationPower == 1, getSumDamage, getMaxDamage];
   r = getR[t];
   unchangedIntervalSetIndices = Subsets[Range[Length[targetedIntervalsA]], {r}];
   potentialUnchangedIntervalSets = Map[Map[targetedIntervalsA[[#]]&, #]&, unchangedIntervalSetIndices];
@@ -325,17 +317,7 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[
     filteredNormalizedPotentialUnchangedIntervalSets
   ], Not[# === Null]&];
   potentialTuningMaps = Map[primesTuningMap.#&, potentialProjectionAs];
-  potentialTuningMapDamages = Map[damagePowerSum[
-    #,
-    t,
-    targetedIntervalsA, (* trait 0 *)
-    damageWeightingSlope, (* trait 2 *)
-    complexityNormPower, (* trait 3 *)
-    complexityNegateLogPrimeCoordination, (* trait 4a *)
-    complexityPrimePower, (* trait 4b *)
-    complexitySizeFactor, (* trait 4c *)
-    complexityMakeOdd (* trait 4d *)
-  ]&, potentialTuningMaps];
+  potentialTuningMapDamages = Map[getSumDamage[#, tuningOptions]&, potentialTuningMaps];
   
   minDamageTuningMapIndices = Position[potentialTuningMapDamages, Min[potentialTuningMapDamages]];
   If[
@@ -350,18 +332,7 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[
     
     (* result is not unique; fallback to numerical solution *)
     (* note this only happens for minimax, not for minisum or other powers *)
-    optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
-      t,
-      unchangedIntervals, (* trait -1 *)
-      targetedIntervalsA, (* trait 0 *)
-      optimizationPower, (* trait 1 *)
-      damageWeightingSlope, (* trait 2 *)
-      complexityNormPower, (* trait 3 *)
-      complexityNegateLogPrimeCoordination, (* trait 4a *)
-      complexityPrimePower, (* trait 4b *)
-      complexitySizeFactor, (* trait 4c *)
-      complexityMakeOdd (* trait 4d *)
-    ]
+    optimizeGeneratorsTuningMapMinisopNonunique[tuningOptions]
   ]
 ];
 
@@ -383,7 +354,6 @@ getDiagonalEigenvalueA[unchangedIntervalEigenvectors_, commaEigenvectors_] := Di
 
 
 (* MINISOS *)
-
 
 optimizeGeneratorsTuningMapWithPseudoInverse[
   t_,
@@ -422,130 +392,35 @@ optimizeGeneratorsTuningMapWithPseudoInverse[
 ];
 
 
-(* OTHER *)
+(* OTHER POWERS *)
 
-optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
-  t_,
-  unchangedIntervals_, (* trait -1 *)
-  targetedIntervalsA_, (* trait 0 *)
-  optimizationPower_, (* trait 1 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Module[
+optimizeGeneratorsTuningMapNumericalPowerSolver[tuningOptions_, absErrorL_, normPower_] := Module[
   {
+    t,
+    unchangedIntervals,
+    complexityMakeOdd,
+    
     tuningMappings,
     generatorsTuningMap,
-    tuningMap,
     
-    damagesMagnitude,
-    previousDamagesMagnitude,
-    previousSolution,
-    normPower,
-    normPowerPower,
-    
-    damagesL,
-    normFn,
-    normPowerLimit,
     periodsPerOctave,
     minimizedNorm,
     solution
   },
   
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
-  tuningMap = Part[tuningMappings, 3];
-  
-  damagesL = getTargetedIntervalDamagesL[
-    tuningMap,
-    t,
-    targetedIntervalsA, (* trait 0 *)
-    damageWeightingSlope, (* trait 2 *)
-    complexityNormPower, (* trait 3 *)
-    complexityNegateLogPrimeCoordination, (* trait 4a *)
-    complexityPrimePower, (* trait 4b *)
-    complexitySizeFactor, (* trait 4c *)
-    complexityMakeOdd (* trait 4d *)
-  ];
-  normFn = Norm;
-  normPowerLimit = optimizationPower;
-  
-  damagesMagnitude = 1000000;
-  previousDamagesMagnitude = \[Infinity];
-  normPower = 2;
-  normPowerPower = 1;
-  
-  periodsPerOctave = getPeriodsPerOctave[t];
-  
-  While[
-    normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
-    previousDamagesMagnitude = damagesMagnitude;
-    previousSolution = solution;
-    minimizedNorm = If[
-      Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {normFn[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      normFn[damagesL, normPower]
-    ];
-    solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
-    damagesMagnitude = First[solution];
-    normPowerPower = normPowerPower += 1;
-    normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
-  ];
-  generatorsTuningMap /. Last[previousSolution]
-];
-
-optimizeGeneratorsTuningMapNumericalPowerSolver[
-  t_,
-  unchangedIntervals_, (* trait -1 *)
-  targetedIntervalsA_, (* trait 0 *)
-  optimizationPower_, (* trait 1 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Module[
-  {
-    tuningMappings,
-    generatorsTuningMap,
-    tuningMap,
-    
-    damagesL,
-    normFn,
-    normPower,
-    periodsPerOctave,
-    minimizedNorm,
-    solution
-  },
+  t = tuningOption[tuningOptions, "t"];
+  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"];
+  complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
-  tuningMap = Part[tuningMappings, 3];
-  
-  damagesL = getTargetedIntervalDamagesL[
-    tuningMap,
-    t,
-    targetedIntervalsA, (* trait 0 *)
-    damageWeightingSlope, (* trait 2 *)
-    complexityNormPower, (* trait 3 *)
-    complexityNegateLogPrimeCoordination, (* trait 4a *)
-    complexityPrimePower, (* trait 4b *)
-    complexitySizeFactor, (* trait 4c *)
-    complexityMakeOdd (* trait 4d *)
-  ];
-  normFn = Norm;
-  normPower = optimizationPower;
   
   periodsPerOctave = getPeriodsPerOctave[t];
   
   minimizedNorm = If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-    {normFn[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-    normFn[damagesL, normPower]
+    {Norm[absErrorL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+    Norm[absErrorL, normPower]
   ];
   solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
   generatorsTuningMap /. Last[solution]

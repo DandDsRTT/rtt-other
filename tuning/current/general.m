@@ -301,6 +301,26 @@ processTuningOptions[
   }
 ];
 
+tuningOption[tuningOptions_, optionName_] := Module[
+  {tuningOptionsPartsByOptionName},
+  
+  tuningOptionsPartsByOptionName = <|
+    "t" -> 1,
+    "unchangedIntervals" -> 2, (* trait -1 *)
+    "targetedIntervalsA" -> 3, (* trait 0 *)
+    "optimizationPower" -> 4, (* trait 1 *)
+    "damageWeightingSlope" -> 5, (* trait 2 *)
+    "complexityNormPower" -> 6, (* trait 3 *)
+    "complexityNegateLogPrimeCoordination" -> 7, (* trait 4a *)
+    "complexityPrimePower" -> 8, (* trait 4b *)
+    "complexitySizeFactor" -> 9, (* trait 4c *)
+    "complexityMakeOdd" -> 10, (* trait 4d *)
+    "pureOctaveStretch" -> 11
+  |>;
+  
+  Part[tuningOptions, tuningOptionsPartsByOptionName[optionName]]
+];
+
 getPrimesTuningMap[t_] := Log2[getIntervalBasis[t]];
 
 getLogPrimeCoordinationA[t_] := DiagonalMatrix[Log2[getIntervalBasis[t]]];

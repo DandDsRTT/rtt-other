@@ -63,84 +63,33 @@ getDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Module[
     forDamage
   ];
   
-  tPossiblyWithChangedIntervalBasis = Part[tuningOptions, 1];
-  targetedIntervalsA = Part[tuningOptions, 3]; (* trait 0 *)
-  optimizationPower = Part[tuningOptions, 4]; (* trait 1 *)
-  damageWeightingSlope = Part[tuningOptions, 5];(* trait 2 *)
-  complexityNormPower = Part[tuningOptions, 6]; (* trait 3 *)
-  complexityNegateLogPrimeCoordination = Part[tuningOptions, 7]; (* trait 4a *)
-  complexityPrimePower = Part[tuningOptions, 8]; (* trait 4b *)
-  complexitySizeFactor = Part[tuningOptions, 9]; (* trait 4c *)
-  complexityMakeOdd = Part[tuningOptions, 10];(* trait 4d *)
+  optimizationPower = tuningOption[tuningOptions, "optimizationPower"];
   
-  tuningMap = generatorsTuningMap. getA[getM[t]] / 1200;
+  tuningMap = generatorsTuningMap.getA[getM[t]] / 1200;
   
   1200 * If[
     optimizationPower == \[Infinity],
-    getMaxDamage[
-      tuningMap,
-      tPossiblyWithChangedIntervalBasis,
-      targetedIntervalsA, (* trait 0 *)
-      damageWeightingSlope, (* trait 2 *)
-      complexityNormPower, (* trait 3 *)
-      complexityNegateLogPrimeCoordination, (* trait 4a *)
-      complexityPrimePower, (* trait 4b *)
-      complexitySizeFactor, (* trait 4c *)
-      complexityMakeOdd (* trait 4d *)
-    ],
+    getMaxDamage[tuningMap, tuningOptions],
     If[
       optimizationPower == 2,
-      get2SumDamage[
-        tuningMap,
-        tPossiblyWithChangedIntervalBasis,
-        targetedIntervalsA, (* trait 0 *)
-        damageWeightingSlope, (* trait 2 *)
-        complexityNormPower, (* trait 3 *)
-        complexityNegateLogPrimeCoordination, (* trait 4a *)
-        complexityPrimePower, (* trait 4b *)
-        complexitySizeFactor, (* trait 4c *)
-        complexityMakeOdd (* trait 4d *)
-      ],
-      getSumDamage[
-        tuningMap,
-        tPossiblyWithChangedIntervalBasis,
-        targetedIntervalsA, (* trait 0 *)
-        damageWeightingSlope, (* trait 2 *)
-        complexityNormPower, (* trait 3 *)
-        complexityNegateLogPrimeCoordination, (* trait 4a *)
-        complexityPrimePower, (* trait 4b *)
-        complexitySizeFactor, (* trait 4c *)
-        complexityMakeOdd (* trait 4d *)
+      get2SumDamage[tuningMap, tuningOptions],
+      If[
+        optimizationPower == 1,
+        getSumDamage[tuningMap, tuningOptions],
+        getPowerSumDamage[tuningMap, tuningOptions, optimizationPower]
       ]
     ]
   ]
 ];
 
 (* compare with getDualMultipliedPrimesErrorL *)
-getTargetedIntervalDamagesL[
-  tuningMap_,
-  t_,
-  targetedIntervalsA_, (* trait 0 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Module[
-  {primesTuningMap, damageWeights},
+getTargetedIntervalDamagesL[tuningMap_, tuningOptions_] := Module[
+  {t, targetedIntervalsA, primesTuningMap, damageWeights},
   
+  t = tuningOption[tuningOptions, "t"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
   primesTuningMap = getPrimesTuningMap[t];
-  damageWeights = getDamageWeights[
-    t,
-    targetedIntervalsA, (* trait 0 *)
-    damageWeightingSlope, (* trait 2 *)
-    complexityNormPower, (* trait 3 *)
-    complexityNegateLogPrimeCoordination, (* trait 4a *)
-    complexityPrimePower, (* trait 4b *)
-    complexitySizeFactor, (* trait 4c *)
-    complexityMakeOdd (* trait 4d *)
-  ];
+  damageWeights = getDamageWeights[tuningOptions];
   
   (* TODO: yeah now you really need to clarify the relation between this and the WorkingPrecision *)
   Abs[N[tuningMap - primesTuningMap, 256].Transpose[targetedIntervalsA].damageWeights]
@@ -148,82 +97,33 @@ getTargetedIntervalDamagesL[
 
 Square[n_] := n^2;
 
-getSumDamage[
-  tuningMap_,
-  t_,
-  targetedIntervalsA_, (* trait 0 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Total[getTargetedIntervalDamagesL[
-  tuningMap,
-  t,
-  targetedIntervalsA, (* trait 0 *)
-  damageWeightingSlope, (* trait 2 *)
-  complexityNormPower, (* trait 3 *)
-  complexityNegateLogPrimeCoordination, (* trait 4a *)
-  complexityPrimePower, (* trait 4b *)
-  complexitySizeFactor, (* trait 4c *)
-  complexityMakeOdd (* trait 4d *)
-]];
+getSumDamage[tuningMap_, tuningOptions_] := Total[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
+get2SumDamage[tuningMap_, tuningOptions_] := Total[Square[getTargetedIntervalDamagesL[tuningMap, tuningOptions]]];
+getPowerSumDamage[tuningMap_, tuningOptions_, power_] := Total[Power[getTargetedIntervalDamagesL[tuningMap, tuningOptions], power]];
+getMaxDamage[tuningMap_, tuningOptions_] := Max[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
 
-get2SumDamage[
-  tuningMap_,
-  t_,
-  targetedIntervalsA_, (* trait 0 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Total[Square[getTargetedIntervalDamagesL[
-  t,
-  tuningMap,
-  targetedIntervalsA, (* trait 0 *)
-  damageWeightingSlope, (* trait 2 *)
-  complexityNormPower, (* trait 3 *)
-  complexityNegateLogPrimeCoordination, (* trait 4a *)
-  complexityPrimePower, (* trait 4b *)
-  complexitySizeFactor, (* trait 4c *)
-  complexityMakeOdd (* trait 4d *)
-]]];
-
-getMaxDamage[
-  tuningMap_,
-  t_,
-  targetedIntervalsA_, (* trait 0 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Max[getTargetedIntervalDamagesL[
-  tuningMap,
-  t,
-  targetedIntervalsA, (* trait 0 *)
-  damageWeightingSlope, (* trait 2 *)
-  complexityNormPower, (* trait 3 *)
-  complexityNegateLogPrimeCoordination, (* trait 4a *)
-  complexityPrimePower, (* trait 4b *)
-  complexitySizeFactor, (* trait 4c *)
-  complexityMakeOdd (* trait 4d *)
-]];
-
-getDamageWeights[
-  t_,
-  targetedIntervalsA_, (* trait 0 *)
-  damageWeightingSlope_, (* trait 2 *)
-  complexityNormPower_, (* trait 3 *)
-  complexityNegateLogPrimeCoordination_, (* trait 4a *)
-  complexityPrimePower_, (* trait 4b *)
-  complexitySizeFactor_, (* trait 4c *)
-  complexityMakeOdd_ (* trait 4d *)
-] := Module[{damageWeights},
+getDamageWeights[tuningOptions_] := Module[
+  {
+    t,
+    targetedIntervalsA, (* trait 0 *)
+    damageWeightingSlope, (* trait 2 *)
+    complexityNormPower, (* trait 3 *)
+    complexityNegateLogPrimeCoordination, (* trait 4a *)
+    complexityPrimePower, (* trait 4b *)
+    complexitySizeFactor, (* trait 4c *)
+    complexityMakeOdd, (* trait 4d *)
+    damageWeights
+  },
+  
+  t = tuningOption[tuningOptions, "t"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
+  damageWeightingSlope = tuningOption[tuningOptions, "damageWeightingSlope"];
+  complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"];
+  complexityNegateLogPrimeCoordination = tuningOption[tuningOptions, "complexityNegateLogPrimeCoordination"];
+  complexityPrimePower = tuningOption[tuningOptions, "complexityPrimePower"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
+  complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
+  
   damageWeights = If[
     damageWeightingSlope == "unweighted",
     
@@ -307,14 +207,14 @@ getComplexityMultiplier[
   complexityMakeOdd_ (* trait 4d *)
 ] := Module[{complexityMultiplier},
   (* When used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm, covers TOP; 
-when used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical, covers TE; 
+when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers TE; 
 when used by getDamageWeights covers any targeting-list tuning using this as its damage's complexity *)
-  complexityMultiplier = getLogPrimeCoordinationA[t];
+  complexityMultiplier = getLogPrimeCoordinationA[t]; (* TODO: wait a sec.. I thought the idea was that we do this OUTSIDE OF THIS *)
   
   If[
     (* When used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm,
     covers L1 version of Frobenius;
-    when used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical,
+    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm,
     covers Frobenius *)
     complexityNegateLogPrimeCoordination == True,
     complexityMultiplier = complexityMultiplier.Inverse[getLogPrimeCoordinationA[t]]
@@ -322,7 +222,7 @@ when used by getDamageWeights covers any targeting-list tuning using this as its
   
   If[
     (* When used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsPowerNorm, covers BOP;
-    when used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical, covers BE *)
+    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers BE *)
     complexityPrimePower > 0,
     complexityMultiplier = complexityMultiplier.DiagonalMatrix[Power[getIntervalBasis[t], complexityPrimePower]]
   ];
@@ -330,7 +230,7 @@ when used by getDamageWeights covers any targeting-list tuning using this as its
   If[
     (* When Weil needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm, 
     where it's implemented separately (the min - max thing); 
-    when used by getDualMultiplier for optimizeGeneratorsTuningMapTargetingAllPseudoInverseAnalytical, covers WE or KE
+    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers WE or KE
     (surprisingly KE does not use the below; it instead uses this and applies an unchanged octave constraint); 
     when used by getDamageWeights should cover any targeting-list tuning using this as its damage's complexity *)
     complexitySizeFactor > 0,
@@ -343,7 +243,7 @@ when used by getDamageWeights covers any targeting-list tuning using this as its
     note again that this is is not used for KE; see note above;
     when used by getDamageWeights should cover any targeting-list tuning using this as its damage's complexity *)
     complexityMakeOdd == True,
-    complexityMultiplier = complexityMultiplier.DiagonalMatrix[Join[{complexityMakeOdd}, Table[1, getD[t] - 1]]]
+    complexityMultiplier = complexityMultiplier.DiagonalMatrix[Join[{0}, Table[1, getD[t] - 1]]]
   ];
   
   complexityMultiplier
