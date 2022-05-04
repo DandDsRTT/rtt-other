@@ -437,7 +437,7 @@ optimizeGeneratorsTuningMapMinisop[{
 
 
 
-(* GENERIC ONES *)
+(* GENERIC FUNCTIONS *)
 
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
 optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[inputMappedSide_, inputJustSide_] := Module[
@@ -581,9 +581,9 @@ findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide_, justSide_, maxCount
   the list of lists itself is sorted corresponding to the candidate tunings*)
   sortedDamagesByCandidateTuning = Quiet[Map[
     Function[
-      {minimaxTuning},
+      {candidateTuning},
       (* note that because of being sorted by size, this is no longer sorted by which target the damage applies to *)
-      ReverseSort[SetAccuracy[Flatten[Abs[mappedSide.minimaxTuning - justSide]], 10]]
+      ReverseSort[SetAccuracy[Flatten[Abs[mappedSide.candidateTuning - justSide]], 10]]
     ],
     candidateTunings
   ]];
