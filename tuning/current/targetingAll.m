@@ -26,25 +26,32 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
   complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
   
   If[
-    complexityNormPower == 1 && Length[unchangedIntervals] == 0 && complexityMakeOdd == False , (* TODO: conditions could be cleaned up, here and in -list version of this fn *)
+    Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
     
-    (* covers TOP, L1 version of Frobenius, BOP, Weil, Kees *)
-    optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions],
+    (* covers KE, CTE *)
+    optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions],
     
     If[
-      complexityNormPower == \[Infinity] && Length[unchangedIntervals] == 0 && complexityMakeOdd == False,
+      complexityNormPower == 2,
       
-      (* no described tunings use this as of yet *)
-      optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions],
+      (* covers TE, Frobenius, WE, BE *)
+      optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions],
       
       If[
-        complexityNormPower == 2 && Length[unchangedIntervals] == 0 && complexityMakeOdd == False,
+        complexityNormPower == 1,
         
-        (* covers TE, Frobenius, WE, BE *)
-        optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions],
+        (* covers TOP, L1 version of Frobenius, BOP, Weil, Kees *)
+        optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions],
         
-        (* covers KE, CTE *)
-        optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions]
+        If[
+          complexityNormPower == \[Infinity],
+          
+          (* no described tunings use this as of yet *)
+          optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions],
+          
+          (* no described tunings use this as of yet *)
+          optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions]
+        ]
       ]
     ]
   ]
@@ -61,12 +68,34 @@ optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions_] := Module[
   optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t, targetedIntervalsAsPrimesIdentityA, dualMultiplier]
 ];
 
-(* TODO: should follow the pattern of optimizeGeneratorsTuningMapTargetingList,
- and have actual bindings for this analytical solution,
- which should be able to be generic to targeting-list and targeting-all situations,
-  which is currently a problem both for it itself and its non-unique path *)
 (* compare with optimizeGeneratorsTuningMapMinisum *)
-optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions];
+optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
+  {
+    t,
+    targetedIntervalsAsPrimesIdentityA,
+    
+    complexityNormPower,
+    tuningMappings,
+    tuningMap,
+    dualMultipliedPrimesErrorL,
+    primesErrorMagnitudeNormPower
+  },
+  
+  t = tuningOption[tuningOptions, "t"];
+  targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
+  
+  (* if the solution from the sum polytope is non-unique, fall back to a power limit solution *)
+  Check[
+    optimizeGeneratorsTuningMapAnalyticalSumPolytope[t, targetedIntervalsA, getSumPrimesAbsError],
+    
+    complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"];
+    tuningMappings = getTuningMappings[t];
+    tuningMap = Part[tuningMappings, 3];
+    dualMultipliedPrimesErrorL = getDualMultipliedPrimesErrorL[tuningMap, tuningOptions];
+    primesErrorMagnitudeNormPower = dualPower[complexityNormPower];
+    optimizeGeneratorsTuningMapNumericalPowerLimitSolver[tuningOptions, dualMultipliedPrimesErrorL, primesErrorMagnitudeNormPower]
+  ]
+];
 
 (* compare with optimizeGeneratorsTuningMapMinisos *)
 optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
@@ -76,7 +105,7 @@ optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
   dualMultiplier = getDualMultiplier[tuningOptions];
   
-  optimizeGeneratorsTuningMapWithPseudoInverse[t, targetedIntervalsAsPrimesIdentityA, dualMultiplier]
+  optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[t, targetedIntervalsAsPrimesIdentityA, dualMultiplier]
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinisop *)
@@ -145,3 +174,6 @@ getDualMultipliedPrimesErrorL[tuningMap_, tuningOptions_] := Module[
   
   Abs[N[tuningMap - primesTuningMap, 256].Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier]
 ];
+
+(* compare with getSumDamage *)
+getSumPrimesAbsError[tuningMap_, tuningOptions_] := Total[getDualMultipliedPrimesErrorL[tuningMap, tuningOptions]];

@@ -274,15 +274,20 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
 
 (* MINISUM *)
 
-optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions_] := Module[
+optimizeGeneratorsTuningMapAnalyticalSumPolytope[
+  tuningOptions_,
+  potentiallyPrimesIdentityTargetedIntervalsA_,
+  getSumDamageOrGetSumPrimesAbsError_
+] := Module[
   {
     t,
-    targetedIntervalsA,
+    
     tuningMappings,
     generatorsTuningMap,
     ma,
     tuningMap,
     primesTuningMap,
+    
     r,
     unchangedIntervalSetIndices,
     potentialUnchangedIntervalSets,
@@ -291,6 +296,7 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions_] := Module[
     potentialProjectionAs,
     potentialTuningMaps,
     potentialTuningMapDamages,
+    
     minDamageTuningMapIndices,
     minDamageTuningMapIndex,
     minDamageProjectionA,
@@ -299,7 +305,6 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions_] := Module[
   },
   
   t = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
@@ -308,8 +313,8 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions_] := Module[
   primesTuningMap = Part[tuningMappings, 4];
   
   r = getR[t];
-  unchangedIntervalSetIndices = Subsets[Range[Length[targetedIntervalsA]], {r}];
-  potentialUnchangedIntervalSets = Map[Map[targetedIntervalsA[[#]]&, #]&, unchangedIntervalSetIndices];
+  unchangedIntervalSetIndices = Subsets[Range[Length[potentiallyPrimesIdentityTargetedIntervalsA]], {r}];
+  potentialUnchangedIntervalSets = Map[Map[potentiallyPrimesIdentityTargetedIntervalsA[[#]]&, #]&, unchangedIntervalSetIndices];
   normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, potentialUnchangedIntervalSets];
   filteredNormalizedPotentialUnchangedIntervalSets = DeleteDuplicates[Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&]];
   potentialProjectionAs = Select[Map[
@@ -317,7 +322,7 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions_] := Module[
     filteredNormalizedPotentialUnchangedIntervalSets
   ], Not[# === Null]&];
   potentialTuningMaps = Map[primesTuningMap.#&, potentialProjectionAs];
-  potentialTuningMapDamages = Map[getSumDamage[#, tuningOptions]&, potentialTuningMaps];
+  potentialTuningMapDamages = Map[getSumDamageOrGetSumPrimesAbsError[#, tuningOptions]&, potentialTuningMaps];
   
   minDamageTuningMapIndices = Position[potentialTuningMapDamages, Min[potentialTuningMapDamages]];
   If[
@@ -330,10 +335,48 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions_] := Module[
     projectedGenerators = minDamageProjectionA.generatorsPreimageTransversal;
     primesTuningMap.projectedGenerators,
     
-    (* result is not unique; fallback to numerical solution *)
-    (* note this only happens for minimax, not for minisum or other powers *)
-    optimizeGeneratorsTuningMapMinisopNonunique[tuningOptions]
+    Throw["non-unique solution for sum polytope"]
   ]
+];
+
+optimizeGeneratorsTuningMapNumericalPowerLimitSolver[tuningOptions_, absErrorL_, normPower_] := Module[
+  {
+    t,
+    unchangedIntervals,
+    complexityMakeOdd,
+    
+    tuningMappings,
+    generatorsTuningMap,
+    
+    periodsPerOctave,
+    minimizedNorm,
+    solution
+  },
+  
+  t = tuningOption[tuningOptions, "t"];
+  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"];
+  complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
+  
+  tuningMappings = getTuningMappings[t];
+  generatorsTuningMap = Part[tuningMappings, 1];
+  
+  periodsPerOctave = getPeriodsPerOctave[t];
+  
+  While[
+    normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
+    previousDamagesMagnitude = damagesMagnitude;
+    previousSolution = solution;
+    minimizedNorm = If[
+      Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
+      {Norm[absErrorL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+      Norm[absErrorL, normPower]
+    ];
+    solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
+    damagesMagnitude = First[solution];
+    normPowerPower = normPowerPower += 1;
+    normPower = Power[2, 1 / normPowerPower];
+  ];
+  generatorsTuningMap /. Last[previousSolution]
 ];
 
 getProjectionAFromUnchangedIntervals[t_, unchangedIntervalEigenvectors_] := Module[
@@ -355,7 +398,7 @@ getDiagonalEigenvalueA[unchangedIntervalEigenvectors_, commaEigenvectors_] := Di
 
 (* MINISOS *)
 
-optimizeGeneratorsTuningMapWithPseudoInverse[
+optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
   t_,
   potentiallyPrimesIdentityTargetedIntervalsA_,
   damageWeightingOrDualMultiplier_

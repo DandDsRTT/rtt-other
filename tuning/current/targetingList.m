@@ -6,15 +6,19 @@ optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
   complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
   
   If[
-    optimizationPower == \[Infinity] && Length[unchangedIntervals] == 0 && complexityMakeOdd == False,
-    optimizeGeneratorsTuningMapMinimax[tuningOptions],
+    Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
+    optimizeGeneratorsTuningMapMinisop[tuningOptions],
     If[
-      optimizationPower == 1 && Length[unchangedIntervals] == 0 && complexityMakeOdd == False ,
-      optimizeGeneratorsTuningMapMinisum[tuningOptions],
+      optimizationPower == 2,
+      optimizeGeneratorsTuningMapMinisos[tuningOptions],
       If[
-        optimizationPower == 2 && Length[unchangedIntervals] == 0 && complexityMakeOdd == False ,
-        optimizeGeneratorsTuningMapMinisos[tuningOptions],
-        optimizeGeneratorsTuningMapMinisop[tuningOptions]
+        optimizationPower == \[Infinity],
+        optimizeGeneratorsTuningMapMinimax[tuningOptions],
+        If[
+          optimizationPower == 1,
+          optimizeGeneratorsTuningMapMinisum[tuningOptions],
+          optimizeGeneratorsTuningMapMinisop[tuningOptions]
+        ]
       ]
     ]
   ]
@@ -30,66 +34,30 @@ optimizeGeneratorsTuningMapMinimax[tuningOptions_] := Module[
   optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t, targetedIntervalsA, damageWeights]
 ];
 
-optimizeGeneratorsTuningMapMinisum[tuningOptions_] := optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions];
-
-optimizeGeneratorsTuningMapMinisumNonunique[tuningOptions_] := Module[
+optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
   {
     t,
-    unchangedIntervals,
-    complexityMakeOdd,
+    targetedIntervalsA,
     
+    optimizationPower,
     tuningMappings,
-    generatorsTuningMap,
     tuningMap,
-    
-    damagesMagnitude,
-    previousDamagesMagnitude,
-    previousSolution,
-    normPower,
-    normPowerPower,
-    
-    damagesL,
-    normFn,
-    normPowerLimit,
-    periodsPerOctave,
-    minimizedNorm,
-    solution
+    targetedIntervalDamagesL
   },
   
   t = tuningOption[tuningOptions, "t"];
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"];
-  complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
   
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
-  tuningMap = Part[tuningMappings, 3];
-  
-  damagesL = getTargetedIntervalDamagesL[tuningMap, tuningOptions];
-  normFn = Norm;
-  normPowerLimit = 1;
-  
-  damagesMagnitude = 1000000;
-  previousDamagesMagnitude = \[Infinity];
-  normPower = 2;
-  normPowerPower = 1;
-  
-  periodsPerOctave = getPeriodsPerOctave[t];
-  
-  While[
-    normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
-    previousDamagesMagnitude = damagesMagnitude;
-    previousSolution = solution;
-    minimizedNorm = If[
-      Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {normFn[damagesL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      normFn[damagesL, normPower]
-    ];
-    solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
-    damagesMagnitude = First[solution];
-    normPowerPower = normPowerPower += 1;
-    normPower = Power[2, 1 / normPowerPower];
-  ];
-  generatorsTuningMap /. Last[previousSolution]
+  (* if the solution from the sum polytope is non-unique, fall back to a power limit solution *)
+  Check[
+    optimizeGeneratorsTuningMapAnalyticalSumPolytope[tuningOptions, targetedIntervalsA, getSumDamage],
+    
+    optimizationPower = tuningOption[tuningOptions, "optimizationPower"];
+    tuningMappings = getTuningMappings[t];
+    tuningMap = Part[tuningMappings, 3];
+    targetedIntervalDamagesL = getTargetedIntervalDamagesL[tuningMap, tuningOptions];
+    optimizeGeneratorsTuningMapNumericalPowerLimitSolver[tuningOptions, targetedIntervalDamagesL, optimizationPower]
+  ]
 ];
 
 optimizeGeneratorsTuningMapMinisos[tuningOptions_] := Module[
@@ -99,7 +67,7 @@ optimizeGeneratorsTuningMapMinisos[tuningOptions_] := Module[
   targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
   damageWeights = getDamageWeights[tuningOptions];
   
-  optimizeGeneratorsTuningMapWithPseudoInverse[t, targetedIntervalsA, damageWeights]
+  optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[t, targetedIntervalsA, damageWeights]
 ];
 
 optimizeGeneratorsTuningMapMinisop[tuningOptions_] := Module[

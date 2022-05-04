@@ -364,54 +364,6 @@ getPureOctaveStretchedGeneratorsTuningMap[optimizedGeneratorsTuningMap_, t_] := 
 ];
 
 
-(* TUNING UNIQUENESS *)
-
-hasNonUniqueTuning[m_] := getR[m] > 1 && (hasIndependentGenerator[m] || primesInLockedRatio[m]);
-
-countNonzeroElements[l_] := Count[l, element_ /; element != 0];
-whichGeneratorIsTheSingleOneApproximatingThisPrime[generatorsApproximatingPrime_] := First[Position[generatorsApproximatingPrime, x_ /; x > 0, 1, 1]];
-
-primesInLockedRatio[m_] := Module[
-  {
-    canonicalM,
-    generatorsApproximatingEachPrime,
-    countGeneratorsInvolvedInApproximatingEachPrime,
-    whetherPrimesAreApproximatedBySingleGeneratorOrNot,
-    indexesOfPrimesApproximatedBySingleGenerators,
-    perGeneratorHowManyPrimesAreApproximatedOnlyByIt,
-    index,
-    whetherGeneratorsApproximateMoreThanOnePrimeForWhichTheyAreItsSingleApproximatingGenerator
-  },
-  canonicalM = canonicalForm[m];
-  
-  generatorsApproximatingEachPrime = Transpose[getA[canonicalM]];
-  countGeneratorsInvolvedInApproximatingEachPrime = Map[countNonzeroElements, generatorsApproximatingEachPrime];
-  whetherPrimesAreApproximatedBySingleGeneratorOrNot = Map[# == 1&, countGeneratorsInvolvedInApproximatingEachPrime];
-  indexesOfPrimesApproximatedBySingleGenerators = {};
-  MapIndexed[If[#1 == True, AppendTo[indexesOfPrimesApproximatedBySingleGenerators, #2] ]&, whetherPrimesAreApproximatedBySingleGeneratorOrNot];
-  
-  perGeneratorHowManyPrimesAreApproximatedOnlyByIt = Association[];
-  Map[
-    Function[{indexOfPrimeApproximatedBySingleGenerator},
-      index = whichGeneratorIsTheSingleOneApproximatingThisPrime[First[Part[generatorsApproximatingEachPrime, indexOfPrimeApproximatedBySingleGenerator]]];
-      If[
-        KeyExistsQ[perGeneratorHowManyPrimesAreApproximatedOnlyByIt, index],
-        perGeneratorHowManyPrimesAreApproximatedOnlyByIt[index] = perGeneratorHowManyPrimesAreApproximatedOnlyByIt[index] + 1,
-        perGeneratorHowManyPrimesAreApproximatedOnlyByIt[index] = 1
-      ];
-    ],
-    indexesOfPrimesApproximatedBySingleGenerators
-  ];
-  whetherGeneratorsApproximateMoreThanOnePrimeForWhichTheyAreItsSingleApproximatingGenerator = Map[# > 1&, Values[perGeneratorHowManyPrimesAreApproximatedOnlyByIt]];
-  
-  AnyTrue[whetherGeneratorsApproximateMoreThanOnePrimeForWhichTheyAreItsSingleApproximatingGenerator, TrueQ]
-];
-
-hasIndependentGenerator[m_] := Module[{},
-  canonicalM = canonicalForm[m];
-  AnyTrue[getA[canonicalM], TrueQ[Total[Abs[#]] == 1]&]
-];
-
 
 (* TARGETED INTERVAL SETS *)
 
