@@ -34,22 +34,22 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
     If[
       complexityNormPower == 2,
       
-      (* covers TE, Frobenius, WE, BE *)
+      (* covers TE, POTE, Frobenius, WE, BE *)
       optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions],
       
       If[
         complexityNormPower == 1,
         
-        (* covers TOP, L1 version of Frobenius, BOP, Weil, Kees *)
+        (* covers TOP, POTOP, L1 version of Frobenius, BOP, Weil, Kees *)
         optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions],
         
         If[
           complexityNormPower == \[Infinity],
           
-          (* no described tunings use this as of yet *)
+          (* no historically described tunings use this *)
           optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions],
           
-          (* no described tunings use this as of yet *)
+          (* no historically described tunings use this *)
           optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions]
         ]
       ]
@@ -58,6 +58,7 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinimax *)
+(* covers TOP, POTOP, L1 version of Frobenius, BOP, Weil, Kees *)
 optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions_] := Module[
   {t, targetedIntervalsAsPrimesIdentityA, dualMultiplier},
   
@@ -69,6 +70,7 @@ optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions_] := Module[
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinisum *)
+(* no historically described tunings use this *)
 optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
   {
     t,
@@ -98,6 +100,7 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinisos *)
+(* covers TE, POTE, Frobenius, WE, BE *)
 optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
   {t, targetedIntervalsAsPrimesIdentityA, dualMultiplier},
   
@@ -109,6 +112,7 @@ optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinisop *)
+(* covers KE, CTE *)
 optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions_] := Module[
   {
     t,
@@ -133,7 +137,8 @@ optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions_] := Module[
   optimizeGeneratorsTuningMapNumericalPowerSolver[tuningOptions, dualMultipliedPrimesErrorL, primesErrorMagnitudeNormPower]
 ];
 
-dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
+
+(* TARGETING-ALL HELPER FUNCTIONS, MANY OF WHICH PARALLEL TARGETING-LIST FUNCTIONS *)
 
 (* compare with getDamageWeights *)
 (* that may be simplicity-weighted or complexity-weighted, but this is always essentially "simplicity-weighted" *)
@@ -177,3 +182,5 @@ getDualMultipliedPrimesErrorL[tuningMap_, tuningOptions_] := Module[
 
 (* compare with getSumDamage *)
 getSumPrimesAbsError[tuningMap_, tuningOptions_] := Total[getDualMultipliedPrimesErrorL[tuningMap, tuningOptions]];
+
+dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];

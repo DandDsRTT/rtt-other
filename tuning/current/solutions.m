@@ -1,6 +1,9 @@
 (* MINIMAX *)
 
+(* covers minimax, TOP, POTOP, L1 version of Frobenius, BOP, Weil, Kees *)
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
+(* TODO: standardize the interfaces of all these solution functions to the greatest extent possible, 
+both their actualities and their superficial namings *)
 optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, damageWeightsOrComplexityMultiplier_] := Module[
   {
     tuningMappings,
@@ -274,6 +277,9 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
 
 (* MINISUM *)
 
+(* no historically described tunings use this *)
+(* based on https://en.xen.wiki/w/Target_tunings#Minimax_tuning, 
+though it is in general actually a solution for minisum, not minimax *)
 optimizeGeneratorsTuningMapAnalyticalSumPolytope[
   tuningOptions_,
   potentiallyPrimesIdentityTargetedIntervalsA_,
@@ -339,6 +345,8 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[
   ]
 ];
 
+(* no historically described tunings use this *)
+(* this is the fallback for when optimizeGeneratorsTuningMapAnalyticalSumPolytope fails to find a unique solution *)
 optimizeGeneratorsTuningMapNumericalPowerLimitSolver[tuningOptions_, absErrorL_, normPower_] := Module[
   {
     t,
@@ -398,6 +406,7 @@ getDiagonalEigenvalueA[unchangedIntervalEigenvectors_, commaEigenvectors_] := Di
 
 (* MINISOS *)
 
+(* covers least squares, TE, POTE, Frobenius, WE, BE *)
 optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
   t_,
   potentiallyPrimesIdentityTargetedIntervalsA_,
@@ -437,6 +446,7 @@ optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
 
 (* OTHER POWERS *)
 
+(* covers KE, CTE *)
 optimizeGeneratorsTuningMapNumericalPowerSolver[tuningOptions_, absErrorL_, normPower_] := Module[
   {
     t,
@@ -461,7 +471,8 @@ optimizeGeneratorsTuningMapNumericalPowerSolver[tuningOptions_, absErrorL_, norm
   periodsPerOctave = getPeriodsPerOctave[t];
   
   minimizedNorm = If[
-    Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
+    (* TODO: might eventually be able to simplify the constraints code, if we always have here and/or never elsewhere *)
+    Length[unchangedIntervals] > 0 || complexityMakeOdd == True, 
     {Norm[absErrorL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
     Norm[absErrorL, normPower]
   ];

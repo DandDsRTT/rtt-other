@@ -7,16 +7,29 @@ optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
   
   If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
+  
+    (* no historically described tunings use this *)
     optimizeGeneratorsTuningMapMinisop[tuningOptions],
+    
     If[
       optimizationPower == 2,
+  
+      (* covers least squares *)
       optimizeGeneratorsTuningMapMinisos[tuningOptions],
+      
       If[
         optimizationPower == \[Infinity],
+  
+        (* covers minimax *)
         optimizeGeneratorsTuningMapMinimax[tuningOptions],
+        
         If[
           optimizationPower == 1,
+  
+          (* no historically described tunings use this *)
           optimizeGeneratorsTuningMapMinisum[tuningOptions],
+  
+          (* no historically described tunings use this *)
           optimizeGeneratorsTuningMapMinisop[tuningOptions]
         ]
       ]
@@ -24,6 +37,7 @@ optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
   ]
 ];
 
+(* covers minimax *)
 optimizeGeneratorsTuningMapMinimax[tuningOptions_] := Module[
   {t, targetedIntervalsA, damageWeights},
   
@@ -34,6 +48,7 @@ optimizeGeneratorsTuningMapMinimax[tuningOptions_] := Module[
   optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t, targetedIntervalsA, damageWeights]
 ];
 
+(* no historically described tunings use this *)
 optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
   {
     t,
@@ -60,6 +75,7 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
   ]
 ];
 
+(* covers least squares *)
 optimizeGeneratorsTuningMapMinisos[tuningOptions_] := Module[
   {t, targetedIntervalsA, damageWeights},
   
@@ -70,6 +86,7 @@ optimizeGeneratorsTuningMapMinisos[tuningOptions_] := Module[
   optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[t, targetedIntervalsA, damageWeights]
 ];
 
+(* no historically described tunings use this *)
 optimizeGeneratorsTuningMapMinisop[tuningOptions_] := Module[
   {
     t,
