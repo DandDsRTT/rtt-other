@@ -125,6 +125,9 @@ getDamageWeights[tuningOptions_] := Module[
   complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
   complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
   
+  (* will be handled elsewhere in optimizeGeneratorsTuningMapSemianalyticalMaxPolytope *)
+  If[complexityNormPower == 1, complexitySizeFactor = 0];
+  
   damageWeights = If[
     damageWeightingSlope == "unweighted",
     
@@ -146,6 +149,7 @@ getDamageWeights[tuningOptions_] := Module[
   
   If[
     damageWeightingSlope == "simplicityWeighted",
+    (*    tuningInverse[damageWeights],*)
     PseudoInverse[damageWeights],
     damageWeights
   ]

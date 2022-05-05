@@ -5,7 +5,7 @@ minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
 (* TODO: standardize the interfaces of all these solution functions to the greatest extent possible, 
 both their actualities and their superficial namings *)
-optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, damageWeightsOrComplexityMultiplier_] := Module[
+optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, damageWeightsOrComplexityMultiplier_, complexitySizeFactor_ ] := Module[
   {
     tuningMappings,
     ma,
@@ -21,7 +21,8 @@ optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, da
     minimaxLockForJustSide,
     undoMinimaxLocksForMappedSide,
     undoMinimaxLocksForJustSide,
-    uniqueOptimalTuning
+    uniqueOptimalTuning,
+    result
   },
   
   tuningMappings = getTuningMappings[t];
@@ -31,6 +32,14 @@ optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, da
   
   mappedSide = Transpose[ma.Transpose[targetedIntervalsA].damageWeightsOrComplexityMultiplier];
   justSide = Transpose[{primesTuningMap.Transpose[targetedIntervalsA].damageWeightsOrComplexityMultiplier}];
+  
+  (* first half of handling dual of integer limit *)
+  If[
+    complexitySizeFactor != 0,
+    mappedSide = Map[Join[#, {complexitySizeFactor}]&, mappedSide];
+    AppendTo[mappedSide, Join[Table[0, Last[Dimensions[mappedSide]] - 1], {-1}]];
+    AppendTo[justSide, {0}];
+  ];
   
   (*   
   our goal is to find the generator tuning map not merely with minimaxed damage, 
@@ -110,10 +119,18 @@ optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, da
   ];
   
   uniqueOptimalTuning = First[minimaxTunings];
-  SetAccuracy[Flatten[
+  
+  result = SetAccuracy[Flatten[
     (* here's that left-multiplication mentioned earlier *)
     undoMinimaxLocksForMappedSide.uniqueOptimalTuning + undoMinimaxLocksForJustSide
-  ], 10]
+  ], 10];
+  
+  (* second half of handling dual of integer limit *)
+  If[
+    complexitySizeFactor != 0,
+    Drop[result, -1],
+    result
+  ]
 ];
 
 findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide_, justSide_, maxCountOfNestedMinimaxibleDamages_] := Module[
@@ -413,11 +430,12 @@ getDiagonalEigenvalueA[unchangedIntervalEigenvectors_, commaEigenvectors_] := Di
 (* MINISOS *)
 
 (* covers pure-octave-constrained minisos-U "least squares", minimax-ES "TE", pure-octave-stretched minimax-ES "POTE",
- minimax-NES "Frobenius", minimax-ZES "WE", minimax-PNES "BE" *)
+minimax-NES "Frobenius", minimax-ZES "WE", minimax-PNES "BE" *)
 optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
   t_,
   potentiallyPrimesIdentityTargetedIntervalsA_,
-  damageWeightingOrDualMultiplier_
+  damageWeightingOrDualMultiplier_(*,
+  complexitySizeFactor_*)
 ] := Module[
   {
     tuningMappings,
@@ -438,14 +456,31 @@ optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
   weightedOrMultipliedTargetedIntervalsAMapped = ma.
       Transpose[potentiallyPrimesIdentityTargetedIntervalsA].
       damageWeightingOrDualMultiplier;
+  (*
+    (* first half of handling dual of integer limit, though this doesn't actually work *)
+  If[
+    complexitySizeFactor != 0,
+    weightedOrMultipliedTargetedIntervalsAMapped = Map[Join[#, {complexitySizeFactor}]&, weightedOrMultipliedTargetedIntervalsAMapped];
+    AppendTo[weightedOrMultipliedTargetedIntervalsAMapped, Join[Table[0, First[Dimensions[weightedOrMultipliedTargetedIntervalsAMapped]] - 1], {-1}]];
+    (*      AppendTo[justSide, {0}];*)
+  ];
+  *)
   generatorsA = Transpose[potentiallyPrimesIdentityTargetedIntervalsA].
       damageWeightingOrDualMultiplier.
       Transpose[weightedOrMultipliedTargetedIntervalsAMapped].
       Inverse[
+        (*    PseudoInverse[  weird to have pseudoinverse in the middle of our simulated pseudoinverse, but it's necessary for the singular items we get when doing Weil tuning this way *)
         weightedOrMultipliedTargetedIntervalsAMapped.Transpose[weightedOrMultipliedTargetedIntervalsAMapped]
       ];
   
   generatorsTuningMap = primesTuningMap.generatorsA;
+  
+  (*  *)(* second half of handling dual of integer limit, though this doesn't actually work *)
+  (*  If[*)
+  (*    complexitySizeFactor != 0,*)
+  (*    Drop[generatorsTuningMap, -1],*)
+  (*    generatorsTuningMap*)
+  (*  ]*)
   
   generatorsTuningMap
 ];
@@ -479,7 +514,7 @@ optimizeGeneratorsTuningMapNumericalPowerSolver[tuningOptions_, absErrorL_, norm
   
   minimizedNorm = If[
     (* TODO: might eventually be able to simplify the constraints code, if we always have here and/or never elsewhere *)
-    Length[unchangedIntervals] > 0 || complexityMakeOdd == True, 
+    Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
     {Norm[absErrorL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
     Norm[absErrorL, normPower]
   ];

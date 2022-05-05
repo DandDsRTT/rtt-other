@@ -71,15 +71,16 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
 (* covers minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
 minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
 optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions_] := Module[
-  {t, targetedIntervalsAsPrimesIdentityA, dualMultiplier},
+  {t, complexitySizeFactor, targetedIntervalsAsPrimesIdentityA, dualMultiplier},
   
   If[tuningOption[tuningOptions, "debug"], Print["primes maximum norm"]];
   
   t = tuningOption[tuningOptions, "t"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
   dualMultiplier = getDualMultiplier[tuningOptions];
   
-  optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t, targetedIntervalsAsPrimesIdentityA, dualMultiplier]
+  optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t, targetedIntervalsAsPrimesIdentityA, dualMultiplier, complexitySizeFactor]
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinisum *)
@@ -105,7 +106,7 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
   Check[
     optimizeGeneratorsTuningMapAnalyticalSumPolytope[t, targetedIntervalsA, getSumPrimesAbsError],
     
-    If[tuningOption[tuningOptions, "debug"], Print["non-unique solution → power limit solver"]];
+    If[tuningOption[tuningOptions, "debug"], Print["non-unique solution \[RightArrow] power limit solver"]];
     complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"];
     tuningMappings = getTuningMappings[t];
     tuningMap = Part[tuningMappings, 3];
@@ -119,15 +120,16 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
 (* covers minimax-ES "TE", minimax-NES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
 minimax-ZES "WE", minimax-PNES "BE" *)
 optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
-  {t, targetedIntervalsAsPrimesIdentityA, dualMultiplier},
+  {t(*, complexitySizeFactor*), targetedIntervalsAsPrimesIdentityA, dualMultiplier},
   
   If[tuningOption[tuningOptions, "debug"], Print["primes Euclidean norm"]];
   
   t = tuningOption[tuningOptions, "t"];
+  (*  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];*)
   targetedIntervalsAsPrimesIdentityA = getPrimesIdentityA[t];
   dualMultiplier = getDualMultiplier[tuningOptions];
   
-  optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[t, targetedIntervalsAsPrimesIdentityA, dualMultiplier]
+  optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[t, targetedIntervalsAsPrimesIdentityA, dualMultiplier(*, complexitySizeFactor*)]
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinisop *)
@@ -166,6 +168,7 @@ optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions_] := Module[
 getDualMultiplier[tuningOptions_] := Module[
   {
     t,
+    complexityNormPower, (* trait 3 *)
     complexityNegateLogPrimeCoordination, (* trait 4a *)
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
@@ -173,11 +176,16 @@ getDualMultiplier[tuningOptions_] := Module[
   },
   
   t = tuningOption[tuningOptions, "t"];
+  complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"]; (* trait 3 *)
   complexityNegateLogPrimeCoordination = tuningOption[tuningOptions, "complexityNegateLogPrimeCoordination"]; (* trait 4a *)
   complexityPrimePower = tuningOption[tuningOptions, "complexityPrimePower"]; (* trait 4b *)
   complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"]; (* trait 4d *)
   
+  (* will be handled elsewhere in optimizeGeneratorsTuningMapSemianalyticalMaxPolytope *)
+  If[complexityNormPower == 1, complexitySizeFactor = 0];
+  
+  (*  tuningInverse[getComplexityMultiplier[*)
   PseudoInverse[getComplexityMultiplier[
     t,
     complexityNegateLogPrimeCoordination, (* trait 4a *)

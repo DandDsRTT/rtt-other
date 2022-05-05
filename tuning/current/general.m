@@ -314,7 +314,7 @@ processTuningOptions[
           {}
         ],
         If[
-          targetedIntervals === "diamond",
+          targetedIntervals == "diamond",
           getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
           intervalRebase.getA[targetedIntervals]
         ]
@@ -333,7 +333,7 @@ processTuningOptions[
           {}
         ],
         If[
-          targetedIntervals === "diamond",
+          targetedIntervals == "diamond",
           getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
           getA[targetedIntervals]
         ]
@@ -400,6 +400,35 @@ getTuningMappings[t_] := Module[
   {generatorsTuningMap, ma, tuningMap, primesTuningMap}
 ];
 
+(*tuningInverse[damageWeighterOrComplexityMultiplier_] := MapThread[
+  Function[
+    {dataRow, zerosRow},
+    MapIndexed[
+      Function[
+        {zerosEl, index},
+        zerosEl + If[
+          First[index] > Length[dataRow],
+          0,
+          Part[dataRow, First[index]]
+        ]
+      ],
+      zerosRow
+    ]
+  ],
+  {
+    Inverse[
+      damageWeighterOrComplexityMultiplier[[1 ;; Last[Dimensions[damageWeighterOrComplexityMultiplier]]]]
+    ],
+    Table[
+      Table[
+        0,
+        First[Dimensions[damageWeighterOrComplexityMultiplier]]
+      ],
+      Last[Dimensions[damageWeighterOrComplexityMultiplier]]
+    ]
+  }
+];*)
+
 
 (* INTERVAL BASIS *)
 
@@ -443,4 +472,4 @@ octaveReduce[inputI_] := Module[{i},
   i
 ];
 
-oddLimitFromD[d_] := Prime[d + 1] - 2;
+oddLimitFromD[d_] := Prime[d + 1] - 2; 
