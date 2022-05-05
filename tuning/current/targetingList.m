@@ -1,3 +1,5 @@
+(* covers targeting-list (includes 
+pure-octave-constrained minimax-U "minimax", pure-octave-constrained minisos-U "least squares") *)
 optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
   {unchangedIntervals, optimizationPower, complexityMakeOdd},
   
@@ -39,7 +41,7 @@ optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
   ]
 ];
 
-(* covers minimax *)
+(* covers pure-octave-constrained minimax-U "minimax" *)
 optimizeGeneratorsTuningMapMinimax[tuningOptions_] := Module[
   {t, targetedIntervalsA, damageWeights},
   
@@ -82,7 +84,7 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
   ]
 ];
 
-(* covers least squares *)
+(* covers pure-octave-constrained minisos-U "least squares" *)
 optimizeGeneratorsTuningMapMinisos[tuningOptions_] := Module[
   {t, targetedIntervalsA, damageWeights},
   

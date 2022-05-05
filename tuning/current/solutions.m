@@ -1,6 +1,7 @@
 (* MINIMAX *)
 
-(* covers minimax, TOP, POTOP, L1 version of Frobenius, BOP, Weil, Kees *)
+(* covers pure-octave-constrained minimax-U "minimax", minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
+minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
 (* TODO: standardize the interfaces of all these solution functions to the greatest extent possible, 
 both their actualities and their superficial namings *)
@@ -279,7 +280,12 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
 
 (* no historically described tunings use this *)
 (* based on https://en.xen.wiki/w/Target_tunings#Minimax_tuning, 
-though it is in general actually a solution for minisum, not minimax *)
+where pure-octave-constrained minimax-U "minimax" is described;
+however, this computation method is in general actually a solution for minisum tunings, not minimax tunings. 
+it only lucks out and works for minimax due to the pure-octave-constraint 
+and nature of the tonality diamond targeted interval set,
+namely that the places where damage to targets are equal is the same where other targets are pure.
+*)
 optimizeGeneratorsTuningMapAnalyticalSumPolytope[
   tuningOptions_,
   potentiallyPrimesIdentityTargetedIntervalsA_,
@@ -406,7 +412,8 @@ getDiagonalEigenvalueA[unchangedIntervalEigenvectors_, commaEigenvectors_] := Di
 
 (* MINISOS *)
 
-(* covers least squares, TE, POTE, Frobenius, WE, BE *)
+(* covers pure-octave-constrained minisos-U "least squares", minimax-ES "TE", pure-octave-stretched minimax-ES "POTE",
+ minimax-NES "Frobenius", minimax-ZES "WE", minimax-PNES "BE" *)
 optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
   t_,
   potentiallyPrimesIdentityTargetedIntervalsA_,
@@ -446,7 +453,7 @@ optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
 
 (* OTHER POWERS *)
 
-(* covers KE, CTE *)
+(* covers minimax-QZES "KE", pure-octave-constrained minimax-ES "CTE" *)
 optimizeGeneratorsTuningMapNumericalPowerSolver[tuningOptions_, absErrorL_, normPower_] := Module[
   {
     t,

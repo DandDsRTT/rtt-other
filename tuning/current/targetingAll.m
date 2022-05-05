@@ -1,5 +1,11 @@
 (* TARGETING-ALL *)
 
+(* covers targeting-all (includes 
+minimax-S "TOP", minimax-ES "TE", minimax-NES "Frobenius", 
+minimax-PNS "BOP", minimax-PNES "BE", 
+minimax-ZS "Weil", minimax-ZES "WE", minimax-QZS "Kees", minimax-QZES "KE", 
+pure-octave-constrained minimax-ES "CTE", 
+pure-octave-stretched minimax-S "POTOP", pure-octave-stretched minimax-ES "POTE") *)
 (* compare with optimizeGeneratorsTuningMapTargetingList *)
 optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
   {
@@ -30,19 +36,21 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
   If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
     
-    (* covers KE, CTE *)
+    (* covers minimax-QZES "KE", pure-octave-constrained minimax-ES "CTE" *)
     optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions],
     
     If[
       complexityNormPower == 2,
       
-      (* covers TE, POTE, Frobenius, WE, BE *)
+      (* covers minimax-ES "TE", minimax-NES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
+      minimax-ZES "WE", minimax-PNES "BE" *)
       optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions],
       
       If[
         complexityNormPower == 1,
         
-        (* covers TOP, POTOP, L1 version of Frobenius, BOP, Weil, Kees *)
+        (* covers minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
+        minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
         optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions],
         
         If[
@@ -60,7 +68,8 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinimax *)
-(* covers TOP, POTOP, L1 version of Frobenius, BOP, Weil, Kees *)
+(* covers minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
+minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
 optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions_] := Module[
   {t, targetedIntervalsAsPrimesIdentityA, dualMultiplier},
   
@@ -95,7 +104,7 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
   (* if the solution from the sum polytope is non-unique, fall back to a power limit solution *)
   Check[
     optimizeGeneratorsTuningMapAnalyticalSumPolytope[t, targetedIntervalsA, getSumPrimesAbsError],
-  
+    
     If[tuningOption[tuningOptions, "debug"], Print["non-unique solution → power limit solver"]];
     complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"];
     tuningMappings = getTuningMappings[t];
@@ -107,7 +116,8 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinisos *)
-(* covers TE, POTE, Frobenius, WE, BE *)
+(* covers minimax-ES "TE", minimax-NES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
+minimax-ZES "WE", minimax-PNES "BE" *)
 optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
   {t, targetedIntervalsAsPrimesIdentityA, dualMultiplier},
   
@@ -121,7 +131,7 @@ optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinisop *)
-(* covers KE, CTE *)
+(* covers minimax-QZES "KE", pure-octave-constrained minimax-ES "CTE" *)
 optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions_] := Module[
   {
     t,

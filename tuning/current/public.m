@@ -132,10 +132,16 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   optimizedGeneratorsTuningMap = 1200 * If[
     Length[targetedIntervalsA] == 0,
     
-    (* covers TOP, TE, L1-style Frobenius, Frobenius, BOP, BE, Weil, WE, Kees, KE, CTE, POTOP, POTE *)
+    (* covers targeting-all (includes 
+    minimax-S "TOP", minimax-ES "TE", minimax-NES "Frobenius", 
+    minimax-PNS "BOP", minimax-PNES "BE", 
+    minimax-ZS "Weil", minimax-ZES "WE", minimax-QZS "Kees", minimax-QZES "KE", 
+    pure-octave-constrained minimax-ES "CTE", 
+    pure-octave-stretched minimax-S "POTOP", pure-octave-stretched minimax-ES "POTE") *)
     optimizeGeneratorsTuningMapTargetingAll[tuningOptions],
     
-    (* covers minimax, minisos, minisum *)
+    (* covers targeting-list (includes 
+    pure-octave-constrained minimax-U "minimax", pure-octave-constrained minisos-U "least squares") *)
     optimizeGeneratorsTuningMapTargetingList[tuningOptions]
   ];
   

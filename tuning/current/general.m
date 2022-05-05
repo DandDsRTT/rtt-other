@@ -8,9 +8,9 @@ tuningOptions = {
   "complexityNormPower" -> 1, (* trait 3: what Mike Battaglia refers to as `p` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space *)
   "complexityNegateLogPrimeCoordination" -> False, (* trait 4a: False = do nothing, True = negate the multiplication by logs of primes *)
   "complexityPrimePower" -> 0, (* trait 4b: what Mike Battaglia refers to as `s` in https://en.xen.wiki/w/BOP_tuning; 0 = nothing, equiv to copfr when log prime coordination is negated and otherwise defaults; 1 = product complexity, equiv to sopfr when log prime coordination is negated and otherwise defaults; >1 = pth power of those *)
-  "complexitySizeFactor" -> 0, (* trait 4c: what Mike Battaglia refers to as `k` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space; 0 = no augmentation to factor in span, 1 = Weil style, etc. *)
-  "complexityMakeOdd" -> False, (* trait 4d: False = do nothing, True = achieve Kees from Weil, KE from WE, etc. *)
-  "tuningIntervalBasis" -> "primes", (* Graham Breed calls this "inharmonic" vs "subgroup" notion in the context of TE tuning, but it can be used for any tuning *)
+  "complexitySizeFactor" -> 0, (* trait 4c: what Mike Battaglia refers to as `k` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space; 0 = no augmentation to factor in span, 1 = could be integer limit, etc. *)
+  "complexityMakeOdd" -> False, (* trait 4d: False = do nothing, True = achieve odd limit from integer limit, etc. *)
+  "tuningIntervalBasis" -> "primes", (* Graham Breed calls this "inharmonic" vs "subgroup" notion in the context of minimax-ES ("TE") tuning, but it can be used for any tuning *)
   "pureOctaveStretch" -> False,
   "systematicTuningName" -> "",
   "originalTuningName" -> "",
@@ -85,11 +85,11 @@ processTuningOptions[
   
   If[
     originalTuningName === "minimax",
-    optimizationPower = \[Infinity]; damageWeightingSlope = "unweighted";
+    optimizationPower = \[Infinity]; damageWeightingSlope = "unweighted"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   If[
     originalTuningName === "least squares",
-    optimizationPower = 2; damageWeightingSlope = "unweighted";
+    optimizationPower = 2; damageWeightingSlope = "unweighted"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   If[
     originalTuningName === "TOP" || originalTuningName === "TIPTOP",
@@ -141,10 +141,20 @@ processTuningOptions[
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted";  systematicComplexityName = "E"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   
+  (* trait -1 *)
+  If[
+    StringMatchQ[systematicTuningName, "*pure-octave-constrained*"],
+    unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
+  ];
+  
   (* trait 0 *)
   If[
-    StringMatchQ[systematicTuningName, "*targeting-all*"],
+    StringMatchQ[systematicTuningName, "*targeting-all*"] || (StringMatchQ[systematicTuningName, "*minimax*"] && StringMatchQ[systematicTuningName, "*S*"]),
     targetedIntervals = {};
+  ];
+  If[
+    StringMatchQ[systematicTuningName, "*diamond*"],
+    targetedIntervals = "diamond";
   ];
   
   (* trait 1 *)
@@ -201,6 +211,18 @@ processTuningOptions[
   If[
     StringMatchQ[systematicTuningName, "*Q*"] || StringMatchQ[systematicComplexityName, "*Q*"],
     complexityMakeOdd = True;
+  ];
+  (* TODO: this is real gross and would be great if we could make minimax-QZES tuning a bit nicer *)
+  If[
+    (StringMatchQ[systematicTuningName, "*Q*"] && StringMatchQ[systematicTuningName, "*E*"]) ||
+        (StringMatchQ[systematicTuningName, "*Q*"] && StringMatchQ[systematicTuningName, "*E*"]),
+    complexityMakeOdd = False; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]}
+  ];
+  
+  (* trait 8 - pure-octave stretch *)
+  If[
+    StringMatchQ[systematicTuningName, "*pure-octave-stretched*"],
+    pureOctaveStretch = True;
   ];
   
   (* Note: we can't implement product complexity with the current design, and don't intend to revise.
@@ -281,10 +303,42 @@ processTuningOptions[
     intervalRebase = getIntervalRebaseForC[intervalBasis, primeLimitIntervalBasis];
     mappingInPrimeLimitIntervalBasis = getM[commaBasisInPrimeLimitIntervalBasis];
     tPossiblyWithChangedIntervalBasis = mappingInPrimeLimitIntervalBasis;
-    targetedIntervalsA = If[targetedIntervals === Null, getDiamond[getD[tPossiblyWithChangedIntervalBasis]], If[Length[targetedIntervals] == 0, If[forDamage, getFormalPrimesA[tPossiblyWithChangedIntervalBasis], {}], intervalRebase.getA[targetedIntervals]]],
+    targetedIntervalsA = If[
+      targetedIntervals === Null,
+      Throw["no targeted intervals"],
+      If[
+        ToString[targetedIntervals] == "{}",
+        If[
+          forDamage,
+          getFormalPrimesA[tPossiblyWithChangedIntervalBasis],
+          {}
+        ],
+        If[
+          targetedIntervals === "diamond",
+          getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
+          intervalRebase.getA[targetedIntervals]
+        ]
+      ]
+    ],
     
     tPossiblyWithChangedIntervalBasis = t;
-    targetedIntervalsA = If[targetedIntervals === Null, getDiamond[getD[tPossiblyWithChangedIntervalBasis]], If[Length[targetedIntervals] == 0, If[forDamage, getFormalPrimesA[tPossiblyWithChangedIntervalBasis], {}], getA[targetedIntervals]]];
+    targetedIntervalsA = If[
+      targetedIntervals === Null,
+      Throw["no targeted intervals"],
+      If[
+        ToString[targetedIntervals] == "{}",
+        If[
+          forDamage,
+          getFormalPrimesA[tPossiblyWithChangedIntervalBasis],
+          {}
+        ],
+        If[
+          targetedIntervals === "diamond",
+          getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
+          getA[targetedIntervals]
+        ]
+      ]
+    ]
   ];
   
   If[!NumericQ[optimizationPower] && optimizationPower != \[Infinity], Throw["no optimization power"]];
