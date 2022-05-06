@@ -400,6 +400,18 @@ getTuningMappings[t_] := Module[
   {generatorsTuningMap, ma, tuningMap, primesTuningMap}
 ];
 
+generatorsTuningMapFromTAndTuningMap[t_, tuningMap_] := Module[
+  {tuningMappings, generatorsTuningMap, ma, solution},
+  
+  tuningMappings = getTuningMappings[t];
+  generatorsTuningMap = Part[tuningMappings, 1];
+  ma = Part[tuningMappings, 2];
+  
+  solution = NMinimize[Norm[generatorsTuningMap.ma - tuningMap], generatorsTuningMap];
+  
+  generatorsTuningMap /. Last[solution]
+];
+
 (*tuningInverse[damageWeighterOrComplexityMultiplier_] := MapThread[
   Function[
     {dataRow, zerosRow},
