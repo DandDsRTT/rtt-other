@@ -217,4 +217,4 @@ getDualMultipliedPrimesErrorL[tuningMap_, tuningOptions_] := Module[
 (* compare with getSumDamage *)
 getSumPrimesAbsError[tuningMap_, tuningOptions_] := Total[getDualMultipliedPrimesErrorL[tuningMap, tuningOptions]];
 
-dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
+dualPower[power_] := If[power == 1, \[Infinity], 1 / (1 - 1 / power)];

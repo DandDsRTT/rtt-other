@@ -290,14 +290,6 @@ dual[{{quotientToPcv[64 / 63]}, "contra"}]
 
 (* ___ PRIVATE ___ *)
 
-
-
-(* getProjectionAFromUnchangedIntervals *)
-test[getProjectionAFromUnchangedIntervals, {{{1, 1, 0}, {0, 1, 4}}, "co"}, {{1, 0, 0}, {-2, 0, 1}}, {{1, 1, 0}, {0, 0, 0}, {0,FractionBox["1", "4"], 1}}];
-
-(* getDiagonalEigenvalueA *)
-test[getDiagonalEigenvalueA, {{1, 0, 0}, {-2, 0, 1}}, {{-4, 4, -1}}, {{1, 0, 0}, {0, 1, 0}, {0, 0, 0}}];
-
 (* getPrimesTuningMap *)
 test[getPrimesTuningMap, {{{12, 19, 28}}, "co", {2, 3, 5}}, {Log2[2], Log2[3], Log2[5]}];
 test[getPrimesTuningMap, {{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}}, {Log2[2], Log2[9], Log2[5], Log2[21]}];
