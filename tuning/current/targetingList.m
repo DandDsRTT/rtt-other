@@ -1,5 +1,5 @@
 (* covers targeting-list (includes 
-pure-octave-constrained minimax-U "minimax", pure-octave-constrained minisos-U "least squares") *)
+unchanged-octave diamond minimax-U "minimax", unchanged-octave diamond minisos-U "least squares") *)
 optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
   {unchangedIntervals, optimizationPower, complexityMakeOdd},
   
@@ -41,7 +41,7 @@ optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
   ]
 ];
 
-(* covers pure-octave-constrained minimax-U "minimax" *)
+(* covers unchanged-octave diamond minimax-U "minimax" *)
 optimizeGeneratorsTuningMapMinimax[tuningOptions_] := Module[
   {t, complexitySizeFactor, targetedIntervalsA, damageWeights},
   
@@ -85,7 +85,7 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
   ]
 ];
 
-(* covers pure-octave-constrained minisos-U "least squares" *)
+(* covers unchanged-octave diamond minisos-U "least squares" *)
 optimizeGeneratorsTuningMapMinisos[tuningOptions_] := Module[
   {t(*, complexitySizeFactor *), targetedIntervalsA, damageWeights},
   

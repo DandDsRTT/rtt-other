@@ -4,7 +4,7 @@
 minimax-S "TOP", minimax-ES "TE", minimax-NES "Frobenius", 
 minimax-PNS "BOP", minimax-PNES "BE", 
 minimax-ZS "Weil", minimax-ZES "WE", minimax-QZS "Kees", minimax-QZES "KE", 
-pure-octave-constrained minimax-ES "CTE", 
+unchanged-octave minimax-ES "CTE", 
 pure-octave-stretched minimax-S "POTOP", pure-octave-stretched minimax-ES "POTE") *)
 (* compare with optimizeGeneratorsTuningMapTargetingList *)
 optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
@@ -36,7 +36,7 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
   If[
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
     
-    (* covers minimax-QZES "KE", pure-octave-constrained minimax-ES "CTE" *)
+    (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
     optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions],
     
     If[
@@ -133,7 +133,7 @@ optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
 ];
 
 (* compare with optimizeGeneratorsTuningMapMinisop *)
-(* covers minimax-QZES "KE", pure-octave-constrained minimax-ES "CTE" *)
+(* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
 optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions_] := Module[
   {
     t,
@@ -206,7 +206,7 @@ getDualMultipliedPrimesErrorL[tuningMap_, tuningOptions_] := Module[
   primesTuningMap = getPrimesTuningMap[t];
   dualMultiplier = getDualMultiplier[tuningOptions];
   
-  Abs[N[tuningMap - primesTuningMap, 256].Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier]
+  Abs[N[tuningMap - primesTuningMap, absoluteValuePrecision].Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier]
 ];
 
 (* compare with getSumDamage *)

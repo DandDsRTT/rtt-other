@@ -108,12 +108,9 @@ testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond
 
 
 (* optimizeGeneratorsTuningMap, by "systematicTuningName" *)
-(* TODO: you should probably instead just test that these map to the correct traits, or something, both for these, and for the by "originalTuningName" *)
-(* TODO: you should make some diagrams and actually visually check some of these non-unique ones for pajara *)
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-U", {600.000, 108.128}];
 
-(*TODO: seems to be some bug here ... First {} has zero length and no first element ... like it doesn't find any candidates maybe? for this and -NC *)
 (*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-NS", {596.502, 106.058}];*)
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-NES", {598.233, 106.938}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-S", {598.447, 107.711}];
@@ -153,50 +150,116 @@ testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamon
 
 (* and then in this section I want to have a bunch of external examples, organized by tuning first, then temperament
 sources:
-[1] Facebook - I have searched this for and added notes below - well no not yet, just added to Google Keep - about (Kees, KE,), not yet for (POTOP, POTT, BOP, BE, Weil, WE, minimax, least squares, TOP, TE)
-[1a] https://www.facebook.com/groups/xenharmonicmath/posts/2363908480416027/?comment_id=2363994823740726 
-[2] Yahoo posts - I have searched this for and added notes below about (), not yet for (POTOP, POTT, BOP, BE, Kees, KE, Weil, WE, minimax, least squares, TOP, TE)
-[2a] https://yahootuninggroupsultimatebackup.github.io/tuning-math/topicId_21029.html
-[3] Graham's temperament app - supports TE, POTE only
-[3a] 
-[4] Flora's temperament app - supports TE, TOP, POTE, POTOP, CTE (not BOP, BE, Kees, KE, Weil, WE, minimax, least squares)
-[5] Paul's papers - pretty sure we're just talking Middle Path, so that's literally just TOP, nothing else
+[1] Facebook https://www.facebook.com
+[1a] https://www.facebook.com/groups/xenharmonicmath/posts/2363908480416027/?comment_id=2363994823740726
+[1b] https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/
+[1c] https://www.facebook.com/groups/xenharmonicmath/posts/1035558283251060/?comment_id=1041634519310103&reply_comment_id=1041649585975263
+[1d] https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064
+[1e] https://www.facebook.com/groups/xenharmonicmath/posts/738498989623659/?comment_id=738515309622027
+[1f] (link lost, sorry) "The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents."
+[2] Yahoo posts https://yahootuninggroupsultimatebackup.github.io
+[2a] https://yahootuninggroupsultimatebackup.github.io/tuning-math/topicId_21029
+[2b] https://yahootuninggroupsultimatebackup.github.io/tuning-math/topicId_15819
+[3] Graham's temperament app http://x31eq.com/temper/
+[3a] http://x31eq.com/cgi-bin/rt.cgi?ets=3_7&limit=5
+[3b] http://x31eq.com/cgi-bin/rt.cgi?ets=12_3&limit=5
+[3c] http://x31eq.com/cgi-bin/rt.cgi?ets=7_2p&limit=5
+[3d] http://x31eq.com/cgi-bin/rt.cgi?ets=7_15&limit=5
+[3e] http://x31eq.com/cgi-bin/rt.cgi?ets=12_34&limit=5
+[3f] http://x31eq.com/cgi-bin/rt.cgi?ets=53_19&limit=5
+[3g] http://x31eq.com/cgi-bin/rt.cgi?ets=19_22&limit=5
+[3h] http://x31eq.com/cgi-bin/rt.cgi?ets=19_10&limit=5
+[3i] http://x31eq.com/cgi-bin/rt.cgi?ets=7_34&limit=5
+[3j] http://x31eq.com/cgi-bin/rt.cgi?ets=12_19&limit=7
+[3k] http://x31eq.com/cgi-bin/rt.cgi?ets=19_22&limit=7
+[3l] http://x31eq.com/cgi-bin/rt.cgi?ets=12_10&limit=7
+[3m] http://x31eq.com/cgi-bin/rt.cgi?ets=12_15&limit=7
+[3n] http://x31eq.com/cgi-bin/rt.cgi?ets=19_27&limit=7
+[3o] http://x31eq.com/cgi-bin/rt.cgi?ets=27_19_22&limit=7
+[3p] http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=3_7&tuning=po
+[3q] http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=12_3&tuning=po
+[3r] http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=7_2p&tuning=po
+[3s] http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=7_15&tuning=po
+[3t] http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=12_34&tuning=po
+[3u] http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=53_19&tuning=po
+[3v] http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=19_22&tuning=po
+[3w] http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=19_10&tuning=po
+[3x] http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=7_34&tuning=po
+[3y] http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=12_19&tuning=po
+[3z] http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=19_22&tuning=po
+[3aa] http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=12_10&tuning=po
+[3ab] http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=12_15&tuning=po
+[3ac] http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=19_27&tuning=po
+[3ad] http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=27_19_22&tuning=po
+[4] Flora's temperament app https://github.com/FloraCanou/te_temperament_measures
+[5] Paul's papers 
 [5a] 
-[6] Graham's papers - searched his site for POTOP, POTT, BOP, BE, Kees, KE, Weil, WE (but not yet TOP, TE, minimax, least squares) 
+[6] Graham's papers http://x31eq.com/tuning.htm
 [6a] 
-[7] Xen wiki - I have searched this for and added notes below about (), not yet for (POTOP, POTT, BOP, BE, Kees, KE, Weil, WE, minimax, least squares, TOP, TE)
+[7] Xen wiki https://en.xen.wiki
 [7a] https://en.xen.wiki/w/Target_tunings#Example
 [7b] https://en.xen.wiki/w/Augene
-[8] Sintel's app https://github.com/Sin-tel/temper (the surfaced app only has TE, and CTE, but the code itself may have more -- looks like only WE)
-[9] Scala - has TOP, RMS-TOP = TE, Frobenius, that's it
-[10] Discord history ... not checked yet
+[7c] https://en.xen.wiki/w/Porcupine
+[7d] https://en.xen.wiki/w/Magic
+[7e] https://en.xen.wiki/w/Tetracot_family#Tetracot
+[7f] https://en.xen.wiki/w/Meantone
+[7g] https://en.xen.wiki/w/Sensipent_family#Septimal_sensi
+[7h] https://en.xen.wiki/w/Sensamagic_family#Sensamagic
+[7i] https://en.xen.wiki/w/Myna#Tuning_spectrum
+[7j] https://en.xen.wiki/w/Pajara#Tuning_spectrum
+[7k] https://en.xen.wiki/w/Chromatic_pairs#Voltage
+[8] Sintel's app https://github.com/Sin-tel/temper
+[8a] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=81%2F80&submit_comma=submit
+[8b] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=256%2F243&submit_comma=submit
+[8c] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=25%2F24&submit_comma=submit
+[8d] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=128%2F125&submit_comma=submit
+[8e] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=135%2F128&submit_comma=submit
+[8f] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=250%2F243&submit_comma=submit
+[8g] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=2048%2F2025&submit_comma=submit
+[8h] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=15625%2F15552&submit_comma=submit
+[8i] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=3125%2F3072&submit_comma=submit
+[8j] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=16875%2F16384&submit_comma=submit
+[8k] https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=20000%2F19683&submit_comma=submit
+[8l] https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=81%2F80%2C+126%2F125&submit_comma=submit
+[8m] https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=225%2F224%2C+245%2F243&submit_comma=submit
+[8n] https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=50%2F49%2C+64%2F63&submit_comma=submit
+[8o] https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=64%2F63%2C+126%2F125&submit_comma=submit
+[8p] https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=126%2F125%2C+245%2F243&submit_comma=submit
+[8q] https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=245%2F243&submit_comma=submit
+[9] Scala
+[10] Discord history https://discord.com/channels/332357996569034752
+[10a] https://discord.com/channels/332357996569034752/859884647337033738/969259730839171123
 [11] Keenan Pepper's tiptop.py https://github.com/YahooTuningGroupsUltimateBackup/YahooTuningGroupsUltimateBackup/blob/master/src/tuning-math/files/KeenanPepper/tiptop.py
 [12] Mike Battaglia's tipweil.py variation on tiptop.py https://github.com/YahooTuningGroupsUltimateBackup/YahooTuningGroupsUltimateBackup/blob/master/src/tuning-math/files/MikeBattaglia/tipweil.py
 *)
 
-(* pure-octave-constrained diamond minimax-U = "minimax" *)
-(* TODO: gather some more; seems like a lot might be available on the xen wiki https://en.xen.wiki/index.php?title=Special:Search&limit=20&offset=20&profile=default&search=minimax but I think a lot of these might enforce pure octaves like the instructions on the Target tunings page do ... and in fact we found that the minimax only works when it's pure octave, so perhaps we shouldn't even really treat it like people have been doing tempered-octave minimax before... like perhaps we should treat the original tuning name "minimax" as referring to this special octave-constrained version *)
-testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "pure-octave-constrained diamond minimax-U", {1200.000, 1896.578, 2786.314}]; (* [7a] *)
-(* blackwood *)
-(* dicot *)
-(* augmented *)
-(* mavila *)
-(* porcupine *)
-(* srutal *)
-(* hanson *)
-(* magic *)
-(* negri *)
-(* tetracot *)
-(* meantone7 *)
-(* magic7 *)
-(* pajara *)
-(*testClose[optimizeTuningMap, augene, "originalTuningName" -> "minimax", {1200.000, 1908.771, 2800.000, 3382.458}]; *)(* [7b] 708.798 is all it says, and these actual numbers are mine; maybe try using the accuracy= trick now that I've developed it *)
-(* sensi *)
-(* sensamagic *)
+(* TODO: scour Facebook for tuning examples - done for Kees, KE, Weil, WE; not for POTOP, POTT, BOP, BE, minimax, least squares, TOP, TE *)
+(* TODO: scour Yahoo for tuning examples - done for Kees, KE, Weil, WE; not for POTOP, POTT, BOP, BE, minimax, least squares, TOP, TE *)
+(* TODO: scour Wiki for tuning examples - done for minimax, least squares; not for POTOP, POTT, BOP, BE, Kees, KE, Weil, WE, TOP, TE *)
 
-(* pure-octave-constrained diamond minisos-U = "least squares" *)
-(* TODO: gather some; some on wiki, but you may have to use a different set of temperaments than the above, and again as with minimax I predict you'll find lot of these might enforce pure octaves like the instructions on the Target tunings page do *)
-(* meantone *)
+(* unchanged-octave diamond diamond minimax-U = "minimax" *)
+testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, 1896.578, 2786.314}]; (* [7a] *)
+(* blackwood *)
+(* dicot *)
+(* augmented *)
+(* mavila *)
+testClose[optimizeGeneratorsTuningMap, porcupine, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, -162.737}]; (* [7c] *)
+(* srutal *)
+(* hanson *)
+testClose[optimizeGeneratorsTuningMap, magic, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, 380.391}]; (* [7d] *)
+(* negri *)
+testClose[optimizeGeneratorsTuningMap, tetracot, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, 176.257}]; (* [7e] *)
+testClose[optimizeGeneratorsTuningMap, meantone7, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, 1200.000 + 696.578}]; (* [7f] *)
+testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.00, 380.391}]; (* [7d] *)
+(* pajara *)
+accuracy = 1;
+testClose[optimizeGeneratorsTuningMap, augene, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {400.000, 3 * 400.000 + 708.798}]; (* [7b] *)
+accuracy = 3;
+testClose[optimizeGeneratorsTuningMap, sensi, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, 443.519}]; (* [7g] *)
+testClose[optimizeTuningMap, sensamagic, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, 1901.955, 2781.584, 3364.096}]; (* [7h] *)
+
+(* unchanged-octave diamond minisos-U = "least squares" *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "unchanged-octave diamond minisos-U", {1200.000, 696.165}]; (* [7f] *)
 (* blackwood *)
 (* dicot *)
 (* augmented *)
@@ -204,19 +267,20 @@ testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "pure-octave-co
 (* porcupine *)
 (* srutal *)
 (* hanson *)
-(* magic *)
+testClose[optimizeGeneratorsTuningMap, magic, "systematicTuningName" -> "unchanged-octave diamond minisos-U", {1200.000, 379.968}]; (* [7d]] *)
 (* negri *)
 (* tetracot *)
-(* meantone7 *)
-(* magic7 *)
+testClose[optimizeGeneratorsTuningMap, meantone7, "systematicTuningName" -> "unchanged-octave diamond minisos-U", {1200.000, 1200.000 + 696.436}]; (* [7f] *)
+testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "unchanged-octave diamond minisos-U", {1200.000, 380.384}]; (* [7d]] *)
 (* pajara *)
 (* augene *)
 (* sensi *)
 (* sensamagic *)
+testClose[optimizeGeneratorsTuningMap, dual[{{quotientToPcv[32805 / 32768]}, "contra"}], "systematicTuningName" -> "unchanged-octave diamond minisos-U", {1200.000, 1200.000 + 701.728}]; (* [2b] has a bunch of least squares tunings... only this one works,though; not sure what's up with the rest*)
 
+dual[{{quotientToPcv[64 / 63]}, "contra"}]
 
 (* pure-octave stretch *)
-
 (* TODO: test cover at all *)
 (* TODO: test cover to error in the case that more than one generator row affects the first column *)
 (* TODO: test cover to error if the subgroup doesn't include prime 2 *)
@@ -280,10 +344,10 @@ testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 1, getPcvLo
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 1, getPcvProductComplexity[pcv]];
 
 (* getGeneratorsTuningMapDamage *)
-(*testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1201.7, 999697.564}, "systematicTuningName" -> "minimax-S", 0.00000172]; TODO: figure out what this freaking "malformed real" pink box error is about *)
-(*testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1199.02, 695.601}, "systematicTuningName" -> "pure-octave-constrained diamond minisos-U", 0.0000729989];TODO: figure out why this started crashing when these tests came back online because getGeneratorsTuningMapDamage actually hadn't even been running correctly because these tests don't catch when functions are just crashing so that's another thing you could try to figure out *)
-testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1200., 696.578}, "systematicTuningName" -> "pure-octave-constrained diamond minimax-U", 5.377];
-(* TODO: I'm not sure this handles pure-octave stretch and interval basis properly *)
+(* TODO: I'm not sure this handles interval basis properly... add a test for that *)
+testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1201.7, 697.564}, "systematicTuningName" -> "minimax-S", 1.700];
+testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1199.02, 695.601}, "systematicTuningName" -> "unchanged-octave diamond minisos-U", 0.088];
+testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1200., 696.578}, "systematicTuningName" -> "unchanged-octave diamond minimax-U", 5.377];
 
 
 
@@ -307,7 +371,6 @@ testClose[optimizeGeneratorsTuningMap, pajara, "targetedIntervals" -> {}, "syste
 
 
 (* interval basis *)
-(* TODO: find and include more examples of this *)
 t = {{{1, 1, 5}, {0, -1, -3}}, "co", {2, 7 / 5, 11}};
 testClose[optimizeGeneratorsTuningMap, t, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningIntervalBasis" -> "formalPrimes", {1200.4181, 617.7581}];
 testClose[optimizeGeneratorsTuningMap, t, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningIntervalBasis" -> "primes", {1200.0558, 616.4318}];
@@ -319,6 +382,7 @@ testClose[optimizeGeneratorsTuningMap, t, "targetedIntervals" -> {}, "optimizati
 
 (* minimax-S = "TOP", "TIPTOP", "Tenney OPtimal", "Tiebreaker-In-Polytope Tenney-OPtimal" *)
 (* I had to fudge the factors to make mapping forms match in some places, due to rounding errors those matching factors introduced *)
+(* could double-check with Scala, Xen wiki, Flora's app but it has incorrect results for TOP at this time *)
 accuracy = 2;
 testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-S", {1201.70, 1201.70 - 504.13}]; (* [5](Table 1) *)
 testClose[optimizeGeneratorsTuningMap, blackwood, "systematicTuningName" -> "minimax-S", {238.87, 238.86 * 11.0003 + 158.78}]; (* [5](Table 1) *)
@@ -339,26 +403,27 @@ testClose[optimizeGeneratorsTuningMap, sensi, "systematicTuningName" -> "minimax
 accuracy = 3;
 
 (* minimax-ES = "TE", "Tenney-Euclidean" *)
-(* TODO: include inharmonic TE in my list of originalTuningName (and support in systematicTuningName somehow... do something for now, and then ask Dave what he thinks) *)
+(* could double-check with Scala, Sintel's app, Flora's app, and Xen wiki *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-ES", {1201.397, 1898.446, 2788.196}]; (* [1a] *)
 testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-ES", {1194.308, 1910.892, 2786.314}]; (* [1a] *)
-testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "minimax-ES", {1206.410, 1907.322, 2763.276}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=3_7&limit=5 *)
-testClose[optimizeTuningMap, augmented, "systematicTuningName" -> "minimax-ES", {1197.053, 1901.955, 2793.123}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_3&limit=5 *)
-testClose[optimizeTuningMap, mavila, "systematicTuningName" -> "minimax-ES", {1208.380, 1892.933, 2779.860}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=7_2p&limit=5 *)
-testClose[optimizeTuningMap, porcupine, "systematicTuningName" -> "minimax-ES", {1199.562, 1907.453, 2779.234}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=7_15&limit=5 *)
-testClose[optimizeTuningMap, srutal, "systematicTuningName" -> "minimax-ES", {1198.823, 1903.030, 2787.467}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_34&limit=5 *)
-testClose[optimizeTuningMap, hanson, "systematicTuningName" -> "minimax-ES", {1200.166, 1902.303, 2785.418}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=53_19&limit=5 *)
-testClose[optimizeTuningMap, magic, "systematicTuningName" -> "minimax-ES", {1201.248, 1902.269, 2782.950}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=19_22&limit=5 *)
-testClose[optimizeTuningMap, negri, "systematicTuningName" -> "minimax-ES", {1202.347, 1900.691, 2782.698}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=19_10&limit=5 *)
-testClose[optimizeTuningMap, tetracot, "systematicTuningName" -> "minimax-ES", {1199.561, 1903.942, 2784.419}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=7_34&limit=5 *)
-testClose[optimizeTuningMap, meantone7, "systematicTuningName" -> "minimax-ES", {1201.242, 1898.458, 2788.863, 3368.432}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_19&limit=7 *)
-testClose[optimizeTuningMap, magic7, "systematicTuningName" -> "minimax-ES", {1201.082, 1903.476, 2782.860, 3367.259}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=19_22&limit=7 *)
-testClose[optimizeTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {1197.719, 1903.422, 2780.608, 3379.468}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_10&limit=7 *)
-testClose[optimizeTuningMap, augene, "systematicTuningName" -> "minimax-ES", {1196.255, 1903.298, 2791.261, 3370.933}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=12_15&limit=7 *)
-testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "minimax-ES", {1199.714, 1903.225, 2789.779, 3363.173}]; (* http://x31eq.com/cgi-bin/rt.cgi?ets=19_27&limit=7 *)
-testClose[optimizeTuningMap, sensamagic, "systematicTuningName" -> "minimax-ES", {1200.000, 1903.742, 2785.546, 3366.583}]; (* as "octorod" http://x31eq.com/cgi-bin/rt.cgi?ets=27_19_22&limit=7 *)
+testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "minimax-ES", {1206.410, 1907.322, 2763.276}]; (* [3a] *)
+testClose[optimizeTuningMap, augmented, "systematicTuningName" -> "minimax-ES", {1197.053, 1901.955, 2793.123}]; (* [3b] *)
+testClose[optimizeTuningMap, mavila, "systematicTuningName" -> "minimax-ES", {1208.380, 1892.933, 2779.860}]; (* [3c] *)
+testClose[optimizeTuningMap, porcupine, "systematicTuningName" -> "minimax-ES", {1199.562, 1907.453, 2779.234}]; (* [3d] *)
+testClose[optimizeTuningMap, srutal, "systematicTuningName" -> "minimax-ES", {1198.823, 1903.030, 2787.467}]; (* [3e] *)
+testClose[optimizeTuningMap, hanson, "systematicTuningName" -> "minimax-ES", {1200.166, 1902.303, 2785.418}]; (* [3f] *)
+testClose[optimizeTuningMap, magic, "systematicTuningName" -> "minimax-ES", {1201.248, 1902.269, 2782.950}]; (* [3g] *)
+testClose[optimizeTuningMap, negri, "systematicTuningName" -> "minimax-ES", {1202.347, 1900.691, 2782.698}]; (* [3h] *)
+testClose[optimizeTuningMap, tetracot, "systematicTuningName" -> "minimax-ES", {1199.561, 1903.942, 2784.419}]; (* [3i] *)
+testClose[optimizeTuningMap, meantone7, "systematicTuningName" -> "minimax-ES", {1201.242, 1898.458, 2788.863, 3368.432}]; (* [3j] *)
+testClose[optimizeTuningMap, magic7, "systematicTuningName" -> "minimax-ES", {1201.082, 1903.476, 2782.860, 3367.259}]; (* [3k] *)
+testClose[optimizeTuningMap, pajara, "systematicTuningName" -> "minimax-ES", {1197.719, 1903.422, 2780.608, 3379.468}]; (* [3l] *)
+testClose[optimizeTuningMap, augene, "systematicTuningName" -> "minimax-ES", {1196.255, 1903.298, 2791.261, 3370.933}]; (* [3m] *)
+testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "minimax-ES", {1199.714, 1903.225, 2789.779, 3363.173}]; (* [3n] *)
+testClose[optimizeTuningMap, sensamagic, "systematicTuningName" -> "minimax-ES", {1200.000, 1903.742, 2785.546, 3366.583}]; (* as "octorod" [3o] *)
 
 (* minimax-NES = "Frobenius" *)
+(* could double-check with Scala, and Xen wiki *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-NES", {1202.6068, 1899.3482, 2786.9654}]; (* [4] *)
 testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-NES", {1191.8899, 1907.0238, 2786.3137}]; (* [4] *)
 testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "minimax-NES", {1215.1441, 1907.0030, 2776.2177}]; (* [4] *)
@@ -378,41 +443,40 @@ testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "minimax-NES", {11
 testClose[optimizeTuningMap, sensamagic, "systematicTuningName" -> "minimax-NES", {1200.0000, 1904.3201, 2785.8407, 3367.8799}]; (* [4] *)
 
 (* pure-octave-stretched minimax-ES = "POTE", "Pure Octave Tenney-Euclidean" *)
+(* could double-check with Xen wiki *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200, 1896.239, 2784.955}]; (* [1a] *)
 testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200, 1920, 2799.594}]; (* [1a] *)
-testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1897.189, 2748.594}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=3_7&tuning=po *)
-testClose[optimizeTuningMap, augmented, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1906.638, 2800.000}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=12_3&tuning=po *)
-testClose[optimizeTuningMap, mavila, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1879.806, 2760.582}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=7_2p&tuning=po *)
-testClose[optimizeTuningMap, porcupine, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1908.149, 2780.248}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=7_15&tuning=po *)
-testClose[optimizeTuningMap, srutal, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1904.898, 2790.204}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=12_34&tuning=po *)
-testClose[optimizeTuningMap, hanson, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1902.039, 2785.033}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=53_19&tuning=po *)
-testClose[optimizeTuningMap, magic, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1900.292, 2780.058}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=19_22&tuning=po *)
-testClose[optimizeTuningMap, negri, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1896.980, 2777.265}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=19_10&tuning=po *)
-testClose[optimizeTuningMap, tetracot, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1904.639, 2785.438}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=5&ets=7_34&tuning=po *)
-testClose[optimizeTuningMap, meantone7, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1896.495, 2785.980, 3364.949}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=12_19&tuning=po *)
-testClose[optimizeTuningMap, magic7, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1901.760, 2780.352, 3364.224}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=19_22&tuning=po *)
-testClose[optimizeTuningMap, pajara, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1907.048, 2785.905, 3385.905}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=12_10&tuning=po *)
-testClose[optimizeTuningMap, augene, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1909.257, 2800.000, 3381.486}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=12_15&tuning=po *)
-testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1903.679, 2790.444, 3363.975}]; (* http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=19_27&tuning=po *)
-testClose[optimizeTuningMap, sensamagic, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1903.742, 2785.546, 3366.583}]; (* as "octorod" http://x31eq.com/cgi-bin/rt.cgi?limit=7&ets=27_19_22&tuning=po *)
+testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1897.189, 2748.594}]; (* [3p] *)
+testClose[optimizeTuningMap, augmented, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1906.638, 2800.000}]; (* [3q] *)
+testClose[optimizeTuningMap, mavila, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1879.806, 2760.582}]; (* [3r] *)
+testClose[optimizeTuningMap, porcupine, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1908.149, 2780.248}]; (* [3s] *)
+testClose[optimizeTuningMap, srutal, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1904.898, 2790.204}]; (* [3t] *)
+testClose[optimizeTuningMap, hanson, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1902.039, 2785.033}]; (* [3u] *)
+testClose[optimizeTuningMap, magic, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1900.292, 2780.058}]; (* [3v] *)
+testClose[optimizeTuningMap, negri, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1896.980, 2777.265}]; (* [3w] *)
+testClose[optimizeTuningMap, tetracot, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1904.639, 2785.438}]; (* [3x] *)
+testClose[optimizeTuningMap, meantone7, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1896.495, 2785.980, 3364.949}]; (* [3y] *)
+testClose[optimizeTuningMap, magic7, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1901.760, 2780.352, 3364.224}]; (* [3z] *)
+testClose[optimizeTuningMap, pajara, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1907.048, 2785.905, 3385.905}]; (* [3aa] *)
+testClose[optimizeTuningMap, augene, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1909.257, 2800.000, 3381.486}]; (* [3ab] *)
+testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1903.679, 2790.444, 3363.975}]; (* [3ac] *)
+testClose[optimizeTuningMap, sensamagic, "systematicTuningName" -> "pure-octave-stretched minimax-ES", {1200.000, 1903.742, 2785.546, 3366.583}]; (* as "octorod" [3ad] *)
 
 (* pure-octave-stretched minimax-S = "POTOP", "POTT", "Pure Octave Tenney OPtimal", "Pure Octave Tiebreaker-in-polytope Tenney-optimal" *)
-(* TODO: this is everything we have on the wiki and Facebook. nothing in Graham's site. nothing in Yahoo archives. but there's more places to search still. and resolve discrepancies too *)
-(*testClose[optimizeGeneratorsTuningMap, {{{1, 4, 4}, {0, -4, -1}}, "co", {2, 7, 13}}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.000, 357.786}]; (* https://en.xen.wiki/w/Chromatic_pairs#Voltage has {1200.000, 357.794}*) *)
-(*testClose[optimizeGeneratorsTuningMap, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {600.000, 709.184}]; *)(* https://en.xen.wiki/w/Pajara#Tuning_spectrum has {600.000, 706.843} *)
-testClose[optimizeGeneratorsTuningMap, {{{1, -1, 0, 1}, {0, 10, 9, 7}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.000, 310.196}]; (* https://en.xen.wiki/w/Myna#Tuning_spectrum *)
-(*testClose[optimizeTuningMap, {{{1, 3, 0, 0, 3}, {0, -3, 5, 6, 1}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S",{1200.00, 1915.81, 2806.98, 3368.38, 4161.40}]; (*  https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ has <1200 1915.578 2807.355 3368.826 4161.472|,but  Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! *)*)
+(* could double-check against Flora's app, but her TOP results are incorrect for now, so these would be too *)
+testClose[optimizeGeneratorsTuningMap, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {600.000, 709.184}]; (* [7j] has {600.000, 706.843} but that has 7.254 damage and mine has 5.988 *)
+testClose[optimizeGeneratorsTuningMap, {{{1, -1, 0, 1}, {0, 10, 9, 7}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.000, 310.196}]; (* [7i] *)
 accuracy = 1;
-testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 10}, {0, -1, -9, 2, -16}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.0, 490.4}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
-testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 1}, {0, -1, -9, 2, 6}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.0, 490.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
-testClose[optimizeGeneratorsTuningMap, {{{1, 2, -3, 2, 1}, {0, -1, 13, 2, 6}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.0, 491.9}];(* https://www.facebook.com/groups/xenharmonicmath/posts/478197012320526/?comment_id=478441632296064  *)
+testClose[optimizeTuningMap, {{{1, 3, 0, 0, 3}, {0, -3, 5, 6, 1}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.00, 1915.81, 2806.98, 3368.38, 4161.40}]; (* [1b] has <1200 1915.578 2807.355 3368.826 4161.472|,but  Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 10}, {0, -1, -9, 2, -16}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.0, 490.4}]; (* [1d] *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 1}, {0, -1, -9, 2, 6}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.0, 490.9}]; (* [1d] *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 2, -3, 2, 1}, {0, -1, 13, 2, 6}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200.0, 491.9}]; (* [1d] *)
 accuracy = 3;
-testClose[optimizeGeneratorsTuningMap, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200, 700.3907806, 384.0221726}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/738498989623659/?comment_id=738515309622027 this was passing with  {1200.000, 700.795, 380.759} before introducing the non-unique check code and then went back to passing after maybe switching to Keenan's nested minimax technique...  it really does seem like it should have a unique solution, so the condition on that might be wrong... you should really plot this one visually and see what's happening *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200, 700.3907806, 384.0221726}]; (* [1e] this was passing with {1200.000, 700.795, 380.759} before introducing the non-unique check code and then went back to passing after maybe switching to Keenan's nested minimax technique...  it really does seem like it should have a unique solution, so the condition on that might be wrong... you should really plot this one visually and see what's happening *)
 accuracy = 2;
-testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0}, {0, 1, 4}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200, 696.58}]; (* The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents. (some Facebook thing sorry I lost the link *)
-testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0, -3}, {0, 1, 4, 10}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200, 696.58}]; (* The POTOP generators for Septimal Meantone and 5-limit meantone, meanwhile, are identical at about 696.58 cents. (some Facebook thing sorry I lost the link *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0}, {0, 1, 4}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200, 696.58}]; (* [1f] *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0, -3}, {0, 1, 4, 10}}, "co"}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200, 696.58}]; (* [1f] *)
 accuracy = 3;
-testClose[optimizeGeneratorsTuningMap, {{{1, 1, 4}, {0, 1, -2}}, "co", {2, 3, 7}}, "systematicTuningName" -> "pure-octave-stretched minimax-S", {1200, 709.18447040211}]; (* https://www.facebook.com/groups/xenharmonicmath/posts/1035558283251060/?comment_id=1041634519310103&reply_comment_id=1041649585975263  *)
 
 (* minimax-PNS = "BOP", "Benedetti OPtimal" *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-PNS", {1201.721, 1899.374, 2790.615}];  (* [4] *)
@@ -453,6 +517,8 @@ testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "minimax-PNES", {1
 testClose[optimizeTuningMap, sensamagic, "systematicTuningName" -> "minimax-PNES", {1200.0000, 1903.3868, 2785.5183, 3365.7078}]; (* [4] *)
 
 (* minimax-ZS = "Weil" *)
+(* could maybe double-check w/ Flora's app but we're aware at this time that her implementation uses the pseudoinverse
+of the Weil complexity multiplier for the primes error magnitude dual multiplier which doesn't work correctly *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", {1200.0, 1896.578, 2786.314}]; (* [2a] *)
 testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-ZS", {1188.722, 1901.955, 2773.22}]; (* [2a] *)
 testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "minimax-ZS", {1200.000, 1901.955, 2750.978}]; (* [2a] *)
@@ -471,132 +537,80 @@ testClose[optimizeTuningMap, augene, "systematicTuningName" -> "minimax-ZS", {11
 testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "minimax-ZS", {1196.783, 1901.181, 2786.314, 3359.796}]; (* [2a] *)
 
 (* minimax-ZES = "WE", "Weil-Euclidean" *)
-(* TODO: I searched on Facebook, Yahoo, Xenwiki, ... also need to check in Flora's app, Sintel's app, Paul's papers, Graham's app, Scala, Discord history, and Graham's papers  *)
-testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-ZES", {1201.391, 1898.436, 2788.182}]; (* [1a] *)
-testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-ZES", {1194.254, 1910.807, 2786.189}]; (* [1a] *)
+(* could maybe double check w/ Sintel's app; what calls Weil is actually Weil-Euclidean, according to Tom here: [10a] and I think he's right 
+but unfortunately it's not easily discernable from his code at this time *)
+testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-ZES", {1201.3906, 1898.4361, 2788.1819}]; (* [4] and [1a] also has {1201.391, 1898.436, 2788.182} *)
+testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-ZES", {1194.2544, 1910.8071, 2786.1895}]; (* [4] and [1a] also has {1194.254, 1910.807, 2786.189} *)
+testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "minimax-ZES", {1206.2832, 1907.1223, 2762.9860}]; (* [4] *)
+testClose[optimizeTuningMap, augmented, "systematicTuningName" -> "minimax-ZES", {1197.0385, 1901.9322, 2793.0898}]; (* [4] *)
+testClose[optimizeTuningMap, mavila, "systematicTuningName" -> "minimax-ZES", {1208.2873, 1892.7881, 2779.6466}]; (* [4] *)
+testClose[optimizeTuningMap, porcupine, "systematicTuningName" -> "minimax-ZES", {1199.5444, 1907.4244, 2779.1926}]; (* [4] *)
+testClose[optimizeTuningMap, srutal, "systematicTuningName" -> "minimax-ZES", {1198.8214, 1903.0273, 2787.4633}]; (* [4] *)
+testClose[optimizeTuningMap, hanson, "systematicTuningName" -> "minimax-ZES", {1200.1659, 1902.3024, 2785.4179}]; (* [4] *)
+testClose[optimizeTuningMap, magic, "systematicTuningName" -> "minimax-ZES", {1201.2449, 1902.2636, 2782.9425}]; (* [4] *)
+testClose[optimizeTuningMap, negri, "systematicTuningName" -> "minimax-ZES", {1202.3403, 1900.6800, 2782.6811}]; (* [4] *)
+testClose[optimizeTuningMap, tetracot, "systematicTuningName" -> "minimax-ZES", {1199.5586, 1903.9387, 2784.4138}]; (* [4] *)
+testClose[optimizeTuningMap, meantone7, "systematicTuningName" -> "minimax-ZES", {1201.2358, 1898.4479, 2788.8486, 3368.4143}]; (* [4] *)
+testClose[optimizeTuningMap, magic7, "systematicTuningName" -> "minimax-ZES", {1201.0786, 1903.4695, 2782.8510, 3367.2482}]; (* [4] *)
+testClose[optimizeTuningMap, pajara, "systematicTuningName" -> "minimax-ZES", {1197.6967, 1903.3872, 2780.5573, 3379.4056}]; (* [4] *)
+testClose[optimizeTuningMap, augene, "systematicTuningName" -> "minimax-ZES", {1196.2383, 1903.2719, 2791.2228, 3370.8863}]; (* [4] *)
+testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "minimax-ZES", {1199.7081, 1903.2158, 2789.7655, 3363.1568}]; (* [4] *)
 
 (* minimax-QZS = "Kees" *)
-(* I searched on Facebook, Yahoo, Xenwiki, Flora's app, Sintel's app, Paul's papers, Graham's app, Scala, Discord history, and Graham's papers, and this is the only actual example of a Kees tuning ever stated publicly by a human *)
+(* could maybe double-check with Flora's app, but per comment above about her implementation of Weil, we know it won't match now *)
+(* this is the only actual example of a Kees tuning ever stated publicly by a human *)
 accuracy = 2;
-(* https://www.facebook.com/groups/xenharmonicmath/posts/2086012064872338/ *)
-testClose[optimizeTuningMap, {{{1, 3, 0, 0, 3}, {0, -3, 5, 6, 1}}, "co"}, "systematicTuningName" -> "minimax-QZS", {1200., 1915.93, 2806.79, 3368.14, 4161.36}];
+testClose[optimizeTuningMap, {{{1, 3, 0, 0, 3}, {0, -3, 5, 6, 1}}, "co"}, "systematicTuningName" -> "minimax-QZS", {1200., 1915.93, 2806.79, 3368.14, 4161.36}]; (* [1b] *)
 accuracy = 3;
 
 (* minimax-QZES = "KE", "Kees-Euclidean" *)
-testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-QZES", {1200, 1896.651, 2786.605} ]; (* [1a]  *)
-testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-QZES", {1200, 1920, 2795.126}]; (* [1a] *)
-(* dicot *)
-(* augmented *)
-(* mavila *)
-(* porcupine *)
-(* srutal *)
-(* hanson *)
-(* magic *)
-(* negri *)
-(* tetracot *)
-(* meantone7 *)
-(* magic7 *)
-(* pajara *)
-(* augene *)
-(* sensi *)
-(* sensamagic *)
-
-(* pure-octave-constrained minimax-ES = "CTE", "Constrained Tenney-Euclidean" *)
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=81%2F80&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 697.214}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=256%2F243&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, blackwood, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {240.000, 1200.000 * 2 + 386.314}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=25%2F24&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, dicot, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 354.664}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=128%2F125&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, augmented, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {400.000, 1200.000 + 701.955}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=135%2F128&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, mavila, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 1200.000 + 677.145}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=250%2F243&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, porcupine, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, -164.166}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=2048%2F2025&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, srutal, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {600.000, 1200.000 + 705.136}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=15625%2F15552&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, hanson, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 317.059}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=3125%2F3072&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, magic, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 380.499}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=16875%2F16384&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, negri, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 125.396}];
-(* https://sintel.pythonanywhere.com/result?subgroup=5&reduce=on&tenney=on&target=&edos=&commas=20000%2F19683&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, tetracot, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 176.028}];
-(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=81%2F80%2C+126%2F125&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, meantone7, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 1200.000 + 696.952}];
-(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=225%2F224%2C+245%2F243&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 380.651}];
-(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=50%2F49%2C+64%2F63&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {600.000, 600.000 * -1 + 708.356}];
-(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=64%2F63%2C+126%2F125&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, augene, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {400.000, 1200.000 + 709.595}];
-(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=126%2F125%2C+245%2F243&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, sensi, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 1200.000 - 756.683}];
-(* https://sintel.pythonanywhere.com/result?subgroup=7&reduce=on&tenney=on&target=&edos=&commas=245%2F243&submit_comma=submit *)
-testClose[optimizeGeneratorsTuningMap, sensamagic, "systematicTuningName" -> "pure-octave-constrained minimax-ES", {1200.000, 1200.000 + 703.742, 440.902}];
-
-
-(* tuning equivalences *)
-
-dummyTestFn[result_] := result;
-
-(* minimax-QZS \[TildeTilde] pure-octave-stretched minimax-S ("Kees" \[TildeTilde] "POTOP/POTT"), when the tuning is unique *) (* TODO: not really sure about this anymore... get out of my way for now *)
-(*checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[t_, isUnique_] := Module[{keesTuning, potopTuning},
-  keesTuning = optimizeGeneratorsTuningMap[t, "originalTuningName" -> "Kees"];
-  potopTuning = optimizeGeneratorsTuningMap[t, "originalTuningName" -> "POTOP"];
-  
-  If[
-    isUnique,
-    testClose[dummyTestFn, keesTuning, potopTuning],
-    testNotClose[dummyTestFn, keesTuning, potopTuning]
-  ];
-];
-accuracy = 1;
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[meantone, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[blackwood, False];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[dicot, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[augmented, False];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[mavila, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[porcupine, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[srutal, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[hanson, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[magic, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[negri, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[tetracot, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[meantone7, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[magic7, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[pajara, True];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[augene, False];
-checkMinimaxQZSIsCloseToPureOctaveStretchedMinimaxSWhenUniqueConjecture[sensi, True];
-accuracy = 3;*)
-
-(* minimax-QZES \[TildeTilde] pure-octave-stretched minimax-ES ("KE" \[TildeTilde] "POTE") *)
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[t_] := Module[{keTuning, poteTuning},
-  keTuning = optimizeGeneratorsTuningMap[t, "originalTuningName" -> "KE"];
-  poteTuning = optimizeGeneratorsTuningMap[t, "originalTuningName" -> "POTE"];
-  
-  testClose[dummyTestFn, keTuning, poteTuning];
-];
-accuracy = 0; (* yeah, it's not really that close... *)
-(*checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[meantone];*)
-(*checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[blackwood]; KE = {240., 2788.}; POTE = {240., 2800.} *) (* TODO: finish filling these out. I accept that some of them just aren't close. as someone said on Facebook somewhere. some are closer than others. has to do with how much error/badness/etc there is *)
-(*checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[dicot];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[augmented];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[mavila];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[porcupine];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[srutal];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[hanson];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[magic];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[negri];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[tetracot];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[meantone7];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[magic7];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[pajara];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[augene];
-checkMinimaxQZESIsCloseToPureOctaveStretchedMinimaxESConjecture[sensi];*)
+(* may be able double-check w/ Sintel's app; should support it by octave-constraining WE, once that's figured out. see above *)
+accuracy = 2;
+testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1896.6516, 2786.6064}]; (* [4]; [1a] has {1200, 1896.651, 2786.605} *)
+testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1920.0000, 2795.1253}]; (* [4]; [1a] has {1200, 1920, 2795.126} *)
+testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1902.1713, 2751.0856}]; (* [4] *)
+testClose[optimizeTuningMap, augmented, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1905.0702, 2800.0000}]; (* [4] *)
+testClose[optimizeTuningMap, mavila, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1879.1117, 2762.6648}]; (* [4] *)
 accuracy = 3;
+testClose[optimizeTuningMap, porcupine, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1907.8136, 2779.6894}]; (* [4] *)
+testClose[optimizeTuningMap, srutal, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1904.9585, 2790.0830}]; (* [4] *)
+testClose[optimizeTuningMap, hanson, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1902.1850, 2785.1542}]; (* [4] *)
+testClose[optimizeTuningMap, magic, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1901.0972, 2780.2194}]; (* [4] *)
+testClose[optimizeTuningMap, negri, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1897.3560, 2776.9830}]; (* [4] *)
+testClose[optimizeTuningMap, tetracot, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1904.3859, 2784.8683}]; (* [4] *)
+testClose[optimizeTuningMap, meantone7, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1896.6562, 2786.6248, 3366.562}]; (* [4] *)
+testClose[optimizeTuningMap, magic7, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1902.2878, 2780.4576, 3365.4906}]; (* [4] *)
+testClose[optimizeTuningMap, pajara, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1907.3437, 2785.3126, 3385.3126}]; (* [4] *)
+accuracy = 2;
+testClose[optimizeTuningMap, augene, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1909.3238, 2800.0000, 3381.3524}]; (* [4] *)
+accuracy = 3;
+testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "minimax-QZES", {1200.0000, 1903.4449, 2790.1435, 3363.5406}]; (* [4] *)
+
+(* unchanged-octave minimax-ES = "CTE", "Constrained Tenney-Euclidean" *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 697.214}]; (* [8a] *)
+testClose[optimizeGeneratorsTuningMap, blackwood, "systematicTuningName" -> "unchanged-octave minimax-ES", {240.000, 1200.000 * 2 + 386.314}]; (* [8b] *)
+testClose[optimizeGeneratorsTuningMap, dicot, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 354.664}]; (* [8c] *)
+testClose[optimizeGeneratorsTuningMap, augmented, "systematicTuningName" -> "unchanged-octave minimax-ES", {400.000, 1200.000 + 701.955}]; (* [8d] *)
+testClose[optimizeGeneratorsTuningMap, mavila, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 1200.000 + 677.145}]; (* [8e] *)
+testClose[optimizeGeneratorsTuningMap, porcupine, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, -164.166}]; (* [8f] *)
+testClose[optimizeGeneratorsTuningMap, srutal, "systematicTuningName" -> "unchanged-octave minimax-ES", {600.000, 1200.000 + 705.136}]; (* [8g] *)
+testClose[optimizeGeneratorsTuningMap, hanson, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 317.059}]; (* [8h] *)
+testClose[optimizeGeneratorsTuningMap, magic, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 380.499}]; (* [8i] *)
+testClose[optimizeGeneratorsTuningMap, negri, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 125.396}]; (* [8j] *)
+testClose[optimizeGeneratorsTuningMap, tetracot, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 176.028}]; (* [8k] *)
+testClose[optimizeGeneratorsTuningMap, meantone7, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 1200.000 + 696.952}]; (* [8l] *)
+testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 380.651}]; (* [8m] *)
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "unchanged-octave minimax-ES", {600.000, 600.000 * -1 + 708.356}]; (* [8n] *)
+testClose[optimizeGeneratorsTuningMap, augene, "systematicTuningName" -> "unchanged-octave minimax-ES", {400.000, 1200.000 + 709.595}]; (* [8o] *)
+testClose[optimizeGeneratorsTuningMap, sensi, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 1200.000 - 756.683}]; (* [8p] *)
+testClose[optimizeGeneratorsTuningMap, sensamagic, "systematicTuningName" -> "unchanged-octave minimax-ES", {1200.000, 1200.000 + 703.742, 440.902}]; (* [8q] *)
+
+(* I no longer really care about tuning equivalences 
+such as minimax-QZS w/ pure-octave-stretched minimax-S ("Kees" w/ "POTOP")
+or minimax-QZES w/ pure-octave-stretched minimax-ES ("KE" w/ "POTE")
+clearly minimax-QZS is the same as pure-octave-*constrained* minimax-S ("Kees" w/ pure-octave-*constrained* "TOP")
+and minimax-QZES is the same as pure-octave-*constrained* minimax-ES ("KE" w/ pure-octave-*constrained* "TE")
+otherwise who really cares?*)
 
 
 

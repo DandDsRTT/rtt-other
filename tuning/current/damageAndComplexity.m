@@ -3,7 +3,7 @@
 Options[getGeneratorsTuningMapDamage] = tuningOptions;
 getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Module[
   {
-    unchangedIntervals, (* trait -1 *)
+    unchangedIntervals, (* trait 9 *)
     targetedIntervals, (* trait 0 *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
@@ -12,8 +12,8 @@ getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Modu
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
-    tuningIntervalBasis,
-    pureOctaveStretch,
+    tuningIntervalBasis, (* trait 8 *)
+    pureOctaveStretch, (* trait 10 *)
     systematicTuningName,
     originalTuningName,
     systematicComplexityName,
@@ -24,7 +24,7 @@ getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Modu
     tuningMap
   },
   
-  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait -1 *)
+  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait 9 *)
   targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
   optimizationPower = OptionValue["optimizationPower"]; (* trait 1 *)
   damageWeightingSlope = OptionValue["damageWeightingSlope"]; (* trait 2 *)
@@ -33,8 +33,8 @@ getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Modu
   complexityPrimePower = OptionValue["complexityPrimePower"]; (* trait 4b *)
   complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
   complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
-  tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
-  pureOctaveStretch = OptionValue["pureOctaveStretch"];
+  tuningIntervalBasis = OptionValue["tuningIntervalBasis"]; (* trait 8 *)
+  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 10 *)
   systematicTuningName = OptionValue["systematicTuningName"];
   originalTuningName = OptionValue["originalTuningName"];
   systematicComplexityName = OptionValue["systematicComplexityName"];
@@ -45,7 +45,7 @@ getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Modu
   
   tuningOptions = processTuningOptions[
     t,
-    unchangedIntervals, (* trait -1 *)
+    unchangedIntervals, (* trait 9 *)
     targetedIntervals, (* trait 0 *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
@@ -54,8 +54,8 @@ getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Modu
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
-    tuningIntervalBasis,
-    pureOctaveStretch,
+    tuningIntervalBasis, (* trait 8 *)
+    pureOctaveStretch, (* trait 10 *)
     systematicTuningName,
     originalTuningName,
     systematicComplexityName,
@@ -86,7 +86,7 @@ getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Modu
 Options[getTuningMapDamage] = tuningOptions;
 getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
   {
-    unchangedIntervals, (* trait -1 *)
+    unchangedIntervals, (* trait 9 *)
     targetedIntervals, (* trait 0 *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
@@ -95,8 +95,8 @@ getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
-    tuningIntervalBasis,
-    pureOctaveStretch,
+    tuningIntervalBasis, (* trait 8 *)
+    pureOctaveStretch, (* trait 10 *)
     systematicTuningName,
     originalTuningName,
     systematicComplexityName,
@@ -105,7 +105,7 @@ getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
     generatorsTuningMap
   },
   
-  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait -1 *)
+  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait 9 *)
   targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
   optimizationPower = OptionValue["optimizationPower"]; (* trait 1 *)
   damageWeightingSlope = OptionValue["damageWeightingSlope"]; (* trait 2 *)
@@ -114,8 +114,8 @@ getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
   complexityPrimePower = OptionValue["complexityPrimePower"]; (* trait 4b *)
   complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
   complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
-  tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
-  pureOctaveStretch = OptionValue["pureOctaveStretch"];
+  tuningIntervalBasis = OptionValue["tuningIntervalBasis"]; (* trait 8 *)
+  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 10 *)
   systematicTuningName = OptionValue["systematicTuningName"];
   originalTuningName = OptionValue["originalTuningName"];
   systematicComplexityName = OptionValue["systematicComplexityName"];
@@ -125,7 +125,7 @@ getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
   generatorsTuningMap = generatorsTuningMapFromTAndTuningMap[t, tuningMap];
   
   getGeneratorsTuningMapDamage[t, generatorsTuningMap, {
-    "unchangedIntervals" -> unchangedIntervals, (* trait -1 *)
+    "unchangedIntervals" -> unchangedIntervals, (* trait 9 *)
     "targetedIntervals" -> targetedIntervals, (* trait 0 *)
     "optimizationPower" -> optimizationPower, (* trait 1 *)
     "damageWeightingSlope" -> damageWeightingSlope, (* trait 2 *)
@@ -134,8 +134,8 @@ getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
     "complexityPrimePower" -> complexityPrimePower, (* trait 4b *)
     "complexitySizeFactor" -> complexitySizeFactor, (* trait 4c *)
     "complexityMakeOdd" -> complexityMakeOdd, (* trait 4d *)
-    "tuningIntervalBasis" -> tuningIntervalBasis,
-    "pureOctaveStretch" -> pureOctaveStretch,
+    "tuningIntervalBasis" -> tuningIntervalBasis, (* trait 8 *)
+    "pureOctaveStretch" -> pureOctaveStretch, (* trait 10 *)
     "systematicTuningName" -> systematicTuningName,
     "originalTuningName" -> originalTuningName,
     "systematicComplexityName" -> systematicComplexityName,
@@ -154,8 +154,7 @@ getTargetedIntervalDamagesL[tuningMap_, tuningOptions_] := Module[
   primesTuningMap = getPrimesTuningMap[t];
   damageWeights = getDamageWeights[tuningOptions];
   
-  (* TODO: yeah now you really need to clarify the relation between this and the WorkingPrecision *)
-  Abs[N[tuningMap - primesTuningMap, 256].Transpose[targetedIntervalsA].damageWeights]
+  Abs[N[tuningMap - primesTuningMap, absoluteValuePrecision].Transpose[targetedIntervalsA].damageWeights]
 ];
 
 Square[n_] := n^2;
@@ -276,7 +275,7 @@ getComplexityMultiplier[
   (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-S ("TOP"); 
 when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ES ("TE"); 
 when used by getDamageWeights covers any targeting-list tuning using this as its damage's complexity *)
-  complexityMultiplier = getLogPrimeCoordinationA[t]; (* TODO: wait a sec.. I thought the idea was that we do this OUTSIDE OF THIS *)
+  complexityMultiplier = getLogPrimeCoordinationA[t];
   
   If[
     (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-NS (the L1 version of "Frobenius");
@@ -320,7 +319,7 @@ when used by getDamageWeights covers any targeting-list tuning using this as its
 Options[plotDamage] = tuningOptions;
 plotDamage[t_, OptionsPattern[]] := Module[
   {
-    unchangedIntervals, (* trait -1 *)
+    unchangedIntervals, (* trait 9 *)
     targetedIntervals, (* trait 0 *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
@@ -329,8 +328,8 @@ plotDamage[t_, OptionsPattern[]] := Module[
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
-    tuningIntervalBasis,
-    pureOctaveStretch,
+    tuningIntervalBasis, (* trait 8 *)
+    pureOctaveStretch, (* trait 10 *)
     systematicTuningName,
     originalTuningName,
     systematicComplexityName,
@@ -353,7 +352,7 @@ plotDamage[t_, OptionsPattern[]] := Module[
     targetedIntervalGraphs
   },
   
-  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait -1 *)
+  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait 9 *)
   targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
   optimizationPower = OptionValue["optimizationPower"]; (* trait 1 *)
   damageWeightingSlope = OptionValue["damageWeightingSlope"]; (* trait 2 *)
@@ -362,8 +361,8 @@ plotDamage[t_, OptionsPattern[]] := Module[
   complexityPrimePower = OptionValue["complexityPrimePower"]; (* trait 4b *)
   complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
   complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
-  tuningIntervalBasis = OptionValue["tuningIntervalBasis"];
-  pureOctaveStretch = OptionValue["pureOctaveStretch"];
+  tuningIntervalBasis = OptionValue["tuningIntervalBasis"]; (* trait 8 *)
+  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 10 *)
   systematicTuningName = OptionValue["systematicTuningName"];
   originalTuningName = OptionValue["originalTuningName"];
   systematicComplexityName = OptionValue["systematicComplexityName"];
@@ -371,7 +370,7 @@ plotDamage[t_, OptionsPattern[]] := Module[
   debug = OptionValue["debug"];
   
   optimalGeneratorsTuningMap = optimizeGeneratorsTuningMap[t, {
-    "unchangedIntervals" -> unchangedIntervals, (* trait -1 *)
+    "unchangedIntervals" -> unchangedIntervals, (* trait 9 *)
     "targetedIntervals" -> targetedIntervals, (* trait 0 *)
     "optimizationPower" -> optimizationPower, (* trait 1 *)
     "damageWeightingSlope" -> damageWeightingSlope, (* trait 2 *)
@@ -380,8 +379,8 @@ plotDamage[t_, OptionsPattern[]] := Module[
     "complexityPrimePower" -> complexityPrimePower, (* trait 4b *)
     "complexitySizeFactor" -> complexitySizeFactor, (* trait 4c *)
     "complexityMakeOdd" -> complexityMakeOdd, (* trait 4d *)
-    "tuningIntervalBasis" -> tuningIntervalBasis,
-    "pureOctaveStretch" -> pureOctaveStretch,
+    "tuningIntervalBasis" -> tuningIntervalBasis, (* trait 8 *)
+    "pureOctaveStretch" -> pureOctaveStretch, (* trait 10 *)
     "systematicTuningName" -> systematicTuningName,
     "originalTuningName" -> originalTuningName,
     "systematicComplexityName" -> systematicComplexityName,
@@ -393,7 +392,7 @@ plotDamage[t_, OptionsPattern[]] := Module[
   
   tuningOptions = processTuningOptions[
     t,
-    unchangedIntervals, (* trait -1 *)
+    unchangedIntervals, (* trait 9 *)
     targetedIntervals, (* trait 0 *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
@@ -402,8 +401,8 @@ plotDamage[t_, OptionsPattern[]] := Module[
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
-    tuningIntervalBasis,
-    pureOctaveStretch,
+    tuningIntervalBasis, (* trait 8 *)
+    pureOctaveStretch, (* trait 10 *)
     systematicTuningName,
     originalTuningName,
     systematicComplexityName,

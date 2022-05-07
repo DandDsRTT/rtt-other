@@ -1,7 +1,12 @@
 (* SHARED *)
 
+outputPrecision = 4;
+linearSolvePrecision = 8;
+nMinimizePrecision = 128;
+absoluteValuePrecision = nMinimizePrecision * 2;
+
 tuningOptions = {
-  "unchangedIntervals" -> {}, (* trait -1 *)
+  "unchangedIntervals" -> {}, (* trait 9 *)
   "targetedIntervals" -> Null, (* trait 0 *)
   "optimizationPower" -> Null, (* trait 1: \[Infinity] = minimax, 2 = minisos, 1 = minisum *)
   "damageWeightingSlope" -> "", (* trait 2: unweighted, complexity-weighted, or simplicity-weighted *)
@@ -10,8 +15,8 @@ tuningOptions = {
   "complexityPrimePower" -> 0, (* trait 4b: what Mike Battaglia refers to as `s` in https://en.xen.wiki/w/BOP_tuning; 0 = nothing, equiv to copfr when log prime coordination is negated and otherwise defaults; 1 = product complexity, equiv to sopfr when log prime coordination is negated and otherwise defaults; >1 = pth power of those *)
   "complexitySizeFactor" -> 0, (* trait 4c: what Mike Battaglia refers to as `k` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space; 0 = no augmentation to factor in span, 1 = could be integer limit, etc. *)
   "complexityMakeOdd" -> False, (* trait 4d: False = do nothing, True = achieve odd limit from integer limit, etc. *)
-  "tuningIntervalBasis" -> "primes", (* Graham Breed calls this "inharmonic" vs "subgroup" notion in the context of minimax-ES ("TE") tuning, but it can be used for any tuning *)
-  "pureOctaveStretch" -> False,
+  "tuningIntervalBasis" -> "primes", (* trait 8: Graham Breed calls this "inharmonic" vs "subgroup" notion in the context of minimax-ES ("TE") tuning, but it can be used for any tuning *)
+  "pureOctaveStretch" -> False, (* trait 10 *)
   "systematicTuningName" -> "",
   "originalTuningName" -> "",
   "systematicComplexityName" -> "",
@@ -21,7 +26,7 @@ tuningOptions = {
 
 processTuningOptions[
   t_,
-  inputUnchangedIntervals_, (* trait -1 *)
+  inputUnchangedIntervals_, (* trait 9 *)
   inputTargetedIntervals_, (* trait 0 *)
   inputOptimizationPower_, (* trait 1 *)
   inputDamageWeightingSlope_, (* trait 2 *)
@@ -30,8 +35,8 @@ processTuningOptions[
   inputComplexityPrimePower_, (* trait 4b *)
   inputComplexitySizeFactor_, (* trait 4c *)
   inputComplexityMakeOdd_, (* trait 4d *)
-  inputTuningIntervalBasis_,
-  inputPureOctaveStretch_,
+  inputTuningIntervalBasis_, (* trait 8 *)
+  inputPureOctaveStretch_, (* trait 10 *)
   inputSystematicTuningName_,
   inputOriginalTuningName_,
   inputSystematicComplexityName_,
@@ -40,7 +45,7 @@ processTuningOptions[
   forDamage_ : False
 ] := Module[
   {
-    unchangedIntervals, (* trait -1 *)
+    unchangedIntervals, (* trait 9 *)
     targetedIntervals, (* trait 0 *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
@@ -49,8 +54,8 @@ processTuningOptions[
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
-    tuningIntervalBasis,
-    pureOctaveStretch,
+    tuningIntervalBasis, (* trait 8 *)
+    pureOctaveStretch, (* trait 10 *)
     systematicTuningName,
     originalTuningName,
     systematicComplexityName,
@@ -66,7 +71,7 @@ processTuningOptions[
     intervalRebase
   },
   
-  unchangedIntervals = inputUnchangedIntervals; (* trait -1 *)
+  unchangedIntervals = inputUnchangedIntervals; (* trait 9 *)
   targetedIntervals = inputTargetedIntervals; (* trait 0 *)
   optimizationPower = inputOptimizationPower; (* trait 1 *)
   damageWeightingSlope = inputDamageWeightingSlope; (* trait 2 *)
@@ -75,8 +80,8 @@ processTuningOptions[
   complexityPrimePower = inputComplexityPrimePower; (* trait 4b *)
   complexitySizeFactor = inputComplexitySizeFactor; (* trait 4c *)
   complexityMakeOdd = inputComplexityMakeOdd; (* trait 4d *)
-  tuningIntervalBasis = inputTuningIntervalBasis;
-  pureOctaveStretch = inputPureOctaveStretch;
+  tuningIntervalBasis = inputTuningIntervalBasis; (* trait 8 *)
+  pureOctaveStretch = inputPureOctaveStretch; (* trait 10 *)
   systematicTuningName = inputSystematicTuningName;
   originalTuningName = inputOriginalTuningName;
   systematicComplexityName = inputSystematicComplexityName;
@@ -96,7 +101,7 @@ processTuningOptions[
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted";
   ];
   If[
-    originalTuningName === "TE" || originalTuningName === "Tenney-Euclidean",
+    originalTuningName === "TE" || originalTuningName === "Tenney-Euclidean" || originalTuningName === "TOP-RMS",
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; systematicComplexityName = "E";
   ];
   If[
@@ -141,9 +146,9 @@ processTuningOptions[
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted";  systematicComplexityName = "E"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   
-  (* trait -1 *)
+  (* trait 9 *)
   If[
-    StringMatchQ[systematicTuningName, "*pure-octave-constrained*"],
+    StringMatchQ[systematicTuningName, "*unchanged-octave*"],
     unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   
@@ -212,14 +217,26 @@ processTuningOptions[
     StringMatchQ[systematicTuningName, "*Q*"] || StringMatchQ[systematicComplexityName, "*Q*"],
     complexityMakeOdd = True;
   ];
-  (* TODO: this is real gross and would be great if we could make minimax-QZES tuning a bit nicer *)
+  (* TODO: CONSTRAINTS / KEES: this is real gross and would be great if we could make minimax-QZES tuning a bit nicer *)
   If[
     (StringMatchQ[systematicTuningName, "*Q*"] && StringMatchQ[systematicTuningName, "*E*"]) ||
         (StringMatchQ[systematicTuningName, "*Q*"] && StringMatchQ[systematicTuningName, "*E*"]),
     complexityMakeOdd = False; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]}
   ];
   
-  (* trait 8 - pure-octave stretch *)
+  (* trait 8 - interval basis *)
+  If[
+    StringMatchQ[systematicTuningName, "*formal-primes-basis*"],
+    tuningIntervalBasis = "primes";
+  ];
+  
+  (* trait 9 - unchanged intervals *)
+  If[
+    StringMatchQ[systematicTuningName, "*unchanged-octave*"],
+    unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
+  ];
+  
+  (* trait 10 - pure-octave stretch *)
   If[
     StringMatchQ[systematicTuningName, "*pure-octave-stretched*"],
     pureOctaveStretch = True;
@@ -346,7 +363,7 @@ processTuningOptions[
   
   {
     tPossiblyWithChangedIntervalBasis,
-    unchangedIntervals, (* trait -1 *)
+    unchangedIntervals, (* trait 9 *)
     targetedIntervalsA, (* trait 0 *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
@@ -365,7 +382,7 @@ tuningOption[tuningOptions_, optionName_] := Module[
   
   tuningOptionsPartsByOptionName = <|
     "t" -> 1,
-    "unchangedIntervals" -> 2, (* trait -1 *)
+    "unchangedIntervals" -> 2, (* trait 9 *)
     "targetedIntervalsA" -> 3, (* trait 0 *)
     "optimizationPower" -> 4, (* trait 1 *)
     "damageWeightingSlope" -> 5, (* trait 2 *)

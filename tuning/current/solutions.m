@@ -1,10 +1,8 @@
 (* MINIMAX *)
 
-(* covers pure-octave-constrained minimax-U "minimax", minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
+(* covers unchanged-octave diamond minimax-U "minimax", minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
 minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
-(* TODO: standardize the interfaces of all these solution functions to the greatest extent possible, 
-both their actualities and their superficial namings *)
 optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, damageWeightsOrComplexityMultiplier_, complexitySizeFactor_ ] := Module[
   {
     tuningMappings,
@@ -153,14 +151,15 @@ findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide_, justSide_, maxCount
   targetCount = First[Dimensions[mappedSide]];
   generatorCount = Last[Dimensions[mappedSide]];
   
-  (* here's the meat of it: solving a linear problem for each vertex of the of tuning polytope *)
+  (* here's the meat of it: solving a linear problem for each vertex of the of tuning polytope;
+  more details on this in the constraint matrix gathering function's comments below *)
   candidateTunings = {};
   vertexConstraintAs = getTuningPolytopeVertexConstraintAs[generatorCount, targetCount];
   Do[
     AppendTo[
       candidateTunings,
       Quiet[Check[
-        LinearSolve[N[vertexConstraintA.mappedSide, 10], N[vertexConstraintA.justSide, 10]],
+        LinearSolve[N[vertexConstraintA.mappedSide, linearSolvePrecision], N[vertexConstraintA.justSide, linearSolvePrecision]],
         "err"
       ]
       ]],
@@ -175,7 +174,7 @@ findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide_, justSide_, maxCount
     Function[
       {candidateTuning},
       (* note that because of being sorted by size, this is no longer sorted by which target the damage applies to *)
-      ReverseSort[SetAccuracy[Flatten[Abs[mappedSide.candidateTuning - justSide]], 10]]
+      ReverseSort[SetAccuracy[Flatten[Abs[mappedSide.candidateTuning - justSide]], linearSolvePrecision]]
     ],
     candidateTunings
   ]];
@@ -247,30 +246,72 @@ findAllNestedMinimaxTuningsFromPolytopeVertices[mappedSide_, justSide_, maxCount
   DeleteDuplicates[candidateTunings]
 ];
 
-(* TODO: explain what happens in here and name variables better *)
 getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
-  {vertexConstraintA, vertexConstraintAs, targetCombinations},
+  {vertexConstraintA, vertexConstraintAs, targetCombinations, directionPermutations},
   
   vertexConstraintAs = {};
   
-  targetCombinations = DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, targetCount], generatorCount + 1], DuplicateFreeQ[#]&]]];
+  (* here we iterate over every combination of r (rank = generator count, in the basic case) targets 
+  and for each of those combinations, looks at all permutations of their directions. 
+  these are the vertices of the maximum damage tuning polytope. each is a generator tuning map. the minimum of these will be the minimax tuning.
   
+  e.g. for target intervals 3/2, 5/4, and 5/3, with 2 generators, we'd look at three combinations (3/2, 5/4) (3/2, 5/3) (5/4, 5/3)
+  and for the first combination, we'd look at both 3/2 × 5/4 = 15/8 and 3/2 ÷ 5/4 = 6/5.
+  
+  then what we do with each of those combo perm vertices is build a constraint matrix. 
+  we'll apply this constraint matrix to a typical linear equation of the form Ax = b, 
+  where A is a matrix, b is a vector, and x is another vector, the one we're solving for.
+  in our case our matrix A is M, our mapping, b is our primes tuning map p, and x is our generators tuning map g.
+  
+  e.g. when the targets are just the primes (and thus an identity matrix we can ignore),
+  and the temperament we're tuning is 12-ET with M = [12 19 28] and standard interval basis so p = [log₂2 log₂3 log₂5],
+  then we have [12 19 28][g₁] = [log₂2 log₂3 log₂5], or a system of three equations:
+  
+  12g₁ = log₂2
+  19g₁ = log₂3
+  28g₁ = log₂5
+  
+  Obviously not all of those can be true, but that's the whole point: we linear solve for the closest possible g₁ that satisfies all well.
+  
+  Now suppose we get the constraint matrix [1 1 0]. We multiply both sides of the setup by that:
+  
+  [1 1 0][12 19 28][g₁] = [1 1 0][log₂2 log₂3 log₂5]
+  [31][g₁] = [log₂2 + log₂3]
+  
+  This leaves us with only a single equation:
+  
+  31g₁ = log₂6
+  
+  Or in other words, this tuning makes 6/1 pure, and divides it into 31 equal parts.
+  If this temperament's mapping says it's 12 steps to 2/1 and 19 steps to 3/1, and it takes 31 steps to a pure 6/1,
+  that implies that whatever damage there is on 2/1 is equal to whatever damage there is on 3/1, since they apparently cancel out.
+  
+  This constraint matrix [1 1 0] means that the target combo was 2/1 and 3/1, 
+  because those are the targets corresponding to its nonzero elements.
+  And both nonzero elements are +1 meaning that both targets are combined in the same direction.
+  If the targeted intervals list had been [3/2, 4/3, 5/4, 8/5, 5/3, 6/5] instead, and the constraint matrix [1 0 0 0 -1 0],
+  then that's 3/2 ÷ 5/3 = 5/2.
+  
+  The reason why we need all the permutations is because they're actually anchored 
+  with the first targeted interval always in the super direction.
+  *)
+  targetCombinations = DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, targetCount], generatorCount + 1], DuplicateFreeQ[#]&]]];
   Do[
-    signPermutations = Tuples[{1, -1}, generatorCount];
-    
+    directionPermutations = Tuples[{1, -1}, generatorCount];
     Do[
+      
       vertexConstraintA = Table[Table[0, targetCount], generatorCount];
       
       Do[
-        vertexConstraintA[[i, Part[targetCombination, 1]]] = 1;
-        vertexConstraintA[[i, Part[targetCombination, i + 1]]] = Part[signPermutation, i],
+        vertexConstraintA[[generatorIndex, Part[targetCombination, 1]]] = 1;
+        vertexConstraintA[[generatorIndex, Part[targetCombination, generatorIndex + 1]]] = Part[directionPermutation, generatorIndex],
         
-        {i, Range[generatorCount]}
+        {generatorIndex, Range[generatorCount]}
       ];
       
       AppendTo[vertexConstraintAs, vertexConstraintA],
       
-      {signPermutation, signPermutations}
+      {directionPermutation, directionPermutations}
     ],
     
     {targetCombination, targetCombinations}
@@ -280,11 +321,11 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
     generatorCount == 1,
     Do[
       vertexConstraintA = {Table[0, targetCount]};
-      vertexConstraintA[[1, i]] = 1;
+      vertexConstraintA[[1, targetIndex]] = 1;
       
       AppendTo[vertexConstraintAs, vertexConstraintA],
       
-      {i, Range[targetCount]}
+      {targetIndex, Range[targetCount]}
     ]
   ];
   
@@ -297,7 +338,7 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
 
 (* no historically described tunings use this *)
 (* based on https://en.xen.wiki/w/Target_tunings#Minimax_tuning, 
-where pure-octave-constrained minimax-U "minimax" is described;
+where unchanged-octave diamond minimax-U "minimax" is described;
 however, this computation method is in general actually a solution for minisum tunings, not minimax tunings. 
 it only lucks out and works for minimax due to the pure-octave-constraint 
 and nature of the tonality diamond targeted interval set,
@@ -402,7 +443,7 @@ optimizeGeneratorsTuningMapNumericalPowerLimitSolver[tuningOptions_, absErrorL_,
       {Norm[absErrorL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
       Norm[absErrorL, normPower]
     ];
-    solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
+    solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> nMinimizePrecision];
     damagesMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = Power[2, 1 / normPowerPower];
@@ -429,7 +470,7 @@ getDiagonalEigenvalueA[unchangedIntervalEigenvectors_, commaEigenvectors_] := Di
 
 (* MINISOS *)
 
-(* covers pure-octave-constrained minisos-U "least squares", minimax-ES "TE", pure-octave-stretched minimax-ES "POTE",
+(* covers unchanged-octave diamond minisos-U "least squares", minimax-ES "TE", pure-octave-stretched minimax-ES "POTE",
 minimax-NES "Frobenius", minimax-ZES "WE", minimax-PNES "BE" *)
 optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
   t_,
@@ -488,7 +529,7 @@ optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
 
 (* OTHER POWERS *)
 
-(* covers minimax-QZES "KE", pure-octave-constrained minimax-ES "CTE" *)
+(* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
 optimizeGeneratorsTuningMapNumericalPowerSolver[tuningOptions_, absErrorL_, normPower_] := Module[
   {
     t,
@@ -513,11 +554,11 @@ optimizeGeneratorsTuningMapNumericalPowerSolver[tuningOptions_, absErrorL_, norm
   periodsPerOctave = getPeriodsPerOctave[t];
   
   minimizedNorm = If[
-    (* TODO: might eventually be able to simplify the constraints code, if we always have here and/or never elsewhere *)
+    (* TODO: CONSTRAINTS / KEES: might eventually be able to simplify the constraints code, if we always have here and/or never elsewhere *)
     Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
     {Norm[absErrorL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
     Norm[absErrorL, normPower]
   ];
-  solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> 128];
+  solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> nMinimizePrecision];
   generatorsTuningMap /. Last[solution]
 ];
