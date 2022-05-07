@@ -363,15 +363,13 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[
     potentialUnchangedIntervalSets,
     normalizedPotentialUnchangedIntervalSets,
     filteredNormalizedPotentialUnchangedIntervalSets,
-    potentialProjectionAs,
+    potentialGeneratorAs,
     potentialTuningMaps,
     potentialTuningMapDamages,
     
     minDamageTuningMapIndices,
     minDamageTuningMapIndex,
-    minDamageProjectionA,
-    generatorsPreimageTransversal,
-    projectedGenerators
+    minDamageGeneratorA
   },
   
   t = tuningOption[tuningOptions, "t"];
@@ -387,11 +385,11 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[
   potentialUnchangedIntervalSets = Map[Map[potentiallyPrimesIdentityTargetedIntervalsA[[#]]&, #]&, unchangedIntervalSetIndices];
   normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, potentialUnchangedIntervalSets];
   filteredNormalizedPotentialUnchangedIntervalSets = DeleteDuplicates[Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&]];
-  potentialProjectionAs = Select[Map[
-    getProjectionAFromUnchangedIntervals[t, #]&,
+  potentialGeneratorAs = Select[Map[
+    getGeneratorsAFromUnchangedIntervals[ma, #]&,
     filteredNormalizedPotentialUnchangedIntervalSets
   ], Not[# === Null]&];
-  potentialTuningMaps = Map[primesTuningMap.#&, potentialProjectionAs];
+  potentialTuningMaps = Map[primesTuningMap.#.ma&, potentialGeneratorAs];
   potentialTuningMapDamages = Map[getSumDamageOrGetSumPrimesAbsError[#, tuningOptions]&, potentialTuningMaps];
   
   minDamageTuningMapIndices = Position[potentialTuningMapDamages, Min[potentialTuningMapDamages]];
@@ -400,10 +398,8 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[
     
     (* result is unique; done *)
     minDamageTuningMapIndex = First[First[Position[potentialTuningMapDamages, Min[potentialTuningMapDamages]]]];
-    minDamageProjectionA = potentialProjectionAs[[minDamageTuningMapIndex]];
-    generatorsPreimageTransversal = Transpose[getA[getGeneratorsPreimageTransversal[t]]];
-    projectedGenerators = minDamageProjectionA.generatorsPreimageTransversal;
-    primesTuningMap.projectedGenerators,
+    minDamageGeneratorA = potentialGeneratorAs[[minDamageTuningMapIndex]];
+    primesTuningMap.minDamageGeneratorA,
     
     Throw["non-unique solution for sum polytope"]
   ]
@@ -451,21 +447,17 @@ optimizeGeneratorsTuningMapNumericalPowerLimitSolver[tuningOptions_, absErrorL_,
   generatorsTuningMap /. Last[previousSolution]
 ];
 
-getProjectionAFromUnchangedIntervals[t_, unchangedIntervalEigenvectors_] := Module[
-  {commaEigenvectors, eigenvectors, diagonalEigenvalueA},
+getGeneratorsAFromUnchangedIntervals[ma_, unchangedIntervalEigenvectors_] := Module[
+  {mappedUnchangedIntervalEigenvectors},
   
-  commaEigenvectors = getA[getC[t]];
-  eigenvectors = Transpose[Join[unchangedIntervalEigenvectors, commaEigenvectors]];
+  mappedUnchangedIntervalEigenvectors = ma.Transpose[unchangedIntervalEigenvectors];
   
-  diagonalEigenvalueA = getDiagonalEigenvalueA[unchangedIntervalEigenvectors, commaEigenvectors];
-  
-  If[Det[eigenvectors] == 0, Null, eigenvectors.diagonalEigenvalueA.Inverse[eigenvectors]]
+  If[
+    Det[mappedUnchangedIntervalEigenvectors] == 0,
+    Null,
+    Transpose[unchangedIntervalEigenvectors].Inverse[mappedUnchangedIntervalEigenvectors]
+  ]
 ];
-
-getDiagonalEigenvalueA[unchangedIntervalEigenvectors_, commaEigenvectors_] := DiagonalMatrix[Join[
-  Table[1, Length[unchangedIntervalEigenvectors]],
-  Table[0, Length[commaEigenvectors]]
-]];
 
 
 (* MINISOS *)

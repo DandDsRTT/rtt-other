@@ -154,7 +154,12 @@ getTargetedIntervalDamagesL[tuningMap_, tuningOptions_] := Module[
   primesTuningMap = getPrimesTuningMap[t];
   damageWeights = getDamageWeights[tuningOptions];
   
-  Abs[N[tuningMap - primesTuningMap, absoluteValuePrecision].Transpose[targetedIntervalsA].damageWeights]
+  Abs[
+    N[
+      Map[If[PossibleZeroQ[#], 0, #]&, tuningMap - primesTuningMap],
+      absoluteValuePrecision
+    ].Transpose[targetedIntervalsA].damageWeights
+  ]
 ];
 
 Square[n_] := n^2;

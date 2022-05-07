@@ -206,7 +206,12 @@ getDualMultipliedPrimesErrorL[tuningMap_, tuningOptions_] := Module[
   primesTuningMap = getPrimesTuningMap[t];
   dualMultiplier = getDualMultiplier[tuningOptions];
   
-  Abs[N[tuningMap - primesTuningMap, absoluteValuePrecision].Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier]
+  Abs[
+    N[
+      Map[If[PossibleZeroQ[#], 0, #]&, tuningMap - primesTuningMap],
+      absoluteValuePrecision
+    ].Transpose[targetedIntervalsAsPrimesIdentityA].dualMultiplier
+  ]
 ];
 
 (* compare with getSumDamage *)
