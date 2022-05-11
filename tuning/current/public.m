@@ -38,7 +38,7 @@ getGeneratorsPreimageTransversal[t_] := Module[{ma, decomp, left, snf, right, ge
   optimizeGeneratorsTuningMap[t]
   
   Given a representation of a temperament as a mapping or comma basis,
-  returns the optimal generator tuning map.
+  returns the optimum generator tuning map.
   
   The tuning may be specified by original name, systematic name, or by individual parameters.
   
@@ -163,7 +163,7 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   optimizeTuningMap[t]
   
   Given a representation of a temperament as a mapping or comma basis,
-  returns the optimal tuning map.
+  returns the optimum tuning map.
   
   The tuning may be specified by original name, systematic name, or by individual parameters.
   

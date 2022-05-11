@@ -217,12 +217,6 @@ processTuningOptions[
     StringMatchQ[systematicTuningName, "*Q*"] || StringMatchQ[systematicComplexityName, "*Q*"],
     complexityMakeOdd = True;
   ];
-  (* TODO: CONSTRAINTS / KEES: this is real gross and would be great if we could make minimax-QZES tuning a bit nicer *)
-  If[
-    (StringMatchQ[systematicTuningName, "*Q*"] && StringMatchQ[systematicTuningName, "*E*"]) ||
-        (StringMatchQ[systematicTuningName, "*Q*"] && StringMatchQ[systematicTuningName, "*E*"]),
-    complexityMakeOdd = False; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]}
-  ];
   
   (* trait 8 - interval basis *)
   If[
@@ -309,6 +303,10 @@ processTuningOptions[
     complexityNormPower = 2; complexityNegateLogPrimeCoordination = 0; complexitySizeFactor = 0; complexityPrimePower = 2; complexityMakeOdd = False;
   ];
   
+  (* complexityMakeOdd is enough to get odd limit complexity from integer limit complexity, 
+  but when actually solving for tunings, it's necessary to lock down prime 2 (the octave) as an unchanged interval. *)
+  If[complexityMakeOdd == True, unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]}];
+  
   (* This has to go below the systematic tuning name gating, so that targetedIntervals has a change to be set to {} *)
   intervalBasis = getIntervalBasis[t];
   If[
@@ -358,8 +356,22 @@ processTuningOptions[
     ]
   ];
   
-  If[!NumericQ[optimizationPower] && optimizationPower != \[Infinity], Throw["no optimization power"]];
-  If[damageWeightingSlope == "", Throw["no damage weighting slope"]];
+  If[
+    !NumericQ[optimizationPower] && optimizationPower != \[Infinity],
+    Throw["no optimization power"]
+  ];
+  If[
+    damageWeightingSlope == "",
+    Throw["no damage weighting slope"]
+  ];
+  If[
+    Length[targetedIntervalsA] == 0 && optimizationPower != \[Infinity],
+    Throw["It is not possible to optimize for minisum or minisos over all intervals, only minimax."]
+  ];
+  If[
+    Length[targetedIntervalsA] == 0 && damageWeightingSlope != "simplicityWeighted",
+    Throw["It is not possible to minimize damage over all intervals if it is not simplicity-weighted."]
+  ];
   
   {
     tPossiblyWithChangedIntervalBasis,
@@ -429,35 +441,6 @@ generatorsTuningMapFromTAndTuningMap[t_, tuningMap_] := Module[
   generatorsTuningMap /. Last[solution]
 ];
 
-(*tuningInverse[damageWeighterOrComplexityMultiplier_] := MapThread[
-  Function[
-    {dataRow, zerosRow},
-    MapIndexed[
-      Function[
-        {zerosEl, index},
-        zerosEl + If[
-          First[index] > Length[dataRow],
-          0,
-          Part[dataRow, First[index]]
-        ]
-      ],
-      zerosRow
-    ]
-  ],
-  {
-    Inverse[
-      damageWeighterOrComplexityMultiplier[[1 ;; Last[Dimensions[damageWeighterOrComplexityMultiplier]]]]
-    ],
-    Table[
-      Table[
-        0,
-        First[Dimensions[damageWeighterOrComplexityMultiplier]]
-      ],
-      Last[Dimensions[damageWeighterOrComplexityMultiplier]]
-    ]
-  }
-];*)
-
 
 (* INTERVAL BASIS *)
 
@@ -480,7 +463,6 @@ getPureOctaveStretchedGeneratorsTuningMap[optimizedGeneratorsTuningMap_, t_] := 
   
   (1200 / periodsPerOctave) * (optimizedGeneratorsTuningMap / First[optimizedGeneratorsTuningMap])
 ];
-
 
 
 (* TARGETED INTERVAL SETS *)

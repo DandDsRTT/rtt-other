@@ -3,15 +3,14 @@
 (* covers unchanged-octave diamond minimax-U "minimax", minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
 minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
-optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, damageWeightsOrComplexityMultiplier_, complexitySizeFactor_ ] := Module[
+optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[tuningOptions_, inputMappedSide_, inputJustSide_] := Module[
   {
-    tuningMappings,
-    ma,
-    tuningMap,
-    primesTuningMap,
-    
     mappedSide,
     justSide,
+    
+    t,
+    complexitySizeFactor,
+    
     generatorCount,
     maxCountOfNestedMinimaxibleDamages,
     minimaxTunings,
@@ -19,25 +18,15 @@ optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, da
     minimaxLockForJustSide,
     undoMinimaxLocksForMappedSide,
     undoMinimaxLocksForJustSide,
-    uniqueOptimalTuning,
-    result
+    uniqueOptimumTuning,
+    optimumGeneratorsTuningMap
   },
   
-  tuningMappings = getTuningMappings[t];
-  ma = Part[tuningMappings, 2];
-  tuningMap = Part[tuningMappings, 3];
-  primesTuningMap = Part[tuningMappings, 4];
+  mappedSide = Transpose[inputMappedSide];
+  justSide = Transpose[{inputJustSide}];
   
-  mappedSide = Transpose[ma.Transpose[targetedIntervalsA].damageWeightsOrComplexityMultiplier];
-  justSide = Transpose[{primesTuningMap.Transpose[targetedIntervalsA].damageWeightsOrComplexityMultiplier}];
-  
-  (* first half of handling dual of integer limit *)
-  If[
-    complexitySizeFactor != 0,
-    mappedSide = Map[Join[#, {complexitySizeFactor}]&, mappedSide];
-    AppendTo[mappedSide, Join[Table[0, Last[Dimensions[mappedSide]] - 1], {-1}]];
-    AppendTo[justSide, {0}];
-  ];
+  t = tuningOption[tuningOptions, "t"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
   
   (*   
   our goal is to find the generator tuning map not merely with minimaxed damage, 
@@ -116,18 +105,17 @@ optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[t_, targetedIntervalsA_, da
     maxCountOfNestedMinimaxibleDamages += generatorCount + 1;
   ];
   
-  uniqueOptimalTuning = First[minimaxTunings];
+  uniqueOptimumTuning = First[minimaxTunings];
   
-  result = SetAccuracy[Flatten[
+  optimumGeneratorsTuningMap = SetAccuracy[Flatten[
     (* here's that left-multiplication mentioned earlier *)
-    undoMinimaxLocksForMappedSide.uniqueOptimalTuning + undoMinimaxLocksForJustSide
+    undoMinimaxLocksForMappedSide.uniqueOptimumTuning + undoMinimaxLocksForJustSide
   ], 10];
   
-  (* second half of handling dual of integer limit *)
   If[
     complexitySizeFactor != 0,
-    Drop[result, -1],
-    result
+    Drop[optimumGeneratorsTuningMap, -1],
+    optimumGeneratorsTuningMap
   ]
 ];
 
@@ -256,7 +244,7 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
   these are the vertices of the maximum damage tuning polytope. each is a generator tuning map. the minimum of these will be the minimax tuning.
   
   e.g. for target intervals 3/2, 5/4, and 5/3, with 2 generators, we'd look at three combinations (3/2, 5/4) (3/2, 5/3) (5/4, 5/3)
-  and for the first combination, we'd look at both 3/2 × 5/4 = 15/8 and 3/2 ÷ 5/4 = 6/5.
+  and for the first combination, we'd look at both 3/2 \[Times] 5/4 = 15/8 and 3/2 \[Divide] 5/4 = 6/5.
   
   then what we do with each of those combo perm vertices is build a constraint matrix. 
   we'll apply this constraint matrix to a typical linear equation of the form Ax = b, 
@@ -290,7 +278,7 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
   because those are the targets corresponding to its nonzero elements.
   And both nonzero elements are +1 meaning that both targets are combined in the same direction.
   If the targeted intervals list had been [3/2, 4/3, 5/4, 8/5, 5/3, 6/5] instead, and the constraint matrix [1 0 0 0 -1 0],
-  then that's 3/2 ÷ 5/3 = 5/2.
+  then that's 3/2 \[Divide] 5/3 = 5/2.
   
   The reason why we need all the permutations is because they're actually anchored 
   with the first targeted interval always in the super direction.
@@ -344,107 +332,174 @@ it only lucks out and works for minimax due to the pure-octave-constraint
 and nature of the tonality diamond targeted interval set,
 namely that the places where damage to targets are equal is the same where other targets are pure.
 *)
+(* TODO: W/R/T COMPLEXITY SIZE FACTOR REFACTOR: handle sum polytope solution 
+this is so disgusting how irregular this is, 
+how many variations and slices/dices of the info it needs that no other solution needs... 
+you can read in both `targetingAll.m` and `targetingList.m` that it is the "problem child"
+anything can be done about it? 
+- if I can't, then I've contemplated keeping better track of all the possibilities that follow the pattern I started
+of `targetingList` version and `targetingAll` version of the same data to be used for solution functions
+like, perhaps generatorsTuningMap in this context becomes "variable part of mapped side", 
+and like, all five of these new variables get packaged up as like... solutionObjects or something much much better than that lol
+but I hope it doesn't have to come to that. actually by the end of this commit I got things way more consistent
+across all vs list and the four solutions, than I had it at the time I wrote those sorts of worrying thoughts
+- and honestly it doesn't even seem like it really handles complexitySizeFactor yet anyway,
+like, these generator tuning maps it conjures, mightn't they need to be augmented? 
+not sure, but I don't think it's tested one way or the other yet.
+none of the three problem-child-marked methods in targetingAll.m actually ever augment what they return, I mean.
+- it certainly doesn't yet do the preening of the final junk generator when returning the result, as do other solutions.
+once you're done deprobelmatizing/standardizing this guy, you should be able to centralize that handling somewhere
+perhaps even in optimizeGeneratorsTuningMap way up top, so you don't have to handle it the same way in multiple spots.
+- there's also the matter of the getTargeting(All/List)GeneratorsTuningMap
+which this is a semi-problem-child for, that is, one of two users (the other being the general power solution)
+I'd really like to look into to what extent this is actually used / needed
+*)
+(* TODO: W/R/T COMPLEXITY SIZE FACTOR REFACTOR: handle targeting-list tunings
+I also just need to test some targeting-list tuning which uses integer-limit complexity, 
+so I can prove that this still works, 
+that is, that it can just use the non-square Weil complexity multiplier as normal still.
+- Note that one big insight of this whole refactor was that we should still think of the dualMultiplier 
+when it applies to the primes
+not as multiplying them directly
+because that changes their shape
+and we need to handle that in another way
+rather
+we need to think of it in the same way we think of damage weighting
+where it's just a k\[Times]k matrix matrix
+with an entry for each targeted interval
+and that value inside that entry is just the log integer-limit complexity of that prime
+which is of course just the same as its log product complexity, since it's a prime
+but THAT complexity can be calculated using the non-square weil matrix, just fine, and should be.
+- and when I say "handle that in another way"
+I mean that when dealing with the whole dual norm effect of integer limit style tunings
+it's not enough to just use a transformation matrix
+you have to really straight up surgically add those extra rows and cols of k's, 0's, and -1's.
+and that's what I'm doing in these new `getTargetingAllJustSide` type functions
+- also note that while the wiki says you can simply use the pseudoinverse of the weil weighter for WE. and that's true!
+it was too gross to me as an exception, that only for minimax did we do this manhandling of the mapped and just sides
+so I now realize that in every solution
+and it still works for WE
+so it's doing more computation than it needs to do... everything cancels out
+but I think it's the right move from a code design and conceptualization standpoint
+*)
 optimizeGeneratorsTuningMapAnalyticalSumPolytope[
   tuningOptions_,
-  potentiallyPrimesIdentityTargetedIntervalsA_,
-  getSumDamageOrGetSumPrimesAbsError_
+  mappedSide_,
+  justSide_,
+  ma_,
+  intervals_,
+  primesTuningMap_
 ] := Module[
   {
     t,
     
-    tuningMappings,
-    generatorsTuningMap,
-    ma,
-    tuningMap,
-    primesTuningMap,
-    
     r,
     unchangedIntervalSetIndices,
-    potentialUnchangedIntervalSets,
+    candidateUnchangedIntervalSets,
     normalizedPotentialUnchangedIntervalSets,
     filteredNormalizedPotentialUnchangedIntervalSets,
-    potentialGeneratorAs,
-    potentialTuningMaps,
-    potentialTuningMapDamages,
+    candidateOptimumGeneratorAs,
+    candidateOptimumGeneratorsTuningMaps,
+    candidateOptimumGeneratorTuningMapDamages,
     
-    minDamageTuningMapIndices,
-    minDamageTuningMapIndex,
-    minDamageGeneratorA
+    optimumGeneratorsTuningMapIndices,
+    optimumGeneratorsTuningMapIndex
   },
   
   t = tuningOption[tuningOptions, "t"];
   
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
-  tuningMap = Part[tuningMappings, 3];
-  primesTuningMap = Part[tuningMappings, 4];
-  
   r = getR[t];
-  unchangedIntervalSetIndices = Subsets[Range[Length[potentiallyPrimesIdentityTargetedIntervalsA]], {r}];
-  potentialUnchangedIntervalSets = Map[Map[potentiallyPrimesIdentityTargetedIntervalsA[[#]]&, #]&, unchangedIntervalSetIndices];
-  normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, potentialUnchangedIntervalSets];
+  unchangedIntervalSetIndices = Subsets[Range[Length[intervals]], {r}];
+  candidateUnchangedIntervalSets = Map[Map[intervals[[#]]&, #]&, unchangedIntervalSetIndices];
+  normalizedPotentialUnchangedIntervalSets = Map[canonicalCa, candidateUnchangedIntervalSets];
   filteredNormalizedPotentialUnchangedIntervalSets = DeleteDuplicates[Select[normalizedPotentialUnchangedIntervalSets, MatrixRank[#] == r&]];
-  potentialGeneratorAs = Select[Map[
+  candidateOptimumGeneratorAs = Select[Map[
     getGeneratorsAFromUnchangedIntervals[ma, #]&,
     filteredNormalizedPotentialUnchangedIntervalSets
   ], Not[# === Null]&];
-  potentialTuningMaps = Map[primesTuningMap.#.ma&, potentialGeneratorAs];
-  potentialTuningMapDamages = Map[getSumDamageOrGetSumPrimesAbsError[#, tuningOptions]&, potentialTuningMaps];
+  candidateOptimumGeneratorsTuningMaps = Map[primesTuningMap.#&, candidateOptimumGeneratorAs];
+  candidateOptimumGeneratorTuningMapDamages = Map[getSumDamageOrGetSumPrimesAbsError[#, mappedSide, justSide]&, candidateOptimumGeneratorsTuningMaps];
   
-  minDamageTuningMapIndices = Position[potentialTuningMapDamages, Min[potentialTuningMapDamages]];
+  optimumGeneratorsTuningMapIndices = Position[candidateOptimumGeneratorTuningMapDamages, Min[candidateOptimumGeneratorTuningMapDamages]];
   If[
-    Length[minDamageTuningMapIndices] == 1,
+    Length[optimumGeneratorsTuningMapIndices] == 1,
     
     (* result is unique; done *)
-    minDamageTuningMapIndex = First[First[Position[potentialTuningMapDamages, Min[potentialTuningMapDamages]]]];
-    minDamageGeneratorA = potentialGeneratorAs[[minDamageTuningMapIndex]];
-    primesTuningMap.minDamageGeneratorA,
+    optimumGeneratorsTuningMapIndex = First[First[Position[candidateOptimumGeneratorTuningMapDamages, Min[candidateOptimumGeneratorTuningMapDamages]]]];
+    candidateOptimumGeneratorsTuningMaps[[optimumGeneratorsTuningMapIndex]],
     
-    Throw["non-unique solution for sum polytope"]
+    (* result is non-unique, will need to handle otherwise *)
+    Null
   ]
 ];
 
+getSumDamageOrGetSumPrimesAbsError[candidateOptimumGeneratorsTuningMap_, mappedSide_, justSide_] := Total[Abs[
+  N[
+    Map[If[Quiet[PossibleZeroQ[#]], 0, #]&, candidateOptimumGeneratorsTuningMap.mappedSide - justSide],
+    absoluteValuePrecision
+  ]
+]];
+
 (* no historically described tunings use this *)
 (* this is the fallback for when optimizeGeneratorsTuningMapAnalyticalSumPolytope fails to find a unique solution *)
-optimizeGeneratorsTuningMapNumericalPowerLimitSolver[tuningOptions_, absErrorL_, normPower_] := Module[
+optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
+  inputNormPower_,
+  tuningOptions_,
+  mappedSide_,
+  justSide_,
+  generatorsTuningMap_
+] := Module[
   {
     t,
     unchangedIntervals,
-    complexityMakeOdd,
-    
-    tuningMappings,
-    generatorsTuningMap,
+    complexitySizeFactor,
     
     periodsPerOctave,
+    
+    normPowerPower,
+    normPower,
+    previousAbsErrorMagnitude,
+    absErrorMagnitude,
+    previousSolution,
     minimizedNorm,
-    solution
+    solution,
+    
+    optimumGeneratorsTuningMap
   },
   
-  t = tuningOption[tuningOptions, "t"];
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"];
-  complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
-  
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
+  t = tuningOption[tuningOptions, "t"]; (* TODO: I think a lot of these solutions don't actually need t *)
+  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
   
   periodsPerOctave = getPeriodsPerOctave[t];
   
+  normPowerPower = 1;
+  normPower = Power[2, 1 / normPowerPower];
+  previousAbsErrorMagnitude = 1000001; (* this is just something really big, in order for initial conditions to work *)
+  absErrorMagnitude = 1000000; (* this is just something really big, but not quite as big as previous *)
+  
   While[
-    normPowerPower <= 6 && previousDamagesMagnitude - damagesMagnitude > 0,
-    previousDamagesMagnitude = damagesMagnitude;
+    normPowerPower <= 6 && previousAbsErrorMagnitude - absErrorMagnitude > 0,
+    previousAbsErrorMagnitude = absErrorMagnitude;
     previousSolution = solution;
     minimizedNorm = If[
-      Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-      {Norm[absErrorL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-      Norm[absErrorL, normPower]
+      Length[unchangedIntervals] > 0,
+      {Norm[N[Map[If[Quiet[PossibleZeroQ[#]], 0, #]&, generatorsTuningMap.mappedSide - justSide], absoluteValuePrecision], normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+      Norm[N[Map[If[Quiet[PossibleZeroQ[#]], 0, #]&, generatorsTuningMap.mappedSide - justSide], absoluteValuePrecision], normPower]
     ];
     solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> nMinimizePrecision];
-    damagesMagnitude = First[solution];
+    absErrorMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = Power[2, 1 / normPowerPower];
   ];
-  generatorsTuningMap /. Last[previousSolution]
+  
+  optimumGeneratorsTuningMap = generatorsTuningMap /. Last[solution];
+  
+  If[
+    complexitySizeFactor != 0,
+    Drop[optimumGeneratorsTuningMap, -1],
+    optimumGeneratorsTuningMap
+  ]
 ];
 
 getGeneratorsAFromUnchangedIntervals[ma_, unchangedIntervalEigenvectors_] := Module[
@@ -464,93 +519,63 @@ getGeneratorsAFromUnchangedIntervals[ma_, unchangedIntervalEigenvectors_] := Mod
 
 (* covers unchanged-octave diamond minisos-U "least squares", minimax-ES "TE", pure-octave-stretched minimax-ES "POTE",
 minimax-NES "Frobenius", minimax-ZES "WE", minimax-PNES "BE" *)
-optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
-  t_,
-  potentiallyPrimesIdentityTargetedIntervalsA_,
-  damageWeightingOrDualMultiplier_(*,
-  complexitySizeFactor_*)
-] := Module[
-  {
-    tuningMappings,
-    generatorsTuningMap,
-    ma,
-    tuningMap,
-    primesTuningMap,
-    weightedOrMultipliedTargetedIntervalsAMapped,
-    generatorsA
-  },
+optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[tuningOptions_, mappedSide_, justSide_] := Module[
+  {t, complexitySizeFactor, optimumGeneratorsTuningMap},
   
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
-  tuningMap = Part[tuningMappings, 3];
-  primesTuningMap = Part[tuningMappings, 4];
+  t = tuningOption[tuningOptions, "t"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
   
-  weightedOrMultipliedTargetedIntervalsAMapped = ma.
-      Transpose[potentiallyPrimesIdentityTargetedIntervalsA].
-      damageWeightingOrDualMultiplier;
-  (*
-    (* first half of handling dual of integer limit, though this doesn't actually work *)
+  optimumGeneratorsTuningMap = justSide.PseudoInverse[mappedSide];
+  
   If[
     complexitySizeFactor != 0,
-    weightedOrMultipliedTargetedIntervalsAMapped = Map[Join[#, {complexitySizeFactor}]&, weightedOrMultipliedTargetedIntervalsAMapped];
-    AppendTo[weightedOrMultipliedTargetedIntervalsAMapped, Join[Table[0, First[Dimensions[weightedOrMultipliedTargetedIntervalsAMapped]] - 1], {-1}]];
-    (*      AppendTo[justSide, {0}];*)
-  ];
-  *)
-  generatorsA = Transpose[potentiallyPrimesIdentityTargetedIntervalsA].
-      damageWeightingOrDualMultiplier.
-      Transpose[weightedOrMultipliedTargetedIntervalsAMapped].
-      Inverse[
-        (*    PseudoInverse[  weird to have pseudoinverse in the middle of our simulated pseudoinverse, but it's necessary for the singular items we get when doing Weil tuning this way *)
-        weightedOrMultipliedTargetedIntervalsAMapped.Transpose[weightedOrMultipliedTargetedIntervalsAMapped]
-      ];
-  
-  generatorsTuningMap = primesTuningMap.generatorsA;
-  
-  (*  *)(* second half of handling dual of integer limit, though this doesn't actually work *)
-  (*  If[*)
-  (*    complexitySizeFactor != 0,*)
-  (*    Drop[generatorsTuningMap, -1],*)
-  (*    generatorsTuningMap*)
-  (*  ]*)
-  
-  generatorsTuningMap
+    Drop[optimumGeneratorsTuningMap, -1],
+    optimumGeneratorsTuningMap
+  ]
 ];
 
 
 (* OTHER POWERS *)
 
 (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
-optimizeGeneratorsTuningMapNumericalPowerSolver[tuningOptions_, absErrorL_, normPower_] := Module[
+optimizeGeneratorsTuningMapNumericalPowerSolver[
+  normPower_,
+  tuningOptions_,
+  mappedSide_,
+  justSide_,
+  generatorsTuningMap_
+] := Module[
   {
     t,
+    complexitySizeFactor,
     unchangedIntervals,
-    complexityMakeOdd,
-    
-    tuningMappings,
-    generatorsTuningMap,
     
     periodsPerOctave,
+    
     minimizedNorm,
-    solution
+    solution,
+    
+    optimumGeneratorsTuningMap
   },
   
   t = tuningOption[tuningOptions, "t"];
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"];
-  complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"];
-  
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
+  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
   
   periodsPerOctave = getPeriodsPerOctave[t];
   
   minimizedNorm = If[
-    (* TODO: CONSTRAINTS / KEES: might eventually be able to simplify the constraints code, if we always have here and/or never elsewhere *)
-    Length[unchangedIntervals] > 0 || complexityMakeOdd == True,
-    {Norm[absErrorL, normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
-    Norm[absErrorL, normPower]
+    Length[unchangedIntervals] > 0,
+    {Norm[N[Map[If[Quiet[PossibleZeroQ[#]], 0, #]&, generatorsTuningMap.mappedSide - justSide], absoluteValuePrecision], normPower], generatorsTuningMap[[1]] == 1 / periodsPerOctave},
+    Norm[N[Map[If[Quiet[PossibleZeroQ[#]], 0, #]&, generatorsTuningMap.mappedSide - justSide], absoluteValuePrecision], normPower]
   ];
   solution = NMinimize[minimizedNorm, generatorsTuningMap, WorkingPrecision -> nMinimizePrecision];
-  generatorsTuningMap /. Last[solution]
+  
+  optimumGeneratorsTuningMap = generatorsTuningMap /. Last[solution];
+  
+  If[
+    complexitySizeFactor != 0,
+    Drop[optimumGeneratorsTuningMap, -1],
+    optimumGeneratorsTuningMap
+  ]
 ];

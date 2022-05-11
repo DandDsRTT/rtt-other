@@ -94,7 +94,7 @@ testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1197.930, 694.911}];
 
 
-testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {1198.180, 695.199}];
 
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1195.699, 693.352}];
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1195.699, 693.352}];
@@ -126,7 +126,7 @@ testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamon
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-NS", {597.851, 106.643}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-NES", {598.310, 106.798}];
-testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-S", {598.436, 106.672}];
+(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-S", {598.436, 106.672}];*)
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-ES", {598.762, 106.835}];
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-NC", {601.653, 107.288}];
@@ -233,9 +233,10 @@ sources:
 [12] Mike Battaglia's tipweil.py variation on tiptop.py https://github.com/YahooTuningGroupsUltimateBackup/YahooTuningGroupsUltimateBackup/blob/master/src/tuning-math/files/MikeBattaglia/tipweil.py
 *)
 
-(* TODO: scour Facebook for tuning examples - done for Kees, KE, Weil, WE; not for POTOP, POTT, BOP, BE, minimax, least squares, TOP, TE *)
-(* TODO: scour Yahoo for tuning examples - done for Kees, KE, Weil, WE; not for POTOP, POTT, BOP, BE, minimax, least squares, TOP, TE *)
-(* TODO: scour Wiki for tuning examples - done for minimax, least squares; not for POTOP, POTT, BOP, BE, Kees, KE, Weil, WE, TOP, TE *)
+(* TODO: scour internet for any remaining tuning examples to test against
+Facebook - done for Kees, KE, Weil, WE; not for POTOP, POTT, BOP, BE, minimax, least squares, TOP, TE
+Yahoo - done for Kees, KE, Weil, WE; not for POTOP, POTT, BOP, BE, minimax, least squares, TOP, TE
+Wiki - done for minimax, least squares; not for POTOP, POTT, BOP, BE, Kees, KE, Weil, WE, TOP, TE *)
 
 (* unchanged-octave diamond diamond minimax-U = "minimax" *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, 1896.578, 2786.314}]; (* [7a] *)
@@ -278,13 +279,11 @@ testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "unchan
 (* sensamagic *)
 testClose[optimizeGeneratorsTuningMap, dual[{{quotientToPcv[32805 / 32768]}, "contra"}], "systematicTuningName" -> "unchanged-octave diamond minisos-U", {1200.000, 1200.000 + 701.728}]; (* [2b] has a bunch of least squares tunings... only this one works,though; not sure what's up with the rest*)
 
-dual[{{quotientToPcv[64 / 63]}, "contra"}]
-
 (* pure-octave stretch *)
-(* TODO: test cover at all *)
-(* TODO: test cover to error in the case that more than one generator row affects the first column *)
-(* TODO: test cover to error if the subgroup doesn't include prime 2 *)
-(* TODO: test cover to find prime 2 if it's not the first prime for some reason *)
+(* TODO: test cover stretched tunings at all, 
+to error in the case that more than one generator row affects the first column
+to error if the subgroup doesn't include prime 2
+and to find prime 2 if it's not the first prime for some reason *)
 
 
 
@@ -336,7 +335,6 @@ testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 1, getPcvLo
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 1, getPcvProductComplexity[pcv]];
 
 (* getGeneratorsTuningMapDamage *)
-(* TODO: I'm not sure this handles interval basis properly... add a test for that *)
 testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1201.7, 697.564}, "systematicTuningName" -> "minimax-S", 1.700];
 testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1199.02, 695.601}, "systematicTuningName" -> "unchanged-octave diamond minisos-U", 0.088];
 testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1200., 696.578}, "systematicTuningName" -> "unchanged-octave diamond minimax-U", 5.377];
@@ -510,7 +508,7 @@ testClose[optimizeTuningMap, sensamagic, "systematicTuningName" -> "minimax-PNES
 
 (* minimax-ZS = "Weil" *)
 (* could maybe double-check w/ Flora's app but we're aware at this time that her implementation uses the pseudoinverse
-of the Weil complexity multiplier for the primes error magnitude dual multiplier which doesn't work correctly *)
+of the Weil complexity multiplier which doesn't work correctly *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", {1200.0, 1896.578, 2786.314}]; (* [2a] *)
 testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-ZS", {1188.722, 1901.955, 2773.22}]; (* [2a] *)
 testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "minimax-ZS", {1200.000, 1901.955, 2750.978}]; (* [2a] *)
@@ -530,7 +528,7 @@ testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "minimax-ZS", {119
 
 (* minimax-ZES = "WE", "Weil-Euclidean" *)
 (* could maybe double check w/ Sintel's app; what calls Weil is actually Weil-Euclidean, according to Tom here: [10a] and I think he's right 
-but unfortunately it's not easily discernable from his code at this time *)
+but unfortunately it's not easily discernible from his code at this time *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-ZES", {1201.3906, 1898.4361, 2788.1819}]; (* [4] and [1a] also has {1201.391, 1898.436, 2788.182} *)
 testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-ZES", {1194.2544, 1910.8071, 2786.1895}]; (* [4] and [1a] also has {1194.254, 1910.807, 2786.189} *)
 testClose[optimizeTuningMap, dicot, "systematicTuningName" -> "minimax-ZES", {1206.2832, 1907.1223, 2762.9860}]; (* [4] *)
