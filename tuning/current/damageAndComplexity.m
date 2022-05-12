@@ -144,11 +144,17 @@ getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
   }]
 ];
 
+getSumDamage[tuningMap_, tuningOptions_] := Total[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
+Square[n_] := n^2;
+get2SumDamage[tuningMap_, tuningOptions_] := Total[Square[getTargetedIntervalDamagesL[tuningMap, tuningOptions]]];
+getPowerSumDamage[tuningMap_, tuningOptions_, power_] := Total[Power[getTargetedIntervalDamagesL[tuningMap, tuningOptions], power]];
+getMaxDamage[tuningMap_, tuningOptions_] := Max[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
+
 getTargetedIntervalDamagesL[tuningMap_, tuningOptions_] := Module[
   {t, targetedIntervalsA, primesTuningMap, damageWeights},
   
   t = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
   primesTuningMap = getPrimesTuningMap[t];
   damageWeights = getDamageWeights[tuningOptions];
   
@@ -159,13 +165,6 @@ getTargetedIntervalDamagesL[tuningMap_, tuningOptions_] := Module[
     ].Transpose[targetedIntervalsA].damageWeights
   ]
 ];
-
-Square[n_] := n^2;
-
-getSumDamage[tuningMap_, tuningOptions_] := Total[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
-get2SumDamage[tuningMap_, tuningOptions_] := Total[Square[getTargetedIntervalDamagesL[tuningMap, tuningOptions]]];
-getPowerSumDamage[tuningMap_, tuningOptions_, power_] := Total[Power[getTargetedIntervalDamagesL[tuningMap, tuningOptions], power]];
-getMaxDamage[tuningMap_, tuningOptions_] := Max[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
 
 
 (* COMPLEXITY *)

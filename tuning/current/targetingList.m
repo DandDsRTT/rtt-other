@@ -63,9 +63,10 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
     
     mappedSide,
     justSide,
-    ma,
-    intervals,
-    primesTuningMap,
+    intervalsPartOfMappedSide,
+    mappingPartOfMappedSide,
+    primesTuningMapPartOfJustSide,
+    weightingPartOfMappedSide,
     
     optimumGeneratorsTuningMap,
     
@@ -79,17 +80,19 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
   
   mappedSide = getTargetingListMappedSide[tuningOptions];
   justSide = getTargetingListJustSide[tuningOptions];
-  ma = getTargetingListMa[tuningOptions];
-  intervals = getTargetingListIntervals[tuningOptions];
-  primesTuningMap = getTargetingListPrimesTuningMap[tuningOptions];
+  intervalsPartOfMappedSide = getTargetingListIntervalsPartOfMappedSide[tuningOptions];
+  mappingPartOfMappedSide = getTargetingListMappingPartOfMappedSide[tuningOptions];
+  primesTuningMapPartOfJustSide = getTargetingListPrimesTuningMapPartOfJustSide[tuningOptions];
+  weightingPartOfMappedSide = getTargetingListWeightingPartOfMappedSide[tuningOptions];
   
   optimumGeneratorsTuningMap = optimizeGeneratorsTuningMapAnalyticalSumPolytope[
     tuningOptions,
     mappedSide,
     justSide,
-    ma,
-    intervals,
-    primesTuningMap
+    intervalsPartOfMappedSide,
+    mappingPartOfMappedSide,
+    primesTuningMapPartOfJustSide,
+    weightingPartOfMappedSide
   ];
   
   (* if the solution from the sum polytope is non-unique, it returns null, so we fall back to a power-limit solution *)
@@ -141,19 +144,7 @@ optimizeGeneratorsTuningMapMinisop[tuningOptions_] := Module[
   mappedSide = getTargetingListMappedSide[tuningOptions];
   justSide = getTargetingListJustSide[tuningOptions];
   generatorsTuningMap = getTargetingListGeneratorsTuningMap[tuningOptions];
-  (* TODO: I thought this had to be power limit because it could be 1 or \[Infinity] for now 
-  because it also goes in here if there are unchanged intervals... 
-  and that we should make this change for the targeting-all analog function too... 
-  or we could just have it be smart and only do power-limit if 1 or \[Infinity]... 
-  which I briefly experimented upon here. but then something crazy happened! I had the case of 
-  testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, 1896.578, 2786.314}] 
-  which was giving {1200.000, 1896.566, 2786.263} when it tried to do power limit solver because, 
-  I assume it's because of the constraint, 
-  the damage when the power was 2 which is where it starts off was the lowest, 
-  and every increment toward power being 1 made the damage WORSE. 
-  now if you think about it in this case when the constraint pure octave is on, 
-  that means the solution is non-unique because it's just the g1 = 1200 cross-section of the graph you get with plotDamage at this time, 
-  and there's a clear minimum that way... *)
+  
   optimizeGeneratorsTuningMapNumericalPowerSolver[
     optimizationPower,
     tuningOptions,
@@ -178,8 +169,8 @@ getDamageWeights[tuningOptions_] := Module[
   },
   
   t = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
-  damageWeightingSlope = tuningOption[tuningOptions, "damageWeightingSlope"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
+  damageWeightingSlope = tuningOption[tuningOptions, "damageWeightingSlope"]; (* trait 2 *)
   complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"]; (* trait 3 *)
   complexityNegateLogPrimeCoordination = tuningOption[tuningOptions, "complexityNegateLogPrimeCoordination"]; (* trait 4a *)
   complexityPrimePower = tuningOption[tuningOptions, "complexityPrimePower"]; (* trait 4b *)
@@ -216,7 +207,7 @@ getDamageWeights[tuningOptions_] := Module[
   ]
 ];
 
-(* used by optimizeGeneratorsTuningMapMinisum (problem child) and optimizeGeneratorsTuningMapMinisop *)
+(* only used by optimizeGeneratorsTuningMapNumericalPower(Limit)Solver *)
 (* returns g *)
 getTargetingListGeneratorsTuningMap[tuningOptions_] := Module[
   {t, tuningMappings, generatorsTuningMap},
@@ -229,13 +220,12 @@ getTargetingListGeneratorsTuningMap[tuningOptions_] := Module[
   generatorsTuningMap
 ];
 
-(* used by all four solutions!! *)
 (* returns MTW *)
 getTargetingListMappedSide[tuningOptions_] := Module[
   {t, targetedIntervalsA, tuningMappings, ma, damageWeights},
   
   t = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
   
   tuningMappings = getTuningMappings[t];
   ma = Part[tuningMappings, 2];
@@ -245,13 +235,12 @@ getTargetingListMappedSide[tuningOptions_] := Module[
   ma.Transpose[targetedIntervalsA].damageWeights
 ];
 
-(* used by all four solutions!! *)
 (* returns pTW *)
 getTargetingListJustSide[tuningOptions_] := Module[
   {t, targetedIntervalsA, tuningMappings, primesTuningMap, damageWeights},
   
   t = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
   
   tuningMappings = getTuningMappings[t];
   primesTuningMap = Part[tuningMappings, 4];
@@ -261,30 +250,33 @@ getTargetingListJustSide[tuningOptions_] := Module[
   primesTuningMap.Transpose[targetedIntervalsA].damageWeights
 ];
 
-(* these three are all only used by optimizeGeneratorsTuningMapMinisum, the problem child *)
-(* compare with getTargetingAllPrimesTuningMap (it's identical, actually) *)
-getTargetingListPrimesTuningMap[tuningOptions_] := Module[
-  {t, tuningMappings, primesTuningMap},
+(* only used by optimizeGeneratorsTuningMapMinisum *)
+getTargetingListIntervalsPartOfMappedSide[tuningOptions_] := Module[
+  {targetedIntervalsA, damageWeights},
   
-  t = tuningOption[tuningOptions, "t"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
   
-  tuningMappings = getTuningMappings[t];
-  primesTuningMap = Part[tuningMappings, 4];
-  
-  primesTuningMap
+  Transpose[targetedIntervalsA]
 ];
-(* compare with getTargetingAllIntervals *)
-getTargetingListIntervals[tuningOptions_] := Module[
+getTargetingListWeightingPartOfMappedSide[tuningOptions_] := Module[
   {},
-  
-  tuningOption[tuningOptions, "targetedIntervalsA"]
+  getDamageWeights[tuningOptions]
 ];
-(* compare with getTargetingAllMapping (it's identical, actually) *)
-getTargetingListMa[tuningOptions_] := Module[
+getTargetingListMappingPartOfMappedSide[tuningOptions_] := Module[
   {t, tuningMappings},
   
   t = tuningOption[tuningOptions, "t"];
+  
   tuningMappings = getTuningMappings[t];
   
   Part[tuningMappings, 2]
+];
+getTargetingListPrimesTuningMapPartOfJustSide[tuningOptions_] := Module[
+  {t, tuningMappings},
+  
+  t = tuningOption[tuningOptions, "t"];
+  
+  tuningMappings = getTuningMappings[t];
+  
+  Part[tuningMappings, 4]
 ];

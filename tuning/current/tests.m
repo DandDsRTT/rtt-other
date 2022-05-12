@@ -233,11 +233,6 @@ sources:
 [12] Mike Battaglia's tipweil.py variation on tiptop.py https://github.com/YahooTuningGroupsUltimateBackup/YahooTuningGroupsUltimateBackup/blob/master/src/tuning-math/files/MikeBattaglia/tipweil.py
 *)
 
-(* TODO: scour internet for any remaining tuning examples to test against
-Facebook - done for Kees, KE, Weil, WE; not for POTOP, POTT, BOP, BE, minimax, least squares, TOP, TE
-Yahoo - done for Kees, KE, Weil, WE; not for POTOP, POTT, BOP, BE, minimax, least squares, TOP, TE
-Wiki - done for minimax, least squares; not for POTOP, POTT, BOP, BE, Kees, KE, Weil, WE, TOP, TE *)
-
 (* unchanged-octave diamond diamond minimax-U = "minimax" *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "unchanged-octave diamond minimax-U", {1200.000, 1896.578, 2786.314}]; (* [7a] *)
 (* blackwood *)
@@ -278,12 +273,6 @@ testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "unchan
 (* sensi *)
 (* sensamagic *)
 testClose[optimizeGeneratorsTuningMap, dual[{{quotientToPcv[32805 / 32768]}, "contra"}], "systematicTuningName" -> "unchanged-octave diamond minisos-U", {1200.000, 1200.000 + 701.728}]; (* [2b] has a bunch of least squares tunings... only this one works,though; not sure what's up with the rest*)
-
-(* pure-octave stretch *)
-(* TODO: test cover stretched tunings at all, 
-to error in the case that more than one generator row affects the first column
-to error if the subgroup doesn't include prime 2
-and to find prime 2 if it's not the first prime for some reason *)
 
 
 
@@ -603,6 +592,24 @@ and minimax-QZES is the same as pure-octave-*constrained* minimax-ES ("KE" w/ pu
 otherwise who really cares?*)
 
 
+
+(* confirming the complexitySizePower refactor *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minimax-ZS", {1201.191, 697.405}];                                (* Z     / list / max *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisum-ZS", {1200.000, 696.578}];                                (* Z     / list / sum *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisos-ZS", {1200.665, 696.707}];                                (* Z     / list / sos *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisop-ZS", "optimizationPower" -> 3, {1201.119, 697.031}];      (* Z     / list / pow *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", {1200.000, 696.578}];                                        (* Z     / all  / max *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", "complexityNormPower" -> \[Infinity], {1200.000, 696.578}];  (* Z     / all  / sum *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZES", {1201.391, 697.045}];                                       (* Z     / all  / sos *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", "complexityNormPower" -> 3, {1201.038, 696.782}];            (* Z     / all  / pow *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minimax-S", {1201.699, 697.564}];                                 (* notZ / list / max *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisum-S", {1200.000, 696.578}];                                 (* notZ / list / sum *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisos-S", {1200.985, 696.904}];                                 (* notZ / list / sos *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisop-S", "optimizationPower" -> 3, {1201.476, 697.233}];       (* notZ / list / pow*)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-S", {1201.699, 697.564}];                                         (* notZ / all  / max *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexityNormPower" -> \[Infinity], {1200.000, 696.578}];   (* notZ / all  / sum *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-S", {1201.699, 697.564}];                                         (* notZ / all  / sos *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexityNormPower" -> 3, {1201.039, 696.782}];             (* notZ / all  / pow *)
 
 
 Print["TOTAL FAILURES: ", failures];

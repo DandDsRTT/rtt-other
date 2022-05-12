@@ -8,14 +8,15 @@ unchanged-octave minimax-ES "CTE",
 pure-octave-stretched minimax-S "POTOP", pure-octave-stretched minimax-ES "POTE") *)
 (* compare with optimizeGeneratorsTuningMapTargetingList *)
 optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
-  {unchangedIntervals, complexityNormPower},
+  {unchangedIntervals, complexityNormPower, complexitySizeFactor, optimumGeneratorsTuningMap},
   
   If[tuningOption[tuningOptions, "debug"], Print["targeting-all"]];
   
   unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
   complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"]; (* trait 3 *)
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   
-  If[
+  optimumGeneratorsTuningMap = If[
     Length[unchangedIntervals] > 0,
     
     (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
@@ -46,6 +47,12 @@ optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
         ]
       ]
     ]
+  ];
+  
+  If[
+    complexitySizeFactor != 0,
+    Drop[optimumGeneratorsTuningMap, -1],
+    optimumGeneratorsTuningMap
   ]
 ];
 
@@ -75,9 +82,10 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
     
     mappedSide,
     justSide,
-    ma,
-    intervals,
-    primesTuningMap,
+    intervalsPartOfMappedSide,
+    mappingPartOfMappedSide,
+    primesTuningMapPartOfJustSide,
+    weightingPartOfMappedSide,
     
     optimumGeneratorsTuningMap,
     
@@ -92,17 +100,19 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
   
   mappedSide = getTargetingAllMappedSide[tuningOptions];
   justSide = getTargetingAllJustSide[tuningOptions];
-  ma = getTargetingAllMa[tuningOptions];
-  intervals = getTargetingAllIntervals[tuningOptions];
-  primesTuningMap = getTargetingAllPrimesTuningMap[tuningOptions];
+  intervalsPartOfMappedSide = getTargetingAllIntervalsPartOfMappedSide[tuningOptions];
+  mappingPartOfMappedSide = getTargetingAllMappingPartOfMappedSide[tuningOptions];
+  primesTuningMapPartOfJustSide = getTargetingAllPrimesTuningMapPartOfJustSide[tuningOptions];
+  weightingPartOfMappedSide = getTargetingAllWeightingPartOfMappedSide[tuningOptions];
   
   optimumGeneratorsTuningMap = optimizeGeneratorsTuningMapAnalyticalSumPolytope[
     tuningOptions,
     mappedSide,
     justSide,
-    ma,
-    intervals,
-    primesTuningMap
+    intervalsPartOfMappedSide,
+    mappingPartOfMappedSide,
+    primesTuningMapPartOfJustSide,
+    weightingPartOfMappedSide
   ];
   
   (* if the solution from the sum polytope is non-unique, it returns null, so we fall back to a power-limit solution *)
@@ -111,10 +121,6 @@ optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
     
     If[tuningOption[tuningOptions, "debug"], Print["non-unique solution \[RightArrow] power limit solver"]];
     complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"]; (* trait 3 *)
-    (* TODO: this could also be wrapped in a targeting-all version to hide the differences
-     I feel like this happens in more than one place
-     but I'm also slightly hesitant about this because it feels of a slightly different sort of thing as the other
-     targetingAll vs targetingList functions... this one would definitely only be used by the power and power limit solutions, at least*)
     primesErrorMagnitudeNormPower = dualPower[complexityNormPower];
     generatorsTuningMap = getTargetingAllGeneratorsTuningMap[tuningOptions];
     optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
@@ -217,13 +223,13 @@ getPrimeAbsErrorCounterweights[tuningOptions_] := Module[
   PseudoInverse[primeAbsErrorCounterweights]
 ];
 
-(* used by optimizeGeneratorsTuningMapPrimesTaxicabNorm (problem child) and optimizeGeneratorsTuningMapPrimesPowerNorm *)
+(* only used by optimizeGeneratorsTuningMapNumericalPower(Limit)Solver *)
 (* returns g or augmented thereof if using size factor for complexity *)
 getTargetingAllGeneratorsTuningMap[tuningOptions_] := Module[
   {t, complexitySizeFactor, tuningMappings, generatorsTuningMap},
   
   t = tuningOption[tuningOptions, "t"];
-  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
@@ -236,14 +242,13 @@ getTargetingAllGeneratorsTuningMap[tuningOptions_] := Module[
   generatorsTuningMap
 ];
 
-(* used by all four solutions!! *)
 (* returns MTW (where T is primes identity I, and W is prime abs error counterweights) 
 or augmented thereof if using size factor for complexity *)
 getTargetingAllMappedSide[tuningOptions_] := Module[
   {t, complexitySizeFactor, tuningMappings, ma, primeAbsErrorCounterweights, mappedSide},
   
   t = tuningOption[tuningOptions, "t"];
-  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   
   tuningMappings = getTuningMappings[t];
   ma = Part[tuningMappings, 2];
@@ -261,14 +266,13 @@ getTargetingAllMappedSide[tuningOptions_] := Module[
   mappedSide
 ];
 
-(* used by all four solutions!! *)
 (* returns pTW (where T is primes identity I, and W is prime abs error counterweights) 
 or augmented thereof if using size factor for complexity *)
 getTargetingAllJustSide[tuningOptions_] := Module[
   {t, complexitySizeFactor, tuningMappings, primesTuningMap, primeAbsErrorCounterweights, justSide},
   
   t = tuningOption[tuningOptions, "t"];
-  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   
   tuningMappings = getTuningMappings[t];
   primesTuningMap = Part[tuningMappings, 4];
@@ -285,32 +289,73 @@ getTargetingAllJustSide[tuningOptions_] := Module[
   justSide
 ];
 
-(* these three are all only used by optimizeGeneratorsTuningMapPrimesTaxicabNorm, the problem child *)
-(* compare with getTargetingListPrimesTuningMap (it's identical, actually) *)
-getTargetingAllPrimesTuningMap[tuningOptions_] := Module[
-  {t, tuningMappings, primesTuningMap},
+(* only used by optimizeGeneratorsTuningMapPrimesTaxicabNorm, the problem child *)
+(* TODO: this is not only of the mapped side, it's shared with both.
+ and ultimately of course the goal is to get rid of the plain mapped Side and justSIde fns if they can be composed with these 
+ in order for mappingSide to be composed out of all of these parts, this will have to be the primes tuning map but scaled by k then augmented with -1
+ see https://docs.google.com/spreadsheets/d/1dCBcpmwm8b7lbomSwM1CKXD06lYuPvRzHXSSpWhXUiI/edit#gid=991893487 for more info
+ *)
+getTargetingAllIntervalsPartOfMappedSide[tuningOptions_] := Module[
+  {t, complexitySizeFactor, intervalsSide},
   
   t = tuningOption[tuningOptions, "t"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
+  
+  intervalsSide = Transpose[getPrimesIdentityA[t]];
+  
+  If[
+    complexitySizeFactor != 0,
+    intervalsSide = Map[Join[#, {0}]&, intervalsSide];
+    AppendTo[intervalsSide, Join[Table[0, Last[Dimensions[intervalsSide]] - 1], {1}]]; (* TODO: DRY this sort of shenanigans up? *)
+  ];
+  
+  intervalsSide
+];
+getTargetingAllWeightingPartOfMappedSide[tuningOptions_] := Module[
+  {complexitySizeFactor, primeAbsErrorCounterweights, intervalsSide},
+  
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
+  
+  primeAbsErrorCounterweights = getPrimeAbsErrorCounterweights[tuningOptions];
+  
+  If[
+    complexitySizeFactor != 0,
+    primeAbsErrorCounterweights = Map[Join[#, {0}]&, primeAbsErrorCounterweights];
+    AppendTo[primeAbsErrorCounterweights, Join[Table[0, Last[Dimensions[primeAbsErrorCounterweights]] - 1], {1}]];
+  ];
+  
+  primeAbsErrorCounterweights
+];
+getTargetingAllMappingPartOfMappedSide[tuningOptions_] := Module[
+  {t, complexitySizeFactor, tuningMappings, ma},
+  
+  t = tuningOption[tuningOptions, "t"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
+  
+  tuningMappings = getTuningMappings[t];
+  ma = Part[tuningMappings, 2];
+  
+  If[
+    complexitySizeFactor != 0,
+    ma = Map[Join[#, {0}]&, ma];
+    AppendTo[ma, Join[Table[complexitySizeFactor, Last[Dimensions[ma]] - 1], {-1}]];
+  ];
+  
+  ma
+];
+getTargetingAllPrimesTuningMapPartOfJustSide[tuningOptions_] := Module[
+  {t, complexitySizeFactor, tuningMappings, primesTuningMap, primeAbsErrorCounterweights, justSide},
+  
+  t = tuningOption[tuningOptions, "t"];
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   
   tuningMappings = getTuningMappings[t];
   primesTuningMap = Part[tuningMappings, 4];
   
+  If[
+    complexitySizeFactor != 0,
+    AppendTo[primesTuningMap, 0]
+  ];
+  
   primesTuningMap
-];
-(* compare with getTargetingListIntervals *)
-getTargetingAllIntervals[tuningOptions_] := Module[
-  {t},
-  
-  t = tuningOption[tuningOptions, "t"];
-  
-  getPrimesIdentityA[t]
-];
-(* compare with getTargetingListMapping (it's identical, actually) *)
-getTargetingAllMa[tuningOptions_] := Module[
-  {t, tuningMappings},
-  
-  t = tuningOption[tuningOptions, "t"];
-  tuningMappings = getTuningMappings[t];
-  
-  Part[tuningMappings, 2]
 ];
