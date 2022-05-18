@@ -42,17 +42,32 @@ optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
 
 (* covers unchanged-octave diamond minimax-U "minimax" *)
 optimizeGeneratorsTuningMapMinimax[tuningOptions_] := Module[
-  {mappedSide, justSide},
+  {
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart
+  },
   
   If[tuningOption[tuningOptions, "debug"], Print["minimax"]];
   
-  mappedSide = getTargetingListMappedSide[tuningOptions];
-  justSide = getTargetingListJustSide[tuningOptions];
+  temperedSideGeneratorsPart = getTargetingListTemperedSideGeneratorsPart[tuningOptions];
+  temperedSideMappingPart = getTargetingListTemperedSideMappingPart[tuningOptions];
+  justSideGeneratorsPart = getTargetingListJustSideGeneratorsPart[tuningOptions];
+  justSideMappingPart = getTargetingListJustSideMappingPart[tuningOptions];
+  eitherSideIntervalsPart = getTargetingListEitherSideIntervalsPart[tuningOptions];
+  eitherSideMultiplierPart = getTargetingListEitherSideMultiplierPart[tuningOptions];
   
   optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[
     tuningOptions,
-    mappedSide,
-    justSide
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart
   ]
 ];
 
@@ -61,38 +76,37 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
   {
     t,
     
-    mappedSide,
-    justSide,
-    intervalsPartOfMappedSide,
-    mappingPartOfMappedSide,
-    primesTuningMapPartOfJustSide,
-    weightingPartOfMappedSide,
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart,
     
     optimumGeneratorsTuningMap,
     
-    optimizationPower,
-    generatorsTuningMap
+    optimizationPower
   },
   
   If[tuningOption[tuningOptions, "debug"], Print["minisum"]];
   
   t = tuningOption[tuningOptions, "t"];
   
-  mappedSide = getTargetingListMappedSide[tuningOptions];
-  justSide = getTargetingListJustSide[tuningOptions];
-  intervalsPartOfMappedSide = getTargetingListIntervalsPartOfMappedSide[tuningOptions];
-  mappingPartOfMappedSide = getTargetingListMappingPartOfMappedSide[tuningOptions];
-  primesTuningMapPartOfJustSide = getTargetingListPrimesTuningMapPartOfJustSide[tuningOptions];
-  weightingPartOfMappedSide = getTargetingListWeightingPartOfMappedSide[tuningOptions];
+  temperedSideGeneratorsPart = getTargetingListTemperedSideGeneratorsPart[tuningOptions];
+  temperedSideMappingPart = getTargetingListTemperedSideMappingPart[tuningOptions];
+  justSideGeneratorsPart = getTargetingListJustSideGeneratorsPart[tuningOptions];
+  justSideMappingPart = getTargetingListJustSideMappingPart[tuningOptions];
+  eitherSideIntervalsPart = getTargetingListEitherSideIntervalsPart[tuningOptions];
+  eitherSideMultiplierPart = getTargetingListEitherSideMultiplierPart[tuningOptions];
   
   optimumGeneratorsTuningMap = optimizeGeneratorsTuningMapAnalyticalSumPolytope[
     tuningOptions,
-    mappedSide,
-    justSide,
-    intervalsPartOfMappedSide,
-    mappingPartOfMappedSide,
-    primesTuningMapPartOfJustSide,
-    weightingPartOfMappedSide
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart
   ];
   
   (* if the solution from the sum polytope is non-unique, it returns null, so we fall back to a power-limit solution *)
@@ -101,13 +115,15 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
     
     If[tuningOption[tuningOptions, "debug"], Print["non-unique solution \[RightArrow] power limit solver"]];
     optimizationPower = tuningOption[tuningOptions, "optimizationPower"]; (* trait 1 *)
-    generatorsTuningMap = getTargetingListGeneratorsTuningMap[tuningOptions];
     optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
       optimizationPower,
       tuningOptions,
-      mappedSide,
-      justSide,
-      generatorsTuningMap
+      temperedSideGeneratorsPart,
+      temperedSideMappingPart,
+      justSideGeneratorsPart,
+      justSideMappingPart,
+      eitherSideIntervalsPart,
+      eitherSideMultiplierPart
     ],
     
     optimumGeneratorsTuningMap
@@ -116,15 +132,37 @@ optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
 
 (* covers unchanged-octave diamond minisos-U "least squares" *)
 optimizeGeneratorsTuningMapMinisos[tuningOptions_] := Module[
-  {t, mappedSide, justSide},
+  {
+    t,
+    
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart
+  },
   
   If[tuningOption[tuningOptions, "debug"], Print["minisos"]];
   
   t = tuningOption[tuningOptions, "t"];
-  mappedSide = getTargetingListMappedSide[tuningOptions];
-  justSide = getTargetingListJustSide[tuningOptions];
   
-  optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[tuningOptions, mappedSide, justSide]
+  temperedSideGeneratorsPart = getTargetingListTemperedSideGeneratorsPart[tuningOptions];
+  temperedSideMappingPart = getTargetingListTemperedSideMappingPart[tuningOptions];
+  justSideGeneratorsPart = getTargetingListJustSideGeneratorsPart[tuningOptions];
+  justSideMappingPart = getTargetingListJustSideMappingPart[tuningOptions];
+  eitherSideIntervalsPart = getTargetingListEitherSideIntervalsPart[tuningOptions];
+  eitherSideMultiplierPart = getTargetingListEitherSideMultiplierPart[tuningOptions];
+  
+  optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
+    tuningOptions,
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart
+  ]
 ];
 
 (* no historically described tunings use this *)
@@ -132,25 +170,34 @@ optimizeGeneratorsTuningMapMinisop[tuningOptions_] := Module[
   {
     optimizationPower,
     
-    mappedSide,
-    justSide,
-    generatorsTuningMap
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart
   },
   
   If[tuningOption[tuningOptions, "debug"], Print["minisop"]];
   
   optimizationPower = tuningOption[tuningOptions, "optimizationPower"]; (* trait 1 *)
   
-  mappedSide = getTargetingListMappedSide[tuningOptions];
-  justSide = getTargetingListJustSide[tuningOptions];
-  generatorsTuningMap = getTargetingListGeneratorsTuningMap[tuningOptions];
+  temperedSideGeneratorsPart = getTargetingListTemperedSideGeneratorsPart[tuningOptions];
+  temperedSideMappingPart = getTargetingListTemperedSideMappingPart[tuningOptions];
+  justSideGeneratorsPart = getTargetingListJustSideGeneratorsPart[tuningOptions];
+  justSideMappingPart = getTargetingListJustSideMappingPart[tuningOptions];
+  eitherSideIntervalsPart = getTargetingListEitherSideIntervalsPart[tuningOptions];
+  eitherSideMultiplierPart = getTargetingListEitherSideMultiplierPart[tuningOptions];
   
   optimizeGeneratorsTuningMapNumericalPowerSolver[
     optimizationPower,
     tuningOptions,
-    mappedSide,
-    justSide,
-    generatorsTuningMap
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart
   ]
 ];
 
@@ -199,17 +246,14 @@ getDamageWeights[tuningOptions_] := Module[
   If[
     damageWeightingSlope == "simplicityWeighted",
     
-    (* note: this is pseudo not because of non-square, due to complexity size factor,
-    but because of when complexity is odd and the top-left entry is a 0 so det is 0 so it's singular *)
-    PseudoInverse[damageWeights],
+    tuningInverse[damageWeights],
     
     damageWeights
   ]
 ];
 
-(* only used by optimizeGeneratorsTuningMapNumericalPower(Limit)Solver *)
 (* returns g *)
-getTargetingListGeneratorsTuningMap[tuningOptions_] := Module[
+getTargetingListTemperedSideGeneratorsPart[tuningOptions_] := Module[
   {t, tuningMappings, generatorsTuningMap},
   
   t = tuningOption[tuningOptions, "t"];
@@ -217,52 +261,11 @@ getTargetingListGeneratorsTuningMap[tuningOptions_] := Module[
   tuningMappings = getTuningMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
   
-  generatorsTuningMap
+  {generatorsTuningMap}
 ];
 
-(* returns MTW *)
-getTargetingListMappedSide[tuningOptions_] := Module[
-  {t, targetedIntervalsA, tuningMappings, ma, damageWeights},
-  
-  t = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
-  
-  tuningMappings = getTuningMappings[t];
-  ma = Part[tuningMappings, 2];
-  
-  damageWeights = getDamageWeights[tuningOptions];
-  
-  ma.Transpose[targetedIntervalsA].damageWeights
-];
-
-(* returns pTW *)
-getTargetingListJustSide[tuningOptions_] := Module[
-  {t, targetedIntervalsA, tuningMappings, primesTuningMap, damageWeights},
-  
-  t = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
-  
-  tuningMappings = getTuningMappings[t];
-  primesTuningMap = Part[tuningMappings, 4];
-  
-  damageWeights = getDamageWeights[tuningOptions];
-  
-  primesTuningMap.Transpose[targetedIntervalsA].damageWeights
-];
-
-(* only used by optimizeGeneratorsTuningMapMinisum *)
-getTargetingListIntervalsPartOfMappedSide[tuningOptions_] := Module[
-  {targetedIntervalsA, damageWeights},
-  
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
-  
-  Transpose[targetedIntervalsA]
-];
-getTargetingListWeightingPartOfMappedSide[tuningOptions_] := Module[
-  {},
-  getDamageWeights[tuningOptions]
-];
-getTargetingListMappingPartOfMappedSide[tuningOptions_] := Module[
+(* returns M *)
+getTargetingListTemperedSideMappingPart[tuningOptions_] := Module[
   {t, tuningMappings},
   
   t = tuningOption[tuningOptions, "t"];
@@ -271,12 +274,39 @@ getTargetingListMappingPartOfMappedSide[tuningOptions_] := Module[
   
   Part[tuningMappings, 2]
 ];
-getTargetingListPrimesTuningMapPartOfJustSide[tuningOptions_] := Module[
+
+(* returns p *)
+getTargetingListJustSideGeneratorsPart[tuningOptions_] := Module[
   {t, tuningMappings},
   
   t = tuningOption[tuningOptions, "t"];
   
   tuningMappings = getTuningMappings[t];
   
-  Part[tuningMappings, 4]
+  {Part[tuningMappings, 4]}
+];
+
+(* returns I *)
+getTargetingListJustSideMappingPart[tuningOptions_] := Module[
+  {t},
+  
+  t = tuningOption[tuningOptions, "t"];
+  
+  getPrimesIdentityA[t]
+];
+
+(* returns T *)
+getTargetingListEitherSideIntervalsPart[tuningOptions_] := Module[
+  {targetedIntervalsA},
+  
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
+  
+  Transpose[targetedIntervalsA]
+];
+
+(* returns W *)
+getTargetingListEitherSideMultiplierPart[tuningOptions_] := Module[
+  {},
+  
+  getDamageWeights[tuningOptions]
 ];

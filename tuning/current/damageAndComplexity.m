@@ -186,7 +186,7 @@ getComplexity[
     complexityMakeOdd (* trait 4d *)
   ];
   
-  Norm[complexityMultiplier.pcv, complexityNormPower]
+  Norm[complexityMultiplier.pcv, complexityNormPower] / (1 + complexitySizeFactor)
 ];
 
 (* Note that we don't actually use any of these functions directly; they're just around to test understanding *)
@@ -248,7 +248,7 @@ when used by getDamageWeights covers any targeting-list tuning using this as its
     (surprisingly minimax-QZES does not use the below; it instead uses this and applies an unchanged octave constraint); 
     when used by getDamageWeights should cover any targeting-list tuning using this as its damage's complexity *)
     complexitySizeFactor > 0,
-    complexityMultiplier = (Join[getPrimesIdentityA[t], {Table[complexitySizeFactor, getD[t]]}] / (1 + complexitySizeFactor)).complexityMultiplier
+    complexityMultiplier = Join[getPrimesIdentityA[t], {Table[complexitySizeFactor, getD[t]]}].complexityMultiplier
   ];
   
   If[

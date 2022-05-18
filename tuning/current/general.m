@@ -441,6 +441,38 @@ generatorsTuningMapFromTAndTuningMap[t_, tuningMap_] := Module[
   generatorsTuningMap /. Last[solution]
 ];
 
+tuningInverse[damageWeighterOrComplexityMultiplier_] := MapThread[
+  (* TODO: comment this first half... or just break out and name... it's just like, wiping out-of-square entries as 0 *)
+  Function[
+    {dataRow, zerosRow},
+    MapIndexed[
+      Function[
+        {zerosEl, index},
+        zerosEl + If[
+          First[index] > Length[dataRow],
+          0,
+          Part[dataRow, First[index]]
+        ]
+      ],
+      zerosRow
+    ]
+  ],
+  {
+    (* note: this is pseudo not because of non-square, due to complexity size factor,
+    but because of when complexity is odd and the top-left entry is a 0 so det is 0 so it's singular *)
+    PseudoInverse[
+      damageWeighterOrComplexityMultiplier[[1 ;; Last[Dimensions[damageWeighterOrComplexityMultiplier]]]]
+    ],
+    Table[
+      Table[
+        0,
+        First[Dimensions[damageWeighterOrComplexityMultiplier]]
+      ],
+      Last[Dimensions[damageWeighterOrComplexityMultiplier]]
+    ]
+  }
+];
+
 
 (* INTERVAL BASIS *)
 
