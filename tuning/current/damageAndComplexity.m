@@ -292,7 +292,6 @@ plotDamage[t_, OptionsPattern[]] := Module[
     tWithPossiblyChangedIntervalBasis,
     targetedIntervalsA,
     
-    tuningMappings,
     generatorsTuningMap,
     ma,
     primesTuningMap,
@@ -372,10 +371,7 @@ plotDamage[t_, OptionsPattern[]] := Module[
   complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"]; (* trait 4d *)
   
-  tuningMappings = getTuningMappings[tWithPossiblyChangedIntervalBasis];
-  generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
-  primesTuningMap = Part[tuningMappings, 4];
+  {generatorsTuningMap, ma, primesTuningMap} = getTuningMappings[t];
   
   plotArgs = {};
   

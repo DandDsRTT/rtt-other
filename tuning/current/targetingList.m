@@ -192,7 +192,6 @@ getTargetingListParts[tuningOptions_] := Module[
     t,
     targetedIntervalsA,
     
-    tuningMappings,
     generatorsTuningMap,
     ma,
     primesTuningMap,
@@ -208,10 +207,7 @@ getTargetingListParts[tuningOptions_] := Module[
   t = tuningOption[tuningOptions, "t"];
   targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
   
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
-  primesTuningMap = Part[tuningMappings, 4];
+  {generatorsTuningMap, ma, primesTuningMap} = getTuningMappings[t];
   
   temperedSideGeneratorsPart = {generatorsTuningMap};
   temperedSideMappingPart = ma;

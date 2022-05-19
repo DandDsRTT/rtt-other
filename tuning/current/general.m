@@ -389,26 +389,21 @@ processTuningOptions[
   }
 ];
 
-tuningOption[tuningOptions_, optionName_] := Module[
-  {tuningOptionsPartsByOptionName},
-  
-  tuningOptionsPartsByOptionName = <|
-    "t" -> 1,
-    "unchangedIntervals" -> 2, (* trait 9 *)
-    "targetedIntervalsA" -> 3, (* trait 0 *)
-    "optimizationPower" -> 4, (* trait 1 *)
-    "damageWeightingSlope" -> 5, (* trait 2 *)
-    "complexityNormPower" -> 6, (* trait 3 *)
-    "complexityNegateLogPrimeCoordination" -> 7, (* trait 4a *)
-    "complexityPrimePower" -> 8, (* trait 4b *)
-    "complexitySizeFactor" -> 9, (* trait 4c *)
-    "complexityMakeOdd" -> 10, (* trait 4d *)
-    "pureOctaveStretch" -> 11,
-    "debug" -> 12
-  |>;
-  
-  Part[tuningOptions, tuningOptionsPartsByOptionName[optionName]]
-];
+tuningOptionsPartsByOptionName = <|
+  "t" -> 1,
+  "unchangedIntervals" -> 2, (* trait 9 *)
+  "targetedIntervalsA" -> 3, (* trait 0 *)
+  "optimizationPower" -> 4, (* trait 1 *)
+  "damageWeightingSlope" -> 5, (* trait 2 *)
+  "complexityNormPower" -> 6, (* trait 3 *)
+  "complexityNegateLogPrimeCoordination" -> 7, (* trait 4a *)
+  "complexityPrimePower" -> 8, (* trait 4b *)
+  "complexitySizeFactor" -> 9, (* trait 4c *)
+  "complexityMakeOdd" -> 10, (* trait 4d *)
+  "pureOctaveStretch" -> 11,
+  "debug" -> 12
+|>;
+tuningOption[tuningOptions_, optionName_] := Part[tuningOptions, tuningOptionsPartsByOptionName[optionName]];
 
 getPrimesTuningMap[t_] := Log2[getIntervalBasis[t]];
 
@@ -419,22 +414,19 @@ getPeriodsPerOctave[t_] := First[First[getA[getM[t]]]];
 getPrimesIdentityA[t_] := IdentityMatrix[getD[t]];
 
 getTuningMappings[t_] := Module[
-  {generatorsTuningMap, ma, tuningMap, primesTuningMap},
+  {generatorsTuningMap, ma, primesTuningMap},
   
   generatorsTuningMap = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
-  tuningMap = generatorsTuningMap.ma;
   primesTuningMap = getPrimesTuningMap[t];
   
-  {generatorsTuningMap, ma, tuningMap, primesTuningMap}
+  {generatorsTuningMap, ma, primesTuningMap}
 ];
 
 generatorsTuningMapFromTAndTuningMap[t_, tuningMap_] := Module[
-  {tuningMappings, generatorsTuningMap, ma, solution},
+  {generatorsTuningMap, ma, primesTuningMap, solution},
   
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
+  {generatorsTuningMap, ma, primesTuningMap} = getTuningMappings[t];
   
   solution = NMinimize[Norm[generatorsTuningMap.ma - tuningMap], generatorsTuningMap];
   

@@ -204,7 +204,6 @@ getTargetingAllParts[tuningOptions_] := Module[
     t,
     complexitySizeFactor,
     
-    tuningMappings,
     generatorsTuningMap,
     ma,
     primesTuningMap,
@@ -222,10 +221,7 @@ getTargetingAllParts[tuningOptions_] := Module[
   t = tuningOption[tuningOptions, "t"];
   complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   
-  tuningMappings = getTuningMappings[t];
-  generatorsTuningMap = Part[tuningMappings, 1];
-  ma = Part[tuningMappings, 2];
-  primesTuningMap = Part[tuningMappings, 4];
+  {generatorsTuningMap, ma, primesTuningMap} = getTuningMappings[t];
   
   dualMultiplier = getDualMultiplier[tuningOptions];
   
