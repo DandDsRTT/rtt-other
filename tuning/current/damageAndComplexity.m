@@ -222,21 +222,21 @@ getComplexityMultiplier[
   complexitySizeFactor_, (* trait 4c *)
   complexityMakeOdd_ (* trait 4d *)
 ] := Module[{complexityMultiplier},
-  (* When used by getPrimeAbsErrorCounterweights for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-S ("TOP"); 
-when used by getPrimeAbsErrorCounterweights for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ES ("TE"); 
+  (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-S ("TOP"); 
+when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ES ("TE"); 
 when used by getDamageWeights covers any targeting-list tuning using this as its damage's complexity *)
   complexityMultiplier = getLogPrimeCoordinationA[t];
   
   If[
-    (* When used by getPrimeAbsErrorCounterweights for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-NS (the L1 version of "Frobenius");
-    when used by getPrimeAbsErrorCounterweights for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-NES ("Frobenius") *)
+    (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-NS (the L1 version of "Frobenius");
+    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-NES ("Frobenius") *)
     complexityNegateLogPrimeCoordination == True,
     complexityMultiplier = complexityMultiplier.Inverse[getLogPrimeCoordinationA[t]]
   ];
   
   If[
-    (* When used by getPrimeAbsErrorCounterweights for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-PNS ("BOP");
-    when used by getPrimeAbsErrorCounterweights for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-PNES ("BE") *)
+    (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-PNS ("BOP");
+    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-PNES ("BE") *)
     complexityPrimePower > 0,
     complexityMultiplier = complexityMultiplier.DiagonalMatrix[Power[getIntervalBasis[t], complexityPrimePower]]
   ];
@@ -244,7 +244,7 @@ when used by getDamageWeights covers any targeting-list tuning using this as its
   If[
     (* When minimax-ZS ("Weil") needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm, 
     where it's implemented separately (the max minus min thing); 
-    when used by getPrimeAbsErrorCounterweights for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ZES ("WE") or minimax-QZES ("KE")
+    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ZES ("WE") or minimax-QZES ("KE")
     (surprisingly minimax-QZES does not use the below; it instead uses this and applies an unchanged octave constraint); 
     when used by getDamageWeights should cover any targeting-list tuning using this as its damage's complexity *)
     complexitySizeFactor > 0,

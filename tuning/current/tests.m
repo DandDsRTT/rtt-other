@@ -328,6 +328,9 @@ testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1201.7, 697.564}, "sys
 testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1199.02, 695.601}, "systematicTuningName" -> "unchanged-octave diamond minisos-U", 0.088];
 testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1200., 696.578}, "systematicTuningName" -> "unchanged-octave diamond minimax-U", 5.377];
 
+(* tuningInverse *)
+test[tuningInverse, {{Log2[2], 0, 0}, {0, Log2[3], 0}, {0, 0, Log2[5]}}, {{1 / Log2[2], 0, 0}, {0, 1 / Log2[3], 0}, {0, 0, 1 / Log2[5]}}];
+test[tuningInverse, {{Log2[2], 0, 0}, {0, Log2[3], 0}, {0, 0, Log2[5]}, {Log2[2], Log2[3], Log[5]}}, {{1 / Log2[2], 0, 0, 0}, {0, 1 / Log2[3], 0, 0}, {0, 0, 1 / Log2[5], 0}}];
 
 
 (* TARGETING-ALL *)

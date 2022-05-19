@@ -3,15 +3,14 @@
 (* covers unchanged-octave diamond minimax-U "minimax", minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
 minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
-optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[
-  tuningOptions_, (* TODO: tuning options are barely used in this file and I think a refactor so that none of them use them at all would be smart *)
+optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[{
   temperedSideGeneratorsPart_,
   temperedSideMappingPart_,
   justSideGeneratorsPart_,
   justSideMappingPart_,
   eitherSideIntervalsPart_,
   eitherSideMultiplierPart_
-] := Module[
+}] := Module[
   {
     temperedSideMinusGeneratorsPart,
     justSide,
@@ -335,15 +334,14 @@ it only lucks out and works for minimax due to the pure-octave-constraint
 and nature of the tonality diamond targeted interval set,
 namely that the places where damage to targets are equal is the same where other targets are pure.
 *)
-optimizeGeneratorsTuningMapAnalyticalSumPolytope[
-  tuningOptions_,
+optimizeGeneratorsTuningMapAnalyticalSumPolytope[{
   temperedSideGeneratorsPart_,
   temperedSideMappingPart_,
   justSideGeneratorsPart_,
   justSideMappingPart_,
   eitherSideIntervalsPart_,
   eitherSideMultiplierPart_
-] := Module[
+}] := Module[
   {
     generatorCount,
     
@@ -436,15 +434,14 @@ getGeneratorsAFromUnchangedIntervals[ma_, unchangedIntervalEigenvectors_] := Mod
 
 (* covers unchanged-octave diamond minisos-U "least squares", minimax-ES "TE", pure-octave-stretched minimax-ES "POTE",
 minimax-NES "Frobenius", minimax-ZES "WE", minimax-PNES "BE" *)
-optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
-  tuningOptions_,
+optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[{
   temperedSideGeneratorsPart_,
   temperedSideMappingPart_,
   justSideGeneratorsPart_,
   justSideMappingPart_,
   eitherSideIntervalsPart_,
   eitherSideMultiplierPart_
-] := Module[
+}] := Module[
   {temperedSideMinusGeneratorsPart, justSide},
   
   temperedSideMinusGeneratorsPart = temperedSideMappingPart.eitherSideIntervalsPart.eitherSideMultiplierPart;
@@ -458,62 +455,27 @@ optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[
 
 (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
 optimizeGeneratorsTuningMapNumericalPowerSolver[
+  parts_,
   normPower_,
-  tuningOptions_,
-  temperedSideGeneratorsPart_,
-  temperedSideMappingPart_,
-  justSideGeneratorsPart_,
-  justSideMappingPart_,
-  eitherSideIntervalsPart_,
-  eitherSideMultiplierPart_
+  unchangedIntervals_,
+  periodsPerOctave_
 ] := Module[
-  {
-    t,
-    unchangedIntervals,
-    
-    periodsPerOctave,
-    
-    solution
-  },
+  {solution},
   
-  t = tuningOption[tuningOptions, "t"];
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
+  solution = getNumericalSolution[parts, normPower, unchangedIntervals, periodsPerOctave];
   
-  periodsPerOctave = getPeriodsPerOctave[t];
-  
-  solution = getNumericalSolution[
-    normPower,
-    temperedSideGeneratorsPart,
-    temperedSideMappingPart,
-    justSideGeneratorsPart,
-    justSideMappingPart,
-    eitherSideIntervalsPart,
-    eitherSideMultiplierPart,
-    periodsPerOctave,
-    unchangedIntervals
-  ];
-  
-  First[temperedSideGeneratorsPart] /. Last[solution]
+  First[First[parts]] /. Last[solution]
 ];
 
 (* no historically described tunings use this *)
 (* this is the fallback for when optimizeGeneratorsTuningMapAnalyticalSumPolytope fails to find a unique solution *)
 optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
-  inputNormPower_,
-  tuningOptions_,
-  temperedSideGeneratorsPart_,
-  temperedSideMappingPart_,
-  justSideGeneratorsPart_,
-  justSideMappingPart_,
-  eitherSideIntervalsPart_,
-  eitherSideMultiplierPart_
+  parts_,
+  normPowerLimit_,
+  unchangedIntervals_,
+  periodsPerOctave_
 ] := Module[
   {
-    t,
-    unchangedIntervals,
-    
-    periodsPerOctave,
-    
     normPowerPower,
     normPower,
     previousAbsErrorMagnitude,
@@ -521,11 +483,6 @@ optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
     previousSolution,
     solution
   },
-  
-  t = tuningOption[tuningOptions, "t"];
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
-  
-  periodsPerOctave = getPeriodsPerOctave[t];
   
   normPowerPower = 1;
   normPower = Power[2, 1 / normPowerPower];
@@ -537,34 +494,31 @@ optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
     previousAbsErrorMagnitude = absErrorMagnitude;
     previousSolution = solution;
     solution = getNumericalSolution[
+      parts,
       normPower,
-      temperedSideGeneratorsPart,
-      temperedSideMappingPart,
-      justSideGeneratorsPart,
-      justSideMappingPart,
-      eitherSideIntervalsPart,
-      eitherSideMultiplierPart,
-      periodsPerOctave,
-      unchangedIntervals
+      unchangedIntervals,
+      periodsPerOctave
     ];
     absErrorMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
-    normPower = Power[2, 1 / normPowerPower];
+    normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
   
-  First[temperedSideGeneratorsPart] /. Last[solution]
+  First[First[parts]] /. Last[solution]
 ];
 
 getNumericalSolution[
+  {
+    temperedSideGeneratorsPart_,
+    temperedSideMappingPart_,
+    justSideGeneratorsPart_,
+    justSideMappingPart_,
+    eitherSideIntervalsPart_,
+    eitherSideMultiplierPart_
+  },
   normPower_,
-  temperedSideGeneratorsPart_,
-  temperedSideMappingPart_,
-  justSideGeneratorsPart_,
-  justSideMappingPart_,
-  eitherSideIntervalsPart_,
-  eitherSideMultiplierPart_,
-  periodsPerOctave_,
-  unchangedIntervals_
+  unchangedIntervals_,
+  periodsPerOctave_
 ] := Module[
   {
     temperedSide,

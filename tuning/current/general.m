@@ -442,7 +442,6 @@ generatorsTuningMapFromTAndTuningMap[t_, tuningMap_] := Module[
 ];
 
 tuningInverse[damageWeighterOrComplexityMultiplier_] := MapThread[
-  (* TODO: comment this first half... or just break out and name... it's just like, wiping out-of-square entries as 0 *)
   Function[
     {dataRow, zerosRow},
     MapIndexed[
