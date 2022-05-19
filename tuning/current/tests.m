@@ -111,12 +111,12 @@ testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-U", {600.000, 108.128}];
 
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-NS", {596.502, 106.058}];*)
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-NS", {596.502, 106.058}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-NES", {598.233, 106.938}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-S", {598.447, 107.711}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-ES", {599.682, 108.375}];
 
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-NC", {601.515, 108.014}];*)
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-NC", {601.515, 108.014}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-NEC", {601.826, 108.325}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-C", {601.553, 108.015}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-EC", {600.318, 108.188}];
@@ -126,7 +126,7 @@ testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamon
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-NS", {597.851, 106.643}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-NES", {598.310, 106.798}];
-(*testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-S", {598.436, 106.672}];*)
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-S", {598.436, 106.672}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-ES", {598.762, 106.835}];
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisos-NC", {601.653, 107.288}];

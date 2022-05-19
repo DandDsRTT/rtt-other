@@ -233,7 +233,10 @@ findAllNestedMinimaxTuningsFromPolytopeVertices[temperedSideMinusGeneratorsPart_
   
   (* if duplicates are not deleted, then when differences are checked between tunings,
   some will come out to all zeroes, and this causes a crash *)
-  DeleteDuplicates[candidateTunings]
+  DeleteDuplicates[
+    candidateTunings,
+    Function[{tuningA, tuningB}, AllTrue[MapThread[#1 == #2&, {tuningA, tuningB}], TrueQ]]
+  ]
 ];
 
 getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
@@ -447,7 +450,7 @@ optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[{
   temperedSideMinusGeneratorsPart = temperedSideMappingPart.eitherSideIntervalsPart.eitherSideMultiplierPart;
   justSide = getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart];
   
-  First[justSide.PseudoInverse[temperedSideMinusGeneratorsPart]]
+  First[justSide.Transpose[temperedSideMinusGeneratorsPart].Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]]
 ];
 
 
