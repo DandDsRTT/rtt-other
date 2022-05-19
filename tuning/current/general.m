@@ -423,16 +423,6 @@ getTuningMappings[t_] := Module[
   {generatorsTuningMap, ma, primesTuningMap}
 ];
 
-generatorsTuningMapFromTAndTuningMap[t_, tuningMap_] := Module[
-  {generatorsTuningMap, ma, primesTuningMap, solution},
-  
-  {generatorsTuningMap, ma, primesTuningMap} = getTuningMappings[t];
-  
-  solution = NMinimize[Norm[generatorsTuningMap.ma - tuningMap], generatorsTuningMap];
-  
-  generatorsTuningMap /. Last[solution]
-];
-
 tuningInverse[damageWeighterOrComplexityMultiplier_] := MapThread[
   Function[
     {dataRow, zerosRow},
@@ -462,6 +452,128 @@ tuningInverse[damageWeighterOrComplexityMultiplier_] := MapThread[
       Last[Dimensions[damageWeighterOrComplexityMultiplier]]
     ]
   }
+];
+
+
+(* DAMAGE *)
+
+getSumDamage[tuningMap_, tuningOptions_] := Total[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
+Square[n_] := n^2;
+get2SumDamage[tuningMap_, tuningOptions_] := Total[Square[getTargetedIntervalDamagesL[tuningMap, tuningOptions]]];
+getPowerSumDamage[tuningMap_, tuningOptions_, power_] := Total[Power[getTargetedIntervalDamagesL[tuningMap, tuningOptions], power]];
+getMaxDamage[tuningMap_, tuningOptions_] := Max[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
+
+getTargetedIntervalDamagesL[tuningMap_, tuningOptions_] := Module[
+  {t, targetedIntervalsA, primesTuningMap, damageWeights},
+  
+  t = tuningOption[tuningOptions, "t"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
+  primesTuningMap = getPrimesTuningMap[t];
+  damageWeights = getDamageWeights[tuningOptions];
+  
+  Abs[
+    N[
+      Map[If[PossibleZeroQ[#], 0, #]&, tuningMap - primesTuningMap],
+      absoluteValuePrecision
+    ].Transpose[targetedIntervalsA].damageWeights
+  ]
+];
+
+
+(* COMPLEXITY *)
+
+getComplexity[
+  pcv_,
+  t_,
+  complexityNormPower_, (* trait 3 *)
+  complexityNegateLogPrimeCoordination_, (* trait 4a *)
+  complexityPrimePower_, (* trait 4b *)
+  complexitySizeFactor_, (* trait 4c *)
+  complexityMakeOdd_ (* trait 4d *)
+] := Module[{complexityMultiplier},
+  complexityMultiplier = getComplexityMultiplier[
+    t,
+    complexityNegateLogPrimeCoordination, (* trait 4a *)
+    complexityPrimePower, (* trait 4b *)
+    complexitySizeFactor, (* trait 4c *)
+    complexityMakeOdd (* trait 4d *)
+  ];
+  
+  Norm[complexityMultiplier.pcv, complexityNormPower] / (1 + complexitySizeFactor)
+];
+
+(* Note that we don't actually use any of these functions directly; they're just around to test understanding *)
+getPcvCopfrComplexity[pcv_, t_] := Total[Map[If[Abs[# > 0], 1, 0]&, pcv]];
+(* AKA "Benedetti height" *)
+getPcvProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getIntervalBasis[t], pcv}];
+(* AKA "Tenney height" *)
+getPcvLogProductComplexity[pcv_, t_] := Log2[getPcvProductComplexity[pcv, t]];
+(* AKA "Wilson height", can also be used to find minimax-PNS ("BOP") tuning *)
+getPcvSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getIntervalBasis[t], pcv}]];
+(* This apparently doesn't have a name, but can also be used to find minimax-S ("TOP") tuning *)
+getPcvLogSopfrComplexity[pcv_, t_] := Log2[getPcvSopfrComplexity[pcv, t]];
+(* AKA "Weil height" *)
+getPcvIntegerLimitComplexity[pcv_, t_] := Module[{quotient},
+  quotient = pcvToQuotient[pcv];
+  Max[Numerator[quotient], Denominator[quotient]]
+];
+(* AKA "logarithmic Weil height", used for minimax-ZS ("Weil") tuning *)
+getPcvLogIntegerLimitComplexity[pcv_, t_] := Log2[getPcvIntegerLimitComplexity[pcv, t]];
+(* AKA "Kees height" *)
+removePowersOfTwoFromPcv[pcv_] := MapIndexed[If[First[#2] == 1, 0, #1]&, pcv];
+getPcvOddLimitComplexity[pcv_, t_] := getPcvIntegerLimitComplexity[removePowersOfTwoFromPcv[pcv], t];
+(* AKA "Kees expressibility", used for minimax-QZS ("Kees") tuning *)
+getPcvLogOddLimitComplexity[pcv_, t_] := Log2[getPcvOddLimitComplexity[pcv, t]];
+
+(* This is different than the damageWeights, this is nested within it;
+this is to weight the quantities of the PC-vectors before taking a norm and getting an interval complexity, 
+which are then all taken for each interval and assembled as damageWeights *)
+getComplexityMultiplier[
+  t_,
+  complexityNegateLogPrimeCoordination_, (* trait 4a *)
+  complexityPrimePower_, (* trait 4b *)
+  complexitySizeFactor_, (* trait 4c *)
+  complexityMakeOdd_ (* trait 4d *)
+] := Module[{complexityMultiplier},
+  (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-S ("TOP"); 
+when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ES ("TE"); 
+when used by getDamageWeights covers any targeting-list tuning using this as its damage's complexity *)
+  complexityMultiplier = getLogPrimeCoordinationA[t];
+  
+  If[
+    (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-NS (the L1 version of "Frobenius");
+    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-NES ("Frobenius") *)
+    complexityNegateLogPrimeCoordination == True,
+    complexityMultiplier = complexityMultiplier.Inverse[getLogPrimeCoordinationA[t]]
+  ];
+  
+  If[
+    (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-PNS ("BOP");
+    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-PNES ("BE") *)
+    complexityPrimePower > 0,
+    complexityMultiplier = complexityMultiplier.DiagonalMatrix[Power[getIntervalBasis[t], complexityPrimePower]]
+  ];
+  
+  If[
+    (* When minimax-ZS ("Weil") needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm, 
+    where it's implemented separately (the max minus min thing); 
+    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ZES ("WE") or minimax-QZES ("KE")
+    (surprisingly minimax-QZES does not use the below; it instead uses this and applies an unchanged octave constraint); 
+    when used by getDamageWeights should cover any targeting-list tuning using this as its damage's complexity *)
+    complexitySizeFactor > 0,
+    complexityMultiplier = Join[getPrimesIdentityA[t], {Table[complexitySizeFactor, getD[t]]}].complexityMultiplier
+  ];
+  
+  If[
+    (* When minimax-QZS ("Kees") needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm, 
+    where it's implemented separately (the max minus min thing) with pure-octave constraint on the solver; 
+    note again that this is is not used for minimax-QZES ("KE"); see note above;
+    when used by getDamageWeights should cover any targeting-list tuning using this as its damage's complexity *)
+    complexityMakeOdd == True,
+    complexityMultiplier = complexityMultiplier.DiagonalMatrix[Join[{0}, Table[1, getD[t] - 1]]]
+  ];
+  
+  complexityMultiplier
 ];
 
 
