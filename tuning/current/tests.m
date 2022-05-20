@@ -107,7 +107,7 @@ testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2, {1195.699, 693.352}];
 
 
-(* optimizeGeneratorsTuningMap, by "systematicTuningName" *)
+(* optimizeGeneratorsTuningMap, fully by "systematicTuningName" *)
 
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minimax-U", {600.000, 108.128}];
 
@@ -146,6 +146,88 @@ testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamon
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisum-NEC", {601.397, 106.145}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisum-C", {600.000, 106.843}];
 testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "diamond minisum-EC", {600.000, 106.843}];
+
+
+(* optimizeGeneratorsTuningMap, by "systematicDamageName" plus traits 0 and 1 (targeted intervals, and optimization power) *)
+
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "systematicDamageName" -> "U-damage", {600.000, 1905.214}];
+
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "systematicDamageName" -> "NS-damage", {599.425, 1903.105}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "systematicDamageName" -> "NES-damage", {599.362, 1902.875}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "systematicDamageName" -> "S-damage", {599.555, 1903.365}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "systematicDamageName" -> "ES-damage", {599.577, 1903.449}];
+
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "systematicDamageName" -> "NC-damage", {600.752, 1907.971}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "systematicDamageName" -> "NEC-damage", {600.863, 1908.379}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "systematicDamageName" -> "C-damage", {600.626, 1907.691}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "systematicDamageName" -> "EC-damage", {600.587, 1907.546}];
+
+
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "systematicDamageName" -> "U-damage", {600.208, 1906.115}];
+
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "systematicDamageName" -> "NS-damage", {599.398, 1903.194}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "systematicDamageName" -> "NES-damage", {599.333, 1902.973}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "systematicDamageName" -> "S-damage", {599.332, 1902.950}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "systematicDamageName" -> "ES-damage", {599.374, 1903.116}];
+
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "systematicDamageName" -> "NC-damage", {600.886, 1908.453}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "systematicDamageName" -> "NEC-damage", {600.988, 1908.891}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "systematicDamageName" -> "C-damage", {600.733, 1907.946}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "systematicDamageName" -> "EC-damage", {600.768, 1908.116}];
+
+
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "systematicDamageName" -> "U-damage", {600.000, 1905.214}];
+
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "systematicDamageName" -> "NS-damage", {600.000, 1905.214}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "systematicDamageName" -> "NES-damage", {600.000, 1905.214}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "systematicDamageName" -> "S-damage", {600.000, 1905.214}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "systematicDamageName" -> "ES-damage", {600.000, 1905.214}];
+
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "systematicDamageName" -> "NC-damage", {601.397, 1910.335}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "systematicDamageName" -> "NEC-damage", {601.397, 1910.335}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "systematicDamageName" -> "C-damage", {601.397, 1910.335}];
+testClose[optimizeGeneratorsTuningMap, srutal, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "systematicDamageName" -> "EC-damage", {601.397, 1910.335}];
+
+
+(* optimizeGeneratorsTuningMap, by "systematicComplexityName", plus traits 0, 1, and 2 (targeted intervals, optimization power, and damage weighting slope) *)
+
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {240.000, 2795.336}];
+
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "N-complexity", {238.612, 2784.000}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "NE-complexity", {238.445, 2782.978}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "complexity", {238.867, 2784.297}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "E-complexity", {238.927, 2784.902}];
+
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "N-complexity", {241.504, 2812.629}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "NE-complexity", {241.702, 2813.436}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "complexity", {241.209, 2809.927}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "E-complexity", {241.140, 2808.307}];
+
+
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "unweighted", {240.430, 2800.277}];
+
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "N-complexity", {239.238, 2790.669}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "NE-complexity", {238.949, 2788.613}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "complexity", {238.844, 2783.616}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "E-complexity", {238.846, 2783.963}];
+
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "N-complexity", {241.211, 2807.746}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "NE-complexity", {241.340, 2807.905}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "complexity", {241.210, 2809.203}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "E-complexity", {241.298, 2809.413}];
+
+
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted", {242.578, 2824.982}];
+
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "N-complexity", {240.000, 2804.359}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "NE-complexity", {240.000, 2804.359}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "complexity", {242.578, 2824.982}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "systematicComplexityName" -> "E-complexity", {242.578, 2824.982}];
+
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "N-complexity", {242.578, 2824.982}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "NE-complexity", {242.578, 2824.982}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "complexity", {242.578, 2824.982}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "E-complexity", {242.578, 2824.982}];
 
 
 (* and then in this section I want to have a bunch of external examples, organized by tuning first, then temperament
@@ -597,14 +679,14 @@ otherwise who really cares?*)
 
 
 (* confirming the complexitySizePower refactor *)
-testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minimax-ZS", {1201.191, 697.405}];                                (* Z     / list / max *)
-testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisum-ZS", {1200.000, 696.578}];                                (* Z     / list / sum *)
-testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisos-ZS", {1200.665, 696.707}];                                (* Z     / list / sos *)
-testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisop-ZS", "optimizationPower" -> 3, {1201.119, 697.031}];      (* Z     / list / pow *)
-testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", {1200.000, 696.578}];                                        (* Z     / all  / max *)
-testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", "complexityNormPower" -> \[Infinity], {1200.000, 696.578}];  (* Z     / all  / sum *)
-testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZES", {1201.391, 697.045}];                                       (* Z     / all  / sos *)
-testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", "complexityNormPower" -> 3, {1201.038, 696.782}];            (* Z     / all  / pow *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minimax-ZS", {1201.191, 697.405}];                                (* Z    / list / max *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisum-ZS", {1200.000, 696.578}];                                (* Z    / list / sum *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisos-ZS", {1200.665, 696.707}];                                (* Z    / list / sos *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisop-ZS", "optimizationPower" -> 3, {1201.119, 697.031}];      (* Z    / list / pow *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", {1200.000, 696.578}];                                        (* Z    / all  / max *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", "complexityNormPower" -> \[Infinity], {1200.000, 696.578}];  (* Z    / all  / sum *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZES", {1201.391, 697.045}];                                       (* Z    / all  / sos *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ZS", "complexityNormPower" -> 3, {1201.038, 696.782}];            (* Z    / all  / pow *)
 testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minimax-S", {1201.699, 697.564}];                                 (* notZ / list / max *)
 testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisum-S", {1200.000, 696.578}];                                 (* notZ / list / sum *)
 testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "diamond minisos-S", {1200.985, 696.904}];                                 (* notZ / list / sos *)

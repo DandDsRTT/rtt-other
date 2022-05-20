@@ -6,19 +6,21 @@ nMinimizePrecision = 128;
 absoluteValuePrecision = nMinimizePrecision * 2;
 
 tuningOptions = {
-  "unchangedIntervals" -> {}, (* trait 9 *)
   "targetedIntervals" -> Null, (* trait 0 *)
   "optimizationPower" -> Null, (* trait 1: \[Infinity] = minimax, 2 = minisos, 1 = minisum *)
-  "damageWeightingSlope" -> "", (* trait 2: unweighted, complexity-weighted, or simplicity-weighted *)
+  "damageWeightingSlope" -> "", (* trait 2: unweighted, complexityWeighted, or simplicityWeighted *)
   "complexityNormPower" -> 1, (* trait 3: what Mike Battaglia refers to as `p` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space *)
   "complexityNegateLogPrimeCoordination" -> False, (* trait 4a: False = do nothing, True = negate the multiplication by logs of primes *)
   "complexityPrimePower" -> 0, (* trait 4b: what Mike Battaglia refers to as `s` in https://en.xen.wiki/w/BOP_tuning; 0 = nothing, equiv to copfr when log prime coordination is negated and otherwise defaults; 1 = product complexity, equiv to sopfr when log prime coordination is negated and otherwise defaults; >1 = pth power of those *)
   "complexitySizeFactor" -> 0, (* trait 4c: what Mike Battaglia refers to as `k` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space; 0 = no augmentation to factor in span, 1 = could be integer limit, etc. *)
   "complexityMakeOdd" -> False, (* trait 4d: False = do nothing, True = achieve odd limit from integer limit, etc. *)
   "tuningIntervalBasis" -> "primes", (* trait 8: Graham Breed calls this "inharmonic" vs "subgroup" notion in the context of minimax-ES ("TE") tuning, but it can be used for any tuning *)
+  "unchangedIntervals" -> {}, (* trait 9 *)
   "pureOctaveStretch" -> False, (* trait 10 *)
   "systematicTuningName" -> "",
   "originalTuningName" -> "",
+  "systematicDamageName" -> "",
+  "originalDamageName" -> "",
   "systematicComplexityName" -> "",
   "originalComplexityName" -> "",
   "debug" -> False
@@ -26,7 +28,6 @@ tuningOptions = {
 
 processTuningOptions[
   t_,
-  inputUnchangedIntervals_, (* trait 9 *)
   inputTargetedIntervals_, (* trait 0 *)
   inputOptimizationPower_, (* trait 1 *)
   inputDamageWeightingSlope_, (* trait 2 *)
@@ -36,16 +37,18 @@ processTuningOptions[
   inputComplexitySizeFactor_, (* trait 4c *)
   inputComplexityMakeOdd_, (* trait 4d *)
   inputTuningIntervalBasis_, (* trait 8 *)
+  inputUnchangedIntervals_, (* trait 9 *)
   inputPureOctaveStretch_, (* trait 10 *)
   inputSystematicTuningName_,
   inputOriginalTuningName_,
+  inputSystematicDamageName_,
+  inputOriginalDamageName_,
   inputSystematicComplexityName_,
   inputOriginalComplexityName_,
   inputDebug_,
   forDamage_ : False
 ] := Module[
   {
-    unchangedIntervals, (* trait 9 *)
     targetedIntervals, (* trait 0 *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
@@ -55,9 +58,12 @@ processTuningOptions[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
     tuningIntervalBasis, (* trait 8 *)
+    unchangedIntervals, (* trait 9 *)
     pureOctaveStretch, (* trait 10 *)
     systematicTuningName,
     originalTuningName,
+    systematicDamageName,
+    originalDamageName,
     systematicComplexityName,
     originalComplexityName,
     debug,
@@ -71,7 +77,6 @@ processTuningOptions[
     intervalRebase
   },
   
-  unchangedIntervals = inputUnchangedIntervals; (* trait 9 *)
   targetedIntervals = inputTargetedIntervals; (* trait 0 *)
   optimizationPower = inputOptimizationPower; (* trait 1 *)
   damageWeightingSlope = inputDamageWeightingSlope; (* trait 2 *)
@@ -81,9 +86,12 @@ processTuningOptions[
   complexitySizeFactor = inputComplexitySizeFactor; (* trait 4c *)
   complexityMakeOdd = inputComplexityMakeOdd; (* trait 4d *)
   tuningIntervalBasis = inputTuningIntervalBasis; (* trait 8 *)
+  unchangedIntervals = inputUnchangedIntervals; (* trait 9 *)
   pureOctaveStretch = inputPureOctaveStretch; (* trait 10 *)
   systematicTuningName = inputSystematicTuningName;
   originalTuningName = inputOriginalTuningName;
+  systematicDamageName = inputSystematicDamageName;
+  originalDamageName = inputOriginalDamageName;
   systematicComplexityName = inputSystematicComplexityName;
   originalComplexityName = inputOriginalComplexityName;
   debug = inputDebug;
@@ -146,10 +154,76 @@ processTuningOptions[
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted";  systematicComplexityName = "E"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   
-  (* trait 9 *)
   If[
-    StringMatchQ[systematicTuningName, "*unchanged-octave*"],
-    unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
+    originalDamageName === "topDamage",
+    damageWeightingSlope = "simplicityWeighted"; complexityNormPower = 1; complexityNegateLogPrimeCoordination = True; complexityPrimePower = 0; complexitySizeFactor = 0; complexityMakeOdd = False;
+  ];
+  
+  (* Note: we can't implement product complexity with the current design, and don't intend to revise.
+   This is because product complexity is realized from a PC-vector as a product of terms,
+    raised to the powers of the absolute values of the entries. But this design only multiplies entries and sums them. 
+    Since sopfr achieves the same tuning, we simply treat that sopfr as the canonical approach for this effect. *)
+  If[
+    originalComplexityName === "copfr" || originalComplexityName === "l1Norm",
+    complexityNormPower = 1; complexityNegateLogPrimeCoordination = True; complexityPrimePower = 0; complexitySizeFactor = 0; complexityMakeOdd = False;
+  ];
+  If[
+    originalComplexityName === "sopfr" || originalComplexityName === "wilsonHeight",
+    complexityNormPower = 1; complexityNegateLogPrimeCoordination = True; complexityPrimePower = 1; complexitySizeFactor = 0; complexityMakeOdd = False;
+  ];
+  If[
+    originalComplexityName === "integerLimit" || originalComplexityName === "weilHeight",
+    complexityNormPower = 1; complexityNegateLogPrimeCoordination = True; complexityPrimePower = 0; complexitySizeFactor = 1; complexityMakeOdd = False;
+  ];
+  If[
+    originalComplexityName === "oddLimit" || originalComplexityName === "keesHeight",
+    complexityNormPower = 1; complexityNegateLogPrimeCoordination = True; complexityPrimePower = 0; complexitySizeFactor = 1; complexityMakeOdd = True;
+  ];
+  If[
+    originalComplexityName === "logProduct" || originalComplexityName === "tenneyHeight" || originalComplexityName === "harmonicDistance",
+    complexityNormPower = 1; complexityNegateLogPrimeCoordination = False; complexityPrimePower = 0; complexitySizeFactor = 0; complexityMakeOdd = False;
+  ];
+  If[
+    originalComplexityName === "logIntegerLimit" || originalComplexityName === "logarithmicWeilHeight",
+    complexityNormPower = 1; complexityNegateLogPrimeCoordination = False; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = False;
+  ];
+  If[
+    originalComplexityName === "logOddLimit" || originalComplexityName === "keesExpressibility",
+    complexityNormPower = 1; complexityNegateLogPrimeCoordination = False; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = True;
+  ];
+  If[
+    originalComplexityName === "rososcopfr" || originalComplexityName === "l2Norm",
+    complexityNormPower = 2; complexityNegateLogPrimeCoordination = True; complexitySizeFactor = 0; complexityPrimePower = 0; complexityMakeOdd = False;
+  ];
+  If[
+    originalComplexityName === "rosossopfr",
+    complexityNormPower = 2; complexityNegateLogPrimeCoordination = True; complexitySizeFactor = 0; complexityPrimePower = 1; complexityMakeOdd = False;
+  ];
+  (* (following the pattern here, this one might exist, but it has not been described or named) If[
+    ,
+    complexityNormPower = 2; complexityNegateLogPrimeCoordination = True; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = False;
+  ]; *)
+  (* (following the pattern here, this one might exist, but it has not been described or named) If[
+    ,
+    complexityNormPower = 2; complexityNegateLogPrimeCoordination = True; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = True;
+  ]; *)
+  If[
+    originalComplexityName === "tenneyEuclideanHeight",
+    complexityNormPower = 2; complexityNegateLogPrimeCoordination = False; complexitySizeFactor = 0;  complexityPrimePower = 0; complexityMakeOdd = False;
+  ];
+  If[
+    originalComplexityName === "weilEuclideanNorm",
+    complexityNormPower = 2; complexityNegateLogPrimeCoordination = False; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = False;
+  ];
+  If[
+    originalComplexityName === "keesEuclideanSeminorm",
+    complexityNormPower = 2; complexityNegateLogPrimeCoordination = False; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = True;
+  ];
+  (* This one doesn't follow the above patterns as closely.
+   See: https://www.facebook.com/groups/xenharmonicmath/posts/1426449464161938/?comment_id=1426451087495109&reply_comment_id=1426470850826466 *)
+  If[
+    originalComplexityName === "carlsNorm",
+    complexityNormPower = 2; complexityNegateLogPrimeCoordination = True; complexitySizeFactor = 0; complexityPrimePower = 2; complexityMakeOdd = False;
   ];
   
   (* trait 0 *)
@@ -178,43 +252,43 @@ processTuningOptions[
   
   (* trait 2 *)
   If[
-    StringMatchQ[systematicTuningName, "*S*"],
+    StringMatchQ[systematicTuningName, "*S*"] || StringMatchQ[systematicDamageName, "*S*"],
     damageWeightingSlope = "simplicityWeighted";
   ];
   If[
-    StringMatchQ[systematicTuningName, "*C*"],
+    StringMatchQ[systematicTuningName, "*C*"] || StringMatchQ[systematicDamageName, "*C*"],
     damageWeightingSlope = "complexityWeighted";
   ];
   If[
-    StringMatchQ[systematicTuningName, "*U*"],
+    StringMatchQ[systematicTuningName, "*U*"] || StringMatchQ[systematicDamageName, "*U*"],
     damageWeightingSlope = "unweighted";
   ];
   
   (* trait 3 - same as complexity systematic name parts *)
   If[
-    StringMatchQ[systematicTuningName, "*E*"] || StringMatchQ[systematicComplexityName, "*E*"],
+    StringMatchQ[systematicTuningName, "*E*"] || StringMatchQ[systematicDamageName, "*E*"] || StringMatchQ[systematicComplexityName, "*E*"],
     complexityNormPower = 2;
   ];
   If[
-    StringMatchQ[systematicTuningName, "*T*"] || StringMatchQ[systematicComplexityName, "*T*"],
+    StringMatchQ[systematicTuningName, "*T*"] || StringMatchQ[systematicDamageName, "*T*"] || StringMatchQ[systematicComplexityName, "*T*"],
     complexityNormPower = 1;
   ];
   
   (* trait 4 - same as complexity systematic name parts  *)
   If[
-    StringMatchQ[systematicTuningName, "*N*"] || StringMatchQ[systematicComplexityName, "*N*"],
+    StringMatchQ[systematicTuningName, "*N*"] || StringMatchQ[systematicDamageName, "*N*"] || StringMatchQ[systematicComplexityName, "*N*"],
     complexityNegateLogPrimeCoordination = True;
   ];
   If[
-    StringMatchQ[systematicTuningName, "*P*"] || StringMatchQ[systematicComplexityName, "*P*"],
+    StringMatchQ[systematicTuningName, "*P*"] || StringMatchQ[systematicDamageName, "*P*"] || StringMatchQ[systematicComplexityName, "*P*"],
     complexityPrimePower = 1;
   ];
   If[
-    StringMatchQ[systematicTuningName, "*Z*"] || StringMatchQ[systematicComplexityName, "*Z*"],
+    StringMatchQ[systematicTuningName, "*Z*"] || StringMatchQ[systematicDamageName, "*Z*"] || StringMatchQ[systematicComplexityName, "*Z*"],
     complexitySizeFactor = 1;
   ];
   If[
-    StringMatchQ[systematicTuningName, "*Q*"] || StringMatchQ[systematicComplexityName, "*Q*"],
+    StringMatchQ[systematicTuningName, "*Q*"] || StringMatchQ[systematicDamageName, "*Q*"] || StringMatchQ[systematicComplexityName, "*Q*"],
     complexityMakeOdd = True;
   ];
   
@@ -234,73 +308,6 @@ processTuningOptions[
   If[
     StringMatchQ[systematicTuningName, "*pure-octave-stretched*"],
     pureOctaveStretch = True;
-  ];
-  
-  (* Note: we can't implement product complexity with the current design, and don't intend to revise.
-   This is because product complexity is realized from a PC-vector as a product of terms,
-    raised to the powers of the absolute values of the entries. But this design only multiplies entries and sums them. 
-    Since sopfr achieves the same tuning, we simply treat that sopfr as the canonical approach for this effect. *)
-  If[
-    originalComplexityName === "copfr" || originalComplexityName === "l1Norm",
-    complexityNormPower = 1; complexityNegateLogPrimeCoordination = 0; complexityPrimePower = 0; complexitySizeFactor = 0; complexityMakeOdd = False;
-  ];
-  If[
-    originalComplexityName === "sopfr" || originalComplexityName === "wilsonHeight",
-    complexityNormPower = 1; complexityNegateLogPrimeCoordination = 0; complexityPrimePower = 1; complexitySizeFactor = 0; complexityMakeOdd = False;
-  ];
-  If[
-    originalComplexityName === "integerLimit" || originalComplexityName === "weilHeight",
-    complexityNormPower = 1; complexityNegateLogPrimeCoordination = 0; complexityPrimePower = 0; complexitySizeFactor = 1; complexityMakeOdd = False;
-  ];
-  If[
-    originalComplexityName === "oddLimit" || originalComplexityName === "keesHeight",
-    complexityNormPower = 1; complexityNegateLogPrimeCoordination = 0; complexityPrimePower = 0; complexitySizeFactor = 1; complexityMakeOdd = True;
-  ];
-  If[
-    originalComplexityName === "logProduct" || originalComplexityName === "tenneyHeight",
-    complexityNormPower = 1; complexityNegateLogPrimeCoordination = 1; complexityPrimePower = 0; complexitySizeFactor = 0; complexityMakeOdd = False;
-  ];
-  If[
-    originalComplexityName === "logIntegerLimit" || originalComplexityName === "logarithmicWeilHeight",
-    complexityNormPower = 1; complexityNegateLogPrimeCoordination = 1; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = False;
-  ];
-  If[
-    originalComplexityName === "logOddLimit" || originalComplexityName === "keesExpressibility",
-    complexityNormPower = 1; complexityNegateLogPrimeCoordination = 1; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = True;
-  ];
-  If[
-    originalComplexityName === "rososcopfr" || originalComplexityName === "l2Norm",
-    complexityNormPower = 2; complexityNegateLogPrimeCoordination = 0; complexitySizeFactor = 0; complexityPrimePower = 0; complexityMakeOdd = False;
-  ];
-  If[
-    originalComplexityName === "rosossopfr",
-    complexityNormPower = 2; complexityNegateLogPrimeCoordination = 0; complexitySizeFactor = 0; complexityPrimePower = 1; complexityMakeOdd = False;
-  ];
-  (* (following the pattern here, this one might exist, but it has not been described or named) If[
-    ,
-    complexityNormPower = 2; complexityNegateLogPrimeCoordination = 0; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = False;
-  ]; *)
-  (* (following the pattern here, this one might exist, but it has not been described or named) If[
-    ,
-    complexityNormPower = 2; complexityNegateLogPrimeCoordination = 0; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = True;
-  ]; *)
-  If[
-    originalComplexityName === "tenneyEuclideanHeight",
-    complexityNormPower = 2; complexityNegateLogPrimeCoordination = 1; complexitySizeFactor = 0;  complexityPrimePower = 0; complexityMakeOdd = False;
-  ];
-  If[
-    originalComplexityName === "weilEuclideanNorm",
-    complexityNormPower = 2; complexityNegateLogPrimeCoordination = 1; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = False;
-  ];
-  If[
-    originalComplexityName === "keesEuclideanSeminorm",
-    complexityNormPower = 2; complexityNegateLogPrimeCoordination = 1; complexitySizeFactor = 1; complexityPrimePower = 0; complexityMakeOdd = True;
-  ];
-  (* This one doesn't follow the above patterns as closely.
-   See: https://www.facebook.com/groups/xenharmonicmath/posts/1426449464161938/?comment_id=1426451087495109&reply_comment_id=1426470850826466 *)
-  If[
-    originalComplexityName === "carlsNorm",
-    complexityNormPower = 2; complexityNegateLogPrimeCoordination = 0; complexitySizeFactor = 0; complexityPrimePower = 2; complexityMakeOdd = False;
   ];
   
   (* complexityMakeOdd is enough to get odd limit complexity from integer limit complexity, 
@@ -373,9 +380,23 @@ processTuningOptions[
     Throw["It is not possible to minimize damage over all intervals if it is not simplicity-weighted."]
   ];
   
+  If[
+    debug == True,
+    Print["tPossiblyWithChangedIntervalBasis: ", tPossiblyWithChangedIntervalBasis];
+    Print["targetedIntervalsA: ", targetedIntervalsA]; (* trait 0 *)
+    Print["optimizationPower: ", optimizationPower]; (* trait 1 *)
+    Print["damageWeightingSlope: ", damageWeightingSlope]; (* trait 2 *)
+    Print["complexityNormPower: ", complexityNormPower]; (* trait 3 *)
+    Print["complexityNegateLogPrimeCoordination: ", complexityNegateLogPrimeCoordination]; (* trait 4a *)
+    Print["complexityPrimePower: ", complexityPrimePower]; (* trait 4b *)
+    Print["complexitySizeFactor: ", complexitySizeFactor]; (* trait 4c *)
+    Print["complexityMakeOdd: ", complexityMakeOdd]; (* trait 4d *)
+    Print["unchangedIntervals: ", unchangedIntervals]; (* trait 9 *)
+    Print["pureOctaveStretch: ", pureOctaveStretch]; (* trait 10 *)
+  ];
+  
   {
     tPossiblyWithChangedIntervalBasis,
-    unchangedIntervals, (* trait 9 *)
     targetedIntervalsA, (* trait 0 *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
@@ -384,23 +405,24 @@ processTuningOptions[
     complexityPrimePower, (* trait 4b *)
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
-    pureOctaveStretch,
+    unchangedIntervals, (* trait 9 *)
+    pureOctaveStretch, (* trait 10 *)
     debug
   }
 ];
 
 tuningOptionsPartsByOptionName = <|
   "t" -> 1,
-  "unchangedIntervals" -> 2, (* trait 9 *)
-  "targetedIntervalsA" -> 3, (* trait 0 *)
-  "optimizationPower" -> 4, (* trait 1 *)
-  "damageWeightingSlope" -> 5, (* trait 2 *)
-  "complexityNormPower" -> 6, (* trait 3 *)
-  "complexityNegateLogPrimeCoordination" -> 7, (* trait 4a *)
-  "complexityPrimePower" -> 8, (* trait 4b *)
-  "complexitySizeFactor" -> 9, (* trait 4c *)
-  "complexityMakeOdd" -> 10, (* trait 4d *)
-  "pureOctaveStretch" -> 11,
+  "targetedIntervalsA" -> 2, (* trait 0 *)
+  "optimizationPower" -> 3, (* trait 1 *)
+  "damageWeightingSlope" -> 4, (* trait 2 *)
+  "complexityNormPower" -> 5, (* trait 3 *)
+  "complexityNegateLogPrimeCoordination" -> 6, (* trait 4a *)
+  "complexityPrimePower" -> 7, (* trait 4b *)
+  "complexitySizeFactor" -> 8, (* trait 4c *)
+  "complexityMakeOdd" -> 9, (* trait 4d *)
+  "unchangedIntervals" -> 10, (* trait 9 *)
+  "pureOctaveStretch" -> 11, (* trait 10 *)
   "debug" -> 12
 |>;
 tuningOption[tuningOptions_, optionName_] := Part[tuningOptions, tuningOptionsPartsByOptionName[optionName]];

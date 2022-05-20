@@ -8,13 +8,13 @@ unchanged-octave minimax-ES "CTE",
 pure-octave-stretched minimax-S "POTOP", pure-octave-stretched minimax-ES "POTE") *)
 (* compare with optimizeGeneratorsTuningMapTargetingList *)
 optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
-  {unchangedIntervals, complexityNormPower, complexitySizeFactor, optimumGeneratorsTuningMap},
+  {complexityNormPower, complexitySizeFactor, unchangedIntervals, optimumGeneratorsTuningMap},
   
   If[tuningOption[tuningOptions, "debug"], Print["targeting-all"]];
   
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
   complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"]; (* trait 3 *)
   complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
+  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
   
   optimumGeneratorsTuningMap = If[
     Length[unchangedIntervals] > 0,

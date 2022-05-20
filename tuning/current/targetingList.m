@@ -1,12 +1,12 @@
 (* covers targeting-list (includes 
 unchanged-octave diamond minimax-U "minimax", unchanged-octave diamond minisos-U "least squares") *)
 optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
-  {unchangedIntervals, optimizationPower},
+  {optimizationPower, unchangedIntervals},
   
   If[tuningOption[tuningOptions, "debug"], Print["targeting-list"]];
   
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
   optimizationPower = tuningOption[tuningOptions, "optimizationPower"]; (* trait 1 *)
+  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
   
   If[
     Length[unchangedIntervals] > 0,
