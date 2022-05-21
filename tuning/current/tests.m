@@ -604,7 +604,7 @@ testClose[optimizeTuningMap, augene, "systematicTuningName" -> "minimax-ZS", {11
 testClose[optimizeTuningMap, sensi, "systematicTuningName" -> "minimax-ZS", {1196.783, 1901.181, 2786.314, 3359.796}]; (* [2a] *)
 
 (* minimax-ZES = "WE", "Weil-Euclidean" *)
-(* could maybe double check w/ Sintel's app; what calls Weil is actually Weil-Euclidean, according to Tom here: [10a] and I think he's right 
+(* could maybe double check w/ Sintel's app; what he calls Weil is actually Weil-Euclidean, according to Tom here: [10a] and I think he's right 
 but unfortunately it's not easily discernible from his code at this time *)
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-ZES", {1201.3906, 1898.4361, 2788.1819}]; (* [4] and [1a] also has {1201.391, 1898.436, 2788.182} *)
 testClose[optimizeTuningMap, blackwood, "systematicTuningName" -> "minimax-ZES", {1194.2544, 1910.8071, 2786.1895}]; (* [4] and [1a] also has {1194.254, 1910.807, 2786.189} *)
@@ -698,6 +698,14 @@ testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "mini
 testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexityNormPower" -> \[Infinity], {1200.000, 696.578}];   (* notZ / all  / sum *)
 testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-S", {1201.699, 697.564}];                                         (* notZ / all  / sos *)
 testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexityNormPower" -> 3, {1201.039, 696.782}];             (* notZ / all  / pow *)
+
+
+(* continuum between minimax-S (Mike's k = 0) and minimax-ZS (Mike's k = 1) as well as beyond (k > 1) *)
+testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexitySizeFactor" -> 0.00, {1201.699, 1899.263, 2790.258}];
+testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexitySizeFactor" -> 0.25, {1201.273, 1898.591, 2789.271}];
+testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexitySizeFactor" -> 0.50, {1200.849, 1897.920, 2788.284}];
+testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexitySizeFactor" -> 1.00, {1200.000, 1896.578, 2786.314}];
+testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexitySizeFactor" -> 2.00, {1198.306, 1893.902, 2782.381}];
 
 
 Print["TOTAL FAILURES: ", failures];
