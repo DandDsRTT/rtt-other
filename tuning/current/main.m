@@ -86,7 +86,8 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
     tPossiblyWithChangedIntervalBasis,
     targetedIntervalsA,
     parts,
-    powerPart
+    powerPart,
+    solution
   },
   
   targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
@@ -147,12 +148,12 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   
   powerPart = part[parts, "powerPart"];
   
-  optimizedGeneratorsTuningMap = If[
+  solution = If[
     Length[unchangedIntervals] > 0,
     
     (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
     If[debug, Print["power solver"]];
-    optimizeGeneratorsTuningMapNumericalPowerSolver[parts, unchangedIntervals],
+    powerNormSolution[parts, unchangedIntervals],
     
     If[
       powerPart == 2,
@@ -161,7 +162,7 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
       minimax-ES "TE", minimax-NES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
       minimax-ZES "WE", minimax-PNES "BE" *)
       If[debug, Print["pseudoinverse"]];
-      optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[parts, unchangedIntervals],
+      pseudoinverseSolution[parts, unchangedIntervals],
       
       If[
         powerPart == \[Infinity],
@@ -170,29 +171,29 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
         minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
         minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
         If[debug, Print["max polytope"]];
-        optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[parts, unchangedIntervals],
+        maxPolytopeSolution[parts, unchangedIntervals],
         
         If[
           powerPart == 1,
           
           (* no historically described tunings use this *)
           If[debug, Print["sum polytope"]];
-          optimizeGeneratorsTuningMapAnalyticalSumPolytope[parts, unchangedIntervals],
+          sumPolytopeSolution[parts, unchangedIntervals],
           
           (* no historically described tunings go here *)
-          optimizeGeneratorsTuningMapNumericalPowerSolver[parts, unchangedIntervals]
+          powerNormSolution[parts, unchangedIntervals]
         ]
       ]
     ]
   ];
   
   If[
-    optimizedGeneratorsTuningMap == Null,
+    solution == Null,
     If[debug, Print["power limit solver"]];
-    optimizedGeneratorsTuningMap = optimizeGeneratorsTuningMapNumericalPowerLimitSolver[parts, unchangedIntervals]
+    solution = powerNormLimitSolution[parts, unchangedIntervals]
   ];
   
-  optimizedGeneratorsTuningMap = 1200 * optimizedGeneratorsTuningMap;
+  optimizedGeneratorsTuningMap = 1200 * solution;
   
   If[
     Length[targetedIntervalsA] == 0 && complexitySizeFactor != 0,
@@ -425,7 +426,9 @@ getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
     originalComplexityName,
     debug,
     forDamage,
-    tuningOptions
+    tuningOptions,
+    targetedIntervalsA,
+    parts
   },
   
   targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
@@ -473,17 +476,24 @@ getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
   ];
   
   optimizationPower = tuningOption[tuningOptions, "optimizationPower"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
+  
+  parts = If[
+    Length[targetedIntervalsA] == 0,
+    getTargetingAllParts[tuningOptions],
+    getParts[tuningOptions]
+  ];
   
   1200 * If[
     optimizationPower == \[Infinity],
-    getMaxDamage[tuningMap, tuningOptions],
+    getMaxDamage[parts],
     If[
       optimizationPower == 2,
-      get2SumDamage[tuningMap, tuningOptions],
+      get2SumDamage[parts],
       If[
         optimizationPower == 1,
-        getSumDamage[tuningMap, tuningOptions],
-        getPowerSumDamage[tuningMap, tuningOptions, optimizationPower]
+        getSumDamage[parts],
+        getPowerSumDamage[parts]
       ]
     ]
   ]
@@ -1315,45 +1325,15 @@ getDamageWeights[tuningOptions_] := Module[
   ]
 ];
 
-getSumDamage[tuningMap_, tuningOptions_] := Total[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
-Square[n_] := n^2;
-get2SumDamage[tuningMap_, tuningOptions_] := Total[Square[getTargetedIntervalDamagesL[tuningMap, tuningOptions]]];
-getPowerSumDamage[tuningMap_, tuningOptions_, power_] := Total[Power[getTargetedIntervalDamagesL[tuningMap, tuningOptions], power]];
-getMaxDamage[tuningMap_, tuningOptions_] := Max[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
-
-getTargetedIntervalDamagesL[tuningMap_, tuningOptions_] := Module[
-  {
-    temperedSideGeneratorsPart,
-    temperedSideMappingPart,
-    justSideGeneratorsPart,
-    justSideMappingPart,
-    eitherSideIntervalsPart,
-    eitherSideMultiplierPart,
-    
-    temperedSide,
-    justSide
-  },
-  
-  {
-    temperedSideGeneratorsPart,
-    temperedSideMappingPart,
-    justSideGeneratorsPart,
-    justSideMappingPart,
-    eitherSideIntervalsPart,
-    eitherSideMultiplierPart
-  } = getParts[tuningOptions];
-  
-  temperedSide = First[{tuningMap / 1200}.eitherSideIntervalsPart.eitherSideMultiplierPart];
-  justSide = First[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
-  
-  getAbsErrors[temperedSide, justSide]
-];
+getSumDamage[parts_] := Total[getAbsErrorWrapper[parts_]];
+get2SumDamage[parts_] := Total[Power[getAbsErrorWrapper[tuningMap, tuningOptions], 2]];
+getPowerSumDamage[parts_] := Total[Power[getAbsErrorWrapper[tuningMap, tuningOptions], part[parts, "powerPart"]]];
+getMaxDamage[parts_] := Max[getAbsErrorWrapper[tuningMap, tuningOptions]];
 
 
 (* ERROR *)
 
-getAbsErrors[temperedSide_, justSide_] := Abs[getErrors[temperedSide, justSide]];
-
+(* returns errors in octaves *)
 getErrors[temperedSide_, justSide_] := N[
   Map[
     If[Quiet[PossibleZeroQ[#]], 0, #]&,
@@ -1362,9 +1342,27 @@ getErrors[temperedSide_, justSide_] := N[
   absoluteValuePrecision
 ];
 
+getAbsErrorWrapper[{
+  temperedSideGeneratorsPart_,
+  temperedSideMappingPart_,
+  justSideGeneratorsPart_,
+  justSideMappingPart_,
+  eitherSideIntervalsPart_,
+  eitherSideMultiplierPart_,
+  powerPart_,
+  periodsPerOctavePart_
+}] := Module[
+  {temperedSide, justSide},
+  
+  temperedSide = First[getSide[temperedSideGeneratorsPart, temperedSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
+  justSide = First[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
+  
+  Abs[getErrors[temperedSide, justSide]]
+];
 
 (* COMPLEXITY *)
 
+(* returns complexities in weighted octaves *)
 getComplexity[
   pcv_,
   t_,
@@ -1606,20 +1604,20 @@ basicComplexitySizeFactorAugmentation[a_] := Module[
   AppendTo[augmentedA, Join[Table[0, Last[Dimensions[a]]], {1}]];
   
   augmentedA
-]
+];
 
 
 (* INTERVAL BASIS *)
 
 retrievePrimesIntervalBasisGeneratorsTuningMap[optimizedGeneratorsTuningMap_, originalT_, t_] := Module[
-  {ma, optimizedTm, generatorsPreimageTransversal, f},
+  {ma, optimizedTuningMap, generatorsPreimageTransversal, f},
   
   ma = getA[getM[t]];
-  optimizedTm = optimizedGeneratorsTuningMap.ma;
+  optimizedTuningMap = optimizedGeneratorsTuningMap.ma;
   generatorsPreimageTransversal = Transpose[getA[getGeneratorsPreimageTransversal[originalT]]];
   f = Transpose[getFormalPrimesA[originalT]];
   
-  optimizedTm.f.generatorsPreimageTransversal
+  optimizedTuningMap.f.generatorsPreimageTransversal
 ];
 
 
@@ -1660,7 +1658,7 @@ oddLimitFromD[d_] := Prime[d + 1] - 2;
 (* covers unchanged-octave diamond minimax-U "minimax", minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
 minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
-optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[{
+maxPolytopeSolution[{
   temperedSideGeneratorsPart_,
   temperedSideMappingPart_,
   justSideGeneratorsPart_,
@@ -1996,7 +1994,7 @@ it only lucks out and works for minimax due to the pure-octave-constraint
 and nature of the tonality diamond targeted interval set,
 namely that the places where damage to targets are equal is the same where other targets are pure.
 *)
-optimizeGeneratorsTuningMapAnalyticalSumPolytope[{
+sumPolytopeSolution[{
   temperedSideGeneratorsPart_,
   temperedSideMappingPart_,
   justSideGeneratorsPart_,
@@ -2015,7 +2013,7 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[{
     filteredNormalizedCandidateUnchangedIntervalSets,
     candidateOptimumGeneratorAs,
     candidateOptimumGeneratorsTuningMaps,
-    candidateOptimumGeneratorTuningMapDamages,
+    candidateOptimumGeneratorTuningMapAbsErrors,
     
     optimumGeneratorsTuningMapIndices,
     optimumGeneratorsTuningMapIndex
@@ -2032,45 +2030,31 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[{
     filteredNormalizedCandidateUnchangedIntervalSets
   ], Not[# === Null]&];
   candidateOptimumGeneratorsTuningMaps = Map[justSideGeneratorsPart.#&, candidateOptimumGeneratorAs];
-  candidateOptimumGeneratorTuningMapDamages = Map[
-    getSumDamageOrGetSumPrimesAbsError[
-      #,
+  candidateOptimumGeneratorTuningMapAbsErrors = Map[
+    Total[getAbsErrorWrapper[{
+      #, (* note: this is an override; only reason these parts are unpacked *)
       temperedSideMappingPart,
       justSideGeneratorsPart,
       justSideMappingPart,
       eitherSideIntervalsPart,
-      eitherSideMultiplierPart
-    ]&,
+      eitherSideMultiplierPart,
+      powerPart,
+      periodsPerOctavePart
+    }]]&,
     candidateOptimumGeneratorsTuningMaps
   ];
   
-  optimumGeneratorsTuningMapIndices = Position[candidateOptimumGeneratorTuningMapDamages, Min[candidateOptimumGeneratorTuningMapDamages]];
+  optimumGeneratorsTuningMapIndices = Position[candidateOptimumGeneratorTuningMapAbsErrors, Min[candidateOptimumGeneratorTuningMapAbsErrors]];
   If[
     Length[optimumGeneratorsTuningMapIndices] == 1,
     
     (* result is unique; done *)
-    optimumGeneratorsTuningMapIndex = First[First[Position[candidateOptimumGeneratorTuningMapDamages, Min[candidateOptimumGeneratorTuningMapDamages]]]];
+    optimumGeneratorsTuningMapIndex = First[First[Position[candidateOptimumGeneratorTuningMapAbsErrors, Min[candidateOptimumGeneratorTuningMapAbsErrors]]]];
     First[candidateOptimumGeneratorsTuningMaps[[optimumGeneratorsTuningMapIndex]]],
     
     (* result is non-unique, will need to handle otherwise *)
     Null
   ]
-];
-
-getSumDamageOrGetSumPrimesAbsError[
-  temperedSideGeneratorsPart_,
-  temperedSideMappingPart_,
-  justSideGeneratorsPart_,
-  justSideMappingPart_,
-  eitherSideIntervalsPart_,
-  eitherSideMultiplierPart_
-] := Module[
-  {temperedSide, justSide},
-  
-  temperedSide = First[getSide[temperedSideGeneratorsPart, temperedSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
-  justSide = First[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
-  
-  Total[getAbsErrors[temperedSide, justSide]]
 ];
 
 getGeneratorsAFromUnchangedIntervals[ma_, unchangedIntervalEigenvectors_] := Module[
@@ -2090,7 +2074,7 @@ getGeneratorsAFromUnchangedIntervals[ma_, unchangedIntervalEigenvectors_] := Mod
 
 (* covers unchanged-octave diamond minisos-U "least squares", minimax-ES "TE", pure-octave-stretched minimax-ES "POTE",
 minimax-NES "Frobenius", minimax-ZES "WE", minimax-PNES "BE" *)
-optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[{
+pseudoinverseSolution[{
   temperedSideGeneratorsPart_,
   temperedSideMappingPart_,
   justSideGeneratorsPart_,
@@ -2112,7 +2096,7 @@ optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[{
 (* SOLUTIONS: GENERAL OPTIMIZATION POWER (MINISOP) OR GENERAL COMPLEXITY NORM POWER (P-NORM) *)
 
 (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
-optimizeGeneratorsTuningMapNumericalPowerSolver[parts_, unchangedIntervals_] := Module[
+powerNormSolution[parts_, unchangedIntervals_] := Module[
   {solution},
   
   solution = getNumericalSolution[parts, unchangedIntervals];
@@ -2121,8 +2105,8 @@ optimizeGeneratorsTuningMapNumericalPowerSolver[parts_, unchangedIntervals_] := 
 ];
 
 (* no historically described tunings use this *)
-(* this is the fallback for when optimizeGeneratorsTuningMapAnalyticalSumPolytope fails to find a unique solution *)
-optimizeGeneratorsTuningMapNumericalPowerLimitSolver[{
+(* this is the fallback for when sumPolytopeSolution fails to find a unique solution *)
+powerNormLimitSolution[{
   temperedSideGeneratorsPart_,
   temperedSideMappingPart_,
   justSideGeneratorsPart_,
@@ -2204,8 +2188,7 @@ getNumericalSolution[
   NMinimize[minimizedNorm, First[temperedSideGeneratorsPart], WorkingPrecision -> nMinimizePrecision]
 ];
 
-getNorm[normPower_, temperedSide_, justSide_] :=
-    Norm[getErrors[temperedSide, justSide], normPower];
+getNorm[normPower_, temperedSide_, justSide_] := Norm[getErrors[temperedSide, justSide], normPower];
 
 getSide[
   temperedOrJustSideGeneratorsPart_,
