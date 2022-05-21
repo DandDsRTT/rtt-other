@@ -292,9 +292,92 @@ getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Modu
     systematicComplexityName,
     originalComplexityName,
     debug,
-    forDamage,
-    tuningOptions,
     tuningMap
+  },
+  
+  targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
+  optimizationPower = OptionValue["optimizationPower"]; (* trait 1 *)
+  damageWeightingSlope = OptionValue["damageWeightingSlope"]; (* trait 2 *)
+  complexityNormPower = OptionValue["complexityNormPower"]; (* trait 3 *)
+  complexityNegateLogPrimeCoordination = OptionValue["complexityNegateLogPrimeCoordination"]; (* trait 4a *)
+  complexityPrimePower = OptionValue["complexityPrimePower"]; (* trait 4b *)
+  complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
+  complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
+  tuningIntervalBasis = OptionValue["tuningIntervalBasis"]; (* trait 8 *)
+  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait 9 *)
+  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 10 *)
+  systematicTuningName = OptionValue["systematicTuningName"];
+  originalTuningName = OptionValue["originalTuningName"];
+  systematicDamageName = OptionValue["systematicDamageName"];
+  originalDamageName = OptionValue["originalDamageName"];
+  systematicComplexityName = OptionValue["systematicComplexityName"];
+  originalComplexityName = OptionValue["originalComplexityName"];
+  debug = OptionValue["debug"];
+  
+  tuningMap = generatorsTuningMap.getA[getM[t]];
+  
+  getTuningMapDamage[t, tuningMap, {
+    "targetedIntervals" -> targetedIntervals, (* trait 0 *)
+    "optimizationPower" -> optimizationPower, (* trait 1 *)
+    "damageWeightingSlope" -> damageWeightingSlope, (* trait 2 *)
+    "complexityNormPower" -> complexityNormPower, (* trait 3 *)
+    "complexityNegateLogPrimeCoordination" -> complexityNegateLogPrimeCoordination, (* trait 4a *)
+    "complexityPrimePower" -> complexityPrimePower, (* trait 4b *)
+    "complexitySizeFactor" -> complexitySizeFactor, (* trait 4c *)
+    "complexityMakeOdd" -> complexityMakeOdd, (* trait 4d *)
+    "tuningIntervalBasis" -> tuningIntervalBasis, (* trait 8 *)
+    "unchangedIntervals" -> unchangedIntervals, (* trait 9 *)
+    "pureOctaveStretch" -> pureOctaveStretch, (* trait 10 *)
+    "systematicTuningName" -> systematicTuningName,
+    "originalTuningName" -> originalTuningName,
+    "systematicDamageName" -> systematicDamageName,
+    "originalDamageName" -> originalDamageName,
+    "systematicComplexityName" -> systematicComplexityName,
+    "originalComplexityName" -> originalComplexityName,
+    "debug" -> debug
+  }]
+];
+
+(*
+  getTuningMapDamage[t, tuningMap]
+  
+  Given a representation of a temperament as a mapping or comma basis,
+  plus a tuning map for that temperament, and a tuning method, 
+  returns how much damage this tuning map causes this temperament using this tuning method.
+  
+  The tuning may be specified by original name, systematic name, or by individual parameters.
+  
+  Examples:
+  
+  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+        quarterCommaTuningMap = {1200, 1896.578, 2786.314};
+        getTuningMapDamage[meantoneM, quarterCommaTuningMap, "systematicTuningName" -> "minimax-S"]
+    
+  Out   3.39236
+*)
+Options[getTuningMapDamage] = tuningOptions;
+getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
+  {
+    targetedIntervals, (* trait 0 *)
+    optimizationPower, (* trait 1 *)
+    damageWeightingSlope, (* trait 2 *)
+    complexityNormPower, (* trait 3 *)
+    complexityNegateLogPrimeCoordination, (* trait 4a *)
+    complexityPrimePower, (* trait 4b *)
+    complexitySizeFactor, (* trait 4c *)
+    complexityMakeOdd, (* trait 4d *)
+    tuningIntervalBasis, (* trait 8 *)
+    unchangedIntervals, (* trait 9 *)
+    pureOctaveStretch, (* trait 10 *)
+    systematicTuningName,
+    originalTuningName,
+    systematicDamageName,
+    originalDamageName,
+    systematicComplexityName,
+    originalComplexityName,
+    debug,
+    forDamage,
+    tuningOptions
   },
   
   targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
@@ -341,9 +424,7 @@ getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Modu
     forDamage
   ];
   
-  optimizationPower = tuningOption[tuningOptions, "optimizationPower"]; (* trait 1 *)
-  
-  tuningMap = generatorsTuningMap.getA[getM[t]] / 1200;
+  optimizationPower = tuningOption[tuningOptions, "optimizationPower"];
   
   1200 * If[
     optimizationPower == \[Infinity],
@@ -358,90 +439,6 @@ getGeneratorsTuningMapDamage[t_, generatorsTuningMap_, OptionsPattern[]] := Modu
       ]
     ]
   ]
-];
-
-(*
-  getTuningMapDamage[t, tuningMap]
-  
-  Given a representation of a temperament as a mapping or comma basis,
-  plus a tuning map for that temperament, and a tuning method, 
-  returns how much damage this tuning map causes this temperament using this tuning method.
-  
-  The tuning may be specified by original name, systematic name, or by individual parameters.
-  
-  Examples:
-  
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        quarterCommaTuningMap = {1200, 1896.578, 2786.314};
-        getTuningMapDamage[meantoneM, quarterCommaTuningMap, "systematicTuningName" -> "minimax-S"]
-    
-  Out   3.39236
-*)
-Options[getTuningMapDamage] = tuningOptions;
-getTuningMapDamage[t_, tuningMap_, OptionsPattern[]] := Module[
-  {
-    targetedIntervals, (* trait 0 *)
-    optimizationPower, (* trait 1 *)
-    damageWeightingSlope, (* trait 2 *)
-    complexityNormPower, (* trait 3 *)
-    complexityNegateLogPrimeCoordination, (* trait 4a *)
-    complexityPrimePower, (* trait 4b *)
-    complexitySizeFactor, (* trait 4c *)
-    complexityMakeOdd, (* trait 4d *)
-    tuningIntervalBasis, (* trait 8 *)
-    unchangedIntervals, (* trait 9 *)
-    pureOctaveStretch, (* trait 10 *)
-    systematicTuningName,
-    originalTuningName,
-    systematicDamageName,
-    originalDamageName,
-    systematicComplexityName,
-    originalComplexityName,
-    debug,
-    generatorsTuningMap
-  },
-  
-  targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
-  optimizationPower = OptionValue["optimizationPower"]; (* trait 1 *)
-  damageWeightingSlope = OptionValue["damageWeightingSlope"]; (* trait 2 *)
-  complexityNormPower = OptionValue["complexityNormPower"]; (* trait 3 *)
-  complexityNegateLogPrimeCoordination = OptionValue["complexityNegateLogPrimeCoordination"]; (* trait 4a *)
-  complexityPrimePower = OptionValue["complexityPrimePower"]; (* trait 4b *)
-  complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
-  complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
-  tuningIntervalBasis = OptionValue["tuningIntervalBasis"]; (* trait 8 *)
-  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait 9 *)
-  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 10 *)
-  systematicTuningName = OptionValue["systematicTuningName"];
-  originalTuningName = OptionValue["originalTuningName"];
-  systematicDamageName = OptionValue["systematicDamageName"];
-  originalDamageName = OptionValue["originalDamageName"];
-  systematicComplexityName = OptionValue["systematicComplexityName"];
-  originalComplexityName = OptionValue["originalComplexityName"];
-  debug = OptionValue["debug"];
-  
-  generatorsTuningMap = generatorsTuningMapFromTAndTuningMap[t, tuningMap];
-  
-  getGeneratorsTuningMapDamage[t, generatorsTuningMap, {
-    "targetedIntervals" -> targetedIntervals, (* trait 0 *)
-    "optimizationPower" -> optimizationPower, (* trait 1 *)
-    "damageWeightingSlope" -> damageWeightingSlope, (* trait 2 *)
-    "complexityNormPower" -> complexityNormPower, (* trait 3 *)
-    "complexityNegateLogPrimeCoordination" -> complexityNegateLogPrimeCoordination, (* trait 4a *)
-    "complexityPrimePower" -> complexityPrimePower, (* trait 4b *)
-    "complexitySizeFactor" -> complexitySizeFactor, (* trait 4c *)
-    "complexityMakeOdd" -> complexityMakeOdd, (* trait 4d *)
-    "tuningIntervalBasis" -> tuningIntervalBasis, (* trait 8 *)
-    "unchangedIntervals" -> unchangedIntervals, (* trait 9 *)
-    "pureOctaveStretch" -> pureOctaveStretch, (* trait 10 *)
-    "systematicTuningName" -> systematicTuningName,
-    "originalTuningName" -> originalTuningName,
-    "systematicDamageName" -> systematicDamageName,
-    "originalDamageName" -> originalDamageName,
-    "systematicComplexityName" -> systematicComplexityName,
-    "originalComplexityName" -> originalComplexityName,
-    "debug" -> debug
-  }]
 ];
 
 (*
@@ -495,7 +492,7 @@ plotDamage[t_, OptionsPattern[]] := Module[
     
     generatorsTuningMap,
     ma,
-    primesTuningMap,
+    logPrimeCoordinationAndSummationMap,
     
     normPower,
     plotArgs,
@@ -578,7 +575,7 @@ plotDamage[t_, OptionsPattern[]] := Module[
   complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   complexityMakeOdd = tuningOption[tuningOptions, "complexityMakeOdd"]; (* trait 4d *)
   
-  {generatorsTuningMap, ma, primesTuningMap} = getTuningMappings[t];
+  {generatorsTuningMap, ma, logPrimeCoordinationAndSummationMap} = getTuningMappings[t];
   
   plotArgs = {};
   
@@ -587,7 +584,7 @@ plotDamage[t_, OptionsPattern[]] := Module[
     Function[
       {targetedIntervalPcv},
       
-      Abs[generatorsTuningMap.ma.targetedIntervalPcv - 1200 * primesTuningMap.targetedIntervalPcv] / getComplexity[
+      Abs[generatorsTuningMap.ma.targetedIntervalPcv - 1200 * logPrimeCoordinationAndSummationMap.targetedIntervalPcv] / getComplexity[
         targetedIntervalPcv,
         tWithPossiblyChangedIntervalBasis,
         complexityNormPower, (* trait 3 *)
@@ -640,9 +637,9 @@ plotDamage[t_, OptionsPattern[]] := Module[
   Out   {1200, 696.578};
 *)
 generatorsTuningMapFromTAndTuningMap[t_, tuningMap_] := Module[
-  {generatorsTuningMap, ma, primesTuningMap, solution},
+  {generatorsTuningMap, ma, logPrimeCoordinationAndSummationMap, solution},
   
-  {generatorsTuningMap, ma, primesTuningMap} = getTuningMappings[t];
+  {generatorsTuningMap, ma, logPrimeCoordinationAndSummationMap} = getTuningMappings[t];
   
   solution = NMinimize[Norm[generatorsTuningMap.ma - tuningMap], generatorsTuningMap];
   

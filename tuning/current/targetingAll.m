@@ -176,7 +176,7 @@ getDualMultiplier[tuningOptions_] := Module[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
     
-    complexityMultiplier
+    complexityMultiplierAndLogPrimeCoordinationA
   },
   
   t = tuningOption[tuningOptions, "t"];
@@ -187,7 +187,7 @@ getDualMultiplier[tuningOptions_] := Module[
   (* when computing tunings (as opposed to complexities directly), complexity-make-odd is handled through constraints *)
   complexityMakeOdd = False; (* trait 4d *)
   
-  complexityMultiplier = getComplexityMultiplier[
+  complexityMultiplierAndLogPrimeCoordinationA = getComplexityMultiplierAndLogPrimeCoordinationA[
     t,
     complexityNegateLogPrimeCoordination, (* trait 4a *)
     complexityPrimePower, (* trait 4b *)
@@ -196,7 +196,7 @@ getDualMultiplier[tuningOptions_] := Module[
   ];
   
   (* always essentially simplicity weighted *)
-  tuningInverse[complexityMultiplier]
+  tuningInverse[complexityMultiplierAndLogPrimeCoordinationA]
 ];
 
 getTargetingAllParts[tuningOptions_] := Module[
@@ -206,7 +206,7 @@ getTargetingAllParts[tuningOptions_] := Module[
     
     generatorsTuningMap,
     ma,
-    primesTuningMap,
+    logPrimeCoordinationAndSummationMap,
     
     dualMultiplier,
     
@@ -221,7 +221,7 @@ getTargetingAllParts[tuningOptions_] := Module[
   t = tuningOption[tuningOptions, "t"];
   complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
   
-  {generatorsTuningMap, ma, primesTuningMap} = getTuningMappings[t];
+  {generatorsTuningMap, ma, logPrimeCoordinationAndSummationMap} = getTuningMappings[t];
   
   dualMultiplier = getDualMultiplier[tuningOptions];
   
@@ -236,7 +236,7 @@ getTargetingAllParts[tuningOptions_] := Module[
     ma = Map[Join[#, {0}]&, ma];
     AppendTo[ma, Join[Table[complexitySizeFactor, Last[Dimensions[ma]] - 1].getLogPrimeCoordinationA[t], {-1}]];
     
-    AppendTo[primesTuningMap, 0];
+    AppendTo[logPrimeCoordinationAndSummationMap, 0];
     
     justSideMappingPart = basicComplexitySizeFactorAugmentation[justSideMappingPart];
     
@@ -247,7 +247,7 @@ getTargetingAllParts[tuningOptions_] := Module[
   
   temperedSideGeneratorsPart = {generatorsTuningMap};
   temperedSideMappingPart = ma;
-  justSideGeneratorsPart = {primesTuningMap};
+  justSideGeneratorsPart = {logPrimeCoordinationAndSummationMap};
   eitherSideMultiplierPart = dualMultiplier;
   
   {

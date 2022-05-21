@@ -336,7 +336,7 @@ processTuningOptions[
           {}
         ],
         If[
-          targetedIntervals == "diamond",
+          ToString[targetedIntervals] == "diamond",
           getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
           intervalRebase.getA[targetedIntervals]
         ]
@@ -355,7 +355,7 @@ processTuningOptions[
           {}
         ],
         If[
-          targetedIntervals == "diamond",
+          ToString[targetedIntervals] == "diamond",
           getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
           getA[targetedIntervals]
         ]
@@ -427,22 +427,24 @@ tuningOptionsPartsByOptionName = <|
 |>;
 tuningOption[tuningOptions_, optionName_] := Part[tuningOptions, tuningOptionsPartsByOptionName[optionName]];
 
-getPrimesTuningMap[t_] := Log2[getIntervalBasis[t]];
+getSummationMap[t_] := Table[1, getD[t]];
 
 getLogPrimeCoordinationA[t_] := DiagonalMatrix[Log2[getIntervalBasis[t]]];
+
+getLogPrimeCoordinationAndSummationMap[t_] := getSummationMap[t].getLogPrimeCoordinationA[t];
 
 getPeriodsPerOctave[t_] := First[First[getA[getM[t]]]];
 
 getPrimesIdentityA[t_] := IdentityMatrix[getD[t]];
 
 getTuningMappings[t_] := Module[
-  {generatorsTuningMap, ma, primesTuningMap},
+  {generatorsTuningMap, ma, logPrimeCoordinationAndSummationMap},
   
   generatorsTuningMap = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
   ma = getA[getM[t]];
-  primesTuningMap = getPrimesTuningMap[t];
+  logPrimeCoordinationAndSummationMap = getLogPrimeCoordinationAndSummationMap[t];
   
-  {generatorsTuningMap, ma, primesTuningMap}
+  {generatorsTuningMap, ma, logPrimeCoordinationAndSummationMap}
 ];
 
 tuningInverse[damageWeighterOrComplexityMultiplier_] := MapThread[
@@ -486,19 +488,31 @@ getPowerSumDamage[tuningMap_, tuningOptions_, power_] := Total[Power[getTargeted
 getMaxDamage[tuningMap_, tuningOptions_] := Max[getTargetedIntervalDamagesL[tuningMap, tuningOptions]];
 
 getTargetedIntervalDamagesL[tuningMap_, tuningOptions_] := Module[
-  {t, targetedIntervalsA, primesTuningMap, damageWeights},
+  {
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart,
+    
+    temperedSide,
+    justSide
+  },
   
-  t = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
-  primesTuningMap = getPrimesTuningMap[t];
-  damageWeights = getDamageWeights[tuningOptions];
+  {
+    temperedSideGeneratorsPart,
+    temperedSideMappingPart,
+    justSideGeneratorsPart,
+    justSideMappingPart,
+    eitherSideIntervalsPart,
+    eitherSideMultiplierPart
+  } = getParts[tuningOptions];
   
-  Abs[
-    N[
-      Map[If[PossibleZeroQ[#], 0, #]&, tuningMap - primesTuningMap],
-      absoluteValuePrecision
-    ].Transpose[targetedIntervalsA].damageWeights
-  ]
+  temperedSide = First[{tuningMap / 1200}.eitherSideIntervalsPart.eitherSideMultiplierPart];
+  justSide = First[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
+  
+  getAbsErrors[temperedSide, justSide]
 ];
 
 
@@ -512,8 +526,10 @@ getComplexity[
   complexityPrimePower_, (* trait 4b *)
   complexitySizeFactor_, (* trait 4c *)
   complexityMakeOdd_ (* trait 4d *)
-] := Module[{complexityMultiplier},
-  complexityMultiplier = getComplexityMultiplier[
+] := Module[
+  {complexityMultiplierAndLogPrimeCoordinationA},
+  
+  complexityMultiplierAndLogPrimeCoordinationA = getComplexityMultiplierAndLogPrimeCoordinationA[
     t,
     complexityNegateLogPrimeCoordination, (* trait 4a *)
     complexityPrimePower, (* trait 4b *)
@@ -521,7 +537,7 @@ getComplexity[
     complexityMakeOdd (* trait 4d *)
   ];
   
-  Norm[complexityMultiplier.pcv, complexityNormPower] / (1 + complexitySizeFactor)
+  Norm[complexityMultiplierAndLogPrimeCoordinationA.pcv, complexityNormPower] / (1 + complexitySizeFactor)
 ];
 
 (* Note that we don't actually use any of these functions directly; they're just around to test understanding *)
@@ -560,7 +576,7 @@ getComplexityMultiplier[
   (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-S ("TOP"); 
 when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ES ("TE"); 
 when used by getDamageWeights covers any targeting-list tuning using this as its damage's complexity *)
-  complexityMultiplier = getLogPrimeCoordinationA[t];
+  complexityMultiplier = IdentityMatrix[getD[t]];
   
   If[
     (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-NS (the L1 version of "Frobenius");
@@ -597,6 +613,20 @@ when used by getDamageWeights covers any targeting-list tuning using this as its
   
   complexityMultiplier
 ];
+
+getComplexityMultiplierAndLogPrimeCoordinationA[
+  t_,
+  complexityNegateLogPrimeCoordination_, (* trait 4a *)
+  complexityPrimePower_, (* trait 4b *)
+  complexitySizeFactor_, (* trait 4c *)
+  complexityMakeOdd_ (* trait 4d *)
+] := getComplexityMultiplier[
+  t,
+  complexityNegateLogPrimeCoordination, (* trait 4a *)
+  complexityPrimePower, (* trait 4b *)
+  complexitySizeFactor, (* trait 4c *)
+  complexityMakeOdd (* trait 4d *)
+].getLogPrimeCoordinationA[t];
 
 
 (* INTERVAL BASIS *)

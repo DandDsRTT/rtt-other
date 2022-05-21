@@ -409,8 +409,10 @@ getSumDamageOrGetSumPrimesAbsError[
   temperedSide = First[getSide[temperedSideGeneratorsPart, temperedSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
   justSide = First[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
   
-  Total[Abs[getErrors[temperedSide, justSide]]]
+  Total[getAbsErrors[temperedSide, justSide]]
 ];
+
+getAbsErrors[temperedSide_, justSide_] := Abs[getErrors[temperedSide, justSide]];
 
 getErrors[temperedSide_, justSide_] := N[
   Map[

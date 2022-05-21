@@ -360,9 +360,9 @@ testClose[optimizeGeneratorsTuningMap, dual[{{quotientToPcv[32805 / 32768]}, "co
 
 (* ___ PRIVATE ___ *)
 
-(* getPrimesTuningMap *)
-test[getPrimesTuningMap, {{{12, 19, 28}}, "co", {2, 3, 5}}, {Log2[2], Log2[3], Log2[5]}];
-test[getPrimesTuningMap, {{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}}, {Log2[2], Log2[9], Log2[5], Log2[21]}];
+(* getLogPrimeCoordinationAndSummationMap *)
+test[getLogPrimeCoordinationAndSummationMap, {{{12, 19, 28}}, "co", {2, 3, 5}}, {Log2[2], Log2[3], Log2[5]}];
+test[getLogPrimeCoordinationAndSummationMap, {{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}}, {Log2[2], Log2[9], Log2[5], Log2[21]}];
 
 (* getDiamond *)
 test[getDiamond, 2, {{2, -1}, {-1, 1}}];
@@ -409,6 +409,9 @@ testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 1, getPcvProduc
 testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1201.7, 697.564}, "systematicTuningName" -> "minimax-S", 1.700];
 testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1199.02, 695.601}, "systematicTuningName" -> "unchanged-octave diamond minisos-U", 0.088];
 testCloseNotList[getGeneratorsTuningMapDamage, meantone, {1200., 696.578}, "systematicTuningName" -> "unchanged-octave diamond minimax-U", 5.377];
+
+(* getTuningMapDamage *)
+testCloseNotList[getTuningMapDamage, meantone, {1200.000, 1897.564, 2786.314}, "targetedIntervals" -> {IdentityMatrix[3], "contra"}, "damageWeightingSlope" -> "unweighted", "optimizationPower" -> \[Infinity], 4.391];
 
 (* tuningInverse *)
 test[tuningInverse, {{Log2[2], 0, 0}, {0, Log2[3], 0}, {0, 0, Log2[5]}}, {{1 / Log2[2], 0, 0}, {0, 1 / Log2[3], 0}, {0, 0, 1 / Log2[5]}}];
