@@ -427,6 +427,18 @@ tuningOptionsPartsByOptionName = <|
 |>;
 tuningOption[tuningOptions_, optionName_] := Part[tuningOptions, tuningOptionsPartsByOptionName[optionName]];
 
+partsPartsByPartName = <|
+  "temperedSideGeneratorsPart" -> 1,
+  "temperedSideMappingPart" -> 2,
+  "justSideGeneratorsPart" -> 3,
+  "justSideMappingPart" -> 4,
+  "eitherSideIntervalsPart" -> 5,
+  "eitherSideMultiplierPart" -> 6,
+  "powerPart" -> 7,
+  "periodsPerOctavePart" -> 8
+|>;
+part[parts_, partName_] := Part[parts, partsPartsByPartName[partName]];
+
 getSummationMap[t_] := Table[1, getD[t]];
 
 getLogPrimeCoordinationA[t_] := DiagonalMatrix[Log2[getIntervalBasis[t]]];
@@ -645,10 +657,12 @@ retrievePrimesIntervalBasisGeneratorsTuningMap[optimizedGeneratorsTuningMap_, or
 
 (* PURE-OCTAVE STRETCH *)
 
-getPureOctaveStretchedGeneratorsTuningMap[optimizedGeneratorsTuningMap_, t_] := Module[{periodsPerOctave},
-  periodsPerOctave = First[First[getA[getM[t]]]];
+getPureOctaveStretchedGeneratorsTuningMap[optimizedGeneratorsTuningMap_, parts_] := Module[
+  {periodsPerOctavePart},
   
-  (1200 / periodsPerOctave) * (optimizedGeneratorsTuningMap / First[optimizedGeneratorsTuningMap])
+  periodsPerOctavePart = part[parts, "periodsPerOctavePart"];
+  
+  (1200 / periodsPerOctavePart) * (optimizedGeneratorsTuningMap / First[optimizedGeneratorsTuningMap])
 ];
 
 

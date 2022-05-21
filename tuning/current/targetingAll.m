@@ -1,170 +1,4 @@
-(* TARGETING-ALL *)
-
-(* covers targeting-all (includes 
-minimax-S "TOP", minimax-ES "TE", minimax-NES "Frobenius", 
-minimax-PNS "BOP", minimax-PNES "BE", 
-minimax-ZS "Weil", minimax-ZES "WE", minimax-QZS "Kees", minimax-QZES "KE", 
-unchanged-octave minimax-ES "CTE", 
-pure-octave-stretched minimax-S "POTOP", pure-octave-stretched minimax-ES "POTE") *)
-(* compare with optimizeGeneratorsTuningMapTargetingList *)
-optimizeGeneratorsTuningMapTargetingAll[tuningOptions_] := Module[
-  {complexityNormPower, complexitySizeFactor, unchangedIntervals, optimumGeneratorsTuningMap},
-  
-  If[tuningOption[tuningOptions, "debug"], Print["targeting-all"]];
-  
-  complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"]; (* trait 3 *)
-  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
-  
-  optimumGeneratorsTuningMap = If[
-    Length[unchangedIntervals] > 0,
-    
-    (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
-    optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions],
-    
-    If[
-      complexityNormPower == 2,
-      
-      (* covers minimax-ES "TE", minimax-NES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
-      minimax-ZES "WE", minimax-PNES "BE" *)
-      optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions],
-      
-      If[
-        complexityNormPower == 1,
-        
-        (* covers minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
-        minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
-        optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions],
-        
-        If[
-          complexityNormPower == \[Infinity],
-          
-          (* no historically described tunings use this *)
-          optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions],
-          
-          (* no historically described tunings use this *)
-          optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions]
-        ]
-      ]
-    ]
-  ];
-  
-  If[
-    complexitySizeFactor != 0,
-    Drop[optimumGeneratorsTuningMap, -1],
-    optimumGeneratorsTuningMap
-  ]
-];
-
-(* compare with optimizeGeneratorsTuningMapMinimax *)
-(* covers minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
-minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
-optimizeGeneratorsTuningMapPrimesMaximumNorm[tuningOptions_] := Module[
-  {targetingAllParts},
-  
-  If[tuningOption[tuningOptions, "debug"], Print["primes maximum norm"]];
-  
-  targetingAllParts = getTargetingAllParts[tuningOptions];
-  
-  optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[targetingAllParts]
-];
-
-(* compare with optimizeGeneratorsTuningMapMinisum *)
-(* no historically described tunings use this *)
-optimizeGeneratorsTuningMapPrimesTaxicabNorm[tuningOptions_] := Module[
-  {
-    targetingAllParts,
-    
-    optimumGeneratorsTuningMap,
-    
-    t,
-    complexityNormPower,
-    unchangedIntervals,
-    
-    primesErrorMagnitudeNormPower,
-    periodsPerOctave
-  },
-  
-  If[tuningOption[tuningOptions, "debug"], Print["primes taxicab norm"]];
-  
-  targetingAllParts = getTargetingAllParts[tuningOptions];
-  
-  optimumGeneratorsTuningMap = optimizeGeneratorsTuningMapAnalyticalSumPolytope[targetingAllParts];
-  
-  (* if the solution from the sum polytope is non-unique, it returns null, so we fall back to a power-limit solution *)
-  If[
-    optimumGeneratorsTuningMap === Null,
-    
-    If[tuningOption[tuningOptions, "debug"], Print["non-unique solution \[RightArrow] power limit solver"]];
-    
-    t = tuningOption[tuningOptions, "t"];
-    complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"]; (* trait 3 *)
-    unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
-    
-    primesErrorMagnitudeNormPower = dualPower[complexityNormPower];
-    periodsPerOctave = getPeriodsPerOctave[t];
-    
-    optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
-      targetingAllParts,
-      primesErrorMagnitudeNormPower,
-      unchangedIntervals,
-      periodsPerOctave
-    ],
-    
-    optimumGeneratorsTuningMap
-  ]
-];
-
-(* compare with optimizeGeneratorsTuningMapMinisos *)
-(* covers minimax-ES "TE", minimax-NES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
-minimax-ZES "WE", minimax-PNES "BE" *)
-optimizeGeneratorsTuningMapPrimesEuclideanNorm[tuningOptions_] := Module[
-  {targetingAllParts},
-  
-  If[tuningOption[tuningOptions, "debug"], Print["primes Euclidean norm"]];
-  
-  targetingAllParts = getTargetingAllParts[tuningOptions];
-  
-  optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[targetingAllParts]
-];
-
-(* compare with optimizeGeneratorsTuningMapMinisop *)
-(* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
-optimizeGeneratorsTuningMapPrimesPowerNorm[tuningOptions_] := Module[
-  {
-    targetingAllParts,
-    
-    t,
-    complexityNormPower,
-    unchangedIntervals,
-    
-    primesErrorMagnitudeNormPower,
-    periodsPerOctave
-  },
-  
-  If[tuningOption[tuningOptions, "debug"], Print["primes power norm"]];
-  
-  targetingAllParts = getTargetingAllParts[tuningOptions];
-  
-  t = tuningOption[tuningOptions, "t"];
-  complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"]; (* trait 3 *)
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
-  
-  primesErrorMagnitudeNormPower = dualPower[complexityNormPower];
-  periodsPerOctave = getPeriodsPerOctave[t];
-  
-  optimizeGeneratorsTuningMapNumericalPowerSolver[
-    targetingAllParts,
-    primesErrorMagnitudeNormPower,
-    unchangedIntervals,
-    periodsPerOctave
-  ]
-];
-
-
-(* TARGETING-ALL HELPER FUNCTIONS, MANY OF WHICH PARALLEL TARGETING-LIST FUNCTIONS *)
-
-dualPower[power_] := If[power == 1, \[Infinity], 1 / (1 - 1 / power)];
+getDualPower[power_] := If[power == 1, \[Infinity], 1 / (1 - 1 / power)];
 
 (* compare with getDamageWeights *)
 getDualMultiplier[tuningOptions_] := Module[
@@ -199,34 +33,45 @@ getDualMultiplier[tuningOptions_] := Module[
   tuningInverse[complexityMultiplierAndLogPrimeCoordinationA]
 ];
 
+(* compare with getParts *)
 getTargetingAllParts[tuningOptions_] := Module[
   {
     t,
+    complexityNormPower,
     complexitySizeFactor,
+    debug,
     
     generatorsTuningMap,
     ma,
     logPrimeCoordinationAndSummationMap,
     
     dualMultiplier,
+    primesErrorMagnitudeNormPower,
     
     temperedSideGeneratorsPart,
     temperedSideMappingPart,
     justSideGeneratorsPart,
     justSideMappingPart,
     eitherSideIntervalsPart,
-    eitherSideMultiplierPart
+    eitherSideMultiplierPart,
+    powerPart,
+    periodsPerOctavePart
   },
   
   t = tuningOption[tuningOptions, "t"];
+  complexityNormPower = tuningOption[tuningOptions, "complexityNormPower"]; (* trait 3 *)
   complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
+  debug = tuningOption[tuningOptions, "debug"];
   
   {generatorsTuningMap, ma, logPrimeCoordinationAndSummationMap} = getTuningMappings[t];
   
   dualMultiplier = getDualMultiplier[tuningOptions];
+  primesErrorMagnitudeNormPower = getDualPower[complexityNormPower];
   
   justSideMappingPart = getPrimesIdentityA[t];
   eitherSideIntervalsPart = Transpose[getPrimesIdentityA[t]];
+  powerPart = primesErrorMagnitudeNormPower;
+  periodsPerOctavePart = getPeriodsPerOctave[t];
   
   If[
     complexitySizeFactor != 0,
@@ -250,13 +95,27 @@ getTargetingAllParts[tuningOptions_] := Module[
   justSideGeneratorsPart = {logPrimeCoordinationAndSummationMap};
   eitherSideMultiplierPart = dualMultiplier;
   
+  If[
+    debug == True,
+    Print["temperedSideGeneratorsPart: ", temperedSideGeneratorsPart]; (* g *)
+    Print["temperedSideMappingPart: ", temperedSideMappingPart]; (* M *)
+    Print["justSideGeneratorsPart: ", justSideGeneratorsPart]; (* p *)
+    Print["justSideMappingPart: ", justSideMappingPart]; (* I *)
+    Print["eitherSideIntervalsPart: ", eitherSideIntervalsPart]; (* I *)
+    Print["eitherSideMultiplierPart: ", eitherSideMultiplierPart]; (* X⁻¹ *)
+    Print["powerPart: ", powerPart];
+    Print["periodsPerOctavePart: ", periodsPerOctavePart];
+  ];
+  
   {
     temperedSideGeneratorsPart, (* g *)
     temperedSideMappingPart, (* M *)
     justSideGeneratorsPart, (* p *)
     justSideMappingPart, (* I *)
     eitherSideIntervalsPart, (* I *)
-    eitherSideMultiplierPart (* X⁻¹ *)
+    eitherSideMultiplierPart, (* X⁻¹ *)
+    powerPart,
+    periodsPerOctavePart
   }
 ];
 

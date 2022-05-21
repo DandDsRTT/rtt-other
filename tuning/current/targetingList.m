@@ -1,140 +1,3 @@
-(* covers targeting-list (includes 
-unchanged-octave diamond minimax-U "minimax", unchanged-octave diamond minisos-U "least squares") *)
-optimizeGeneratorsTuningMapTargetingList[tuningOptions_] := Module[
-  {optimizationPower, unchangedIntervals},
-  
-  If[tuningOption[tuningOptions, "debug"], Print["targeting-list"]];
-  
-  optimizationPower = tuningOption[tuningOptions, "optimizationPower"]; (* trait 1 *)
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
-  
-  If[
-    Length[unchangedIntervals] > 0,
-    
-    (* no historically described tunings use this *)
-    optimizeGeneratorsTuningMapMinisop[tuningOptions],
-    
-    If[
-      optimizationPower == 2,
-      
-      (* covers least squares *)
-      optimizeGeneratorsTuningMapMinisos[tuningOptions],
-      
-      If[
-        optimizationPower == \[Infinity],
-        
-        (* covers minimax *)
-        optimizeGeneratorsTuningMapMinimax[tuningOptions],
-        
-        If[
-          optimizationPower == 1,
-          
-          (* no historically described tunings use this *)
-          optimizeGeneratorsTuningMapMinisum[tuningOptions],
-          
-          (* no historically described tunings use this *)
-          optimizeGeneratorsTuningMapMinisop[tuningOptions]
-        ]
-      ]
-    ]
-  ]
-];
-
-(* covers unchanged-octave diamond minimax-U "minimax" *)
-optimizeGeneratorsTuningMapMinimax[tuningOptions_] := Module[
-  {parts},
-  
-  If[tuningOption[tuningOptions, "debug"], Print["minimax"]];
-  
-  parts = getParts[tuningOptions];
-  
-  optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[parts]
-];
-
-(* no historically described tunings use this *)
-optimizeGeneratorsTuningMapMinisum[tuningOptions_] := Module[
-  {
-    parts,
-    
-    optimumGeneratorsTuningMap,
-    
-    t,
-    optimizationPower,
-    unchangedIntervals,
-    
-    periodsPerOctave
-  },
-  
-  If[tuningOption[tuningOptions, "debug"], Print["minisum"]];
-  
-  parts = getParts[tuningOptions];
-  
-  optimumGeneratorsTuningMap = optimizeGeneratorsTuningMapAnalyticalSumPolytope[parts];
-  
-  (* if the solution from the sum polytope is non-unique, it returns null, so we fall back to a power-limit solution *)
-  If[
-    optimumGeneratorsTuningMap === Null,
-    
-    If[tuningOption[tuningOptions, "debug"], Print["non-unique solution \[RightArrow] power limit solver"]];
-    
-    t = tuningOption[tuningOptions, "t"];
-    optimizationPower = tuningOption[tuningOptions, "optimizationPower"]; (* trait 1 *)
-    unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
-    
-    periodsPerOctave = getPeriodsPerOctave[t];
-    
-    optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
-      parts,
-      optimizationPower,
-      unchangedIntervals,
-      periodsPerOctave
-    ],
-    
-    optimumGeneratorsTuningMap
-  ]
-];
-
-(* covers unchanged-octave diamond minisos-U "least squares" *)
-optimizeGeneratorsTuningMapMinisos[tuningOptions_] := Module[
-  {parts},
-  
-  If[tuningOption[tuningOptions, "debug"], Print["minisos"]];
-  
-  parts = getParts[tuningOptions];
-  
-  optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[parts]
-];
-
-(* no historically described tunings use this *)
-optimizeGeneratorsTuningMapMinisop[tuningOptions_] := Module[
-  {
-    parts,
-    
-    t,
-    optimizationPower,
-    unchangedIntervals,
-    
-    periodsPerOctave
-  },
-  
-  If[tuningOption[tuningOptions, "debug"], Print["minisop"]];
-  
-  parts = getParts[tuningOptions];
-  
-  t = tuningOption[tuningOptions, "t"];
-  optimizationPower = tuningOption[tuningOptions, "optimizationPower"]; (* trait 1 *)
-  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
-  
-  periodsPerOctave = getPeriodsPerOctave[t];
-  
-  optimizeGeneratorsTuningMapNumericalPowerSolver[
-    parts,
-    optimizationPower,
-    unchangedIntervals,
-    periodsPerOctave
-  ]
-];
-
 (* compare with getDualMultiplier *)
 getDamageWeights[tuningOptions_] := Module[
   {
@@ -191,6 +54,8 @@ getParts[tuningOptions_] := Module[
   {
     t,
     targetedIntervalsA,
+    optimizationPower,
+    debug,
     
     generatorsTuningMap,
     ma,
@@ -201,11 +66,15 @@ getParts[tuningOptions_] := Module[
     justSideGeneratorsPart,
     justSideMappingPart,
     eitherSideIntervalsPart,
-    eitherSideMultiplierPart
+    eitherSideMultiplierPart,
+    powerPart,
+    periodsPerOctavePart
   },
   
   t = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
+  optimizationPower = tuningOption[tuningOptions, "optimizationPower"]; (* trait 1 *)
+  debug = tuningOption[tuningOptions, "debug"];
   
   {generatorsTuningMap, ma, logPrimeCoordinationAndSummationMap} = getTuningMappings[t];
   
@@ -215,6 +84,20 @@ getParts[tuningOptions_] := Module[
   justSideMappingPart = getPrimesIdentityA[t];
   eitherSideIntervalsPart = Transpose[targetedIntervalsA];
   eitherSideMultiplierPart = getDamageWeights[tuningOptions];
+  powerPart = optimizationPower;
+  periodsPerOctavePart = getPeriodsPerOctave[t];
+  
+  If[
+    debug == True,
+    Print["temperedSideGeneratorsPart: ", temperedSideGeneratorsPart]; (* g *)
+    Print["temperedSideMappingPart: ", temperedSideMappingPart]; (* M *)
+    Print["justSideGeneratorsPart: ", justSideGeneratorsPart]; (* p *)
+    Print["justSideMappingPart: ", justSideMappingPart]; (* I *)
+    Print["eitherSideIntervalsPart: ", eitherSideIntervalsPart]; (* I *)
+    Print["eitherSideMultiplierPart: ", eitherSideMultiplierPart]; (* X⁻¹ *)
+    Print["powerPart: ", powerPart];
+    Print["periodsPerOctavePart: ", periodsPerOctavePart];
+  ];
   
   {
     temperedSideGeneratorsPart, (* g *)
@@ -222,6 +105,8 @@ getParts[tuningOptions_] := Module[
     justSideGeneratorsPart, (* p *)
     justSideMappingPart, (* I *)
     eitherSideIntervalsPart, (* T *)
-    eitherSideMultiplierPart (* W *)
+    eitherSideMultiplierPart, (* W *)
+    powerPart,
+    periodsPerOctavePart
   }
 ];

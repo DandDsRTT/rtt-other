@@ -84,7 +84,9 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
     tuningOptions,
     optimizedGeneratorsTuningMap,
     tPossiblyWithChangedIntervalBasis,
-    targetedIntervalsA
+    targetedIntervalsA,
+    parts,
+    powerPart
   },
   
   targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
@@ -132,23 +134,69 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   ];
   
   tPossiblyWithChangedIntervalBasis = tuningOption[tuningOptions, "t"];
-  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"];
-  pureOctaveStretch = tuningOption[tuningOptions, "pureOctaveStretch"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
+  complexitySizeFactor = tuningOption[tuningOptions, "complexitySizeFactor"]; (* trait 4c *)
+  unchangedIntervals = tuningOption[tuningOptions, "unchangedIntervals"]; (* trait 9 *)
+  pureOctaveStretch = tuningOption[tuningOptions, "pureOctaveStretch"]; (* trait 10 *)
   
-  optimizedGeneratorsTuningMap = 1200 * If[
+  parts = If[
     Length[targetedIntervalsA] == 0,
+    getTargetingAllParts[tuningOptions],
+    getParts[tuningOptions]
+  ];
+  
+  powerPart = part[parts, "powerPart"];
+  
+  optimizedGeneratorsTuningMap = If[
+    Length[unchangedIntervals] > 0,
     
-    (* covers targeting-all (includes 
-    minimax-S "TOP", minimax-ES "TE", minimax-NES "Frobenius", 
-    minimax-PNS "BOP", minimax-PNES "BE", 
-    minimax-ZS "Weil", minimax-ZES "WE", minimax-QZS "Kees", minimax-QZES "KE", 
-    unchanged-octave minimax-ES "CTE", 
-    pure-octave-stretched minimax-S "POTOP", pure-octave-stretched minimax-ES "POTE") *)
-    optimizeGeneratorsTuningMapTargetingAll[tuningOptions],
+    (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
+    If[debug, Print["power solver"]];
+    optimizeGeneratorsTuningMapNumericalPowerSolver[parts, unchangedIntervals],
     
-    (* covers targeting-list (includes 
-    unchanged-octave diamond minimax-U "minimax", unchanged-octave diamond minisos-U "least squares") *)
-    optimizeGeneratorsTuningMapTargetingList[tuningOptions]
+    If[
+      powerPart == 2,
+      
+      (* covers unchanged-octave diamond minisos-U "least squares", 
+      minimax-ES "TE", minimax-NES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
+      minimax-ZES "WE", minimax-PNES "BE" *)
+      If[debug, Print["pseudoinverse"]];
+      optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[parts, unchangedIntervals],
+      
+      If[
+        powerPart == \[Infinity],
+        
+        (* covers unchanged-octave diamond minimax-U "minimax", 
+        minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
+        minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
+        If[debug, Print["max polytope"]];
+        optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[parts, unchangedIntervals],
+        
+        If[
+          powerPart == 1,
+          
+          (* no historically described tunings use this *)
+          If[debug, Print["sum polytope"]];
+          optimizeGeneratorsTuningMapAnalyticalSumPolytope[parts, unchangedIntervals],
+          
+          (* no historically described tunings go here *)
+          optimizeGeneratorsTuningMapNumericalPowerSolver[parts, unchangedIntervals]
+        ]
+      ]
+    ]
+  ];
+  
+  If[
+    optimizedGeneratorsTuningMap == Null,
+    If[debug, Print["power limit solver"]];
+    optimizedGeneratorsTuningMap = optimizeGeneratorsTuningMapNumericalPowerLimitSolver[parts, unchangedIntervals]
+  ];
+  
+  optimizedGeneratorsTuningMap = 1200 * optimizedGeneratorsTuningMap;
+  
+  If[
+    Length[targetedIntervalsA] == 0 && complexitySizeFactor != 0,
+    optimizedGeneratorsTuningMap = Drop[optimizedGeneratorsTuningMap, -1]
   ];
   
   If[
@@ -158,7 +206,7 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   
   If[
     pureOctaveStretch,
-    optimizedGeneratorsTuningMap = getPureOctaveStretchedGeneratorsTuningMap[optimizedGeneratorsTuningMap, t]
+    optimizedGeneratorsTuningMap = getPureOctaveStretchedGeneratorsTuningMap[optimizedGeneratorsTuningMap, parts]
   ];
   
   SetAccuracy[N[optimizedGeneratorsTuningMap], outputPrecision]
@@ -598,7 +646,7 @@ plotDamage[t_, OptionsPattern[]] := Module[
   ];
   normPower = If[
     optimizationPower == \[Infinity] && damageWeightingSlope == "simplicityWeighted" && Length[targetedIntervals] == 0,
-    dualPower[complexityNormPower],
+    getDualPower[complexityNormPower],
     optimizationPower
   ];
   AppendTo[plotArgs, Norm[targetedIntervalGraphs, normPower]];

@@ -9,8 +9,10 @@ optimizeGeneratorsTuningMapSemianalyticalMaxPolytope[{
   justSideGeneratorsPart_,
   justSideMappingPart_,
   eitherSideIntervalsPart_,
-  eitherSideMultiplierPart_
-}] := Module[
+  eitherSideMultiplierPart_,
+  powerPart_,
+  periodsPerOctavePart_
+}, unchangedIntervals_] := Module[
   {
     temperedSideMinusGeneratorsPart,
     justSide,
@@ -343,8 +345,10 @@ optimizeGeneratorsTuningMapAnalyticalSumPolytope[{
   justSideGeneratorsPart_,
   justSideMappingPart_,
   eitherSideIntervalsPart_,
-  eitherSideMultiplierPart_
-}] := Module[
+  eitherSideMultiplierPart_,
+  powerPart_,
+  periodsPerOctavePart_
+}, unchangedIntervals_] := Module[
   {
     generatorCount,
     
@@ -445,8 +449,10 @@ optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[{
   justSideGeneratorsPart_,
   justSideMappingPart_,
   eitherSideIntervalsPart_,
-  eitherSideMultiplierPart_
-}] := Module[
+  eitherSideMultiplierPart_,
+  powerPart_,
+  periodsPerOctavePart_
+}, unchangedIntervals_] := Module[
   {temperedSideMinusGeneratorsPart, justSide},
   
   temperedSideMinusGeneratorsPart = temperedSideMappingPart.eitherSideIntervalsPart.eitherSideMultiplierPart;
@@ -459,28 +465,28 @@ optimizeGeneratorsTuningMapAnalyticalMagPseudoinverse[{
 (* GENERAL OPTIMIZATION POWER (MINISOP) OR GENERAL COMPLEXITY NORM POWER (P-NORM) *)
 
 (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
-optimizeGeneratorsTuningMapNumericalPowerSolver[
-  parts_,
-  normPower_,
-  unchangedIntervals_,
-  periodsPerOctave_
-] := Module[
+optimizeGeneratorsTuningMapNumericalPowerSolver[parts_, unchangedIntervals_] := Module[
   {solution},
   
-  solution = getNumericalSolution[parts, normPower, unchangedIntervals, periodsPerOctave];
+  solution = getNumericalSolution[parts, unchangedIntervals];
   
   First[First[parts]] /. Last[solution]
 ];
 
 (* no historically described tunings use this *)
 (* this is the fallback for when optimizeGeneratorsTuningMapAnalyticalSumPolytope fails to find a unique solution *)
-optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
-  parts_,
-  normPowerLimit_,
-  unchangedIntervals_,
-  periodsPerOctave_
-] := Module[
+optimizeGeneratorsTuningMapNumericalPowerLimitSolver[{
+  temperedSideGeneratorsPart_,
+  temperedSideMappingPart_,
+  justSideGeneratorsPart_,
+  justSideMappingPart_,
+  eitherSideIntervalsPart_,
+  eitherSideMultiplierPart_,
+  powerPart_,
+  periodsPerOctavePart_
+}, unchangedIntervals_] := Module[
   {
+    normPowerLimit,
     normPowerPower,
     normPower,
     previousAbsErrorMagnitude,
@@ -489,6 +495,7 @@ optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
     solution
   },
   
+  normPowerLimit = powerPart;
   normPowerPower = 1;
   normPower = Power[2, 1 / normPowerPower];
   previousAbsErrorMagnitude = 1000001; (* this is just something really big, in order for initial conditions to work *)
@@ -498,18 +505,22 @@ optimizeGeneratorsTuningMapNumericalPowerLimitSolver[
     normPowerPower <= 6 && previousAbsErrorMagnitude - absErrorMagnitude > 0,
     previousAbsErrorMagnitude = absErrorMagnitude;
     previousSolution = solution;
-    solution = getNumericalSolution[
-      parts,
-      normPower,
-      unchangedIntervals,
-      periodsPerOctave
-    ];
+    solution = getNumericalSolution[{
+      temperedSideGeneratorsPart,
+      temperedSideMappingPart,
+      justSideGeneratorsPart,
+      justSideMappingPart,
+      eitherSideIntervalsPart,
+      eitherSideMultiplierPart,
+      normPower, (* note: this is different *)
+      periodsPerOctavePart
+    }, unchangedIntervals];
     absErrorMagnitude = First[solution];
     normPowerPower = normPowerPower += 1;
     normPower = If[normPowerLimit == 1, Power[2, 1 / normPowerPower], Power[2, normPowerPower]];
   ];
   
-  First[First[parts]] /. Last[solution]
+  First[temperedSideGeneratorsPart] /. Last[solution]
 ];
 
 getNumericalSolution[
@@ -519,11 +530,11 @@ getNumericalSolution[
     justSideGeneratorsPart_,
     justSideMappingPart_,
     eitherSideIntervalsPart_,
-    eitherSideMultiplierPart_
+    eitherSideMultiplierPart_,
+    powerPart_,
+    periodsPerOctavePart_
   },
-  normPower_,
-  unchangedIntervals_,
-  periodsPerOctave_
+  unchangedIntervals_
 ] := Module[
   {
     temperedSide,
@@ -536,10 +547,10 @@ getNumericalSolution[
   temperedSide = First[getSide[temperedSideGeneratorsPart, temperedSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
   justSide = First[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
   
-  norm = getNorm[normPower, temperedSide, justSide];
+  norm = getNorm[powerPart, temperedSide, justSide];
   minimizedNorm = If[
     Length[unchangedIntervals] > 0,
-    {norm, First[temperedSideGeneratorsPart][[1]] == 1 / periodsPerOctave},
+    {norm, First[temperedSideGeneratorsPart][[1]] == 1 / periodsPerOctavePart},
     norm
   ];
   

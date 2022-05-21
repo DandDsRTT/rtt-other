@@ -420,10 +420,10 @@ test[tuningInverse, {{Log2[2], 0, 0}, {0, Log2[3], 0}, {0, 0, Log2[5]}, {Log2[2]
 
 (* TARGETING-ALL *)
 
-(* dualPower *)
-test[dualPower, 1, \[Infinity]];
-test[dualPower, 2, 2];
-test[dualPower, \[Infinity], 1];
+(* getDualPower *)
+test[getDualPower, 1, \[Infinity]];
+test[getDualPower, 2, 2];
+test[getDualPower, \[Infinity], 1];
 
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, {1202.390, 697.176}];
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2, {1202.607, 696.741}];
