@@ -66,6 +66,12 @@ augene = {{{3, 0, 7, 18}, {0, 1, 0, -2}}, "co"};
 sensi = {{{1, -1, -1, -2}, {0, 7, 9, 13}}, "co"};
 sensamagic = {{{1, 0, 0, 0}, {0, 1, 1, 2}, {0, 0, 2, -1}}, "co"};
 
+
+(* optimizeGeneratorsTuningMap, using explicit targeted intervals *)
+
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
+
+
 (* optimizeGeneratorsTuningMap, by individual tuning properties *)
 
 testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {1200.000, 696.578}];
