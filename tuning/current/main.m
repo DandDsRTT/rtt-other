@@ -1325,10 +1325,10 @@ getDamageWeights[tuningOptions_] := Module[
   ]
 ];
 
-getSumDamage[parts_] := Total[getAbsErrorWrapper[parts_]];
-get2SumDamage[parts_] := Total[Power[getAbsErrorWrapper[tuningMap, tuningOptions], 2]];
-getPowerSumDamage[parts_] := Total[Power[getAbsErrorWrapper[tuningMap, tuningOptions], part[parts, "powerPart"]]];
-getMaxDamage[parts_] := Max[getAbsErrorWrapper[tuningMap, tuningOptions]];
+getSumDamage[parts_] := Total[getAbsError[parts]];
+get2SumDamage[parts_] := Total[Power[getAbsError[parts], 2]];
+getPowerSumDamage[parts_] := Total[Power[getAbsError[parts], part[parts, "powerPart"]]];
+getMaxDamage[parts_] := Max[getAbsError[parts]];
 
 
 (* ERROR *)
@@ -1342,7 +1342,7 @@ getErrors[temperedSide_, justSide_] := N[
   absoluteValuePrecision
 ];
 
-getAbsErrorWrapper[{
+getAbsError[{
   temperedSideGeneratorsPart_,
   temperedSideMappingPart_,
   justSideGeneratorsPart_,
@@ -2031,7 +2031,7 @@ sumPolytopeSolution[{
   ], Not[# === Null]&];
   candidateOptimumGeneratorsTuningMaps = Map[justSideGeneratorsPart.#&, candidateOptimumGeneratorAs];
   candidateOptimumGeneratorTuningMapAbsErrors = Map[
-    Total[getAbsErrorWrapper[{
+    Total[getAbsError[{
       #, (* note: this is an override; only reason these parts are unpacked *)
       temperedSideMappingPart,
       justSideGeneratorsPart,
@@ -2178,7 +2178,7 @@ getNumericalSolution[
   temperedSide = First[getSide[temperedSideGeneratorsPart, temperedSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
   justSide = First[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
   
-  norm = getNorm[powerPart, temperedSide, justSide];
+  norm = getNorm[SetPrecision[powerPart, nMinimizePrecision], temperedSide, justSide];
   minimizedNorm = If[
     Length[unchangedIntervals] > 0,
     {norm, First[temperedSideGeneratorsPart][[1]] == 1 / periodsPerOctavePart},

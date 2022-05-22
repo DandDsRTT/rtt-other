@@ -236,6 +236,26 @@ testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamon
 testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "E-complexity", {242.578, 2824.982}];
 
 
+(* optimization power continuum *)
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {240.000, 2795.336}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 5.00, "damageWeightingSlope" -> "unweighted", {239.797, 2793.002}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 3.00, "damageWeightingSlope" -> "unweighted", {240.000, 2795.336}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 2.00, "damageWeightingSlope" -> "unweighted", {240.430, 2800.277}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1.50, "damageWeightingSlope" -> "unweighted", {241.129, 2808.320}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1.25, "damageWeightingSlope" -> "unweighted", {241.997, 2818.308}];
+testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1.00, "damageWeightingSlope" -> "unweighted", {242.578, 2824.982}];
+
+
+(* complexity norm power continuum *)
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> \[Infinity], {1201.191, 697.405}];
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 5.00, {1201.381, 697.460}];
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 3.00, {1201.513, 697.503}];
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2.00, {1201.600, 697.531}];
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 1.50, {1201.648, 697.547}];
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 1.25, {1201.673, 697.556}];
+testClose[optimizeGeneratorsTuningMap, meantone, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 1.00, {1201.699, 697.564}];
+
+
 (* and then in this section I want to have a bunch of external examples, organized by tuning first, then temperament
 sources:
 [1] Facebook https://www.facebook.com
