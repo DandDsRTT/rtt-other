@@ -1569,7 +1569,7 @@ getTargetingAllParts[tuningOptions_] := Module[
   If[
     complexitySizeFactor != 0,
     
-    AppendTo[generatorsTuningMap, Symbol["gW"]];
+    AppendTo[generatorsTuningMap, Symbol["gAugmented"]];
     
     ma = Map[Join[#, {0}]&, ma];
     AppendTo[ma, Join[Table[complexitySizeFactor, Last[Dimensions[ma]] - 1].getLogPrimeCoordinationA[t], {-1}]];
