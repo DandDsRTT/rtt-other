@@ -438,6 +438,8 @@ testCloseNotList[getGeneratorsTuningMapDamageMean, meantone, {1200., 696.578}, "
 
 (* getTuningMapDamageMean *)
 testCloseNotList[getTuningMapDamageMean, meantone, {1200.000, 1897.564, 2786.314}, "targetedIntervals" -> {IdentityMatrix[3], "contra"}, "damageWeightingSlope" -> "unweighted", "optimizationPower" -> \[Infinity], 4.391];
+testCloseNotList[getTuningMapDamageMean, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "systematicTuningName" -> "diamond minisos-U", 12.052];
+testCloseNotList[getTuningMapDamageMean, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "systematicTuningName" -> "diamond minisum-U", 10.428];
 
 (* tuningInverse *)
 test[tuningInverse, {{Log2[2], 0, 0}, {0, Log2[3], 0}, {0, 0, Log2[5]}}, {{1 / Log2[2], 0, 0}, {0, 1 / Log2[3], 0}, {0, 0, 1 / Log2[5]}}];

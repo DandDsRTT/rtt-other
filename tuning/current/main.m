@@ -489,7 +489,7 @@ getTuningMapDamageMean[t_, tuningMap_, OptionsPattern[]] := Module[
   (* override the other half of the temperedSideMappingPart too, since we have the whole tuning map already *)
   parts[[2]] = IdentityMatrix[getD[t]];
   
-  1200 * getPowerMeanAbsError[parts]
+  SetAccuracy[N[1200 * getPowerMeanAbsError[parts]], outputPrecision]
 ];
 
 (*
@@ -548,7 +548,8 @@ plotDamage[t_, OptionsPattern[]] := Module[
     normPower,
     plotArgs,
     targetedIntervalGraphs,
-    r
+    r,
+    plotStyle
   },
   
   targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
@@ -647,18 +648,25 @@ plotDamage[t_, OptionsPattern[]] := Module[
     ],
     targetedIntervalsA
   ];
+  (* Print["targetedIntervalGraphs", targetedIntervalGraphs]; *)
   normPower = If[
     optimizationPower == \[Infinity] && damageWeightingSlope == "simplicityWeighted" && Length[targetedIntervals] == 0,
     getDualPower[complexityNormPower],
     optimizationPower
   ];
-  AppendTo[plotArgs, Norm[targetedIntervalGraphs, normPower]];
+  (* AppendTo[plotArgs, {targetedIntervalGraphs, Norm[targetedIntervalGraphs, normPower]}];*)
+  
+  AppendTo[plotArgs, {targetedIntervalGraphs, (* Norm[targetedIntervalGraphs, Infinity],*) Norm[targetedIntervalGraphs, 2](*, Norm[targetedIntervalGraphs, 2]^2*)(* Norm[targetedIntervalGraphs, 1]*)(*, sumLines*)}];
+  plotStyle = Join[Table[Auto, Length[targetedIntervalGraphs]], { {Gray}(*{Black, Dotted},  {Black, Dashed},  {Black}*)}];
+  Print[plotStyle];
   
   (* range *)
   MapIndexed[AppendTo[plotArgs, {Part[generatorsTuningMap, First[#2]], #1 - 10, #1 + 10}]&, optimumGeneratorsTuningMap];
   
   (* settings *)
   AppendTo[plotArgs, ImageSize -> 1000];
+  AppendTo[plotArgs, PlotStyle -> plotStyle];
+  AppendTo[plotArgs, MaxRecursion -> 6];
   
   (* plot type *)
   r = getR[tWithPossiblyChangedIntervalBasis];
@@ -1175,12 +1183,12 @@ getParts[tuningOptions_] := Module[
   
   If[
     debug == True,
-    Print["temperedSideGeneratorsPart: ", temperedSideGeneratorsPart]; (* g *)
-    Print["temperedSideMappingPart: ", temperedSideMappingPart]; (* M *)
-    Print["justSideGeneratorsPart: ", justSideGeneratorsPart]; (* p *)
-    Print["justSideMappingPart: ", justSideMappingPart]; (* I *)
-    Print["eitherSideIntervalsPart: ", eitherSideIntervalsPart]; (* I *)
-    Print["eitherSideMultiplierPart: ", eitherSideMultiplierPart]; (* X⁻¹ *)
+    Print["temperedSideGeneratorsPart: ", temperedSideGeneratorsPart // MatrixForm, N[temperedSideGeneratorsPart] // MatrixForm]; (* g *)
+    Print["temperedSideMappingPart: ", temperedSideMappingPart // MatrixForm, N[temperedSideMappingPart] // MatrixForm]; (* M *)
+    Print["justSideGeneratorsPart: ", justSideGeneratorsPart // MatrixForm, N[justSideGeneratorsPart] // MatrixForm]; (* p *)
+    Print["justSideMappingPart: ", justSideMappingPart // MatrixForm, N[justSideMappingPart] // MatrixForm]; (* I *)
+    Print["eitherSideIntervalsPart: ", eitherSideIntervalsPart // MatrixForm, N[eitherSideIntervalsPart] // MatrixForm]; (* T *)
+    Print["eitherSideMultiplierPart: ", eitherSideMultiplierPart // MatrixForm, N[eitherSideMultiplierPart] // MatrixForm]; (* W *)
     Print["powerPart: ", powerPart];
     Print["periodsPerOctavePart: ", periodsPerOctavePart];
   ];
@@ -1330,21 +1338,29 @@ getPowerSumAbsError[parts_] := If[
 ];
 getPowerNormAbsError[parts_] := Norm[getAbsErrors[parts], part[parts, "powerPart"]];
 getPowerMeanAbsError[parts_] := Module[
-  {result},
+  {absErrors, powerPart, targetedIntervalCount, result},
+  
+  absErrors = getAbsErrors[parts];
+  powerPart = part[parts, "powerPart"];
+  targetedIntervalCount = Last[Dimensions[part[parts, "eitherSideIntervalsPart"]]]; (* k *)
+  
+  (* Print["absErrors: ", SetAccuracy[N[absErrors * 1200], outputPrecision]]; *)
+  (* Print[SetAccuracy[N[part[parts, "justSideGeneratorsPart"]* 1200], outputPrecision]]; *)
+  (* Print[SetAccuracy[N[part[parts, "temperedSideGeneratorsPart"]* 1200], outputPrecision]]; *)
   
   result = If[
-    part[parts, "powerPart"] == \[Infinity],
+    powerPart == \[Infinity],
     
     (* again, I thought it'd be fine, but Wolfram Language thinks the infinity-power-sum is "indeterminate" *)
-    Max[getAbsErrors[parts]],
+    Max[absErrors],
     
     Power[
       Total[Power[
-        getAbsErrors[parts],
-        part[parts, "powerPart"]
-      ]] / Last[Dimensions[part[parts, "eitherSideIntervalsPart"]]],
-      1 / part[parts, "powerPart"]
-    ];
+        absErrors,
+        powerPart
+      ]] / targetedIntervalCount,
+      1 / powerPart
+    ]
   ];
   
   result
@@ -1365,6 +1381,9 @@ getAbsErrors[{
   
   temperedSide = First[getSide[temperedSideGeneratorsPart, temperedSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
   justSide = First[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
+  
+  (* Print[SetAccuracy[N[1200*temperedSide], outputPrecision]]; *)
+  (* Print[SetAccuracy[N[1200*justSide], outputPrecision]]; *)
   
   Abs[N[
     Map[
@@ -1590,12 +1609,12 @@ getTargetingAllParts[tuningOptions_] := Module[
   
   If[
     debug == True,
-    Print["temperedSideGeneratorsPart: ", temperedSideGeneratorsPart]; (* g *)
-    Print["temperedSideMappingPart: ", temperedSideMappingPart]; (* M *)
-    Print["justSideGeneratorsPart: ", justSideGeneratorsPart]; (* p *)
-    Print["justSideMappingPart: ", justSideMappingPart]; (* I *)
-    Print["eitherSideIntervalsPart: ", eitherSideIntervalsPart]; (* I *)
-    Print["eitherSideMultiplierPart: ", eitherSideMultiplierPart]; (* X⁻¹ *)
+    Print["temperedSideGeneratorsPart: ", temperedSideGeneratorsPart // MatrixForm, N[temperedSideGeneratorsPart] // MatrixForm]; (* g *)
+    Print["temperedSideMappingPart: ", temperedSideMappingPart // MatrixForm, N[temperedSideMappingPart] // MatrixForm]; (* M *)
+    Print["justSideGeneratorsPart: ", justSideGeneratorsPart // MatrixForm, N[justSideGeneratorsPart] // MatrixForm]; (* p *)
+    Print["justSideMappingPart: ", justSideMappingPart // MatrixForm, N[justSideMappingPart] // MatrixForm]; (* I *)
+    Print["eitherSideIntervalsPart: ", eitherSideIntervalsPart // MatrixForm, N[eitherSideIntervalsPart] // MatrixForm]; (* I *)
+    Print["eitherSideMultiplierPart: ", eitherSideMultiplierPart // MatrixForm, N[eitherSideMultiplierPart] // MatrixForm]; (* X⁻¹ *)
     Print["powerPart: ", powerPart];
     Print["periodsPerOctavePart: ", periodsPerOctavePart];
   ];
@@ -1653,6 +1672,11 @@ getDiamond[d_] := Module[{oddLimit, oddsWithinLimit, rawDiamond},
   oddLimit = oddLimitFromD[d];
   oddsWithinLimit = Range[1, oddLimit, 2];
   rawDiamond = Map[Function[outer, Map[Function[inner, outer / inner], oddsWithinLimit]], oddsWithinLimit];
+  
+  (* for when you want the tonality diamond to be in the natural order for a 5-limit diamond, 
+  as when developing pedagogical materials and using this library, 
+  because it normally doesn't end up getting them in the natural order
+  {{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}} *)
   
   padVectorsWithZerosUpToD[Map[quotientToPcv, Map[octaveReduce, Select[DeleteDuplicates[Flatten[rawDiamond]], # != 1&]]], d]
 ];
@@ -1927,7 +1951,7 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
   then what we do with each of those combo perm vertices is build a constraint matrix. 
   we'll apply this constraint matrix to a typical linear equation of the form Ax = b, 
   where A is a matrix, b is a vector, and x is another vector, the one we're solving for.
-  in our case our matrix A is M, our mapping, b is our primes tuning map p, and x is our generators tuning map g.
+  in our case our matrix A is M, our mapping, b is our just tuning map j, and x is our generators tuning map g.
   
   e.g. when the targets are just the primes (and thus an identity matrix we can ignore),
   and the temperament we're tuning is 12-ET with M = [12 19 28] and standard interval basis so p = [log₂2 log₂3 log₂5],
@@ -2046,7 +2070,7 @@ sumPolytopeSolution[{
     getGeneratorsAFromUnchangedIntervals[temperedSideMappingPart, #]&,
     filteredNormalizedCandidateUnchangedIntervalSets
   ], Not[# === Null]&];
-  candidateOptimumGeneratorsTuningMaps = Map[justSideGeneratorsPart.#&, candidateOptimumGeneratorAs];
+  candidateOptimumGeneratorsTuningMaps = Map[justSideGeneratorsPart.#&, candidateOptimumGeneratorAs]; (* TODO: not really tuning maps because not in cents *)
   candidateOptimumGeneratorTuningMapAbsErrors = Map[
     Total[getAbsErrors[{
       #, (* note: this is an override; only reason these parts are unpacked *)
@@ -2060,6 +2084,13 @@ sumPolytopeSolution[{
     }]]&,
     candidateOptimumGeneratorsTuningMaps
   ];
+  
+  (* Print["candidateUnchangedIntervalSets: ", candidateUnchangedIntervalSets // MatrixForm];
+  Print["normalizedCandidateUnchangedIntervalSets: ", normalizedCandidateUnchangedIntervalSets // MatrixForm];
+  Print["filteredNormalizedCandidateUnchangedIntervalSets: ", filteredNormalizedCandidateUnchangedIntervalSets // MatrixForm];
+  Print["candidateOptimumGeneratorAs: ", Map[Transpose, candidateOptimumGeneratorAs] // MatrixForm];
+  Print["candidateOptimumGeneratorsTuningMaps: ", 1200 * N[candidateOptimumGeneratorsTuningMaps] // MatrixForm];
+  Print["candidateOptimumGeneratorTuningMapAbsErrors: ", 1200 * N[candidateOptimumGeneratorTuningMapAbsErrors] // MatrixForm]; *)
   
   optimumGeneratorsTuningMapIndices = Position[candidateOptimumGeneratorTuningMapAbsErrors, Min[candidateOptimumGeneratorTuningMapAbsErrors]];
   If[
@@ -2106,6 +2137,13 @@ pseudoinverseSolution[{
   
   temperedSideMinusGeneratorsPart = temperedSideMappingPart.eitherSideIntervalsPart.eitherSideMultiplierPart;
   justSide = getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart];
+  
+  (* Print["temperedSideMinusGeneratorsPart: ", N[temperedSideMinusGeneratorsPart] // MatrixForm];
+  Print["temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]: ", N[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]] // MatrixForm];
+  Print["Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]: ", N[Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]] // MatrixForm];
+  Print["Transpose[temperedSideMinusGeneratorsPart].Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]: ", N[Transpose[temperedSideMinusGeneratorsPart].Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]] // MatrixForm];
+  Print["justSide.Transpose[temperedSideMinusGeneratorsPart].Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]: ", N[justSide.Transpose[temperedSideMinusGeneratorsPart].Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]] // MatrixForm];
+  Print["justSide: ", N[justSide] // MatrixForm]; *)
   
   First[justSide.Transpose[temperedSideMinusGeneratorsPart].Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]]
 ];
