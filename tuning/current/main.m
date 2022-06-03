@@ -1953,6 +1953,7 @@ maxPolytopeSolution[{
   so you may as well just keep calling it "TOP" and refine its definition. anyway...
   
   the `findAllNestedMinimaxTuningsFromPolytopeVertices` function this function calls may come back with more than one result. 
+  (sometimes it pulls off some nested-minimaxing on its own, but that's a really subtle point, and we won't worry about it here.)
   the clever way we compute a nested-minimax uses the same polytope vertex searching method used for that first pass, but now with a twist.
   so in the basic case, this method finds the vertices of a max polytope for a temperament.
   so now, instead of running it on the case of the original temperament versus JI, we run it on a distorted version of this case.
