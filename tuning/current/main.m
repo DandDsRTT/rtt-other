@@ -549,7 +549,8 @@ plotDamage[t_, OptionsPattern[]] := Module[
     plotArgs,
     targetedIntervalGraphs,
     r,
-    plotStyle
+    plotStyle,
+    image
   },
   
   targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
@@ -656,12 +657,31 @@ plotDamage[t_, OptionsPattern[]] := Module[
   ];
   (* AppendTo[plotArgs, {targetedIntervalGraphs, Norm[targetedIntervalGraphs, normPower]}];*)
   
-  AppendTo[plotArgs, {targetedIntervalGraphs, (* Norm[targetedIntervalGraphs, Infinity],*) Norm[targetedIntervalGraphs, 2](*, Norm[targetedIntervalGraphs, 2]^2*)(* Norm[targetedIntervalGraphs, 1]*)(*, sumLines*)}];
-  plotStyle = Join[Table[Auto, Length[targetedIntervalGraphs]], { {Gray}(*{Black, Dotted},  {Black, Dashed},  {Black}*)}];
-  Print[plotStyle];
+  image = Image[
+    Map[
+      Map[
+        If[
+          # == 1,
+          {0, 0, 0, 1},
+          {0, 0, 0, 0}
+        ]&,
+        #
+      ]&,
+      Array[(-1)^+ ## &, {32, 32}]
+    ],
+    ColorSpace -> "RGB"
+  ];
+  image = ImageResize[image, 256, Resampling -> "Constant"];
+  
+  (* Image@Array[(-1)^+## &, {64, 64}];*)
+  (*image = Graphics@{PatternFilling["Checkerboard", ImageScaled[1/10]](*,   Rectangle[]*)}*)
+  (* SetAlphaChannel[White];*)
+  AppendTo[plotArgs, {targetedIntervalGraphs, (* Norm[targetedIntervalGraphs, Infinity],*) Norm[targetedIntervalGraphs, \[Infinity]] + 0.001(*, Norm[targetedIntervalGraphs, 2]^2*)(* Norm[targetedIntervalGraphs, 1]*)(*, sumLines*)}];
+  plotStyle = Join[Table[Auto, Length[targetedIntervalGraphs]], {{Texture[image](*,PatternFilling["Checkerboard"]*)}(*{Black, Dotted},  {Black, Dashed},  {Black}*)}];
+  (* Print[plotStyle];*)
   
   (* range *)
-  MapIndexed[AppendTo[plotArgs, {Part[generatorsTuningMap, First[#2]], #1 - 10, #1 + 10}]&, optimumGeneratorsTuningMap];
+  MapIndexed[AppendTo[plotArgs, {Part[generatorsTuningMap, First[#2]], #1 - 2, #1 + 2}]&, optimumGeneratorsTuningMap];
   
   (* settings *)
   AppendTo[plotArgs, ImageSize -> 1000];
@@ -1345,6 +1365,7 @@ getPowerMeanAbsError[parts_] := Module[
   targetedIntervalCount = Last[Dimensions[part[parts, "eitherSideIntervalsPart"]]]; (* k *)
   
   (* Print["absErrors: ", SetAccuracy[N[absErrors * 1200], outputPrecision]]; *)
+  (* Print["absErrors: ", absErrors * 1200]; *) (* TODO: the above with the accuracy setting was causing us one of those malformed real problems *)
   (* Print[SetAccuracy[N[part[parts, "justSideGeneratorsPart"]* 1200], outputPrecision]]; *)
   (* Print[SetAccuracy[N[part[parts, "temperedSideGeneratorsPart"]* 1200], outputPrecision]]; *)
   
@@ -1848,21 +1869,24 @@ findAllNestedMinimaxTuningsFromPolytopeVertices[temperedSideMinusGeneratorsPart_
       ]],
     {vertexConstraintA, vertexConstraintAs}
   ];
-  (* ignore the problems that are singular and therefore have no solution *)
-  candidateTunings = Select[candidateTunings, !TrueQ[# == "err"]&];
   
   (* each damages list is sorted in descending order; 
   the list of lists itself is sorted corresponding to the candidate tunings*)
   sortedDamagesByCandidateTuning = Quiet[Map[
     Function[
       {candidateTuning},
-      (* note that because of being sorted by size, this is no longer sorted by which target the damage applies to *)
-      ReverseSort[SetAccuracy[Flatten[Abs[
-        temperedSideMinusGeneratorsPart.candidateTuning - justSide
-      ]], linearSolvePrecision]]
+      If[
+        ToString[candidateTuning] == "err",
+        "err",
+        ReverseSort[Abs[Flatten[fixUpZeros[temperedSideMinusGeneratorsPart.candidateTuning - justSide]]]]
+      ]
     ],
     candidateTunings
   ]];
+  (* MapThread[Print["constraint matrix: ", #1 // MatrixForm, " tuning: ", 1200 * #2 , " damages: ", 1200 * #3]&, {vertexConstraintAs, candidateTunings, sortedDamagesByCandidateTuning}]; *)
+  (* ignore the problems that are singular and therefore have no solution *)
+  candidateTunings = Select[candidateTunings, !TrueQ[# == "err"]&];
+  sortedDamagesByCandidateTuning = Select[sortedDamagesByCandidateTuning, !TrueQ[# == "err"]&];
   
   (*     
   here we're iterating by index of the targeted intervals, 
@@ -1933,6 +1957,16 @@ findAllNestedMinimaxTuningsFromPolytopeVertices[temperedSideMinusGeneratorsPart_
     Function[{tuningA, tuningB}, AllTrue[MapThread[#1 == #2&, {tuningA, tuningB}], TrueQ]]
   ]
 ];
+fixUpZeros[l_] := Map[
+  Function[
+    {nestedList},
+    Map[
+      If[Quiet[PossibleZeroQ[#]], 0, SetAccuracy[#, linearSolvePrecision]]&, (* TODO: reconcile this with other PossibleZeroQ part *)
+      nestedList
+    ]
+  ],
+  l
+];
 
 getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
   {vertexConstraintA, vertexConstraintAs, targetCombinations, directionPermutations},
@@ -1984,10 +2018,17 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
   they're anchored with the first targeted interval always in the super direction.
   *)
   targetCombinations = DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, targetCount], generatorCount + 1], DuplicateFreeQ[#]&]]];
+  (* Print["targetCombinations: ", targetCombinations // MatrixForm];*)
+  
   Do[
     (* note that these are only generatorCount, not generatorCount + 1, because whichever is the first one will always be +1 *)
+    (*Print["  targetCombination: ", targetCombination // MatrixForm];*)
+    
     directionPermutations = Tuples[{1, -1}, generatorCount];
+    (*Print["  directionPermutations: ", directionPermutations // MatrixForm];*)
+    
     Do[
+      (*  Print["    directionPermutation: ", directionPermutation // MatrixForm];*)
       
       vertexConstraintA = Table[Table[0, targetCount], generatorCount];
       
@@ -1998,6 +2039,7 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
         {generatorIndex, Range[generatorCount]}
       ];
       
+      (*Print["      vertexConstraintA: ", vertexConstraintA // MatrixForm];*)
       AppendTo[vertexConstraintAs, vertexConstraintA],
       
       {directionPermutation, directionPermutations}
