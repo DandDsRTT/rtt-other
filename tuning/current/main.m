@@ -492,6 +492,200 @@ getTuningMapDamageMean[t_, tuningMap_, OptionsPattern[]] := Module[
   SetAccuracy[N[1200 * getPowerMeanAbsError[parts]], outputPrecision]
 ];
 
+(* TODO: it would be cool if this did a nicer job of printing them out, like, telling you which targeted interval has which damages you know? *)
+(*
+  getGeneratorsTuningMapDamages[t, generatorsTuningMap]
+  
+  Given a representation of a temperament as a mapping or comma basis,
+  plus a tuning map for that temperament, and a tuning method, 
+  returns the damages to each of the targeted intervals.
+  
+  The tuning may be specified by original name, systematic name, or by individual parameters.
+  
+  Examples:
+  
+  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+        quarterCommaGeneratorsTuningMap = {1200, 696.578};
+        getGeneratorsTuningMapDamages[meantoneM, quarterCommaGeneratorsTuningMap, "systematicTuningName" -> "minimax-S"]
+    
+  Out   {} TODO: get this answer 
+*)
+Options[getGeneratorsTuningMapDamages] = tuningOptions;
+getGeneratorsTuningMapDamages[t_, generatorsTuningMap_, OptionsPattern[]] := Module[
+  {
+    targetedIntervals, (* trait 0 *)
+    optimizationPower, (* trait 1 *)
+    damageWeightingSlope, (* trait 2 *)
+    complexityNormPower, (* trait 3 *)
+    complexityNegateLogPrimeCoordination, (* trait 4a *)
+    complexityPrimePower, (* trait 4b *)
+    complexitySizeFactor, (* trait 4c *)
+    complexityMakeOdd, (* trait 4d *)
+    tuningIntervalBasis, (* trait 8 *)
+    unchangedIntervals, (* trait 9 *)
+    pureOctaveStretch, (* trait 10 *)
+    systematicTuningName,
+    originalTuningName,
+    systematicDamageName,
+    originalDamageName,
+    systematicComplexityName,
+    originalComplexityName,
+    debug,
+    tuningMap
+  },
+  
+  targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
+  optimizationPower = OptionValue["optimizationPower"]; (* trait 1 *)
+  damageWeightingSlope = OptionValue["damageWeightingSlope"]; (* trait 2 *)
+  complexityNormPower = OptionValue["complexityNormPower"]; (* trait 3 *)
+  complexityNegateLogPrimeCoordination = OptionValue["complexityNegateLogPrimeCoordination"]; (* trait 4a *)
+  complexityPrimePower = OptionValue["complexityPrimePower"]; (* trait 4b *)
+  complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
+  complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
+  tuningIntervalBasis = OptionValue["tuningIntervalBasis"]; (* trait 8 *)
+  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait 9 *)
+  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 10 *)
+  systematicTuningName = OptionValue["systematicTuningName"];
+  originalTuningName = OptionValue["originalTuningName"];
+  systematicDamageName = OptionValue["systematicDamageName"];
+  originalDamageName = OptionValue["originalDamageName"];
+  systematicComplexityName = OptionValue["systematicComplexityName"];
+  originalComplexityName = OptionValue["originalComplexityName"];
+  debug = OptionValue["debug"];
+  
+  tuningMap = generatorsTuningMap.getA[getM[t]];
+  
+  getTuningMapDamages[t, tuningMap, {
+    "targetedIntervals" -> targetedIntervals, (* trait 0 *)
+    "optimizationPower" -> optimizationPower, (* trait 1 *)
+    "damageWeightingSlope" -> damageWeightingSlope, (* trait 2 *)
+    "complexityNormPower" -> complexityNormPower, (* trait 3 *)
+    "complexityNegateLogPrimeCoordination" -> complexityNegateLogPrimeCoordination, (* trait 4a *)
+    "complexityPrimePower" -> complexityPrimePower, (* trait 4b *)
+    "complexitySizeFactor" -> complexitySizeFactor, (* trait 4c *)
+    "complexityMakeOdd" -> complexityMakeOdd, (* trait 4d *)
+    "tuningIntervalBasis" -> tuningIntervalBasis, (* trait 8 *)
+    "unchangedIntervals" -> unchangedIntervals, (* trait 9 *)
+    "pureOctaveStretch" -> pureOctaveStretch, (* trait 10 *)
+    "systematicTuningName" -> systematicTuningName,
+    "originalTuningName" -> originalTuningName,
+    "systematicDamageName" -> systematicDamageName,
+    "originalDamageName" -> originalDamageName,
+    "systematicComplexityName" -> systematicComplexityName,
+    "originalComplexityName" -> originalComplexityName,
+    "debug" -> debug
+  }]
+];
+
+(*
+  getTuningMapDamages[t, tuningMap]
+  
+  Given a representation of a temperament as a mapping or comma basis,
+  plus a tuning map for that temperament, and a tuning method, 
+  returns the damages to each of the targeted intervals.
+  
+  The tuning may be specified by original name, systematic name, or by individual parameters.
+  
+  Examples:
+  
+  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+        quarterCommaTuningMap = {1200, 1896.578, 2786.314};
+        getTuningMapDamages[meantoneM, quarterCommaTuningMap, "systematicTuningName" -> "minimax-S"]
+    
+  Out   {} TODO: get this answer
+*)
+Options[getTuningMapDamages] = tuningOptions;
+getTuningMapDamages[t_, tuningMap_, OptionsPattern[]] := Module[
+  {
+    targetedIntervals, (* trait 0 *)
+    optimizationPower, (* trait 1 *)
+    damageWeightingSlope, (* trait 2 *)
+    complexityNormPower, (* trait 3 *)
+    complexityNegateLogPrimeCoordination, (* trait 4a *)
+    complexityPrimePower, (* trait 4b *)
+    complexitySizeFactor, (* trait 4c *)
+    complexityMakeOdd, (* trait 4d *)
+    tuningIntervalBasis, (* trait 8 *)
+    unchangedIntervals, (* trait 9 *)
+    pureOctaveStretch, (* trait 10 *)
+    systematicTuningName,
+    originalTuningName,
+    systematicDamageName,
+    originalDamageName,
+    systematicComplexityName,
+    originalComplexityName,
+    debug,
+    forDamage,
+    tuningOptions,
+    targetedIntervalsA,
+    parts
+  },
+  
+  targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
+  optimizationPower = OptionValue["optimizationPower"]; (* trait 1 *)
+  damageWeightingSlope = OptionValue["damageWeightingSlope"]; (* trait 2 *)
+  complexityNormPower = OptionValue["complexityNormPower"]; (* trait 3 *)
+  complexityNegateLogPrimeCoordination = OptionValue["complexityNegateLogPrimeCoordination"]; (* trait 4a *)
+  complexityPrimePower = OptionValue["complexityPrimePower"]; (* trait 4b *)
+  complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
+  complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
+  tuningIntervalBasis = OptionValue["tuningIntervalBasis"]; (* trait 8 *)
+  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait 9 *)
+  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 10 *)
+  systematicTuningName = OptionValue["systematicTuningName"];
+  originalTuningName = OptionValue["originalTuningName"];
+  systematicDamageName = OptionValue["systematicDamageName"];
+  originalDamageName = OptionValue["originalDamageName"];
+  systematicComplexityName = OptionValue["systematicComplexityName"];
+  originalComplexityName = OptionValue["originalComplexityName"];
+  debug = OptionValue["debug"];
+  
+  forDamage = True;
+  
+  tuningOptions = processTuningOptions[
+    t,
+    targetedIntervals, (* trait 0 *)
+    optimizationPower, (* trait 1 *)
+    damageWeightingSlope, (* trait 2 *)
+    complexityNormPower, (* trait 3 *)
+    complexityNegateLogPrimeCoordination, (* trait 4a *)
+    complexityPrimePower, (* trait 4b *)
+    complexitySizeFactor, (* trait 4c *)
+    complexityMakeOdd, (* trait 4d *)
+    tuningIntervalBasis, (* trait 8 *)
+    unchangedIntervals, (* trait 9 *)
+    pureOctaveStretch, (* trait 10 *)
+    systematicTuningName,
+    originalTuningName,
+    systematicDamageName,
+    originalDamageName,
+    systematicComplexityName,
+    originalComplexityName,
+    debug,
+    forDamage
+  ];
+  
+  optimizationPower = tuningOption[tuningOptions, "optimizationPower"];
+  targetedIntervalsA = tuningOption[tuningOptions, "targetedIntervalsA"]; (* trait 0 *)
+  
+  parts = If[
+    Length[targetedIntervalsA] == 0,
+    getTargetingAllParts[tuningOptions],
+    getParts[tuningOptions]
+  ];
+  (* set the temperedSideGeneratorsPart to the input tuningMap, in octaves, in the structure getAbsErrors needs it, 
+  since getPowerMeanAbsError shares it with other methods *)
+  parts[[1]] = {tuningMap / 1200};
+  (* override the other half of the temperedSideMappingPart too, since we have the whole tuning map already *)
+  parts[[2]] = IdentityMatrix[getD[t]];
+  
+  SetAccuracy[N[1200 * getAbsErrors[parts]], outputPrecision]
+];
+(* TODO: obviously this is super wet... 
+there should be some way to get the damage mean ones to just do these but then do the total outside...
+and also it really hammers home how obnoxious these argument lists are... maybe wolfram language has a better way
+*)
+
 (*
   plotDamage[t]
   
