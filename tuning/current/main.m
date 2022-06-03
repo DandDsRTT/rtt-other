@@ -1722,6 +1722,10 @@ maxPolytopeSolution[{
     uniqueOptimumTuning
   },
   
+  (* the mapped and weighted targeted intervals on one side, and the just and weighted targeted intervals on the other;
+  note that just side goes all the way down to tuning map level (logs of primes), including the generators
+  while the tempered side isn't tuned, but merely mapped. that's so we can solve for the rest of it, 
+  i.e. the generators AKA its tunings *)
   temperedSideMinusGeneratorsPart = Transpose[temperedSideMappingPart.eitherSideIntervalsPart.eitherSideMultiplierPart];
   justSide = Transpose[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
   
@@ -1734,9 +1738,8 @@ maxPolytopeSolution[{
   so you may as well just keep calling it "TOP" and refine its definition. anyway...
   
   the `findAllNestedMinimaxTuningsFromPolytopeVertices` function this function calls may come back with more than one result. 
-  the clever way we compute a nested-minimax uses the same polytope vertex searching method used for the that first pass, but now with a twist.
-  so in the basic case, this method finds the vertices of a tuning polytope for a temperament.
-  this is the area inside of which the targeted intervals are as close as possible to just (by the definition of minimax damage, anyway).
+  the clever way we compute a nested-minimax uses the same polytope vertex searching method used for that first pass, but now with a twist.
+  so in the basic case, this method finds the vertices of a max polytope for a temperament.
   so now, instead of running it on the case of the original temperament versus JI, we run it on a distorted version of this case.
   specifically, we run it on a case distorted so that the previous minimaxes are locked down.
   
@@ -1746,16 +1749,11 @@ maxPolytopeSolution[{
   involving the differences between this arbitrarily-chosen minimax tuning and each of the other minimax tunings.
   note that after this distortion, the original rank and dimensionality of the temperament will no longer be recognizable.
   
-  we then we search for polytope vertices of this minimax-locked distorted situation.
+  we then search for polytope vertices of this minimax-locked distorted situation.
   and we repeatedly do this until we eventually find a unique, nested-minimax optimum. 
   once we've done that, though, our result isn't in the form of a generators tuning map yet. it's still distorted.
   well, with each iteration, we've been keeping track of the distortion applied, so that in the end we could undo them all.
   after undoing those, voilà, we're done! *)
-  
-  (* the mapped and weighted targeted intervals on one side, and the just and weighted targeted intervals on the other;
-  note that just side goes all the way down to tuning map level (logs of primes), including the generators
-  while the tempered side isn't tuned, but merely mapped. that's so we can solve for the rest of it, 
-  i.e. the generators AKA its tunings *)
   
   (* the same as rank here, but named this for correlation with elsewhere in this code *)
   generatorCount = Last[Dimensions[temperedSideMinusGeneratorsPart]];
@@ -1941,11 +1939,11 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
   
   vertexConstraintAs = {};
   
-  (* here we iterate over every combination of r (rank = generator count, in the basic case) targets 
+  (* here we iterate over every combination of r + 1 (rank = generator count, in the basic case) targets 
   and for each of those combinations, looks at all permutations of their directions. 
   these are the vertices of the maximum damage tuning polytope. each is a generator tuning map. the minimum of these will be the minimax tuning.
   
-  e.g. for target intervals 3/2, 5/4, and 5/3, with 2 generators, we'd look at three combinations (3/2, 5/4) (3/2, 5/3) (5/4, 5/3)
+  e.g. for target intervals 3/2, 5/4, and 5/3, with 1 generator, we'd look at three combinations (3/2, 5/4) (3/2, 5/3) (5/4, 5/3)
   and for the first combination, we'd look at both 3/2 \[Times] 5/4 = 15/8 and 3/2 \[Divide] 5/4 = 6/5.
   
   then what we do with each of those combo perm vertices is build a constraint matrix. 
@@ -1982,11 +1980,12 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
   If the targeted intervals list had been [3/2, 4/3, 5/4, 8/5, 5/3, 6/5] instead, and the constraint matrix [1 0 0 0 -1 0],
   then that's 3/2 \[Divide] 5/3 = 5/2.
   
-  The reason why we need all the permutations is because they're actually anchored 
-  with the first targeted interval always in the super direction.
+  The reason why we only need half of the permutations is because we only need relative direction permutations;
+  they're anchored with the first targeted interval always in the super direction.
   *)
   targetCombinations = DeleteDuplicates[Map[Sort, Select[Tuples[Range[1, targetCount], generatorCount + 1], DuplicateFreeQ[#]&]]];
   Do[
+    (* note that these are only generatorCount, not generatorCount + 1, because whichever is the first one will always be +1 *)
     directionPermutations = Tuples[{1, -1}, generatorCount];
     Do[
       
