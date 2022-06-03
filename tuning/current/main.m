@@ -2243,6 +2243,8 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
     {targetCombination, targetCombinations}
   ];
   
+  (* if there's only one generator, we also need to consider each tuning where a target is pure 
+  (rather than tied for damage with another target) *)
   If[
     generatorCount == 1,
     Do[
