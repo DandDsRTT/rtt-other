@@ -1163,6 +1163,10 @@ processTuningOptions[
     StringMatchQ[systematicTuningName, "*diamond*"],
     targetedIntervals = "diamond";
   ];
+  If[
+    StringMatchQ[systematicTuningName, "*primes*"],
+    targetedIntervals = "primes";
+  ];
   
   (* trait 1 *)
   If[
@@ -1266,7 +1270,11 @@ processTuningOptions[
         If[
           ToString[targetedIntervals] == "diamond",
           getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
-          intervalRebase.getA[targetedIntervals]
+          If[
+            ToString[targetedIntervals] == "primes",
+            IdentityMatrix[getD[tPossiblyWithChangedIntervalBasis]],
+            intervalRebase.getA[targetedIntervals]
+          ]
         ]
       ]
     ],
@@ -1285,7 +1293,11 @@ processTuningOptions[
         If[
           ToString[targetedIntervals] == "diamond",
           getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
-          getA[targetedIntervals]
+          If[
+            ToString[targetedIntervals] == "primes",
+            IdentityMatrix[getD[tPossiblyWithChangedIntervalBasis]],
+            getA[targetedIntervals]
+          ]
         ]
       ]
     ]

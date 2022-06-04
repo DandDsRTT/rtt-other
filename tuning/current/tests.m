@@ -736,5 +736,82 @@ testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-S", "c
 testClose[optimizeTuningMap, meantone, "systematicTuningName" -> "minimax-S", "complexitySizeFactor" -> 2.00, {1198.306, 1893.902, 2782.381}];
 
 
+(* proving that minimax-ES = primes minisos-S *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[meantone, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, blackwood, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[blackwood, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, dicot, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[dicot, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, augmented, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[augmented, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, mavila, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[mavila, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, porcupine, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[porcupine, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, srutal, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[srutal, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, hanson, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[hanson, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, magic, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[magic, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, negri, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[negri, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, tetracot, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[tetracot, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, meantone7, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[meantone7, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[magic7, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[pajara, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, augene, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[augene, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, sensi, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[sensi, "systematicTuningName" -> "primes minisos-S"]];
+testClose[optimizeGeneratorsTuningMap, sensamagic, "systematicTuningName" -> "minimax-ES", optimizeGeneratorsTuningMap[sensamagic, "systematicTuningName" -> "primes minisos-S"]];
+
+(* proving that minimax-NES = primes minisos-U *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[meantone, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, blackwood, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[blackwood, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, dicot, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[dicot, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, augmented, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[augmented, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, mavila, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[mavila, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, porcupine, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[porcupine, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, srutal, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[srutal, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, hanson, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[hanson, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, magic, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[magic, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, negri, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[negri, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, tetracot, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[tetracot, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, meantone7, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[meantone7, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[magic7, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[pajara, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, augene, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[augene, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, sensi, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[sensi, "systematicTuningName" -> "primes minisos-U"]];
+testClose[optimizeGeneratorsTuningMap, sensamagic, "systematicTuningName" -> "minimax-NES", optimizeGeneratorsTuningMap[sensamagic, "systematicTuningName" -> "primes minisos-U"]];
+
+(* proving that minimax-S = primes minimax-S *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[meantone, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, blackwood, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[blackwood, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, dicot, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[dicot, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, augmented, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[augmented, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, mavila, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[mavila, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, porcupine, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[porcupine, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, srutal, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[srutal, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, hanson, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[hanson, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, magic, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[magic, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, negri, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[negri, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, tetracot, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[tetracot, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, meantone7, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[meantone7, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[magic7, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[pajara, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, augene, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[augene, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, sensi, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[sensi, "systematicTuningName" -> "primes minimax-S"]];
+testClose[optimizeGeneratorsTuningMap, sensamagic, "systematicTuningName" -> "minimax-S", optimizeGeneratorsTuningMap[sensamagic, "systematicTuningName" -> "primes minimax-S"]];
+
+(* proving that minimax-NS = primes minimax-U *)
+testClose[optimizeGeneratorsTuningMap, meantone, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[meantone, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, blackwood, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[blackwood, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, dicot, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[dicot, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, augmented, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[augmented, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, mavila, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[mavila, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, porcupine, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[porcupine, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, srutal, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[srutal, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, hanson, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[hanson, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, magic, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[magic, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, negri, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[negri, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, tetracot, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[tetracot, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, meantone7, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[meantone7, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, magic7, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[magic7, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, pajara, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[pajara, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, augene, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[augene, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, sensi, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[sensi, "systematicTuningName" -> "primes minimax-U"]];
+testClose[optimizeGeneratorsTuningMap, sensamagic, "systematicTuningName" -> "minimax-NS", optimizeGeneratorsTuningMap[sensamagic, "systematicTuningName" -> "primes minimax-U"]];
+
+
 Print["TOTAL FAILURES: ", failures];
 Print["TOTAL PASSES: ", passes];
