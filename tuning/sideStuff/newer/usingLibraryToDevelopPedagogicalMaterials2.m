@@ -102,3 +102,34 @@ getGeneratorsTuningMapDamageMean[rank2, g2, "systematicTuningName" -> "minimax-U
 getGeneratorsTuningMapDamageMean[rank3, g3, "systematicTuningName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
 getGeneratorsTuningMapDamageMean[rank4, g4, "systematicTuningName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
 getGeneratorsTuningMapDamageMean[rank5, g5, "systematicTuningName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]*)
+
+
+optimizeGeneratorsTuningMap[meantone7, "systematicTuningName" -> "minimax-U", "targetedIntervals" -> {{{-2, 0, 1, 0}, {-1, 1, 0, 0}, {-2, 0, 0, 1}, {1, 1, -1, 0}, {0, 0, -1, 1}, {-1, -1, 0, 1}}, "contra"}]
+
+optimizeGeneratorsTuningMap[{{{12, 19, 28}}, "co"}, "systematicTuningName" -> "minimax-U", "targetedIntervals" -> {IdentityMatrix[3], "contra"}]
+
+M = {{1, 1, 1, 2}, {0, 2, 3, 2}, {0, 0, 2, 1}};(*{{1,1,-1,1},{0,2,-1,0},{0,0,2,1}};*) (* breed temperament *)
+T = Transpose[{{1, 1, -1, 0}, {0, 0, -1, 1}, {3, 0, -1, 0}, {0, 2, -1, 0}, {-1, -1, 0, 1}, {2, -1, 0, 0}, {-1, 1, 0, 0}, {3, 0, 0, -1}, {0, 2, 0, -1}, {-3, 2, 0, 0}}];
+W = DiagonalMatrix[Log2[{6 * 5, 7 * 5, 8 * 5, 9 * 5, 7 * 6, 4 * 3, 3 * 2, 8 * 7, 9 * 7, 9 * 8}]];
+j = 1200 * Log2[{2, 3, 5, 7}];
+
+MTW = Transpose[M.T.W];
+jTW = Transpose[j.T.W];
+
+constraint = {{0, 1, 1, 0, 0, 0, 0, 0, 0, 0}, {0, 1, 0, -1, 0, 0, 0, 0, 0, 0}, {0, 1, 0, 0, 0, -1, 0, 0, 0, 0}};
+
+M // MatrixForm
+T // MatrixForm
+SetAccuracy[N[W], 4] // MatrixForm
+
+SetAccuracy[N[MTW], 4] // MatrixForm
+SetAccuracy[N[jTW], 4] // MatrixForm
+SetAccuracy[N[constraint.MTW.{{g1}, {g2}, {g3}}], 4] // MatrixForm
+SetAccuracy[N[constraint.jTW], 4] // MatrixForm
+
+solution = LinearSolve[constraint.MTW, constraint.jTW];
+SetAccuracy[N[solution], 4] // MatrixForm
+
+M.{3, 0, -2, 1}
+M.{0, 2, 0, -1}
+M.{-2, 1, -1, 1}
