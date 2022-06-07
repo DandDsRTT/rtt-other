@@ -1699,7 +1699,7 @@ when used by getDamageWeights covers any targeting-list tuning using this as its
   ];
   
   If[
-    (* When minimax-ZS ("Weil") needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm, 
+    (* When minimax-ZS ("Weil") needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm, (* TODO: this is a lie now *)
     where it's implemented separately (the max minus min thing); 
     when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ZES ("WE") or minimax-QZES ("KE")
     (surprisingly minimax-QZES does not use the below; it instead uses this and applies an unchanged octave constraint); 
