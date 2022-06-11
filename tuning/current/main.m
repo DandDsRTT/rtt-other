@@ -1604,7 +1604,7 @@ getAbsErrors[{
   powerPart_,
   periodsPerOctavePart_
 }] := Module[
-  {temperedSide, justSide},
+  {temperedSide, justSide, result},
   
   temperedSide = First[getSide[temperedSideGeneratorsPart, temperedSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
   justSide = First[getSide[justSideGeneratorsPart, justSideMappingPart, eitherSideIntervalsPart, eitherSideMultiplierPart]];
@@ -1612,13 +1612,21 @@ getAbsErrors[{
   (* Print[SetAccuracy[N[1200*temperedSide], outputPrecision]]; *)
   (* Print[SetAccuracy[N[1200*justSide], outputPrecision]]; *)
   
-  Abs[N[
+  result = Abs[N[
     Map[
       If[Quiet[PossibleZeroQ[#]], 0, #]&,
       temperedSide - justSide
     ],
     absoluteValuePrecision
-  ]]
+  ]];
+  
+  (* Print["result: ", Map[
+    If[Quiet[PossibleZeroQ[#]], 0, SetAccuracy[1200 * #, 4]]&,
+    result
+  ]]; (* TODO: I wonder if it's just when it's 0 and it gets sent to that scientific notation form where it dies? *)
+  *)
+  
+  result
 ];
 
 (* COMPLEXITY *)
@@ -2085,7 +2093,7 @@ findAllNestedMinimaxTuningsFromPolytopeVertices[temperedSideMinusGeneratorsPart_
       If[
         ToString[candidateTuning] == "err",
         "err",
-        ReverseSort[Abs[Flatten[fixUpZeros[temperedSideMinusGeneratorsPart.candidateTuning - justSide]]]]
+        Abs[Flatten[fixUpZeros[temperedSideMinusGeneratorsPart.candidateTuning - justSide]]]
       ]
     ],
     candidateTunings
@@ -2094,6 +2102,7 @@ findAllNestedMinimaxTuningsFromPolytopeVertices[temperedSideMinusGeneratorsPart_
   (* ignore the problems that are singular and therefore have no solution *)
   candidateTunings = Select[candidateTunings, !TrueQ[# == "err"]&];
   sortedDamagesByCandidateTuning = Select[sortedDamagesByCandidateTuning, !TrueQ[# == "err"]&];
+  sortedDamagesByCandidateTuning = Map[ReverseSort, sortedDamagesByCandidateTuning];
   
   (*     
   here we're iterating by index of the targeted intervals, 

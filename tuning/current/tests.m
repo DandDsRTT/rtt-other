@@ -236,7 +236,7 @@ testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamon
 testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "complexityWeighted", "systematicComplexityName" -> "E-complexity", {242.578, 2824.982}];
 
 
-(* optimization power continuum *) (* TODO: these tests are all hanging for some reason ??? *)
+(* optimization power continuum *)
 testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "unweighted", {240.000, 2795.336}];
 testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 5.00, "damageWeightingSlope" -> "unweighted", {239.797, 2793.002}];
 testClose[optimizeGeneratorsTuningMap, blackwood, "targetedIntervals" -> "diamond", "optimizationPower" -> 3.00, "damageWeightingSlope" -> "unweighted", {240.000, 2795.336}];
@@ -465,7 +465,7 @@ testClose[optimizeGeneratorsTuningMap, pajara, "targetedIntervals" -> {}, "syste
 
 
 
-(* interval basis *) (* TODO: these seem to be failing now, the "primes" ones... *)
+(* interval basis *)
 t = {{{1, 1, 5}, {0, -1, -3}}, "co", {2, 7 / 5, 11}};
 testClose[optimizeGeneratorsTuningMap, t, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningIntervalBasis" -> "formalPrimes", {1200.4181, 617.7581}];
 testClose[optimizeGeneratorsTuningMap, t, "targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningIntervalBasis" -> "primes", {1200.0558, 616.4318}];
