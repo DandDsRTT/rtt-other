@@ -19,7 +19,7 @@ optimizeGeneratorsTuningMapPrimesPowerNormDualOfIntegerLimit[
     solution
   },
   
-  tuningMappings = getTuningMappings[t];
+  tuningMappings = getTuningSchemeMappings[t];
   generatorsTuningMap = Part[tuningMappings, 1];
   tuningMap = Part[tuningMappings, 3];
   

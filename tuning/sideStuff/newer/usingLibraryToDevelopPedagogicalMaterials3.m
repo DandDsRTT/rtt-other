@@ -1,25 +1,25 @@
 edo17first = {{{29, 46, 65}}, "co"};
-realSetTuning = optimizeGeneratorsTuningMap[edo17first, "systematicTuningName" -> "primes minimax-U"]
-getGeneratorsTuningMapDamageMean[edo17first, realSetTuning, "systematicTuningName" -> "primes minimax-U"]
+realSetTuning = optimizeGeneratorsTuningMap[edo17first, "systematicTuningSchemeName" -> "primes minimax-U"]
+getGeneratorsTuningMapDamagesMean[edo17first, realSetTuning, "systematicTuningSchemeName" -> "primes minimax-U"]
 
-getGeneratorsTuningMapDamages[meantone, {1197.85, 694.965} , "systematicTuningName" -> "diamond minisum-U"]
-getGeneratorsTuningMapDamageMean[meantone, {1197.85, 694.965} , "systematicTuningName" -> "diamond minisum-U"]
+getGeneratorsTuningMapDamages[meantone, {1197.85, 694.965} , "systematicTuningSchemeName" -> "diamond minisum-U"]
+getGeneratorsTuningMapDamagesMean[meantone, {1197.85, 694.965} , "systematicTuningSchemeName" -> "diamond minisum-U"]
 
 {{1, 1, 0}, {0, 1, 4}}.{1, 1, -1}
 
 Transpose[{{1, 0, 0}, {0, 0, 1 / 4}}].{{1, 1, 0}, {0, 1, 4}} // MatrixForm
 
-plotDamage[pajara, "systematicTuningName" -> "diamond minisum-U"]
+graphTuningDamage[pajara, "systematicTuningSchemeName" -> "diamond minisum-U"]
 
-optimizeGeneratorsTuningMap[{{{12, 19, 28}}, "co"}, "systematicTuningName" -> "diamond minisum-U"]
+optimizeGeneratorsTuningMap[{{{12, 19, 28}}, "co"}, "systematicTuningSchemeName" -> "diamond minisum-U"]
 
-plotDamage[pajara, "systematicTuningName" -> "diamond minisum-U"]
+graphTuningDamage[pajara, "systematicTuningSchemeName" -> "diamond minisum-U"]
 
-plotDamage[pajara, "systematicTuningName" -> "pure-octave-constrained diamond minimax-U"]
+graphTuningDamage[pajara, "systematicTuningSchemeName" -> "pure-octave-constrained diamond minimax-U"]
 
-plotDamage[{{{12, 19}}, "co"}, "systematicTuningName" -> "primes minisum-U"]
+graphTuningDamage[{{{12, 19}}, "co"}, "systematicTuningSchemeName" -> "primes minisum-U"]
 
-plotDamage[{{{12, 19, 28, 35}}, "co"}, "systematicTuningName" -> "unchanged-octave minisum-U", "targetedIntervals" -> {{{-1, 1, 0, 0}, {0, -1, 1, 0}, {0, 0, -1, 1}}, "contra"} ]
+graphTuningDamage[{{{12, 19, 28, 35}}, "co"}, "systematicTuningSchemeName" -> "unchanged-octave minisum-U", "targetedIntervals" -> {{{-1, 1, 0, 0}, {0, -1, 1, 0}, {0, 0, -1, 1}}, "contra"} ]
 
 M = {{1, 2, 3}, {0, -3, -5}};
 T = Transpose[{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}];
@@ -34,7 +34,7 @@ M.T.W.Transpose[M.T.W] // prnt
 Inverse[M.T.W.Transpose[M.T.W]] // prnt
 T.W.Transpose[M.T.W].Inverse[M.T.W.Transpose[M.T.W]] // prnt
 
-optimizeGeneratorsTuningMap[{{{12, 19, 28}, {7, 11, 16}}, "co"}, "systematicTuningName" -> "diamond minimax-U"]
+optimizeGeneratorsTuningMap[{{{12, 19, 28}, {7, 11, 16}}, "co"}, "systematicTuningSchemeName" -> "diamond minimax-U"]
 
 Transpose[{{1, 0, 0}, {0, 0, 1 / 4}}].{{1, 1, 0}, {0, 1, 4}}
 Transpose[{{1, 0, 0}, {1, 0, -1 / 4}}].{{1, 2, 4}, {0, -1, -4}}

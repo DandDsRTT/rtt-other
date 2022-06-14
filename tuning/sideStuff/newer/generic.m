@@ -33,9 +33,9 @@ genericSolver[
     actually let's try working backwards
     lets do the unique version first
     
-TARGETING-LIST
+FINITE-TARGET-SET
 
-TARGETING-ALL
+INFINITE-TARGET-SET
     
     
 *)

@@ -1,5 +1,5 @@
 augene = {{3, 3, 7, 12}, {0, 1, 0, -2}};
-optimizeGeneratorsTuningMap[{augene, "co"}, "originalTuningName" -> "TOP"]
+optimizeGeneratorsTuningMap[{augene, "co"}, "originalTuningSchemeName" -> "TOP"]
 
 diff5[pcv_] := Abs[{g1, g2}.augene.pcv - 1200 * Log2[{2, 3, 5, 7}].pcv] / getPcvLogProductComplexity[pcv, augene];
 
@@ -16,7 +16,7 @@ Plot3D[
 ]
 
 weirdAugene = {{3, 0, 7, 0}, {0, 4, 0, 7}};
-optimizeGeneratorsTuningMap[{weirdAugene, "co"}, "originalTuningName" -> "TOP"]
+optimizeGeneratorsTuningMap[{weirdAugene, "co"}, "originalTuningSchemeName" -> "TOP"]
 
 diff6[pcv_] := Abs[{g1, g2}.weirdAugene.pcv - 1200 * Log2[{2, 3, 5, 7}].pcv] / getPcvLogProductComplexity[pcv, weirdAugene]
 
@@ -32,13 +32,13 @@ Plot3D[
   ImageSize -> 1000
 ]
 
-getDamage[{weirdAugene, "co"}, {397.722, 475.931}, "originalTuningName" -> "TOP"]
-getDamage[{weirdAugene, "co"}, {399, 478.4}, "originalTuningName" -> "TOP"]
-getDamage[{weirdAugene, "co"}, {398.631, 479.162}, "originalTuningName" -> "TOP"]
-getDamage[{weirdAugene, "co"}, {999, 999}, "originalTuningName" -> "TOP"]
+getDamage[{weirdAugene, "co"}, {397.722, 475.931}, "originalTuningSchemeName" -> "TOP"]
+getDamage[{weirdAugene, "co"}, {399, 478.4}, "originalTuningSchemeName" -> "TOP"]
+getDamage[{weirdAugene, "co"}, {398.631, 479.162}, "originalTuningSchemeName" -> "TOP"]
+getDamage[{weirdAugene, "co"}, {999, 999}, "originalTuningSchemeName" -> "TOP"]
 
 something = {{5, 8, 12, 0}, {0, 0, 0, 1}};
-optimizeGeneratorsTuningMap[{something, "co"}, "originalTuningName" -> "TOP"]
+optimizeGeneratorsTuningMap[{something, "co"}, "originalTuningSchemeName" -> "TOP"]
 
 diff7[pcv_] := Abs[{g1, g2}.something.pcv - 1200 * Log2[{2, 3, 5, 7}].pcv] / getPcvLogProductComplexity[pcv, something]
 
@@ -56,4 +56,4 @@ Plot3D[
 
 
 
-optimizeGeneratorsTuningMap[meantone, "systematicTuningName" -> "minimax-S"]
+optimizeGeneratorsTuningMap[meantone, "systematicTuningSchemeName" -> "minimax-S"]

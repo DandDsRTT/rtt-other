@@ -3,7 +3,7 @@ m = {{3, 0, 7, 0}, {0, 4, 0, 7}};
 m = {{5, 8, 0}, {0, 0, 1}};
 
 (* TODO: would be better if this automatically asisgned the g mins and maxes below *)
-optimizeGeneratorsTuningMap[{m, "co"}, "originalTuningName" -> "TOP"]
+optimizeGeneratorsTuningMap[{m, "co"}, "originalTuningSchemeName" -> "TOP"]
 
 g1min = 237;
 g1max = 241;

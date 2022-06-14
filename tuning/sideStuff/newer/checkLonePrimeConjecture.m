@@ -2,14 +2,14 @@
 
 
 checkLonePrimeConjecture[m_] := Module[{a1,a2,b1,b2, c1, c2, d1, d2},
-  (*a1 = optimizeGeneratorsTuningMap[m, "originalTuningName" -> "Frobenius"]; (*AMES-minimax, AKA Frobenius *)
+  (*a1 = optimizeGeneratorsTuningMap[m, "originalTuningSchemeName" -> "Frobenius"]; (*AMES-minimax, AKA Frobenius *)
   Print["a1: ", a1];
-  a2 = optimizeGeneratorsTuningMap[m, "originalTuningName" -> "least squares", "tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target U-minisos*)
+  a2 = optimizeGeneratorsTuningMap[m, "originalTuningSchemeName" -> "least squares", "tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target U-minisos*)
   Print["a2: ", a2];
   
-      b1= optimizeGeneratorsTuningMap[m, "originalTuningName" -> "TE"]; (*AES-minimax, AKA TE*)
+      b1= optimizeGeneratorsTuningMap[m, "originalTuningSchemeName" -> "TE"]; (*AES-minimax, AKA TE*)
     Print["b1: ", b1];
-      b2 = optimizeGeneratorsTuningMap[m, "originalTuningName" -> "least squares","damage" -> "ES" ,"tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target ES-minisos*)
+      b2 = optimizeGeneratorsTuningMap[m, "originalTuningSchemeName" -> "least squares","damage" -> "ES" ,"tim" -> {IdentityMatrix[getD[m]],"contra"}];(*prime-target ES-minisos*)
       Print["b2: ", b2];*)
   
   c1 = optimizeGeneratorsTuningMap[m,"optimization" -> "minimax", "damage" -> "MS", "tim" ->{}]; (*AMS-minimax- member, 1 is on intervals, \[Infinity] is on primes*)

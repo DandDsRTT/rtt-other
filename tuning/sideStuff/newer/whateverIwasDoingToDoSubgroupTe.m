@@ -50,16 +50,16 @@ getGeneratorsPreimageTransversal[t_] := Module[{ma, decomp, left, snf, right, ge
   Out   {1200., 696.578}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGeneratorsTuningMap[meantoneM, "originalTuningName" -> "TOP"]
+        optimizeGeneratorsTuningMap[meantoneM, "originalTuningSchemeName" -> "TOP"]
     
   Out   {1201.7, 697.564}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGeneratorsTuningMap[meantoneM, "systematicTuningName" -> "minisos-MEC"]
+        optimizeGeneratorsTuningMap[meantoneM, "systematicTuningSchemeName" -> "minisos-MEC"]
     
   Out   {1198.24, 695.294}
 *)
-Options[optimizeGeneratorsTuningMap] = tuningOptions;
+Options[optimizeGeneratorsTuningMap] = tuningSchemeProperties;
 optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   {
     optimizationPower,
@@ -68,9 +68,9 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
     complexityWeighting,
     complexityPower,
     tim,
-    systematicTuningName,
-    originalTuningName,
-    tuningOptions
+    systematicTuningSchemeName,
+    originalTuningSchemeName,
+    tuningSchemeProperties
   },
   
   optimizationPower = OptionValue["optimizationPower"];
@@ -79,21 +79,21 @@ optimizeGeneratorsTuningMap[t_, OptionsPattern[]] := Module[
   complexityWeighting = OptionValue["originalComplexityName"];
   complexityPower = OptionValue["complexityNormPower"];
   tim = OptionValue["tim"];
-  systematicTuningName = OptionValue["systematicTuningName"];
-  originalTuningName = OptionValue["originalTuningName"];
+  systematicTuningSchemeName = OptionValue["systematicTuningSchemeName"];
+  originalTuningSchemeName = OptionValue["originalTuningSchemeName"];
   
-  tuningOptions = processTuningOptions[t, optimizationPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, originalTuningName, systematicTuningName];
-  optimizationPower = First[tuningOptions];
+  tuningSchemeProperties = processTuningSchemeOptions[t, optimizationPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, originalTuningSchemeName, systematicTuningSchemeName];
+  optimizationPower = First[tuningSchemeProperties];
   
   Print["tim?", tim];
   
   1200 * If[
     optimizationPower == \[Infinity],
-    optimizeGtmMinimax[tuningOptions],
+    optimizeGtmMinimax[tuningSchemeProperties],
     If[
       optimizationPower == 2,
-      optimizeGtmLeastSquares[tuningOptions],
-      optimizeGtmLeastAbsolutes[tuningOptions]
+      optimizeGtmLeastSquares[tuningSchemeProperties],
+      optimizeGtmLeastAbsolutes[tuningSchemeProperties]
     ]
   ]
 ];
@@ -117,7 +117,7 @@ optimizeGtmMinimax[{optimizationPower_, tima_, d_, t_, ptm_, weightingDirection_
 ];
 
 
-(* TARGETING-ALL MINIMAX *)
+(* INFINITE-TARGET-SET MINIMAX *)
 
 optimizeGtmMinimaxPLimit[d_, t_, ptm_, complexityWeighting_, complexityPower_] := If[
   complexityPower == 2,
@@ -145,7 +145,7 @@ optimizeGtmMinimaxPLimitLinearProgrammingNumerical[d_, t_, ptm_, complexityWeigh
 dualPower[power_] := If[power == 1, Infinity, 1 / (1 - 1 / power)];
 
 
-(* TARGETING-LIST MINIMAX *)
+(* FINITE-TARGET-SET MINIMAX *)
 
 optimizeGtmMinimaxConsonanceSetAnalytical[optimizationPower_, tima_, d_, t_, ptm_, weighted_, weightingDirection_, complexityWeighting_, complexityPower_] :=
     optimizeGtmSimplex[optimizationPower, tima, d, t, ptm, weighted, weightingDirection, complexityWeighting, complexityPower, getMaxDamage];
@@ -343,7 +343,7 @@ oddLimitFromD[d_] := Prime[d + 1] - 2;
 
 (* DAMAGE *)
 
-Options[getDamage] = tuningOptions;
+Options[getDamage] = tuningSchemeProperties;
 getDamage[t_, gtm_, OptionsPattern[]] := Module[
   {
     optimizationPower,
@@ -356,7 +356,7 @@ getDamage[t_, gtm_, OptionsPattern[]] := Module[
     mean,
     ma,
     tm,
-    tuningOptions
+    tuningSchemeProperties
   },
   
   optimizationPower = OptionValue["optimizationPower"];
@@ -365,22 +365,22 @@ getDamage[t_, gtm_, OptionsPattern[]] := Module[
   complexityPower = OptionValue["complexityNormPower"];
   tim = OptionValue["tim"];
   damage = OptionValue["damage"];
-  tuning = OptionValue["originalTuningName"];
+  tuning = OptionValue["originalTuningSchemeName"];
   mean = OptionValue["optimization"];
   
-  tuningOptions = processTuningOptions[t, optimizationPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, damage, tuning, mean, True];
-  optimizationPower = First[tuningOptions];
+  tuningSchemeProperties = processTuningSchemeOptions[t, optimizationPower, weighted, weightingDirection, complexityWeighting, complexityPower, tim, damage, tuning, mean, True];
+  optimizationPower = First[tuningSchemeProperties];
   ma = getA[getM[t]];
   
   tm = (gtm / 1200).ma;
   
   If[
     optimizationPower == \[Infinity],
-    getMaxDamage[tm, tuningOptions],
+    getMaxDamage[tm, tuningSchemeProperties],
     If[
       optimizationPower == 2,
-      getSumOfSquaresDamage[tm, tuningOptions],
-      getSumOfAbsolutesDamage[tm, tuningOptions]
+      getSumOfSquaresDamage[tm, tuningSchemeProperties],
+      getSumOfAbsolutesDamage[tm, tuningSchemeProperties]
     ]
   ]
 ];
@@ -412,7 +412,7 @@ tieBreak[tiedTms_, optimizationPower_, tima_, d_, t_, ptm_, weighted_, weighting
 
 (* SHARED *)
 
-tuningOptions = {
+tuningSchemeProperties = {
   "optimizationPower" -> \[Infinity],
   "weighted" -> False,
   "damageWeightingSlope" -> "simplicityWeighted",
@@ -421,10 +421,10 @@ tuningOptions = {
   "tim" -> Null,
   "damage" -> "",
   "optimization" -> "",
-  "originalTuningName" -> ""
+  "originalTuningSchemeName" -> ""
 };
 
-processTuningOptions[t_, inputMeanPower_, inputWeighted_, inputWeightingDirection_, inputComplexityWeighting_, inputComplexityPower_, inputTim_, inputDamage_, inputTuning_, inputMean_, forDamage_ : False] := Module[
+processTuningSchemeOptions[t_, inputMeanPower_, inputWeighted_, inputWeightingDirection_, inputComplexityWeighting_, inputComplexityPower_, inputTim_, inputDamage_, inputTuning_, inputMean_, forDamage_ : False] := Module[
   {
     tima,
     damageParts,
@@ -539,7 +539,7 @@ getComplexity[pcv_, complexityWeighting_, complexityPower_] := Module[{weightedP
 
 optimizeGeneratorsTuningMap[{{{12, 19, 28}}, "co"}, {"tim" -> {{{1, 0, 0}, {0, 1, 0}, {0, 0, 1}}, "contra"}}]
 
-optimizeGeneratorsTuningMap[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co"}, {"originalTuningName" -> "TE"}]
+optimizeGeneratorsTuningMap[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co"}, {"originalTuningSchemeName" -> "TE"}]
 
 changeIntervalBasis[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}}, {2, 3, 5, 7}]
 changeIntervalBasis[{{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 3, 5, 7}}, {2, 9, 5, 21}]
