@@ -80,15 +80,15 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeOptions_] := Module[
   tuningSchemeProperties = processTuningSchemeOptions[t, forDamage, tuningSchemeOptions];
   
   tPossiblyWithChangedIntervalBasis = tuningSchemeProperty[tuningSchemeProperties, "t"];
-  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0 *)
+  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0a *)
+  unchangedIntervals = tuningSchemeProperty[tuningSchemeProperties, "unchangedIntervals"]; (* trait 0b *)
   complexitySizeFactor = tuningSchemeProperty[tuningSchemeProperties, "complexitySizeFactor"]; (* trait 4c *)
   tuningSchemeIntervalBasis = tuningSchemeProperty[tuningSchemeProperties, "tuningSchemeIntervalBasis"]; (* trait 8 *)
-  unchangedIntervals = tuningSchemeProperty[tuningSchemeProperties, "unchangedIntervals"]; (* trait 9 *)
   pureOctaveStretch = tuningSchemeProperty[tuningSchemeProperties, "pureOctaveStretch"]; (* trait 10 *)
   
   parts = If[
     Length[targetedIntervalsA] == 0,
-    getTargetingAllParts[tuningSchemeProperties],
+    getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties],
     getParts[tuningSchemeProperties]
   ];
   
@@ -243,11 +243,11 @@ getTuningMapDamagesMean[t_, tuningMap_, tuningSchemeOptions_] := Module[
   tuningSchemeProperties = processTuningSchemeOptions[t, forDamage, tuningSchemeOptions];
   
   optimizationPower = tuningSchemeProperty[tuningSchemeProperties, "optimizationPower"];
-  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0 *)
+  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0a *)
   
   parts = If[
     Length[targetedIntervalsA] == 0,
-    getTargetingAllParts[tuningSchemeProperties],
+    getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties],
     getParts[tuningSchemeProperties]
   ];
   (* set the temperedSideGeneratorsPart to the input tuningMap, in octaves, in the structure getAbsErrors needs it, 
@@ -259,7 +259,6 @@ getTuningMapDamagesMean[t_, tuningMap_, tuningSchemeOptions_] := Module[
   SetAccuracy[N[1200 * getPowerMeanAbsError[parts]], outputPrecision]
 ];
 
-(* TODO: it would be cool if this did a nicer job of printing them out, like, telling you which targeted interval has which damages you know? *)
 (*
   getGeneratorsTuningMapDamages[t, generatorsTuningMap]
   
@@ -275,7 +274,7 @@ getTuningMapDamagesMean[t_, tuningMap_, tuningSchemeOptions_] := Module[
         quarterCommaGeneratorsTuningMap = {1200, 696.578};
         getGeneratorsTuningMapDamages[meantoneM, quarterCommaGeneratorsTuningMap, "systematicTuningSchemeName" -> "minimax-S"]
     
-  Out   {} TODO: get this answer 
+  Out   {0.000, 3.393, 0.000}
 *)
 getGeneratorsTuningMapDamages[t_, generatorsTuningMap_, tuningSchemeOptions_] := Module[
   {tuningMap},
@@ -300,7 +299,7 @@ getGeneratorsTuningMapDamages[t_, generatorsTuningMap_, tuningSchemeOptions_] :=
         quarterCommaTuningMap = {1200, 1896.578, 2786.314};
         getTuningMapDamages[meantoneM, quarterCommaTuningMap, "systematicTuningSchemeName" -> "minimax-S"]
     
-  Out   {} TODO: get this answer
+  Out   {0.000, 3.393, 0.000}
 *)
 getTuningMapDamages[t_, tuningMap_, tuningSchemeOptions_] := Module[
   {
@@ -316,11 +315,11 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeOptions_] := Module[
   tuningSchemeProperties = processTuningSchemeOptions[t, forDamage, tuningSchemeOptions];
   
   optimizationPower = tuningSchemeProperty[tuningSchemeProperties, "optimizationPower"];
-  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0 *)
+  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0a *)
   
   parts = If[
     Length[targetedIntervalsA] == 0,
-    getTargetingAllParts[tuningSchemeProperties],
+    getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties],
     getParts[tuningSchemeProperties]
   ];
   (* set the temperedSideGeneratorsPart to the input tuningMap, in octaves, in the structure getAbsErrors needs it, 
@@ -331,10 +330,6 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeOptions_] := Module[
   
   SetAccuracy[N[1200 * getAbsErrors[parts]], outputPrecision]
 ];
-(* TODO: obviously this is super wet... 
-there should be some way to get the damage mean ones to just do these but then do the total outside...
-and also it really hammers home how obnoxious these argument lists are... maybe wolfram language has a better way
-*)
 
 (*
   graphTuningDamage[t]
@@ -395,7 +390,7 @@ graphTuningDamage[t_, tuningSchemeOptions_] := Module[
   tuningSchemeProperties = processTuningSchemeOptions[t, forDamage, tuningSchemeOptions];
   
   tWithPossiblyChangedIntervalBasis = tuningSchemeProperty[tuningSchemeProperties, "t"];
-  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0 *)
+  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0a *)
   optimizationPower = tuningSchemeProperty[tuningSchemeProperties, "optimizationPower"]; (* trait 1 *)
   damageWeightingSlope = tuningSchemeProperty[tuningSchemeProperties, "damageWeightingSlope"]; (* trait 2 *)
   complexityNormPower = tuningSchemeProperty[tuningSchemeProperties, "complexityNormPower"]; (* trait 3 *)
@@ -515,8 +510,9 @@ linearSolvePrecision = 8;
 nMinimizePrecision = 128;
 absoluteValuePrecision = nMinimizePrecision * 2;
 
-tuningSchemeProperties = {
-  "targetedIntervals" -> Null, (* trait 0 *)
+tuningSchemeOptions = {
+  "targetedIntervals" -> Null, (* trait 0a *)
+  "unchangedIntervals" -> {}, (* trait 0b *)
   "optimizationPower" -> Null, (* trait 1: \[Infinity] = minimax, 2 = minisos, 1 = minisum *)
   "damageWeightingSlope" -> "", (* trait 2: unweighted, complexityWeighted, or simplicityWeighted *)
   "complexityNormPower" -> 1, (* trait 3: what Mike Battaglia refers to as `p` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space *)
@@ -525,7 +521,6 @@ tuningSchemeProperties = {
   "complexitySizeFactor" -> 0, (* trait 4c: what Mike Battaglia refers to as `k` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space; 0 = no augmentation to factor in span, 1 = could be integer limit, etc. *)
   "complexityMakeOdd" -> False, (* trait 4d: False = do nothing, True = achieve odd limit from integer limit, etc. *)
   "tuningSchemeIntervalBasis" -> "primes", (* trait 8: Graham Breed calls this "inharmonic" vs "subgroup" notion in the context of minimax-ES ("TE") tuning, but it can be used for any tuning *)
-  "unchangedIntervals" -> {}, (* trait 9 *)
   "pureOctaveStretch" -> False, (* trait 10 *)
   "systematicTuningSchemeName" -> "",
   "originalTuningSchemeName" -> "",
@@ -535,10 +530,11 @@ tuningSchemeProperties = {
   "originalComplexityName" -> "",
   "debug" -> False
 };
-Options[processTuningSchemeOptions] = tuningSchemeProperties; (* TODO: this might be unnecessarily complex now; just use normal args *)
+Options[processTuningSchemeOptions] = tuningSchemeOptions;
 processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   {
-    targetedIntervals, (* trait 0 *)
+    targetedIntervals, (* trait 0a *)
+    unchangedIntervals, (* trait 0b *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
     complexityNormPower, (* trait 3 *)
@@ -547,7 +543,6 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
     tuningSchemeIntervalBasis, (* trait 8 *)
-    unchangedIntervals, (* trait 9 *)
     pureOctaveStretch, (* trait 10 *)
     systematicTuningSchemeName,
     originalTuningSchemeName,
@@ -566,7 +561,8 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     intervalRebase
   },
   
-  targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0 *)
+  targetedIntervals = OptionValue["targetedIntervals"]; (* trait 0a *)
+  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait 0b *)
   optimizationPower = OptionValue["optimizationPower"]; (* trait 1 *)
   damageWeightingSlope = OptionValue["damageWeightingSlope"]; (* trait 2 *)
   complexityNormPower = OptionValue["complexityNormPower"]; (* trait 3 *)
@@ -575,7 +571,6 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
   complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
   tuningSchemeIntervalBasis = OptionValue["tuningSchemeIntervalBasis"]; (* trait 8 *)
-  unchangedIntervals = OptionValue["unchangedIntervals"]; (* trait 9 *)
   pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 10 *)
   systematicTuningSchemeName = OptionValue["systematicTuningSchemeName"];
   originalTuningSchemeName = OptionValue["originalTuningSchemeName"];
@@ -715,7 +710,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexityNormPower = 2; complexityNegateLogPrimeCoordination = True; complexitySizeFactor = 0; complexityPrimePower = 2; complexityMakeOdd = False;
   ];
   
-  (* trait 0 *)
+  (* trait 0a *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*infinite-target-set*"] || (StringMatchQ[systematicTuningSchemeName, "*minimax*"] && StringMatchQ[systematicTuningSchemeName, "*S*"]),
     targetedIntervals = {};
@@ -727,6 +722,12 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   If[
     StringMatchQ[systematicTuningSchemeName, "*primes*"],
     targetedIntervals = "primes";
+  ];
+  
+  (* trait 0b - unchanged intervals *)
+  If[
+    StringMatchQ[systematicTuningSchemeName, "*unchanged-octave*"],
+    unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   
   (* trait 1 *)
@@ -789,12 +790,6 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   If[
     StringMatchQ[systematicTuningSchemeName, "*formal-primes-basis*"],
     tuningSchemeIntervalBasis = "primes";
-  ];
-  
-  (* trait 9 - unchanged intervals *)
-  If[
-    StringMatchQ[systematicTuningSchemeName, "*unchanged-octave*"],
-    unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   
   (* trait 10 - pure-octave stretch *)
@@ -884,7 +879,8 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   If[
     debug == True,
     Print["tPossiblyWithChangedIntervalBasis: ", tPossiblyWithChangedIntervalBasis];
-    Print["targetedIntervalsA: ", targetedIntervalsA]; (* trait 0 *)
+    Print["targetedIntervalsA: ", targetedIntervalsA]; (* trait 0a *)
+    Print["unchangedIntervals: ", unchangedIntervals]; (* trait 0b *)
     Print["optimizationPower: ", optimizationPower]; (* trait 1 *)
     Print["damageWeightingSlope: ", damageWeightingSlope]; (* trait 2 *)
     Print["complexityNormPower: ", complexityNormPower]; (* trait 3 *)
@@ -893,13 +889,13 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     Print["complexitySizeFactor: ", complexitySizeFactor]; (* trait 4c *)
     Print["complexityMakeOdd: ", complexityMakeOdd]; (* trait 4d *)
     Print["tuningSchemeIntervalBasis: ", tuningSchemeIntervalBasis]; (* trait 8 *)
-    Print["unchangedIntervals: ", unchangedIntervals]; (* trait 9 *)
     Print["pureOctaveStretch: ", pureOctaveStretch]; (* trait 10 *)
   ];
   
   {
     tPossiblyWithChangedIntervalBasis,
-    targetedIntervalsA, (* trait 0 *)
+    targetedIntervalsA, (* trait 0a *)
+    unchangedIntervals, (* trait 0b *)
     optimizationPower, (* trait 1 *)
     damageWeightingSlope, (* trait 2 *)
     complexityNormPower, (* trait 3 *)
@@ -908,7 +904,6 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
     tuningSchemeIntervalBasis, (* trait 8 *)
-    unchangedIntervals, (* trait 9 *)
     pureOctaveStretch, (* trait 10 *)
     debug
   }
@@ -916,16 +911,16 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
 
 tuningSchemePropertiesPartsByOptionName = <|
   "t" -> 1,
-  "targetedIntervalsA" -> 2, (* trait 0 *)
-  "optimizationPower" -> 3, (* trait 1 *)
-  "damageWeightingSlope" -> 4, (* trait 2 *)
-  "complexityNormPower" -> 5, (* trait 3 *)
-  "complexityNegateLogPrimeCoordination" -> 6, (* trait 4a *)
-  "complexityPrimePower" -> 7, (* trait 4b *)
-  "complexitySizeFactor" -> 8, (* trait 4c *)
-  "complexityMakeOdd" -> 9, (* trait 4d *)
-  "tuningSchemeIntervalBasis" -> 10, (* trait 8 *)
-  "unchangedIntervals" -> 11, (* trait 9 *)
+  "targetedIntervalsA" -> 2, (* trait 0a *)
+  "unchangedIntervals" -> 3, (* trait 0b *)
+  "optimizationPower" -> 4, (* trait 1 *)
+  "damageWeightingSlope" -> 5, (* trait 2 *)
+  "complexityNormPower" -> 6, (* trait 3 *)
+  "complexityNegateLogPrimeCoordination" -> 7, (* trait 4a *)
+  "complexityPrimePower" -> 8, (* trait 4b *)
+  "complexitySizeFactor" -> 9, (* trait 4c *)
+  "complexityMakeOdd" -> 10, (* trait 4d *)
+  "tuningSchemeIntervalBasis" -> 11, (* trait 8 *)
   "pureOctaveStretch" -> 12, (* trait 10 *)
   "debug" -> 13
 |>;
@@ -956,7 +951,7 @@ getParts[tuningSchemeProperties_] := Module[
   },
   
   t = tuningSchemeProperty[tuningSchemeProperties, "t"];
-  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0 *)
+  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0a *)
   optimizationPower = tuningSchemeProperty[tuningSchemeProperties, "optimizationPower"]; (* trait 1 *)
   debug = tuningSchemeProperty[tuningSchemeProperties, "debug"];
   
@@ -1069,7 +1064,7 @@ tuningInverse[damageWeightsOrComplexityMultiplier_] := MapThread[
 getDamageWeights[tuningSchemeProperties_] := Module[
   {
     t,
-    targetedIntervalsA, (* trait 0 *)
+    targetedIntervalsA, (* trait 0a *)
     damageWeightingSlope, (* trait 2 *)
     complexityNormPower, (* trait 3 *)
     complexityNegateLogPrimeCoordination, (* trait 4a *)
@@ -1081,7 +1076,7 @@ getDamageWeights[tuningSchemeProperties_] := Module[
   },
   
   t = tuningSchemeProperty[tuningSchemeProperties, "t"];
-  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0 *)
+  targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0a *)
   damageWeightingSlope = tuningSchemeProperty[tuningSchemeProperties, "damageWeightingSlope"]; (* trait 2 *)
   complexityNormPower = tuningSchemeProperty[tuningSchemeProperties, "complexityNormPower"]; (* trait 3 *)
   complexityNegateLogPrimeCoordination = tuningSchemeProperty[tuningSchemeProperties, "complexityNegateLogPrimeCoordination"]; (* trait 4a *)
@@ -1136,7 +1131,7 @@ getPowerMeanAbsError[parts_] := Module[
   targetedIntervalCount = Last[Dimensions[part[parts, "eitherSideIntervalsPart"]]]; (* k *)
   
   (* Print["absErrors: ", SetAccuracy[N[absErrors * 1200], outputPrecision]]; *)
-  (* Print["absErrors: ", absErrors * 1200]; *) (* TODO: the above with the accuracy setting was causing us one of those malformed real problems *)
+  (* Print["absErrors: ", absErrors * 1200]; *)
   (* Print[SetAccuracy[N[part[parts, "justSideGeneratorsPart"]* 1200], outputPrecision]]; *)
   (* Print[SetAccuracy[N[part[parts, "temperedSideGeneratorsPart"]* 1200], outputPrecision]]; *)
   
@@ -1188,8 +1183,7 @@ getAbsErrors[{
   (* Print["result: ", Map[
     If[Quiet[PossibleZeroQ[#]], 0, SetAccuracy[1200 * #, 4]]&,
     result
-  ]]; (* TODO: I wonder if it's just when it's 0 and it gets sent to that scientific notation form where it dies? *)
-  *)
+  ]]; *)
   
   result
 ];
@@ -1242,9 +1236,12 @@ getPcvOddLimitComplexity[pcv_, t_] := getPcvIntegerLimitComplexity[removePowersO
 (* AKA "Kees expressibility", used for minimax-QZS ("Kees") tuning scheme *)
 getPcvLogOddLimitComplexity[pcv_, t_] := Log2[getPcvOddLimitComplexity[pcv, t]];
 
-(* This is different than the damageWeights, this is nested within it;
-this is to weight the quantities of the PC-vectors before taking a norm and getting an interval complexity, 
-which are then all taken for each interval and assembled as damageWeights *)
+(* This is different than getDamageWeights, this is nested within it;
+this is to weight the quantities of the PC-vector entries before taking their norm to get an interval complexity, 
+and these complexities are then gathered for each interval and applied 
+(or their reciprocals applied, in the case of simplicity-weighting) as damageWeights;
+when this method is used by getDamageWeights in getParts, 
+it covers any finite-target-set tuning scheme using this for its damage's complexity *)
 getComplexityMultiplier[
   t_,
   complexityNegateLogPrimeCoordination_, (* trait 4a *)
@@ -1252,40 +1249,31 @@ getComplexityMultiplier[
   complexitySizeFactor_, (* trait 4c *)
   complexityMakeOdd_ (* trait 4d *)
 ] := Module[{complexityMultiplier},
-  (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-S ("TOP"); 
-when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ES ("TE"); 
-when used by getDamageWeights covers any finite-target-set tuning scheme using this as its damage's complexity *)
+  (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-S ("TOP") and minimax-ES ("TE") *)
   complexityMultiplier = IdentityMatrix[getD[t]];
   
   If[
-    (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-NS (the L1 version of "Frobenius");
-    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-NES ("Frobenius") *)
+    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-NS (the L1 version of "Frobenius") and minimax-NES ("Frobenius") *)
     complexityNegateLogPrimeCoordination == True,
     complexityMultiplier = complexityMultiplier.Inverse[getLogPrimeCoordinationA[t]]
   ];
   
   If[
-    (* When used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesMaximumNorm, covers minimax-PNS ("BOP");
-    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-PNES ("BE") *)
+    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-PNS ("BOP") and minimax-PNES ("BE") *)
     complexityPrimePower > 0,
     complexityMultiplier = complexityMultiplier.DiagonalMatrix[Power[getIntervalBasis[t], complexityPrimePower]]
   ];
   
   If[
-    (* When minimax-ZS ("Weil") needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm, (* TODO: this is a lie now *)
-    where it's implemented separately (the max minus min thing); 
-    when used by getDualMultiplier for optimizeGeneratorsTuningMapPrimesEuclideanNorm, covers minimax-ZES ("WE") or minimax-QZES ("KE")
-    (surprisingly minimax-QZES does not use the below; it instead uses this and applies an unchanged octave constraint); 
-    when used by getDamageWeights should cover any finite-target-set tuning scheme using this as its damage's complexity *)
+    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-ZS ("Weil"), minimax-ZES ("WE"), minimax-QZS ("Kees"), and minimax-QZES ("KE")
+    (yes, surprisingly, when computing minimax-QZS and minimax-QZES tunings, we do not use the below, though user calls for odd-limit complexity do use it;
+    the tuning calculations instead use only this size-sensitizer effect, and apply an unchanged octave constraint to achieve the oddness aspect) *)
     complexitySizeFactor > 0,
     complexityMultiplier = Join[getPrimesIdentityA[t], {Table[complexitySizeFactor, getD[t]]}].complexityMultiplier
   ];
   
   If[
-    (* When minimax-QZS ("Kees") needs its dual norm, we actually go into optimizeGeneratorsTuningMapTargetingAllNumericalDualNormIsNotPowerNorm, 
-    where it's implemented separately (the max minus min thing) with pure-octave constraint on the solver; 
-    note again that this is is not used for minimax-QZES ("KE"); see note above;
-    when used by getDamageWeights should cover any finite-target-set tuning scheme using this as its damage's complexity *)
+    (* When minimax-QZS ("Kees") and minimax-QZES ("KE") need their dual norms, they don't use this; see note above *)
     complexityMakeOdd == True,
     complexityMultiplier = complexityMultiplier.DiagonalMatrix[Join[{0}, Table[1, getD[t] - 1]]]
   ];
@@ -1346,7 +1334,7 @@ getDualMultiplier[tuningSchemeProperties_] := Module[
 ];
 
 (* compare with getParts *)
-getTargetingAllParts[tuningSchemeProperties_] := Module[
+getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties_] := Module[
   {
     t,
     complexityNormPower,
@@ -1894,7 +1882,7 @@ sumPolytopeSolution[{
     getGeneratorsAFromUnchangedIntervals[temperedSideMappingPart, #]&,
     filteredNormalizedCandidateUnchangedIntervalSets
   ], Not[# === Null]&];
-  candidateOptimumGeneratorsTuningMaps = Map[justSideGeneratorsPart.#&, candidateOptimumGeneratorAs]; (* TODO: not really tuning maps because not in cents... and I suspect the same problem occurs with max polytope too. perhaps the best solution is to not wait until the end to multiply by 1200? dunno really *)
+  candidateOptimumGeneratorsTuningMaps = Map[justSideGeneratorsPart.#&, candidateOptimumGeneratorAs];
   candidateOptimumGeneratorTuningMapAbsErrors = Map[
     Total[getAbsErrors[{
       #, (* note: this is an override; only reason these parts are unpacked *)
@@ -1969,6 +1957,7 @@ pseudoinverseSolution[{
   Print["justSide.Transpose[temperedSideMinusGeneratorsPart].Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]: ", N[justSide.Transpose[temperedSideMinusGeneratorsPart].Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]] // MatrixForm];
   Print["justSide: ", N[justSide] // MatrixForm]; *)
   
+  (* Technically the Aᵀ(AAᵀ)⁻¹ type of pseudoinverse is necessary. Wolfram's built-in will sometimes use other techniques, which do not give the correct answer. *)
   First[justSide.Transpose[temperedSideMinusGeneratorsPart].Inverse[temperedSideMinusGeneratorsPart.Transpose[temperedSideMinusGeneratorsPart]]]
 ];
 
