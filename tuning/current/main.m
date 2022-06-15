@@ -45,22 +45,23 @@ getGeneratorsPreimageTransversal[t_] := Module[{ma, decomp, left, snf, right, ge
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGeneratorsTuningMap[meantoneM, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"]
+        optimizeGeneratorsTuningMap[meantoneM, {"optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"}]
     
   Out   {1201.69, 697.563}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGeneratorsTuningMap[meantoneM, "originalTuningSchemeName" -> "TOP"]
+        optimizeGeneratorsTuningMap[meantoneM, "TOP"]
     
   Out   {1201.7, 697.563}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeGeneratorsTuningMap[meantoneM, "systematicTuningSchemeName" -> "minisos-NEC"]
+        optimizeGeneratorsTuningMap[meantoneM, "minisos-copfr-EC"]
     
   Out   {1198.24, 695.294}
 *)
-optimizeGeneratorsTuningMap[t_, tuningSchemeOptions_] := Module[
+optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   {
+    tuningSchemeOptions,
     forDamage,
     tuningSchemeProperties,
     optimumGeneratorsTuningMap,
@@ -77,6 +78,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeOptions_] := Module[
   
   forDamage = False;
   
+  tuningSchemeOptions = processTuningSchemeSpec[tuningSchemeSpec];
   tuningSchemeProperties = processTuningSchemeOptions[t, forDamage, tuningSchemeOptions];
   
   tPossiblyWithChangedIntervalBasis = tuningSchemeProperty[tuningSchemeProperties, "t"];
@@ -84,7 +86,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeOptions_] := Module[
   unchangedIntervals = tuningSchemeProperty[tuningSchemeProperties, "unchangedIntervals"]; (* trait 0b *)
   complexitySizeFactor = tuningSchemeProperty[tuningSchemeProperties, "complexitySizeFactor"]; (* trait 4c *)
   tuningSchemeIntervalBasis = tuningSchemeProperty[tuningSchemeProperties, "tuningSchemeIntervalBasis"]; (* trait 8 *)
-  pureOctaveStretch = tuningSchemeProperty[tuningSchemeProperties, "pureOctaveStretch"]; (* trait 10 *)
+  pureOctaveStretch = tuningSchemeProperty[tuningSchemeProperties, "pureOctaveStretch"]; (* trait 9 *)
   
   parts = If[
     Length[targetedIntervalsA] == 0,
@@ -171,21 +173,21 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeOptions_] := Module[
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeTuningMap[meantoneM, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"]
+        optimizeTuningMap[meantoneM, {"optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"}]
     
   Out   {1201.69, 1899.26, 2790.25}
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeTuningMap[meantoneM, "originalTuningSchemeName" -> "TOP"]
+        optimizeTuningMap[meantoneM, "TOP"]
     
   Out   {1201.7, 1899.26, 2790.25} 
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        optimizeTuningMap[meantoneM, "systematicTuningSchemeName" -> "minisos-NEC"]
+        optimizeTuningMap[meantoneM, "minisos-copfr-EC"]
     
   Out   {1198.24, 1893.54, 2781.18} 
 *)
-optimizeTuningMap[t_, tuningSchemeOptions_] := optimizeGeneratorsTuningMap[t, tuningSchemeOptions].getA[getM[t]];
+optimizeTuningMap[t_, tuningSchemeSpec_] := optimizeGeneratorsTuningMap[t, tuningSchemeSpec].getA[getM[t]];
 
 (*
   getGeneratorsTuningMapDamagesMean[t, generatorsTuningMap]
@@ -200,16 +202,16 @@ optimizeTuningMap[t_, tuningSchemeOptions_] := optimizeGeneratorsTuningMap[t, tu
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
         quarterCommaGeneratorsTuningMap = {1200, 696.578};
-        getGeneratorsTuningMapDamagesMean[meantoneM, quarterCommaGeneratorsTuningMap, "systematicTuningSchemeName" -> "minimax-S"]
+        getGeneratorsTuningMapDamagesMean[meantoneM, quarterCommaGeneratorsTuningMap, "minimax-S"]
     
   Out   3.39251 
 *)
-getGeneratorsTuningMapDamagesMean[t_, generatorsTuningMap_, tuningSchemeOptions_] := Module[
+getGeneratorsTuningMapDamagesMean[t_, generatorsTuningMap_, tuningSchemeSpec_] := Module[
   {tuningMap},
   
   tuningMap = generatorsTuningMap.getA[getM[t]];
   
-  getTuningMapDamagesMean[t, tuningMap, tuningSchemeOptions]
+  getTuningMapDamagesMean[t, tuningMap, tuningSchemeSpec]
 ];
 
 (*
@@ -225,13 +227,14 @@ getGeneratorsTuningMapDamagesMean[t_, generatorsTuningMap_, tuningSchemeOptions_
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
         quarterCommaTuningMap = {1200, 1896.578, 2786.314};
-        getTuningMapDamagesMean[meantoneM, quarterCommaTuningMap, "systematicTuningSchemeName" -> "minimax-S"]
+        getTuningMapDamagesMean[meantoneM, quarterCommaTuningMap, "minimax-S"]
     
   Out   3.39236
 *)
-getTuningMapDamagesMean[t_, tuningMap_, tuningSchemeOptions_] := Module[
+getTuningMapDamagesMean[t_, tuningMap_, tuningSchemeSpec_] := Module[
   {
     forDamage,
+    tuningSchemeOptions,
     tuningSchemeProperties,
     optimizationPower,
     targetedIntervalsA,
@@ -240,6 +243,7 @@ getTuningMapDamagesMean[t_, tuningMap_, tuningSchemeOptions_] := Module[
   
   forDamage = True;
   
+  tuningSchemeOptions = processTuningSchemeSpec[tuningSchemeSpec];
   tuningSchemeProperties = processTuningSchemeOptions[t, forDamage, tuningSchemeOptions];
   
   optimizationPower = tuningSchemeProperty[tuningSchemeProperties, "optimizationPower"];
@@ -272,16 +276,16 @@ getTuningMapDamagesMean[t_, tuningMap_, tuningSchemeOptions_] := Module[
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
         quarterCommaGeneratorsTuningMap = {1200, 696.578};
-        getGeneratorsTuningMapDamages[meantoneM, quarterCommaGeneratorsTuningMap, "systematicTuningSchemeName" -> "minimax-S"]
+        getGeneratorsTuningMapDamages[meantoneM, quarterCommaGeneratorsTuningMap, "minimax-S"]
     
   Out   {0.000, 3.393, 0.000}
 *)
-getGeneratorsTuningMapDamages[t_, generatorsTuningMap_, tuningSchemeOptions_] := Module[
+getGeneratorsTuningMapDamages[t_, generatorsTuningMap_, tuningSchemeSpec_] := Module[
   {tuningMap},
   
   tuningMap = generatorsTuningMap.getA[getM[t]];
   
-  getTuningMapDamages[t, tuningMap, tuningSchemeOptions]
+  getTuningMapDamages[t, tuningMap, tuningSchemeSpec]
 ];
 
 (*
@@ -297,13 +301,14 @@ getGeneratorsTuningMapDamages[t_, generatorsTuningMap_, tuningSchemeOptions_] :=
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
         quarterCommaTuningMap = {1200, 1896.578, 2786.314};
-        getTuningMapDamages[meantoneM, quarterCommaTuningMap, "systematicTuningSchemeName" -> "minimax-S"]
+        getTuningMapDamages[meantoneM, quarterCommaTuningMap, "minimax-S"]
     
   Out   {0.000, 3.393, 0.000}
 *)
-getTuningMapDamages[t_, tuningMap_, tuningSchemeOptions_] := Module[
+getTuningMapDamages[t_, tuningMap_, tuningSchemeSpec_] := Module[
   {
     forDamage,
+    tuningSchemeOptions,
     tuningSchemeProperties,
     optimizationPower,
     targetedIntervalsA,
@@ -312,6 +317,7 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeOptions_] := Module[
   
   forDamage = True;
   
+  tuningSchemeOptions = processTuningSchemeSpec[tuningSchemeSpec];
   tuningSchemeProperties = processTuningSchemeOptions[t, forDamage, tuningSchemeOptions];
   
   optimizationPower = tuningSchemeProperty[tuningSchemeProperties, "optimizationPower"];
@@ -343,20 +349,21 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeOptions_] := Module[
   Examples:
   
   In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        graphTuningDamage[meantoneM, "systematicTuningSchemeName" -> "minisos-NEC"]
+        graphTuningDamage[meantoneM, "minisos-copfr-EC"]
     
   Out   (3D graph)
   
   In    12etM = {{{12, 19, 28}, "co"};
-        graphTuningDamage[meantoneM, "systematicTuningSchemeName" -> "minisos-NEC"]
+        graphTuningDamage[meantoneM, "minisos-copfr-EC"]
         
   Out   (2D graph)
 *)
-graphTuningDamage[t_, tuningSchemeOptions_] := Module[
+graphTuningDamage[t_, tuningSchemeSpec_] := Module[
   {
-    optimumGeneratorsTuningMap,
-    
     forDamage,
+    
+    tuningSchemeOptions,
+    optimumGeneratorsTuningMap,
     
     tuningSchemeProperties,
     
@@ -383,9 +390,10 @@ graphTuningDamage[t_, tuningSchemeOptions_] := Module[
     image
   },
   
-  optimumGeneratorsTuningMap = optimizeGeneratorsTuningMap[t, tuningSchemeOptions];
-  
   forDamage = True;
+  
+  tuningSchemeOptions = processTuningSchemeSpec[tuningSchemeSpec];
+  optimumGeneratorsTuningMap = optimizeGeneratorsTuningMap[t, tuningSchemeOptions];
   
   tuningSchemeProperties = processTuningSchemeOptions[t, forDamage, tuningSchemeOptions];
   
@@ -510,6 +518,16 @@ linearSolvePrecision = 8;
 nMinimizePrecision = 128;
 absoluteValuePrecision = nMinimizePrecision * 2;
 
+processTuningSchemeSpec[tuningSchemeSpec_] := If[
+  StringQ[tuningSchemeSpec],
+  If[
+    StringMatchQ[tuningSchemeSpec, RegularExpression["(?:.* )?mini(?:max|sos|sum)-(?:\w+-)?E?[UCS]"]],
+    {"systematicTuningSchemeName" -> tuningSchemeSpec},
+    {"originalTuningSchemeName" -> tuningSchemeSpec}
+  ],
+  tuningSchemeSpec
+];
+
 tuningSchemeOptions = {
   "targetedIntervals" -> Null, (* trait 0a *)
   "unchangedIntervals" -> {}, (* trait 0b *)
@@ -521,7 +539,7 @@ tuningSchemeOptions = {
   "complexitySizeFactor" -> 0, (* trait 4c: what Mike Battaglia refers to as `k` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space; 0 = no augmentation to factor in span, 1 = could be integer limit, etc. *)
   "complexityMakeOdd" -> False, (* trait 4d: False = do nothing, True = achieve odd limit from integer limit, etc. *)
   "tuningSchemeIntervalBasis" -> "primes", (* trait 8: Graham Breed calls this "inharmonic" vs "subgroup" notion in the context of minimax-ES ("TE") tuning, but it can be used for any tuning *)
-  "pureOctaveStretch" -> False, (* trait 10 *)
+  "pureOctaveStretch" -> False, (* trait 9 *)
   "systematicTuningSchemeName" -> "",
   "originalTuningSchemeName" -> "",
   "systematicDamageName" -> "",
@@ -543,7 +561,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
     tuningSchemeIntervalBasis, (* trait 8 *)
-    pureOctaveStretch, (* trait 10 *)
+    pureOctaveStretch, (* trait 9 *)
     systematicTuningSchemeName,
     originalTuningSchemeName,
     systematicDamageName,
@@ -571,7 +589,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
   complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
   tuningSchemeIntervalBasis = OptionValue["tuningSchemeIntervalBasis"]; (* trait 8 *)
-  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 10 *)
+  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 9 *)
   systematicTuningSchemeName = OptionValue["systematicTuningSchemeName"];
   originalTuningSchemeName = OptionValue["originalTuningSchemeName"];
   systematicDamageName = OptionValue["systematicDamageName"];
@@ -589,11 +607,11 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     optimizationPower = 2; damageWeightingSlope = "unweighted"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   If[
-    originalTuningSchemeName === "TOP" || originalTuningSchemeName === "TIPTOP",
+    originalTuningSchemeName === "TOP" || originalTuningSchemeName === "TIPTOP" || originalTuningSchemeName === "T1" || originalTuningSchemeName === "TOP-max",
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted";
   ];
   If[
-    originalTuningSchemeName === "TE" || originalTuningSchemeName === "Tenney-Euclidean" || originalTuningSchemeName === "TOP-RMS",
+    originalTuningSchemeName === "TE" || originalTuningSchemeName === "Tenney-Euclidean" || originalTuningSchemeName === "T2" || originalTuningSchemeName === "TOP-RMS",
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; systematicComplexityName = "E";
   ];
   If[
@@ -792,7 +810,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     tuningSchemeIntervalBasis = "primes";
   ];
   
-  (* trait 10 - pure-octave stretch *)
+  (* trait 9 - pure-octave stretch *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*pure-octave-stretched*"],
     pureOctaveStretch = True;
@@ -889,7 +907,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     Print["complexitySizeFactor: ", complexitySizeFactor]; (* trait 4c *)
     Print["complexityMakeOdd: ", complexityMakeOdd]; (* trait 4d *)
     Print["tuningSchemeIntervalBasis: ", tuningSchemeIntervalBasis]; (* trait 8 *)
-    Print["pureOctaveStretch: ", pureOctaveStretch]; (* trait 10 *)
+    Print["pureOctaveStretch: ", pureOctaveStretch]; (* trait 9 *)
   ];
   
   {
@@ -904,7 +922,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
     tuningSchemeIntervalBasis, (* trait 8 *)
-    pureOctaveStretch, (* trait 10 *)
+    pureOctaveStretch, (* trait 9 *)
     debug
   }
 ];
@@ -921,7 +939,7 @@ tuningSchemePropertiesPartsByOptionName = <|
   "complexitySizeFactor" -> 9, (* trait 4c *)
   "complexityMakeOdd" -> 10, (* trait 4d *)
   "tuningSchemeIntervalBasis" -> 11, (* trait 8 *)
-  "pureOctaveStretch" -> 12, (* trait 10 *)
+  "pureOctaveStretch" -> 12, (* trait 9 *)
   "debug" -> 13
 |>;
 tuningSchemeProperty[tuningSchemeProperties_, optionName_] := Part[tuningSchemeProperties, tuningSchemePropertiesPartsByOptionName[optionName]];
