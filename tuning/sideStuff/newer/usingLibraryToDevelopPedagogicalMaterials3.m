@@ -1,9 +1,9 @@
 edo17first = {{{29, 46, 65}}, "co"};
 realSetTuning = optimizeGeneratorsTuningMap[edo17first, "systematicTuningSchemeName" -> "primes minimax-U"]
-getGeneratorsTuningMapDamagesMean[edo17first, realSetTuning, "systematicTuningSchemeName" -> "primes minimax-U"]
+getGeneratorsTuningMapMeanDamage[edo17first, realSetTuning, "systematicTuningSchemeName" -> "primes minimax-U"]
 
 getGeneratorsTuningMapDamages[meantone, {1197.85, 694.965} , "systematicTuningSchemeName" -> "diamond minisum-U"]
-getGeneratorsTuningMapDamagesMean[meantone, {1197.85, 694.965} , "systematicTuningSchemeName" -> "diamond minisum-U"]
+getGeneratorsTuningMapMeanDamage[meantone, {1197.85, 694.965} , "systematicTuningSchemeName" -> "diamond minisum-U"]
 
 {{1, 1, 0}, {0, 1, 4}}.{1, 1, -1}
 

@@ -42,7 +42,7 @@ testClose[optimizeGeneratorsTuningMap, sensamagic, "targetedIntervals" -> "diamo
 
 optimizeGeneratorsTuningMap[meantone7, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-2, 0, 1, 0}, {-1, 1, 0, 0}, {-2, 0, 0, 1}, {1, 1, -1, 0}, {0, 0, -1, 1}, {-1, -1, 0, 1}}, "contra"}]
 
-getGeneratorsTuningMapDamagesMean[meantone7, {1211.3614691597649652977`7.0832737555602145, 1913.924794386560051862`7.281924868642176}, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-2, 0, 1, 0}, {-1, 1, 0, 0}, {-2, 0, 0, 1}, {1, 1, -1, 0}, {0, 0, -1, 1}, {-1, -1, 0, 1}}, "contra"}]
+getGeneratorsTuningMapMeanDamage[meantone7, {1211.3614691597649652977`7.0832737555602145, 1913.924794386560051862`7.281924868642176}, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-2, 0, 1, 0}, {-1, 1, 0, 0}, {-2, 0, 0, 1}, {1, 1, -1, 0}, {0, 0, -1, 1}, {-1, -1, 0, 1}}, "contra"}]
 
 graphTuningDamage[meantone7, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-2, 0, 1, 0}, {-1, 1, 0, 0}, {-2, 0, 0, 1}, {1, 1, -1, 0}, {0, 0, -1, 1}, {-1, -1, 0, 1}}, "contra"}]
 
@@ -97,11 +97,11 @@ g3 = optimizeGeneratorsTuningMap[rank3, "systematicTuningSchemeName" -> "minimax
 g4 = optimizeGeneratorsTuningMap[rank4, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals];
 g5 = optimizeGeneratorsTuningMap[rank5, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals];
 
-getGeneratorsTuningMapDamagesMean[rank1, g1, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
-getGeneratorsTuningMapDamagesMean[rank2, g2, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
-getGeneratorsTuningMapDamagesMean[rank3, g3, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
-getGeneratorsTuningMapDamagesMean[rank4, g4, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
-getGeneratorsTuningMapDamagesMean[rank5, g5, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]*)
+getGeneratorsTuningMapMeanDamage[rank1, g1, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
+getGeneratorsTuningMapMeanDamage[rank2, g2, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
+getGeneratorsTuningMapMeanDamage[rank3, g3, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
+getGeneratorsTuningMapMeanDamage[rank4, g4, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]
+getGeneratorsTuningMapMeanDamage[rank5, g5, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> targetedIntervals]*)
 
 
 optimizeGeneratorsTuningMap[meantone7, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-2, 0, 1, 0}, {-1, 1, 0, 0}, {-2, 0, 0, 1}, {1, 1, -1, 0}, {0, 0, -1, 1}, {-1, -1, 0, 1}}, "contra"}]

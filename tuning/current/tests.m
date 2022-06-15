@@ -90,7 +90,7 @@ testClose[optimizeGeneratorsTuningMap, meantone, {"targetedIntervals" -> "diamon
 testClose[optimizeGeneratorsTuningMap, meantone, {"targetedIntervals" -> "diamond", "optimizationPower" -> 2, "damageWeightingSlope" -> "complexityWeighted", "complexityNormPower" -> 2}, {1197.930, 694.911}];
 
 
-testClose[optimizeGeneratorsTuningMap, meantone, {"targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted"}, {1198.180, 695.199}];
+testClose[optimizeGeneratorsTuningMap, meantone, {"targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "unweighted"}, {1198.054, 695.119}];
 
 testClose[optimizeGeneratorsTuningMap, meantone, {"targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True}, {1195.699, 693.352}];
 testClose[optimizeGeneratorsTuningMap, meantone, {"targetedIntervals" -> "diamond", "optimizationPower" -> 1, "damageWeightingSlope" -> "simplicityWeighted", "complexityNegateLogPrimeCoordination" -> True, "complexityNormPower" -> 2}, {1195.699, 693.352}];
@@ -507,10 +507,10 @@ testClose[optimizeGeneratorsTuningMap, meantone, "Weil-Euclidean", optimizeGener
 (* minimax-lol-S = "Kees" *)
 (* could maybe double-check with Flora's app, but per comment above about her implementation of Weil, we know it won't match now *)
 (* this is the only actual example of a Kees tuning ever stated publicly by a human *)
-accuracy = 2;
+accuracy = 1;
 testClose[optimizeTuningMap, {{{1, 3, 0, 0, 3}, {0, -3, 5, 6, 1}}, "co"}, "minimax-lol-S", {1200.00, 1915.93, 2806.79, 3368.14, 4161.36}]; (* [1b] *)
-testClose[optimizeGeneratorsTuningMap, meantone, "Kees", optimizeGeneratorsTuningMap[meantone, "minimax-lol-S"]];
 accuracy = 3;
+testClose[optimizeGeneratorsTuningMap, meantone, "Kees", optimizeGeneratorsTuningMap[meantone, "minimax-lol-S"]];
 
 (* minimax-lol-ES = "KE", "Kees-Euclidean" *)
 (* may be able double-check w/ Sintel's app; should support it by octave-constraining WE, once that's figured out. see above *)
@@ -683,9 +683,9 @@ test[getGeneratorsPreimageTransversal, {{{4, -4, 1}}, "contra"}, {{{1, 0, 0}, {0
 
 (* ___ PRIVATE ___ *)
 
-(* getLogPrimeCoordinationAndSummationMap *)
-test[getLogPrimeCoordinationAndSummationMap, {{{12, 19, 28}}, "co", {2, 3, 5}}, {Log2[2], Log2[3], Log2[5]}];
-test[getLogPrimeCoordinationAndSummationMap, {{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}}, {Log2[2], Log2[9], Log2[5], Log2[21]}];
+(* logPrimeCentsMap *)
+test[logPrimeCentsMap, {{{12, 19, 28}}, "co", {2, 3, 5}}, {1200 * Log2[2], 1200 * Log2[3], 1200 * Log2[5]}];
+test[logPrimeCentsMap, {{{1, 0, -4, 0}, {0, 1, 2, 0}, {0, 0, 0, 1}}, "co", {2, 9, 5, 21}}, {1200 * Log2[2], 1200 * Log2[9], 1200 * Log2[5], 1200 * Log2[21]}];
 
 (* getDiamond *)
 test[getDiamond, 2, {{2, -1}, {-1, 1}}];
@@ -728,15 +728,25 @@ testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logIntegerLimit", 1, getP
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "logOddLimit", 1, getPcvLogOddLimitComplexity[pcv]];
 testCloseNotList[getComplexity, pcv, dummy5limitTemp, "product", 1, getPcvProductComplexity[pcv]];
 
-(* getGeneratorsTuningMapDamagesMean *)
-testCloseNotList[getGeneratorsTuningMapDamagesMean, meantone, {1201.7, 697.564}, "minimax-S", 1.700];
-testCloseNotList[getGeneratorsTuningMapDamagesMean, meantone, {1199.02, 695.601}, "unchanged-octave diamond minisos-U", 4.186];
-testCloseNotList[getGeneratorsTuningMapDamagesMean, meantone, {1200., 696.578}, "unchanged-octave diamond minimax-U", 5.377];
+(* getGeneratorsTuningMapMeanDamage *)
+testCloseNotList[getGeneratorsTuningMapMeanDamage, meantone, {1201.7, 697.564}, "minimax-S", 1.700];
+testCloseNotList[getGeneratorsTuningMapMeanDamage, meantone, {1199.02, 695.601}, "unchanged-octave diamond minisos-U", 4.186];
+testCloseNotList[getGeneratorsTuningMapMeanDamage, meantone, {1200., 696.578}, "unchanged-octave diamond minimax-U", 5.377];
 
-(* getTuningMapDamagesMean *)
-testCloseNotList[getTuningMapDamagesMean, meantone, {1200.000, 1897.564, 2786.314}, {"targetedIntervals" -> {IdentityMatrix[3], "contra"}, "damageWeightingSlope" -> "unweighted", "optimizationPower" -> \[Infinity]}, 4.391];
-testCloseNotList[getTuningMapDamagesMean, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisos-U", 12.052];
-testCloseNotList[getTuningMapDamagesMean, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisum-U", 10.428];
+(* getTuningMapMeanDamage *)
+testCloseNotList[getTuningMapMeanDamage, meantone, {1200.000, 1897.564, 2786.314}, {"targetedIntervals" -> {IdentityMatrix[3], "contra"}, "damageWeightingSlope" -> "unweighted", "optimizationPower" -> \[Infinity]}, 4.391];
+testCloseNotList[getTuningMapMeanDamage, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisos-U", 12.052];
+testCloseNotList[getTuningMapMeanDamage, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisum-U", 10.428];
+
+(* getGeneratorsTuningMapDamages *)
+testClose[getGeneratorsTuningMapDamages, meantone, {1201.7, 697.564}, "minimax-S", {1.700, 1.698, 1.698}];
+testClose[getGeneratorsTuningMapDamages, meantone, {1199.02, 695.601}, "unchanged-octave diamond minisos-U", {5.374, 0.970, 6.354, 4.404, 1.950, 3.424}];
+testClose[getGeneratorsTuningMapDamages, meantone, {1200., 696.578}, "unchanged-octave diamond minimax-U", {5.377, 0.002, 5.377, 5.375, 0.002, 5.375}];
+
+(* getTuningMapDamages *)
+testClose[getTuningMapDamages, meantone, {1200.000, 1897.564, 2786.314}, {"targetedIntervals" -> {IdentityMatrix[3], "contra"}, "damageWeightingSlope" -> "unweighted", "optimizationPower" -> \[Infinity]}, {0.000, 4.391, 0.000}];
+testClose[getTuningMapDamages, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisos-U", {1.955, 13.686, 1.955, 15.641, 13.686, 15.641}];
+testClose[getTuningMapDamages, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisum-U", {1.955, 13.686, 1.955, 15.641, 13.686, 15.641}];
 
 (* tuningInverse *)
 test[tuningInverse, {{Log2[2], 0, 0}, {0, Log2[3], 0}, {0, 0, Log2[5]}}, {{1 / Log2[2], 0, 0}, {0, 1 / Log2[3], 0}, {0, 0, 1 / Log2[5]}}];

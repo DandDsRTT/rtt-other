@@ -1,9 +1,9 @@
 
-getTuningMapDamagesMean[meantone, {1202, 1900, 2792}, "systematicTuningSchemeName" -> "diamond minisum-C", "debug" -> True]
+getTuningMapMeanDamage[meantone, {1202, 1900, 2792}, "systematicTuningSchemeName" -> "diamond minisum-C", "debug" -> True]
 
 graphTuningDamage[{{{17, 27, 40}}, "co"}, "systematicTuningSchemeName" -> "diamond minimax-U"]
 
-getTuningMapDamagesMean[meantone, {1200.000, 1894.786, 2779.144}, "systematicTuningSchemeName" -> "diamond minisum-S"]
+getTuningMapMeanDamage[meantone, {1200.000, 1894.786, 2779.144}, "systematicTuningSchemeName" -> "diamond minisum-S"]
 
 graphTuningDamage[meantone, "systematicTuningSchemeName" -> "diamond minisum-U"]
 
@@ -35,22 +35,22 @@ edo17first = {{{29, 46, 67}}, "co"};(* {{{17, 27, 39}},"co"};*)
 a = optimizeGeneratorsTuningMap[edo17first, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"} ]
 b = optimizeGeneratorsTuningMap[edo17first, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {IdentityMatrix[3], "contra"} ]
 
-getGeneratorsTuningMapDamagesMean[edo17first, a, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"} ]
-getGeneratorsTuningMapDamagesMean[edo17first, b, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"}  ]
+getGeneratorsTuningMapMeanDamage[edo17first, a, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"} ]
+getGeneratorsTuningMapMeanDamage[edo17first, b, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"}  ]
 
-(*getGeneratorsTuningMapDamagesMean[edo17first, a, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" ->{IdentityMatrix[3], "contra"} ]*)
-getGeneratorsTuningMapDamagesMean[edo17first, b, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {IdentityMatrix[3], "contra"}  ]
+(*getGeneratorsTuningMapMeanDamage[edo17first, a, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" ->{IdentityMatrix[3], "contra"} ]*)
+getGeneratorsTuningMapMeanDamage[edo17first, b, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {IdentityMatrix[3], "contra"}  ]
 
 edo17second = (*{{{29,46, 66}},"co"};*){{{17, 27, 40}}, "co"};
 
 realSetTuning = optimizeGeneratorsTuningMap[edo17second, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"} ]
 onlyPrimesTuning = optimizeGeneratorsTuningMap[edo17second, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {IdentityMatrix[3], "contra"} ]
 
-getGeneratorsTuningMapDamagesMean[edo17second, realSetTuning, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"} ]
-getGeneratorsTuningMapDamagesMean[edo17second, onlyPrimesTuning, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"}  ]
+getGeneratorsTuningMapMeanDamage[edo17second, realSetTuning, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"} ]
+getGeneratorsTuningMapMeanDamage[edo17second, onlyPrimesTuning, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {{{-1, 1, 0}, {2, -1, 0}, {-2, 0, 1}, {3, 0, -1}, {0, -1, 1}, {1, 1, -1}}, "contra"}  ]
 
-(*getGeneratorsTuningMapDamagesMean[edo17second, realSetTuning, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" ->{IdentityMatrix[3], "contra"} ]*)
-getGeneratorsTuningMapDamagesMean[edo17second, onlyPrimesTuning, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {IdentityMatrix[3], "contra"}  ]
+(*getGeneratorsTuningMapMeanDamage[edo17second, realSetTuning, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" ->{IdentityMatrix[3], "contra"} ]*)
+getGeneratorsTuningMapMeanDamage[edo17second, onlyPrimesTuning, "systematicTuningSchemeName" -> "minimax-U", "targetedIntervals" -> {IdentityMatrix[3], "contra"}  ]
 
 
 
