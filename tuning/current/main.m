@@ -97,7 +97,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeOptions_] := Module[
   solution = If[
     Length[unchangedIntervals] > 0,
     
-    (* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
+    (* covers minimax-lol-ES "KE", unchanged-octave minimax-ES "CTE" *)
     If[debug, Print["power solver"]];
     powerSumSolution[parts, unchangedIntervals],
     
@@ -105,8 +105,8 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeOptions_] := Module[
       powerPart == 2,
       
       (* covers unchanged-octave diamond minisos-U "least squares", 
-      minimax-ES "TE", minimax-NES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
-      minimax-ZES "WE", minimax-PNES "BE" *)
+      minimax-ES "TE", minimax-copfr-ES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
+      minimax-lil-ES "WE", minimax-sopfr-ES "BE" *)
       If[debug, Print["pseudoinverse"]];
       pseudoinverseSolution[parts, unchangedIntervals],
       
@@ -115,7 +115,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeOptions_] := Module[
         
         (* covers unchanged-octave diamond minimax-U "minimax", 
         minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
-        minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
+        minimax-sopfr-S "BOP", minimax-lil-S "Weil", minimax-lol-S "Kees" *)
         If[debug, Print["max polytope"]];
         maxPolytopeSolution[parts, unchangedIntervals],
         
@@ -758,7 +758,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     damageWeightingSlope = "unweighted";
   ];
   
-  (* trait 3 - same as complexity systematic name parts *)
+  (* trait 3 - same as systematic complexity name parts *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*E*"] || StringMatchQ[systematicDamageName, "*E*"] || StringMatchQ[systematicComplexityName, "*E*"],
     complexityNormPower = 2;
@@ -768,22 +768,22 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexityNormPower = 1;
   ];
   
-  (* trait 4 - same as complexity systematic name parts  *)
+  (* trait 4 - same as systematic complexity name parts  *)
   If[
-    StringMatchQ[systematicTuningSchemeName, "*N*"] || StringMatchQ[systematicDamageName, "*N*"] || StringMatchQ[systematicComplexityName, "*N*"],
+    StringMatchQ[systematicTuningSchemeName, "*copfr*"] || StringMatchQ[systematicDamageName, "*copfr*"] || StringMatchQ[systematicComplexityName, "*copfr*"],
     complexityNegateLogPrimeCoordination = True;
   ];
   If[
-    StringMatchQ[systematicTuningSchemeName, "*P*"] || StringMatchQ[systematicDamageName, "*P*"] || StringMatchQ[systematicComplexityName, "*P*"],
-    complexityPrimePower = 1;
+    StringMatchQ[systematicTuningSchemeName, "*sopfr*"] || StringMatchQ[systematicDamageName, "*sopfr*"] || StringMatchQ[systematicComplexityName, "*sopfr*"],
+    complexityNegateLogPrimeCoordination = True; complexityPrimePower = 1;
   ];
   If[
-    StringMatchQ[systematicTuningSchemeName, "*Z*"] || StringMatchQ[systematicDamageName, "*Z*"] || StringMatchQ[systematicComplexityName, "*Z*"],
+    StringMatchQ[systematicTuningSchemeName, "*lil*"] || StringMatchQ[systematicDamageName, "*lil*"] || StringMatchQ[systematicComplexityName, "*lil*"],
     complexitySizeFactor = 1;
   ];
   If[
-    StringMatchQ[systematicTuningSchemeName, "*Q*"] || StringMatchQ[systematicDamageName, "*Q*"] || StringMatchQ[systematicComplexityName, "*Q*"],
-    complexityMakeOdd = True;
+    StringMatchQ[systematicTuningSchemeName, "*lol*"] || StringMatchQ[systematicDamageName, "*lol*"] || StringMatchQ[systematicComplexityName, "*lol*"],
+    complexitySizeFactor = 1; complexityMakeOdd = True;
   ];
   
   (* trait 8 - interval basis *)
@@ -1219,7 +1219,7 @@ getPcvCopfrComplexity[pcv_, t_] := Total[Map[If[Abs[# > 0], 1, 0]&, pcv]];
 getPcvProductComplexity[pcv_, t_] := Times @@ MapThread[#1^Abs[#2]&, {getIntervalBasis[t], pcv}];
 (* AKA "Tenney height" *)
 getPcvLogProductComplexity[pcv_, t_] := Log2[getPcvProductComplexity[pcv, t]];
-(* AKA "Wilson height", can also be used to find minimax-PNS ("BOP") tuning scheme *)
+(* AKA "Wilson height", can also be used to find minimax-sopfr-S ("BOP") tuning scheme *)
 getPcvSopfrComplexity[pcv_, t_] := Total[MapThread[#1 * Abs[#2]&, {getIntervalBasis[t], pcv}]];
 (* This apparently doesn't have a name, but can also be used to find minimax-S ("TOP") tuning scheme *)
 getPcvLogSopfrComplexity[pcv_, t_] := Log2[getPcvSopfrComplexity[pcv, t]];
@@ -1228,12 +1228,12 @@ getPcvIntegerLimitComplexity[pcv_, t_] := Module[{quotient},
   quotient = pcvToQuotient[pcv];
   Max[Numerator[quotient], Denominator[quotient]]
 ];
-(* AKA "logarithmic Weil height", used for minimax-ZS ("Weil") tuning scheme *)
+(* AKA "logarithmic Weil height", used for minimax-lil-S ("Weil") tuning scheme *)
 getPcvLogIntegerLimitComplexity[pcv_, t_] := Log2[getPcvIntegerLimitComplexity[pcv, t]];
 (* AKA "Kees height" *)
 removePowersOfTwoFromPcv[pcv_] := MapIndexed[If[First[#2] == 1, 0, #1]&, pcv];
 getPcvOddLimitComplexity[pcv_, t_] := getPcvIntegerLimitComplexity[removePowersOfTwoFromPcv[pcv], t];
-(* AKA "Kees expressibility", used for minimax-QZS ("Kees") tuning scheme *)
+(* AKA "Kees expressibility", used for minimax-lol-S ("Kees") tuning scheme *)
 getPcvLogOddLimitComplexity[pcv_, t_] := Log2[getPcvOddLimitComplexity[pcv, t]];
 
 (* This is different than getDamageWeights, this is nested within it;
@@ -1253,27 +1253,27 @@ getComplexityMultiplier[
   complexityMultiplier = IdentityMatrix[getD[t]];
   
   If[
-    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-NS (the L1 version of "Frobenius") and minimax-NES ("Frobenius") *)
+    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-copfr-S (the L1 version of "Frobenius") and minimax-copfr-ES ("Frobenius") *)
     complexityNegateLogPrimeCoordination == True,
     complexityMultiplier = complexityMultiplier.Inverse[getLogPrimeCoordinationA[t]]
   ];
   
   If[
-    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-PNS ("BOP") and minimax-PNES ("BE") *)
+    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-sopfr-S ("BOP") and minimax-sopfr-ES ("BE") *)
     complexityPrimePower > 0,
     complexityMultiplier = complexityMultiplier.DiagonalMatrix[Power[getIntervalBasis[t], complexityPrimePower]]
   ];
   
   If[
-    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-ZS ("Weil"), minimax-ZES ("WE"), minimax-QZS ("Kees"), and minimax-QZES ("KE")
-    (yes, surprisingly, when computing minimax-QZS and minimax-QZES tunings, we do not use the below, though user calls for odd-limit complexity do use it;
+    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-lil-S ("Weil"), minimax-lil-ES ("WE"), minimax-lol-S ("Kees"), and minimax-lol-ES ("KE")
+    (yes, surprisingly, when computing minimax-lol-S and minimax-lol-ES tunings, we do not use the below, though user calls for odd-limit complexity do use it;
     the tuning calculations instead use only this size-sensitizer effect, and apply an unchanged octave constraint to achieve the oddness aspect) *)
     complexitySizeFactor > 0,
     complexityMultiplier = Join[getPrimesIdentityA[t], {Table[complexitySizeFactor, getD[t]]}].complexityMultiplier
   ];
   
   If[
-    (* When minimax-QZS ("Kees") and minimax-QZES ("KE") need their dual norms, they don't use this; see note above *)
+    (* When minimax-lol-S ("Kees") and minimax-lol-ES ("KE") need their dual norms, they don't use this; see note above *)
     complexityMakeOdd == True,
     complexityMultiplier = complexityMultiplier.DiagonalMatrix[Join[{0}, Table[1, getD[t] - 1]]]
   ];
@@ -1483,7 +1483,7 @@ oddLimitFromD[d_] := Prime[d + 1] - 2;
 (* SOLUTIONS: OPTIMIZATION POWER = \[Infinity] (MINIMAX) OR COMPLEXITY NORM POWER = 1 LEADING TO DUAL NORM POWER \[Infinity] ON PRIMES (MAX NORM) *)
 
 (* covers unchanged-octave diamond minimax-U "minimax", minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
-minimax-PNS "BOP", minimax-ZS "Weil", minimax-QZS "Kees" *)
+minimax-sopfr-S "BOP", minimax-lil-S "Weil", minimax-lol-S "Kees" *)
 (* a semi-analytical solution *)
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
 maxPolytopeSolution[{
@@ -1934,7 +1934,7 @@ getGeneratorsAFromUnchangedIntervals[ma_, unchangedIntervalEigenvectors_] := Mod
 
 (* an analytical solution *)
 (* covers unchanged-octave diamond minisos-U "least squares", minimax-ES "TE", pure-octave-stretched minimax-ES "POTE",
-minimax-NES "Frobenius", minimax-ZES "WE", minimax-PNES "BE" *)
+minimax-copfr-ES "Frobenius", minimax-lil-ES "WE", minimax-sopfr-ES "BE" *)
 pseudoinverseSolution[{
   temperedSideGeneratorsPart_,
   temperedSideMappingPart_,
@@ -1965,7 +1965,7 @@ pseudoinverseSolution[{
 (* SOLUTIONS: GENERAL OPTIMIZATION POWER (MINISOP) OR GENERAL COMPLEXITY NORM POWER (P-NORM) *)
 
 (* a numerical solution *)
-(* covers minimax-QZES "KE", unchanged-octave minimax-ES "CTE" *)
+(* covers minimax-lol-ES "KE", unchanged-octave minimax-ES "CTE" *)
 powerSumSolution[parts_, unchangedIntervals_] := Module[
   {solution},
   
