@@ -71,6 +71,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
     tuningSchemeIntervalBasis,
     unchangedIntervals,
     pureOctaveStretch,
+    debug,
     parts,
     powerPart,
     solution
@@ -87,6 +88,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   complexitySizeFactor = tuningSchemeProperty[tuningSchemeProperties, "complexitySizeFactor"]; (* trait 4c *)
   tuningSchemeIntervalBasis = tuningSchemeProperty[tuningSchemeProperties, "tuningSchemeIntervalBasis"]; (* trait 8 *)
   pureOctaveStretch = tuningSchemeProperty[tuningSchemeProperties, "pureOctaveStretch"]; (* trait 9 *)
+  debug = tuningSchemeProperty[tuningSchemeProperties, "debug"];
   
   parts = If[
     Length[targetedIntervalsA] == 0,
@@ -100,7 +102,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
     Length[unchangedIntervals] > 0,
     
     (* covers minimax-lol-ES "KE", unchanged-octave minimax-ES "CTE" *)
-    If[debug, Print["power solver"]];
+    If[debug == True, Print["power solver"]];
     powerSumSolution[parts, unchangedIntervals],
     
     If[
@@ -109,7 +111,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
       (* covers unchanged-octave diamond minisos-U "least squares", 
       minimax-ES "TE", minimax-copfr-ES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
       minimax-lil-ES "WE", minimax-sopfr-ES "BE" *)
-      If[debug, Print["pseudoinverse"]];
+      If[debug == True, Print["pseudoinverse"]];
       pseudoinverseSolution[parts, unchangedIntervals],
       
       If[
@@ -118,17 +120,18 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
         (* covers unchanged-octave diamond minimax-U "minimax", 
         minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
         minimax-sopfr-S "BOP", minimax-lil-S "Weil", minimax-lol-S "Kees" *)
-        If[debug, Print["max polytope"]];
+        If[debug == True, Print["max polytope"]];
         maxPolytopeSolution[parts, unchangedIntervals],
         
         If[
           powerPart == 1,
           
           (* no historically described tuning schemes use this *)
-          If[debug, Print["sum polytope"]];
+          If[debug == True, Print["sum polytope"]];
           sumPolytopeSolution[parts, unchangedIntervals],
           
           (* no historically described tuning schemes go here *)
+          If[debug == True, Print["power solver"]];
           powerSumSolution[parts, unchangedIntervals]
         ]
       ]
@@ -137,7 +140,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   
   If[
     solution == Null,
-    If[debug, Print["power limit solver"]];
+    If[debug == True, Print["power limit solver"]];
     solution = powerSumLimitSolution[parts, unchangedIntervals]
   ];
   
@@ -2050,11 +2053,11 @@ getPowerSumSolution[parts_, unchangedIntervals_] := Module[
   periodsPerOctavePart = part[parts, "periodsPerOctavePart"];
   
   powerSum = getPowerSumAbsError[parts];
-  minimizedPowerSum = If[
+  minimizedPowerSum = SetPrecision[If[
     Length[unchangedIntervals] > 0,
     {powerSum, First[temperedSideGeneratorsPart][[1]] == 1200 / periodsPerOctavePart},
     powerSum
-  ];
+  ], nMinimizePrecision];
   
   NMinimize[minimizedPowerSum, First[temperedSideGeneratorsPart], WorkingPrecision -> nMinimizePrecision]
 ];
