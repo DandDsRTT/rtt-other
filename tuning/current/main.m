@@ -72,7 +72,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
     unchangedIntervals,
     pureOctaveStretch,
     debug,
-    parts,
+    approximationParts,
     powerPart,
     solution
   },
@@ -90,20 +90,20 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   pureOctaveStretch = tuningSchemeProperty[tuningSchemeProperties, "pureOctaveStretch"]; (* trait 9 *)
   debug = tuningSchemeProperty[tuningSchemeProperties, "debug"];
   
-  parts = If[
+  approximationParts = If[
     Length[targetedIntervalsA] == 0,
     getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties],
     getParts[tuningSchemeProperties]
   ];
   
-  powerPart = part[parts, "powerPart"];
+  powerPart = approximationPart[approximationParts, "powerPart"];
   
   solution = If[
     Length[unchangedIntervals] > 0,
     
     (* covers minimax-lol-ES "KE", unchanged-octave minimax-ES "CTE" *)
     If[debug == True, Print["power solver"]];
-    powerSumSolution[parts, unchangedIntervals],
+    powerSumSolution[approximationParts, unchangedIntervals],
     
     If[
       powerPart == 2,
@@ -112,7 +112,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
       minimax-ES "TE", minimax-copfr-ES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
       minimax-lil-ES "WE", minimax-sopfr-ES "BE" *)
       If[debug == True, Print["pseudoinverse"]];
-      pseudoinverseSolution[parts, unchangedIntervals],
+      pseudoinverseSolution[approximationParts, unchangedIntervals],
       
       If[
         powerPart == \[Infinity],
@@ -121,18 +121,18 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
         minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
         minimax-sopfr-S "BOP", minimax-lil-S "Weil", minimax-lol-S "Kees" *)
         If[debug == True, Print["max polytope"]];
-        maxPolytopeSolution[parts, unchangedIntervals],
+        maxPolytopeSolution[approximationParts, unchangedIntervals],
         
         If[
           powerPart == 1,
           
           (* no historically described tuning schemes use this *)
           If[debug == True, Print["sum polytope"]];
-          sumPolytopeSolution[parts, unchangedIntervals],
+          sumPolytopeSolution[approximationParts, unchangedIntervals],
           
           (* no historically described tuning schemes go here *)
           If[debug == True, Print["power solver"]];
-          powerSumSolution[parts, unchangedIntervals]
+          powerSumSolution[approximationParts, unchangedIntervals]
         ]
       ]
     ]
@@ -141,7 +141,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   If[
     solution == Null,
     If[debug == True, Print["power limit solver"]];
-    solution = powerSumLimitSolution[parts, unchangedIntervals]
+    solution = powerSumLimitSolution[approximationParts, unchangedIntervals]
   ];
   
   optimumGeneratorsTuningMap = solution;
@@ -158,7 +158,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   
   If[
     pureOctaveStretch,
-    optimumGeneratorsTuningMap = getPureOctaveStretchedGeneratorsTuningMap[optimumGeneratorsTuningMap, parts]
+    optimumGeneratorsTuningMap = getPureOctaveStretchedGeneratorsTuningMap[optimumGeneratorsTuningMap, approximationParts]
   ];
   
   SetAccuracy[N[optimumGeneratorsTuningMap], outputPrecision]
@@ -241,7 +241,7 @@ getTuningMapMeanDamage[t_, tuningMap_, tuningSchemeSpec_] := Module[
     tuningSchemeProperties,
     optimizationPower,
     targetedIntervalsA,
-    parts
+    approximationParts
   },
   
   forDamage = True;
@@ -252,18 +252,18 @@ getTuningMapMeanDamage[t_, tuningMap_, tuningSchemeSpec_] := Module[
   optimizationPower = tuningSchemeProperty[tuningSchemeProperties, "optimizationPower"];
   targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0a *)
   
-  parts = If[
+  approximationParts = If[
     Length[targetedIntervalsA] == 0,
     getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties],
     getParts[tuningSchemeProperties]
   ];
   (* set the temperedSideGeneratorsPart to the input tuningMap, in octaves, in the structure getAbsErrors needs it, 
   since getPowerMeanAbsError shares it with other methods *)
-  parts[[1]] = {tuningMap};
+  approximationParts[[1]] = {tuningMap};
   (* override the other half of the temperedSideMappingPart too, since we have the whole tuning map already *)
-  parts[[2]] = IdentityMatrix[getD[t]];
+  approximationParts[[2]] = IdentityMatrix[getD[t]];
   
-  SetAccuracy[N[getPowerMeanAbsError[parts]], outputPrecision]
+  SetAccuracy[N[getPowerMeanAbsError[approximationParts]], outputPrecision]
 ];
 
 (*
@@ -315,7 +315,7 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeSpec_] := Module[
     tuningSchemeProperties,
     optimizationPower,
     targetedIntervalsA,
-    parts
+    approximationParts
   },
   
   forDamage = True;
@@ -326,18 +326,18 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeSpec_] := Module[
   optimizationPower = tuningSchemeProperty[tuningSchemeProperties, "optimizationPower"];
   targetedIntervalsA = tuningSchemeProperty[tuningSchemeProperties, "targetedIntervalsA"]; (* trait 0a *)
   
-  parts = If[
+  approximationParts = If[
     Length[targetedIntervalsA] == 0,
     getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties],
     getParts[tuningSchemeProperties]
   ];
   (* set the temperedSideGeneratorsPart to the input tuningMap, in octaves, in the structure getAbsErrors needs it, 
   since getPowerMeanAbsError shares it with other methods *)
-  parts[[1]] = {tuningMap};
+  approximationParts[[1]] = {tuningMap};
   (* override the other half of the temperedSideMappingPart too, since we have the whole tuning map already *)
-  parts[[2]] = IdentityMatrix[getD[t]];
+  approximationParts[[2]] = IdentityMatrix[getD[t]];
   
-  SetAccuracy[N[getAbsErrors[parts]], outputPrecision]
+  SetAccuracy[N[getAbsErrors[approximationParts]], outputPrecision]
 ];
 
 (*
@@ -731,7 +731,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexityNormPower = 2; complexityNegateLogPrimeCoordination = True; complexitySizeFactor = 0; complexityPrimePower = 2; complexityMakeOdd = False;
   ];
   
-  (* trait 0a *)
+  (* trait 0a - targeted intervals *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*infinite-target-set*"] || (StringMatchQ[systematicTuningSchemeName, "*minimax*"] && StringMatchQ[systematicTuningSchemeName, "*S*"]),
     targetedIntervals = {};
@@ -751,7 +751,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
   ];
   
-  (* trait 1 *)
+  (* trait 1 - optimization power *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*minimax*"],
     optimizationPower = \[Infinity];
@@ -765,7 +765,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     optimizationPower = 1;
   ];
   
-  (* trait 2 *)
+  (* trait 2 - damage weighting slope *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*S*"] || StringMatchQ[systematicDamageName, "*S*"],
     damageWeightingSlope = "simplicityWeighted";
@@ -779,7 +779,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     damageWeightingSlope = "unweighted";
   ];
   
-  (* trait 3 - same as systematic complexity name parts *)
+  (* trait 3 - interval complexity norm power *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*E*"] || StringMatchQ[systematicDamageName, "*E*"] || StringMatchQ[systematicComplexityName, "*E*"],
     complexityNormPower = 2;
@@ -789,7 +789,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexityNormPower = 1;
   ];
   
-  (* trait 4 - same as systematic complexity name parts  *)
+  (* trait 4 - interval complexity coordinate change *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*copfr*"] || StringMatchQ[systematicDamageName, "*copfr*"] || StringMatchQ[systematicComplexityName, "*copfr*"],
     complexityNegateLogPrimeCoordination = True;
@@ -807,7 +807,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexitySizeFactor = 1; complexityMakeOdd = True;
   ];
   
-  (* trait 8 - interval basis *)
+  (* trait 8 - tuning scheme interval basis *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*formal-primes-basis*"],
     tuningSchemeIntervalBasis = "primes";
@@ -1011,7 +1011,7 @@ getParts[tuningSchemeProperties_] := Module[
   }
 ];
 
-partsPartsByPartName = <|
+approximationPartsByName = <|
   "temperedSideGeneratorsPart" -> 1,
   "temperedSideMappingPart" -> 2,
   "justSideGeneratorsPart" -> 3,
@@ -1021,7 +1021,7 @@ partsPartsByPartName = <|
   "powerPart" -> 7,
   "periodsPerOctavePart" -> 8
 |>;
-part[parts_, partName_] := Part[parts, partsPartsByPartName[partName]];
+approximationPart[approximationParts_, partName_] := Part[approximationParts, approximationPartsByName[partName]];
 
 
 (* SHARED *)
@@ -1135,26 +1135,26 @@ getDamageWeights[tuningSchemeProperties_] := Module[
 
 (* ERROR *)
 
-getPowerSumAbsError[parts_] := If[
-  part[parts, "powerPart"] == \[Infinity],
+getPowerSumAbsError[approximationParts_] := If[
+  approximationPart[approximationParts, "powerPart"] == \[Infinity],
   
   (* I thought it would be fine, but apparently Wolfram Language thinks the infinity-power-sum is "indeterminate" *)
-  Max[getAbsErrors[parts]],
+  Max[getAbsErrors[approximationParts]],
   
-  Total[Power[getAbsErrors[parts], part[parts, "powerPart"]]]
+  Total[Power[getAbsErrors[approximationParts], approximationPart[approximationParts, "powerPart"]]]
 ];
-getPowerNormAbsError[parts_] := Norm[getAbsErrors[parts], part[parts, "powerPart"]];
-getPowerMeanAbsError[parts_] := Module[
+getPowerNormAbsError[approximationParts_] := Norm[getAbsErrors[approximationParts], approximationPart[approximationParts, "powerPart"]];
+getPowerMeanAbsError[approximationParts_] := Module[
   {absErrors, powerPart, targetedIntervalCount, result},
   
-  absErrors = getAbsErrors[parts];
-  powerPart = part[parts, "powerPart"];
-  targetedIntervalCount = Last[Dimensions[part[parts, "eitherSideIntervalsPart"]]]; (* k *)
+  absErrors = getAbsErrors[approximationParts];
+  powerPart = approximationPart[approximationParts, "powerPart"];
+  targetedIntervalCount = Last[Dimensions[approximationPart[approximationParts, "eitherSideIntervalsPart"]]]; (* k *)
   
   (* Print["absErrors: ", SetAccuracy[N[absErrors], outputPrecision]]; *)
   (* Print["absErrors: ", absErrors]; *)
-  (* Print[SetAccuracy[N[part[parts, "justSideGeneratorsPart"]], outputPrecision]]; *)
-  (* Print[SetAccuracy[N[part[parts, "temperedSideGeneratorsPart"]], outputPrecision]]; *)
+  (* Print[SetAccuracy[N[approximationPart[approximationParts, "justSideGeneratorsPart"]], outputPrecision]]; *)
+  (* Print[SetAccuracy[N[approximationPart[approximationParts, "temperedSideGeneratorsPart"]], outputPrecision]]; *)
   
   result = If[
     powerPart == \[Infinity],
@@ -1466,10 +1466,10 @@ retrievePrimesIntervalBasisGeneratorsTuningMap[optimumGeneratorsTuningMap_, orig
 
 (* PURE-OCTAVE STRETCH *)
 
-getPureOctaveStretchedGeneratorsTuningMap[optimumGeneratorsTuningMap_, parts_] := Module[
+getPureOctaveStretchedGeneratorsTuningMap[optimumGeneratorsTuningMap_, approximationParts_] := Module[
   {periodsPerOctavePart},
   
-  periodsPerOctavePart = part[parts, "periodsPerOctavePart"];
+  periodsPerOctavePart = approximationPart[approximationParts, "periodsPerOctavePart"];
   
   (1200 / periodsPerOctavePart) * (optimumGeneratorsTuningMap / First[optimumGeneratorsTuningMap])
 ];
@@ -1751,7 +1751,7 @@ fixUpZeros[l_] := Map[
   Function[
     {nestedList},
     Map[
-      If[Quiet[PossibleZeroQ[#]], 0, SetAccuracy[#, linearSolvePrecision]]&, (* TODO: reconcile this with other PossibleZeroQ part *)
+      If[Quiet[PossibleZeroQ[#]], 0, SetAccuracy[#, linearSolvePrecision]]&,
       nestedList
     ]
   ],
@@ -1794,7 +1794,7 @@ getTuningPolytopeVertexConstraintAs[generatorCount_, targetCount_] := Module[
   
   31g₁ = log₂6
   
-  Or in other words, this tuning makes 6/1 pure, and divides it into 31 equal parts.
+  Or in other words, this tuning makes 6/1 pure, and divides it into 31 equal steps.
   If this temperament's mapping says it's 12 steps to 2/1 and 19 steps to 3/1, and it takes 31 steps to a pure 6/1,
   that implies that whatever damage there is on 2/1 is equal to whatever damage there is on 3/1, since they apparently cancel out.
   
@@ -1906,7 +1906,7 @@ sumPolytopeSolution[{
   candidateOptimumGeneratorsTuningMaps = Map[justSideGeneratorsPart.#&, candidateOptimumGeneratorAs];
   candidateOptimumGeneratorTuningMapAbsErrors = Map[
     Total[getAbsErrors[{
-      #, (* note: this is an override; only reason these parts are unpacked *)
+      #, (* note: this is an override; only reason these approximation parts are unpacked *)
       temperedSideMappingPart,
       justSideGeneratorsPart,
       justSideMappingPart,
@@ -1987,12 +1987,12 @@ pseudoinverseSolution[{
 
 (* a numerical solution *)
 (* covers minimax-lol-ES "KE", unchanged-octave minimax-ES "CTE" *)
-powerSumSolution[parts_, unchangedIntervals_] := Module[
+powerSumSolution[approximationParts_, unchangedIntervals_] := Module[
   {solution},
   
-  solution = getPowerSumSolution[parts, unchangedIntervals];
+  solution = getPowerSumSolution[approximationParts, unchangedIntervals];
   
-  First[First[parts]] /. Last[solution]
+  First[First[approximationParts]] /. Last[solution]
 ];
 
 (* no historically described tuning schemes use this *)
@@ -2046,13 +2046,13 @@ powerSumLimitSolution[{
   First[temperedSideGeneratorsPart] /. Last[solution]
 ];
 
-getPowerSumSolution[parts_, unchangedIntervals_] := Module[
+getPowerSumSolution[approximationParts_, unchangedIntervals_] := Module[
   {temperedSideGeneratorsPart, periodsPerOctavePart, powerSum, minimizedPowerSum},
   
-  temperedSideGeneratorsPart = part[parts, "temperedSideGeneratorsPart"];
-  periodsPerOctavePart = part[parts, "periodsPerOctavePart"];
+  temperedSideGeneratorsPart = approximationPart[approximationParts, "temperedSideGeneratorsPart"];
+  periodsPerOctavePart = approximationPart[approximationParts, "periodsPerOctavePart"];
   
-  powerSum = getPowerSumAbsError[parts];
+  powerSum = getPowerSumAbsError[approximationParts];
   minimizedPowerSum = SetPrecision[If[
     Length[unchangedIntervals] > 0,
     {powerSum, First[temperedSideGeneratorsPart][[1]] == 1200 / periodsPerOctavePart},
