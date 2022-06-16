@@ -739,14 +739,14 @@ testCloseNotList[getTuningMapMeanDamage, {{{12, 19, 28}}, "co"}, {1200, 1900, 28
 testCloseNotList[getTuningMapMeanDamage, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisum-U", 10.428];
 
 (* getGeneratorsTuningMapDamages *)
-testClose[getGeneratorsTuningMapDamages, meantone, {1201.7, 697.564}, "minimax-S", {1.700, 1.698, 1.698}];
-testClose[getGeneratorsTuningMapDamages, meantone, {1199.02, 695.601}, "unchanged-octave diamond minisos-U", {5.374, 0.970, 6.354, 4.404, 1.950, 3.424}];
-testClose[getGeneratorsTuningMapDamages, meantone, {1200., 696.578}, "unchanged-octave diamond minimax-U", {5.377, 0.002, 5.377, 5.375, 0.002, 5.375}];
+testClose[getGeneratorsTuningMapDamages, meantone, {1201.7, 697.564}, "minimax-S", {2 -> 1.700, 3 -> 1.6978, 5 -> 1.6978}];
+testClose[getGeneratorsTuningMapDamages, meantone, {1199.02, 695.601}, "unchanged-octave diamond minisos-U", {FractionBox["4", "3"] -> 5.374, FractionBox["8", "5"] -> 0.9697, FractionBox["3", "2"] -> 6.354, FractionBox["6", "5"] -> 4.4043, FractionBox["5", "4"] -> 1.9497, FractionBox["5", "3"] -> 3.4243}];
+testClose[getGeneratorsTuningMapDamages, meantone, {1200., 696.578}, "unchanged-octave diamond minimax-U", {FractionBox["4", "3"] -> 5.377, FractionBox["8", "5"] -> 0.0017, FractionBox["3", "2"] -> 5.377, FractionBox["6", "5"] -> 5.3753, FractionBox["5", "4"] -> 0.0017, FractionBox["5", "3"] -> 5.3753}];
 
 (* getTuningMapDamages *)
-testClose[getTuningMapDamages, meantone, {1200.000, 1897.564, 2786.314}, {"targetedIntervals" -> {IdentityMatrix[3], "contra"}, "damageWeightingSlope" -> "unweighted", "optimizationPower" -> \[Infinity]}, {0.000, 4.391, 0.000}];
-testClose[getTuningMapDamages, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisos-U", {1.955, 13.686, 1.955, 15.641, 13.686, 15.641}];
-testClose[getTuningMapDamages, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisum-U", {1.955, 13.686, 1.955, 15.641, 13.686, 15.641}];
+testClose[getTuningMapDamages, meantone, {1200.000, 1897.564, 2786.314}, {"targetedIntervals" -> {IdentityMatrix[3], "contra"}, "damageWeightingSlope" -> "unweighted", "optimizationPower" -> \[Infinity]}, {2 -> 0.000, 3 -> 4.391, 5 -> 0.00029}];
+testClose[getTuningMapDamages, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisos-U", {FractionBox["4", "3"] -> 1.955, FractionBox["8", "5"] -> 13.68628, FractionBox["3", "2"] -> 1.955, FractionBox["6", "5"] -> 15.6413, FractionBox["5", "4"] -> 13.68628, FractionBox["5", "3"] -> 15.6413}];
+testClose[getTuningMapDamages, {{{12, 19, 28}}, "co"}, {1200, 1900, 2800}, "diamond minisum-U", {FractionBox["4", "3"] -> 1.955, FractionBox["8", "5"] -> 13.68628, FractionBox["3", "2"] -> 1.955, FractionBox["6", "5"] -> 15.6413, FractionBox["5", "4"] -> 13.68628, FractionBox["5", "3"] -> 15.6413}];
 
 (* tuningInverse *)
 test[tuningInverse, {{Log2[2], 0, 0}, {0, Log2[3], 0}, {0, 0, Log2[5]}}, {{1 / Log2[2], 0, 0}, {0, 1 / Log2[3], 0}, {0, 0, 1 / Log2[5]}}];

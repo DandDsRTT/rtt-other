@@ -94,8 +94,8 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   
   approximationParts = If[
     Length[targetedIntervalsA] == 0,
-    getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties],
-    getParts[tuningSchemeProperties]
+    getInfiniteTargetSetTuningSchemeApproximationParts[tuningSchemeProperties],
+    getApproximationParts[tuningSchemeProperties]
   ];
   
   powerPart = approximationPart[approximationParts, "powerPart"];
@@ -256,8 +256,8 @@ getTuningMapMeanDamage[t_, tuningMap_, tuningSchemeSpec_] := Module[
   
   approximationParts = If[
     Length[targetedIntervalsA] == 0,
-    getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties],
-    getParts[tuningSchemeProperties]
+    getInfiniteTargetSetTuningSchemeApproximationParts[tuningSchemeProperties],
+    getApproximationParts[tuningSchemeProperties]
   ];
   (* set the temperedSideGeneratorsPart to the input tuningMap, in octaves, in the structure getAbsErrors needs it, 
   since getPowerMeanAbsError shares it with other methods *)
@@ -317,7 +317,9 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeSpec_] := Module[
     tuningSchemeProperties,
     optimizationPower,
     targetedIntervalsA,
-    approximationParts
+    approximationParts,
+    damages,
+    targetedIntervals
   },
   
   forDamage = True;
@@ -330,8 +332,8 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeSpec_] := Module[
   
   approximationParts = If[
     Length[targetedIntervalsA] == 0,
-    getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties],
-    getParts[tuningSchemeProperties]
+    getInfiniteTargetSetTuningSchemeApproximationParts[tuningSchemeProperties],
+    getApproximationParts[tuningSchemeProperties]
   ];
   (* set the temperedSideGeneratorsPart to the input tuningMap, in octaves, in the structure getAbsErrors needs it, 
   since getPowerMeanAbsError shares it with other methods *)
@@ -339,7 +341,10 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeSpec_] := Module[
   (* override the other half of the temperedSideMappingPart too, since we have the whole tuning map already *)
   approximationParts[[2]] = IdentityMatrix[getD[t]];
   
-  SetAccuracy[N[getAbsErrors[approximationParts]], outputPrecision]
+  damages = SetAccuracy[N[getAbsErrors[approximationParts]], outputPrecision];
+  targetedIntervals = Map[pcvToQuotient, targetedIntervalsA];
+  
+  MapThread[#1 -> #2&, {targetedIntervals, damages}]
 ];
 
 (*
@@ -953,7 +958,7 @@ tuningSchemeProperty[tuningSchemeProperties_, optionName_] := Part[tuningSchemeP
 
 (* PARTS *)
 
-getParts[tuningSchemeProperties_] := Module[
+getApproximationParts[tuningSchemeProperties_] := Module[
   {
     t,
     targetedIntervalsA,
@@ -1260,7 +1265,7 @@ getPcvLogOddLimitComplexity[pcv_, t_] := Log2[getPcvOddLimitComplexity[pcv, t]];
 this is to weight the quantities of the PC-vector entries before taking their norm to get an interval complexity, 
 and these complexities are then gathered for each interval and applied 
 (or their reciprocals applied, in the case of simplicity-weighting) as damageWeights;
-when this method is used by getDamageWeights in getParts, 
+when this method is used by getDamageWeights in getApproximationParts, 
 it covers any finite-target-set tuning scheme using this for its damage's complexity *)
 getComplexityMultiplier[
   t_,
@@ -1269,23 +1274,23 @@ getComplexityMultiplier[
   complexitySizeFactor_, (* trait 4c *)
   complexityMakeOdd_ (* trait 4d *)
 ] := Module[{complexityMultiplier},
-  (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-S ("TOP") and minimax-ES ("TE") *)
+  (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeApproximationParts, covers minimax-S ("TOP") and minimax-ES ("TE") *)
   complexityMultiplier = IdentityMatrix[getD[t]];
   
   If[
-    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-copfr-S (the L1 version of "Frobenius") and minimax-copfr-ES ("Frobenius") *)
+    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeApproximationParts, covers minimax-copfr-S (the L1 version of "Frobenius") and minimax-copfr-ES ("Frobenius") *)
     complexityNegateLogPrimeCoordination == True,
     complexityMultiplier = complexityMultiplier.Inverse[getLogPrimeCoordinationA[t]]
   ];
   
   If[
-    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-sopfr-S ("BOP") and minimax-sopfr-ES ("BE") *)
+    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeApproximationParts, covers minimax-sopfr-S ("BOP") and minimax-sopfr-ES ("BE") *)
     complexityPrimePower > 0,
     complexityMultiplier = complexityMultiplier.DiagonalMatrix[Power[getIntervalBasis[t], complexityPrimePower]]
   ];
   
   If[
-    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeParts, covers minimax-lil-S ("Weil"), minimax-lil-ES ("WE"), minimax-lol-S ("Kees"), and minimax-lol-ES ("KE")
+    (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeApproximationParts, covers minimax-lil-S ("Weil"), minimax-lil-ES ("WE"), minimax-lol-S ("Kees"), and minimax-lol-ES ("KE")
     (yes, surprisingly, when computing minimax-lol-S and minimax-lol-ES tunings, we do not use the below, though user calls for odd-limit complexity do use it;
     the tuning calculations instead use only this size-sensitizer effect, and apply an unchanged octave constraint to achieve the oddness aspect) *)
     complexitySizeFactor > 0,
@@ -1353,8 +1358,8 @@ getDualMultiplier[tuningSchemeProperties_] := Module[
   tuningInverse[complexityMultiplierAndLogPrimeCoordinationA]
 ];
 
-(* compare with getParts *)
-getInfiniteTargetSetTuningSchemeParts[tuningSchemeProperties_] := Module[
+(* compare with getApproximationParts *)
+getInfiniteTargetSetTuningSchemeApproximationParts[tuningSchemeProperties_] := Module[
   {
     t,
     complexityNormPower,
