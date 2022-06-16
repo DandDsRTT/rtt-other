@@ -72,7 +72,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
     complexitySizeFactor,
     tuningSchemeIntervalBasis,
     unchangedIntervals,
-    pureOctaveStretch,
+    pureStretchedInterval,
     logging,
     approximationParts,
     powerPart,
@@ -89,7 +89,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   unchangedIntervals = tuningSchemeProperty[tuningSchemeProperties, "unchangedIntervals"]; (* trait 0b *)
   complexitySizeFactor = tuningSchemeProperty[tuningSchemeProperties, "complexitySizeFactor"]; (* trait 4c *)
   tuningSchemeIntervalBasis = tuningSchemeProperty[tuningSchemeProperties, "tuningSchemeIntervalBasis"]; (* trait 8 *)
-  pureOctaveStretch = tuningSchemeProperty[tuningSchemeProperties, "pureOctaveStretch"]; (* trait 9 *)
+  pureStretchedInterval = tuningSchemeProperty[tuningSchemeProperties, "pureStretchedInterval"]; (* trait 9 *)
   logging = tuningSchemeProperty[tuningSchemeProperties, "logging"];
   
   approximationParts = If[
@@ -111,7 +111,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
       powerPart == 2,
       
       (* covers unchanged-octave diamond minisos-U "least squares", 
-      minimax-ES "TE", minimax-copfr-ES "Frobenius", pure-octave-stretched minimax-ES "POTE", 
+      minimax-ES "TE", minimax-copfr-ES "Frobenius", pure-stretched-octave minimax-ES "POTE", 
       minimax-lil-ES "WE", minimax-sopfr-ES "BE" *)
       If[logging == True, Print["pseudoinverse"]];
       pseudoinverseSolution[approximationParts, unchangedIntervals],
@@ -120,7 +120,7 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
         powerPart == \[Infinity],
         
         (* covers unchanged-octave diamond minimax-U "minimax", 
-        minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
+        minimax-S "TOP", pure-stretched-octave minimax-S "POTOP", 
         minimax-sopfr-S "BOP", minimax-lil-S "Weil", minimax-lol-S "Kees" *)
         If[logging == True, Print["max polytope"]];
         maxPolytopeSolution[approximationParts, unchangedIntervals],
@@ -159,8 +159,8 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   ];
   
   If[
-    pureOctaveStretch,
-    optimumGeneratorsTuningMap = getPureOctaveStretchedGeneratorsTuningMap[optimumGeneratorsTuningMap, approximationParts]
+    ToString[pureStretchedInterval] != "Null",
+    optimumGeneratorsTuningMap = getPureStretchedIntervalGeneratorsTuningMap[optimumGeneratorsTuningMap, t, pureStretchedInterval]
   ];
   
   SetAccuracy[N[optimumGeneratorsTuningMap], outputPrecision]
@@ -550,7 +550,7 @@ tuningSchemeOptions = {
   "complexitySizeFactor" -> 0, (* trait 4c: what Mike Battaglia refers to as `k` in https://en.xen.wiki/w/Weil_Norms,_Tenney-Weil_Norms,_and_TWp_Interval_and_Tuning_Space; 0 = no augmentation to factor in span, 1 = could be integer limit, etc. *)
   "complexityMakeOdd" -> False, (* trait 4d: False = do nothing, True = achieve odd limit from integer limit, etc. *)
   "tuningSchemeIntervalBasis" -> "primes", (* trait 8: Graham Breed calls this "inharmonic" vs "subgroup" notion in the context of minimax-ES ("TE") tuning, but it can be used for any tuning *)
-  "pureOctaveStretch" -> False, (* trait 9 *)
+  "pureStretchedInterval" -> Null, (* trait 9 *)
   "systematicTuningSchemeName" -> "",
   "originalTuningSchemeName" -> "",
   "systematicDamageName" -> "",
@@ -572,7 +572,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
     tuningSchemeIntervalBasis, (* trait 8 *)
-    pureOctaveStretch, (* trait 9 *)
+    pureStretchedInterval, (* trait 9 *)
     systematicTuningSchemeName,
     originalTuningSchemeName,
     systematicDamageName,
@@ -600,7 +600,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   complexitySizeFactor = OptionValue["complexitySizeFactor"]; (* trait 4c *)
   complexityMakeOdd = OptionValue["complexityMakeOdd"]; (* trait 4d *)
   tuningSchemeIntervalBasis = OptionValue["tuningSchemeIntervalBasis"]; (* trait 8 *)
-  pureOctaveStretch = OptionValue["pureOctaveStretch"]; (* trait 9 *)
+  pureStretchedInterval = OptionValue["pureStretchedInterval"]; (* trait 9 *)
   systematicTuningSchemeName = OptionValue["systematicTuningSchemeName"];
   originalTuningSchemeName = OptionValue["originalTuningSchemeName"];
   systematicDamageName = OptionValue["systematicDamageName"];
@@ -611,11 +611,11 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   
   If[
     originalTuningSchemeName === "minimax",
-    optimizationPower = \[Infinity]; damageWeightingSlope = "unweighted"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
+    optimizationPower = \[Infinity]; damageWeightingSlope = "unweighted"; unchangedIntervals = getOctave[t];
   ];
   If[
     originalTuningSchemeName === "least squares",
-    optimizationPower = 2; damageWeightingSlope = "unweighted"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
+    optimizationPower = 2; damageWeightingSlope = "unweighted"; unchangedIntervals = getOctave[t];
   ];
   If[
     originalTuningSchemeName === "TOP" || originalTuningSchemeName === "TIPTOP" || originalTuningSchemeName === "T1" || originalTuningSchemeName === "TOP-max",
@@ -652,19 +652,19 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   If[
     originalTuningSchemeName === "KE" || originalTuningSchemeName === "Kees-Euclidean",
     (* Note how this tuning scheme works by enforcing an unchanged octave via a solver constraint, rather than through the complexity units multiplier *)
-    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; systematicComplexityName = "lol-E"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; systematicComplexityName = "lol-E"; unchangedIntervals = getOctave[t];
   ];
   If[
     originalTuningSchemeName === "POTOP" || originalTuningSchemeName === "POTT",
-    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; pureOctaveStretch = True;
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; pureStretchedInterval = First[getOctave[t]];
   ];
   If[
     originalTuningSchemeName === "POTE",
-    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; systematicComplexityName = "E"; pureOctaveStretch = True;
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; systematicComplexityName = "E"; pureStretchedInterval = First[getOctave[t]];
   ];
   If[
     originalTuningSchemeName === "CTE",
-    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted";  systematicComplexityName = "E"; unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
+    targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; systematicComplexityName = "E"; unchangedIntervals = getOctave[t];
   ];
   
   If[
@@ -756,7 +756,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
   (* trait 0b - unchanged intervals *)
   If[
     StringMatchQ[systematicTuningSchemeName, "*unchanged-octave*"],
-    unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]};
+    unchangedIntervals = getOctave[t];
   ];
   
   (* trait 1 - optimization power *)
@@ -821,15 +821,15 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     tuningSchemeIntervalBasis = "primes";
   ];
   
-  (* trait 9 - pure-octave stretch *)
+  (* trait 9 - pure-stretched interval *)
   If[
-    StringMatchQ[systematicTuningSchemeName, "*pure-octave-stretched*"],
-    pureOctaveStretch = True;
+    StringMatchQ[systematicTuningSchemeName, "*pure-stretched-*"],
+    pureStretchedInterval = getPureStretchedInterval[systematicTuningSchemeName, t];
   ];
   
   (* complexityMakeOdd is enough to get odd limit complexity from integer limit complexity, 
   but when actually solving for tunings, it's necessary to lock down prime 2 (the octave) as an unchanged interval. *)
-  If[complexityMakeOdd == True, unchangedIntervals = {Join[{1}, Table[0, getD[t] - 1]]}];
+  If[complexityMakeOdd == True, unchangedIntervals = getOctave[t]];
   
   (* This has to go below the systematic tuning scheme name gating, so that targetedIntervals has a change to be set to {} *)
   intervalBasis = getIntervalBasis[t];
@@ -918,7 +918,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     Print["complexitySizeFactor: ", complexitySizeFactor]; (* trait 4c *)
     Print["complexityMakeOdd: ", complexityMakeOdd]; (* trait 4d *)
     Print["tuningSchemeIntervalBasis: ", tuningSchemeIntervalBasis]; (* trait 8 *)
-    Print["pureOctaveStretch: ", pureOctaveStretch]; (* trait 9 *)
+    Print["pureStretchedInterval: ", pureStretchedInterval]; (* trait 9 *)
   ];
   
   {
@@ -933,7 +933,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     complexitySizeFactor, (* trait 4c *)
     complexityMakeOdd, (* trait 4d *)
     tuningSchemeIntervalBasis, (* trait 8 *)
-    pureOctaveStretch, (* trait 9 *)
+    pureStretchedInterval, (* trait 9 *)
     logging
   }
 ];
@@ -950,7 +950,7 @@ tuningSchemePropertiesPartsByOptionName = <|
   "complexitySizeFactor" -> 9, (* trait 4c *)
   "complexityMakeOdd" -> 10, (* trait 4d *)
   "tuningSchemeIntervalBasis" -> 11, (* trait 8 *)
-  "pureOctaveStretch" -> 12, (* trait 9 *)
+  "pureStretchedInterval" -> 12, (* trait 9 *)
   "logging" -> 13
 |>;
 tuningSchemeProperty[tuningSchemeProperties_, optionName_] := Part[tuningSchemeProperties, tuningSchemePropertiesPartsByOptionName[optionName]];
@@ -1033,6 +1033,8 @@ approximationPart[approximationParts_, partName_] := Part[approximationParts, ap
 
 
 (* SHARED *)
+
+getOctave[t_] := {Join[{1}, Table[0, getD[t] - 1]]};
 
 getSummationMap[t_] := Table[1, getD[t]];
 
@@ -1468,14 +1470,41 @@ retrievePrimesIntervalBasisGeneratorsTuningMap[optimumGeneratorsTuningMap_, orig
 ];
 
 
-(* PURE-OCTAVE STRETCH *)
+(* PURE-STRETCHED INTERVAL *)
 
-getPureOctaveStretchedGeneratorsTuningMap[optimumGeneratorsTuningMap_, approximationParts_] := Module[
-  {periodsPerOctavePart},
+getPureStretchedInterval[systematicTuningSchemeName_, t_] := Module[
+  {pureStretchedString},
   
-  periodsPerOctavePart = approximationPart[approximationParts, "periodsPerOctavePart"];
+  pureStretchedString = First[StringCases[
+    systematicTuningSchemeName,
+    RegularExpression["pure-stretched-(\\S+) "] -> "$1"
+  ]];
   
-  (1200 / periodsPerOctavePart) * (optimumGeneratorsTuningMap / First[optimumGeneratorsTuningMap])
+  If[
+    pureStretchedString == "octave",
+    First[getOctave[t]],
+    First[padVectorsWithZerosUpToD[
+      {quotientToPcv[ToExpression[pureStretchedString]]},
+      getD[t]
+    ]]
+  ]
+];
+
+getPureStretchedIntervalGeneratorsTuningMap[optimumGeneratorsTuningMap_, t_, pureStretchedInterval_] := Module[
+  {
+    generatorsTuningMap,
+    ma,
+    primeCentsMap,
+    justInterval,
+    temperedInterval
+  },
+  
+  {generatorsTuningMap, ma, primeCentsMap} = getTuningSchemeMappings[t];
+  
+  justInterval = primeCentsMap.pureStretchedInterval;
+  temperedInterval = optimumGeneratorsTuningMap.ma.pureStretchedInterval;
+  
+  (justInterval / temperedInterval) * optimumGeneratorsTuningMap
 ];
 
 
@@ -1507,7 +1536,7 @@ oddLimitFromD[d_] := Prime[d + 1] - 2;
 
 (* SOLUTIONS: OPTIMIZATION POWER = \[Infinity] (MINIMAX) OR COMPLEXITY NORM POWER = 1 LEADING TO DUAL NORM POWER \[Infinity] ON PRIMES (MAX NORM) *)
 
-(* covers unchanged-octave diamond minimax-U "minimax", minimax-S "TOP", pure-octave-stretched minimax-S "POTOP", 
+(* covers unchanged-octave diamond minimax-U "minimax", minimax-S "TOP", pure-stretched-octave minimax-S "POTOP", 
 minimax-sopfr-S "BOP", minimax-lil-S "Weil", minimax-lol-S "Kees" *)
 (* a semi-analytical solution *)
 (* based on https://github.com/keenanpepper/tiptop/blob/main/tiptop.py *)
@@ -1970,7 +1999,7 @@ getGeneratorsAFromUnchangedIntervals[ma_, unchangedIntervalEigenvectors_] := Mod
 (* SOLUTIONS: OPTIMIZATION POWER = 2 (MINISOS) OR COMPLEXITY NORM POWER = 2 LEADING TO DUAL NORM POWER 2 ON PRIMES (EUCLIDEAN NORM) *)
 
 (* an analytical solution *)
-(* covers unchanged-octave diamond minisos-U "least squares", minimax-ES "TE", pure-octave-stretched minimax-ES "POTE",
+(* covers unchanged-octave diamond minisos-U "least squares", minimax-ES "TE", pure-stretched-octave minimax-ES "POTE",
 minimax-copfr-ES "Frobenius", minimax-lil-ES "WE", minimax-sopfr-ES "BE" *)
 pseudoinverseSolution[{
   temperedSideGeneratorsPart_,

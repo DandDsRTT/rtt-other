@@ -310,6 +310,14 @@ testClose[optimizeGeneratorsTuningMap, t, {"targetedIntervals" -> {}, "optimizat
 testClose[optimizeGeneratorsTuningMap, t, {"targetedIntervals" -> {}, "optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted", "complexityNormPower" -> 2, "tuningSchemeIntervalBasis" -> "primes"}, {1201.3969, 3796.8919, 5267.2719}];
 
 
+(* pure-stretched interval *)
+testClose[optimizeGeneratorsTuningMap, meantone, "diamond minisum-U", {1198.054, 695.119}];
+testClose[optimizeGeneratorsTuningMap, meantone, "pure-stretched-octave diamond minisum-U", {1198.054 * 1200 / 1198.054, 695.119 * 1200 / 1198.054}];
+testClose[optimizeGeneratorsTuningMap, meantone, "pure-stretched-2 diamond minisum-U", {1198.054 * 1200 / 1198.054, 695.119 * 1200 / 1198.054}];
+testClose[optimizeGeneratorsTuningMap, meantone, "pure-stretched-2/1 diamond minisum-U", {1198.054 * 1200 / 1198.054, 695.119 * 1200 / 1198.054}];
+testClose[optimizeGeneratorsTuningMap, meantone, "pure-stretched-3/2 diamond minisum-U", {1198.054 * 701.955 / 695.119, 695.119 * 701.955 / 695.119}];
+
+
 (* minimax-S = "TOP", "T1", "TOP-max", "TIPTOP", "Tenney OPtimal", "Tiebreaker-In-Polytope Tenney-OPtimal" *)
 (* I had to fudge the factors to make mapping forms match in some places, due to rounding errors those matching factors introduced *)
 (* could double-check with Scala, Xen wiki, Flora's app but it has incorrect results for TOP at this time *)
@@ -381,44 +389,44 @@ testClose[optimizeTuningMap, sensi, "minimax-copfr-ES", {1198.2677, 1904.0314, 2
 testClose[optimizeTuningMap, sensamagic, "minimax-copfr-ES", {1200.0000, 1904.3201, 2785.8407, 3367.8799}]; (* [4] *)
 testClose[optimizeGeneratorsTuningMap, meantone, "Frobenius", optimizeGeneratorsTuningMap[meantone, "minimax-copfr-ES"]];
 
-(* pure-octave-stretched minimax-ES = "POTE", "Pure Octave Tenney-Euclidean" *)
+(* pure-stretched-octave minimax-ES = "POTE", "Pure Octave Tenney-Euclidean" *)
 (* could double-check with Xen wiki *)
-testClose[optimizeTuningMap, meantone, "pure-octave-stretched minimax-ES", {1200, 1896.239, 2784.955}]; (* [1a] *)
-testClose[optimizeTuningMap, blackwood, "pure-octave-stretched minimax-ES", {1200, 1920, 2799.594}]; (* [1a] *)
-testClose[optimizeTuningMap, dicot, "pure-octave-stretched minimax-ES", {1200.000, 1897.189, 2748.594}]; (* [3p] *)
-testClose[optimizeTuningMap, augmented, "pure-octave-stretched minimax-ES", {1200.000, 1906.638, 2800.000}]; (* [3q] *)
-testClose[optimizeTuningMap, mavila, "pure-octave-stretched minimax-ES", {1200.000, 1879.806, 2760.582}]; (* [3r] *)
-testClose[optimizeTuningMap, porcupine, "pure-octave-stretched minimax-ES", {1200.000, 1908.149, 2780.248}]; (* [3s] *)
-testClose[optimizeTuningMap, srutal, "pure-octave-stretched minimax-ES", {1200.000, 1904.898, 2790.204}]; (* [3t] *)
-testClose[optimizeTuningMap, hanson, "pure-octave-stretched minimax-ES", {1200.000, 1902.039, 2785.033}]; (* [3u] *)
-testClose[optimizeTuningMap, magic, "pure-octave-stretched minimax-ES", {1200.000, 1900.292, 2780.058}]; (* [3v] *)
-testClose[optimizeTuningMap, negri, "pure-octave-stretched minimax-ES", {1200.000, 1896.980, 2777.265}]; (* [3w] *)
-testClose[optimizeTuningMap, tetracot, "pure-octave-stretched minimax-ES", {1200.000, 1904.639, 2785.438}]; (* [3x] *)
-testClose[optimizeTuningMap, meantone7, "pure-octave-stretched minimax-ES", {1200.000, 1896.495, 2785.980, 3364.949}]; (* [3y] *)
-testClose[optimizeTuningMap, magic7, "pure-octave-stretched minimax-ES", {1200.000, 1901.760, 2780.352, 3364.224}]; (* [3z] *)
-testClose[optimizeTuningMap, pajara, "pure-octave-stretched minimax-ES", {1200.000, 1907.048, 2785.905, 3385.905}]; (* [3aa] *)
-testClose[optimizeTuningMap, augene, "pure-octave-stretched minimax-ES", {1200.000, 1909.257, 2800.000, 3381.486}]; (* [3ab] *)
-testClose[optimizeTuningMap, sensi, "pure-octave-stretched minimax-ES", {1200.000, 1903.679, 2790.444, 3363.975}]; (* [3ac] *)
-testClose[optimizeTuningMap, sensamagic, "pure-octave-stretched minimax-ES", {1200.000, 1903.742, 2785.546, 3366.583}]; (* as "octorod" [3ad] *)
-testClose[optimizeGeneratorsTuningMap, meantone, "POTE", optimizeGeneratorsTuningMap[meantone, "pure-octave-stretched minimax-ES"]];
+testClose[optimizeTuningMap, meantone, "pure-stretched-octave minimax-ES", {1200, 1896.239, 2784.955}]; (* [1a] *)
+testClose[optimizeTuningMap, blackwood, "pure-stretched-octave minimax-ES", {1200, 1920, 2799.594}]; (* [1a] *)
+testClose[optimizeTuningMap, dicot, "pure-stretched-octave minimax-ES", {1200.000, 1897.189, 2748.594}]; (* [3p] *)
+testClose[optimizeTuningMap, augmented, "pure-stretched-octave minimax-ES", {1200.000, 1906.638, 2800.000}]; (* [3q] *)
+testClose[optimizeTuningMap, mavila, "pure-stretched-octave minimax-ES", {1200.000, 1879.806, 2760.582}]; (* [3r] *)
+testClose[optimizeTuningMap, porcupine, "pure-stretched-octave minimax-ES", {1200.000, 1908.149, 2780.248}]; (* [3s] *)
+testClose[optimizeTuningMap, srutal, "pure-stretched-octave minimax-ES", {1200.000, 1904.898, 2790.204}]; (* [3t] *)
+testClose[optimizeTuningMap, hanson, "pure-stretched-octave minimax-ES", {1200.000, 1902.039, 2785.033}]; (* [3u] *)
+testClose[optimizeTuningMap, magic, "pure-stretched-octave minimax-ES", {1200.000, 1900.292, 2780.058}]; (* [3v] *)
+testClose[optimizeTuningMap, negri, "pure-stretched-octave minimax-ES", {1200.000, 1896.980, 2777.265}]; (* [3w] *)
+testClose[optimizeTuningMap, tetracot, "pure-stretched-octave minimax-ES", {1200.000, 1904.639, 2785.438}]; (* [3x] *)
+testClose[optimizeTuningMap, meantone7, "pure-stretched-octave minimax-ES", {1200.000, 1896.495, 2785.980, 3364.949}]; (* [3y] *)
+testClose[optimizeTuningMap, magic7, "pure-stretched-octave minimax-ES", {1200.000, 1901.760, 2780.352, 3364.224}]; (* [3z] *)
+testClose[optimizeTuningMap, pajara, "pure-stretched-octave minimax-ES", {1200.000, 1907.048, 2785.905, 3385.905}]; (* [3aa] *)
+testClose[optimizeTuningMap, augene, "pure-stretched-octave minimax-ES", {1200.000, 1909.257, 2800.000, 3381.486}]; (* [3ab] *)
+testClose[optimizeTuningMap, sensi, "pure-stretched-octave minimax-ES", {1200.000, 1903.679, 2790.444, 3363.975}]; (* [3ac] *)
+testClose[optimizeTuningMap, sensamagic, "pure-stretched-octave minimax-ES", {1200.000, 1903.742, 2785.546, 3366.583}]; (* as "octorod" [3ad] *)
+testClose[optimizeGeneratorsTuningMap, meantone, "POTE", optimizeGeneratorsTuningMap[meantone, "pure-stretched-octave minimax-ES"]];
 
-(* pure-octave-stretched minimax-S = "POTOP", "POTT", "Pure Octave Tenney OPtimal", "Pure Octave Tiebreaker-in-polytope Tenney-optimal" *)
+(* pure-stretched-octave minimax-S = "POTOP", "POTT", "Pure Octave Tenney OPtimal", "Pure Octave Tiebreaker-in-polytope Tenney-optimal" *)
 (* could double-check against Flora's app, but her TOP results are incorrect for now, so these would be too *)
-testClose[optimizeGeneratorsTuningMap, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "pure-octave-stretched minimax-S", {600.000, 709.184}]; (* [7j] has {600.000, 706.843} but that has 7.254 damage and mine has 5.988 *)
-testClose[optimizeGeneratorsTuningMap, {{{1, -1, 0, 1}, {0, 10, 9, 7}}, "co"}, "pure-octave-stretched minimax-S", {1200.000, 310.196}]; (* [7i] *)
+testClose[optimizeGeneratorsTuningMap, {{{2, 2, 7, 8, 14, 5}, {0, 1, -2, -2, -6, 2}}, "co"}, "pure-stretched-octave minimax-S", {600.000, 709.184}]; (* [7j] has {600.000, 706.843} but that has 7.254 damage and mine has 5.988 *)
+testClose[optimizeGeneratorsTuningMap, {{{1, -1, 0, 1}, {0, 10, 9, 7}}, "co"}, "pure-stretched-octave minimax-S", {1200.000, 310.196}]; (* [7i] *)
 accuracy = 1;
-testClose[optimizeTuningMap, {{{1, 3, 0, 0, 3}, {0, -3, 5, 6, 1}}, "co"}, "pure-octave-stretched minimax-S", {1200.00, 1915.81, 2806.98, 3368.38, 4161.40}]; (* [1b] has <1200 1915.578 2807.355 3368.826 4161.472|,but  Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! *)
-testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 10}, {0, -1, -9, 2, -16}}, "co"}, "pure-octave-stretched minimax-S", {1200.0, 490.4}]; (* [1d] *)
-testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 1}, {0, -1, -9, 2, 6}}, "co"}, "pure-octave-stretched minimax-S", {1200.0, 490.9}]; (* [1d] *)
-testClose[optimizeGeneratorsTuningMap, {{{1, 2, -3, 2, 1}, {0, -1, 13, 2, 6}}, "co"}, "pure-octave-stretched minimax-S", {1200.0, 491.9}]; (* [1d] *)
+testClose[optimizeTuningMap, {{{1, 3, 0, 0, 3}, {0, -3, 5, 6, 1}}, "co"}, "pure-stretched-octave minimax-S", {1200.00, 1915.81, 2806.98, 3368.38, 4161.40}]; (* [1b] has <1200 1915.578 2807.355 3368.826 4161.472|,but  Mike himself says that maybe he got this one wrong because it should have been TIP... and yeah, I can see that this one has a pair of locked primes! *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 10}, {0, -1, -9, 2, -16}}, "co"}, "pure-stretched-octave minimax-S", {1200.0, 490.4}]; (* [1d] *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 2, 6, 2, 1}, {0, -1, -9, 2, 6}}, "co"}, "pure-stretched-octave minimax-S", {1200.0, 490.9}]; (* [1d] *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 2, -3, 2, 1}, {0, -1, 13, 2, 6}}, "co"}, "pure-stretched-octave minimax-S", {1200.0, 491.9}]; (* [1d] *)
 accuracy = 3;
-testClose[optimizeGeneratorsTuningMap, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "pure-octave-stretched minimax-S", {1200, 700.3907806, 384.0221726}]; (* [1e] this was passing with {1200.000, 700.795, 380.759} before introducing the non-unique check code and then went back to passing after maybe switching to Keenan's nested minimax technique...  it really does seem like it should have a unique solution, so the condition on that might be wrong... you should really plot this one visually and see what's happening *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 1, 2, 1}, {0, 1, 0, 2}, {0, 0, 1, 2}}, "co"}, "pure-stretched-octave minimax-S", {1200, 700.3907806, 384.0221726}]; (* [1e] this was passing with {1200.000, 700.795, 380.759} before introducing the non-unique check code and then went back to passing after maybe switching to Keenan's nested minimax technique...  it really does seem like it should have a unique solution, so the condition on that might be wrong... you should really plot this one visually and see what's happening *)
 accuracy = 2;
-testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0}, {0, 1, 4}}, "co"}, "pure-octave-stretched minimax-S", {1200, 696.58}]; (* [1f] *)
-testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0, -3}, {0, 1, 4, 10}}, "co"}, "pure-octave-stretched minimax-S", {1200, 696.58}]; (* [1f] *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0}, {0, 1, 4}}, "co"}, "pure-stretched-octave minimax-S", {1200, 696.58}]; (* [1f] *)
+testClose[optimizeGeneratorsTuningMap, {{{1, 1, 0, -3}, {0, 1, 4, 10}}, "co"}, "pure-stretched-octave minimax-S", {1200, 696.58}]; (* [1f] *)
 accuracy = 3;
-testClose[optimizeTuningMap, meantone, "POTOP", optimizeTuningMap[meantone, "pure-octave-stretched minimax-S"]];
-testClose[optimizeTuningMap, meantone, "POTT", optimizeTuningMap[meantone, "pure-octave-stretched minimax-S"]];
+testClose[optimizeTuningMap, meantone, "POTOP", optimizeTuningMap[meantone, "pure-stretched-octave minimax-S"]];
+testClose[optimizeTuningMap, meantone, "POTT", optimizeTuningMap[meantone, "pure-stretched-octave minimax-S"]];
 
 (* minimax-sopfr-S = "BOP", "Benedetti OPtimal" *)
 testClose[optimizeTuningMap, meantone, "minimax-sopfr-S", {1201.721, 1899.374, 2790.615}];  (* [4] *)
@@ -560,11 +568,11 @@ testClose[optimizeTuningMap, meantone, "Constrained Tenney-Euclidean", optimizeT
 
 
 (* I no longer really care about tuning scheme equivalences 
-such as minimax-lol-S w/ pure-octave-stretched minimax-S ("Kees" w/ "POTOP")
-or minimax-lol-ES w/ pure-octave-stretched minimax-ES ("KE" w/ "POTE")
-clearly minimax-lol-S is the same as pure-octave-*constrained* minimax-S ("Kees" w/ pure-octave-*constrained* "TOP")
-and minimax-lol-ES is the same as pure-octave-*constrained* minimax-ES ("KE" w/ pure-octave-*constrained* "TE")
-otherwise who really cares?*)
+such as minimax-lol-S w/ pure-stretched-octave minimax-S ("Kees" w/ "POTOP")
+or minimax-lol-ES w/ pure-stretched-octave minimax-ES ("KE" w/ "POTE")
+clearly minimax-lol-S is the same as pure-*constrained*-octave (unchanged-octave) minimax-S ("Kees" w/ pure-*constrained*-octave (unchanged-octave) "TOP")
+and minimax-lol-ES is the same as pure-*constrained*-octave (unchanged-octave) minimax-ES ("KE" w/ pure-*constrained*-octave (unchanged-octave) "TE")
+otherwise... who really cares? *)
 
 
 (* confirming the relationship between log integer limit and log product tuning schemes for various target sets and optimization powers *)
