@@ -1,36 +1,5 @@
 debug = False;
 
-(*
-  
-  GENERATORS PREIMAGE TRANSVERSAL
-  
-  
-  getGeneratorsPreimageTransversal[t]
-  
-  Given a representation of a temperament as a mapping or comma basis,
-  returns a generators preimage transversal 
-  (for each generator, one JI interval that maps to it).
-  
-  Examples:
-  
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        getGeneratorsPreimageTransversal[meantoneM]
-    
-  Out   {{{1, 0, 0}, {-1, 1, 0}}, "contra"}
-  
-*)
-getGeneratorsPreimageTransversal[t_] := Module[{ma, decomp, left, snf, right, generatorsPreimageTransversal},
-  ma = getA[getM[t]];
-  decomp = SmithDecomposition[ma];
-  left = Part[decomp, 1];
-  snf = Part[decomp, 2];
-  right = Part[decomp, 3];
-  
-  generatorsPreimageTransversal = right.Transpose[snf].left;
-  
-  {Transpose[generatorsPreimageTransversal], "contra"}
-];
-
 
 (*
   
@@ -46,22 +15,23 @@ getGeneratorsPreimageTransversal[t_] := Module[{ma, decomp, left, snf, right, ge
   
   Examples:
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
         optimizeGeneratorsTuningMap[meantoneM, {"optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"}]
     
-  Out   {1201.69, 697.563}
+  Out   "⟨1201.69 697.563]"
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
         optimizeGeneratorsTuningMap[meantoneM, "TOP"]
     
-  Out   {1201.7, 697.563}
+  Out   "⟨1201.70 697.563]"
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
         optimizeGeneratorsTuningMap[meantoneM, "minisos-copfr-EC"]
     
-  Out   {1198.24, 695.294}
+  Out   "⟨1198.24 695.294]"
 *)
-optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
+optimizeGeneratorsTuningMap[unparsedT_, tuningSchemeSpec_] := output[{{optimizeGeneratorsTuningMapPrivate[parseT[unparsedT], tuningSchemeSpec]}, "co"}];
+optimizeGeneratorsTuningMapPrivate[t_, tuningSchemeSpec_] := Module[
   {
     tuningSchemeOptions,
     forDamage,
@@ -177,22 +147,23 @@ optimizeGeneratorsTuningMap[t_, tuningSchemeSpec_] := Module[
   
   Examples:
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
         optimizeTuningMap[meantoneM, {"optimizationPower" -> \[Infinity], "damageWeightingSlope" -> "simplicityWeighted"}]
     
-  Out   {1201.69, 1899.26, 2790.25}
+  Out   "⟨1201.69 1899.26 2790.25]"
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
         optimizeTuningMap[meantoneM, "TOP"]
     
-  Out   {1201.7, 1899.26, 2790.25} 
+  Out   "⟨1201.70 1899.26 2790.25]"
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
         optimizeTuningMap[meantoneM, "minisos-copfr-EC"]
     
-  Out   {1198.24, 1893.54, 2781.18} 
+  Out   "⟨1198.24 1893.54 2781.18]" 
 *)
-optimizeTuningMap[t_, tuningSchemeSpec_] := optimizeGeneratorsTuningMap[t, tuningSchemeSpec].getA[getM[t]];
+optimizeTuningMap[unparsedT_, tuningSchemeSpec_] := output[{{optimizeTuningMapPrivate[parseT[unparsedT], tuningSchemeSpec]}, "co"}];
+optimizeTuningMapPrivate[t_, tuningSchemeSpec_] := optimizeGeneratorsTuningMapPrivate[t, tuningSchemeSpec].getA[getM[t]];
 
 (*
   getGeneratorsTuningMapMeanDamage[t, generatorsTuningMap, tuningScheme]
@@ -205,18 +176,19 @@ optimizeTuningMap[t_, tuningSchemeSpec_] := optimizeGeneratorsTuningMap[t, tunin
   
   Examples:
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        quarterCommaGeneratorsTuningMap = {1200.000, 696.578};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
+        quarterCommaGeneratorsTuningMap = "⟨1200.000 696.578]";
         getGeneratorsTuningMapMeanDamage[meantoneM, quarterCommaGeneratorsTuningMap, "minimax-S"]
     
-  Out   3.39251 
+  Out   3.39251
 *)
-getGeneratorsTuningMapMeanDamage[t_, generatorsTuningMap_, tuningSchemeSpec_] := Module[
+getGeneratorsTuningMapMeanDamage[unparsedT_, unparsedGeneratorsTuningMap_, tuningSchemeSpec_] := getGeneratorsTuningMapMeanDamagePrivate[parseT[unparsedT], parseT[unparsedGeneratorsTuningMap], tuningSchemeSpec];
+getGeneratorsTuningMapMeanDamagePrivate[t_, generatorsTuningMap_, tuningSchemeSpec_] := Module[
   {tuningMap},
   
-  tuningMap = generatorsTuningMap.getA[getM[t]];
+  tuningMap = {{First[getA[generatorsTuningMap]].getA[getM[t]]}, "co"};
   
-  getTuningMapMeanDamage[t, tuningMap, tuningSchemeSpec]
+  getTuningMapMeanDamagePrivate[t, tuningMap, tuningSchemeSpec]
 ];
 
 (*
@@ -230,13 +202,14 @@ getGeneratorsTuningMapMeanDamage[t_, generatorsTuningMap_, tuningSchemeSpec_] :=
   
   Examples:
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        quarterCommaTuningMap = {1200.000, 1896.578, 2786.314};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
+        quarterCommaTuningMap = "⟨1200.000 1896.578 2786.314]";
         getTuningMapMeanDamage[meantoneM, quarterCommaTuningMap, "minimax-S"]
     
   Out   3.39236
 *)
-getTuningMapMeanDamage[t_, tuningMap_, tuningSchemeSpec_] := Module[
+getTuningMapMeanDamage[unparsedT_, unparsedTuningMap_, tuningSchemeSpec_] := getTuningMapMeanDamagePrivate[parseT[unparsedT], parseT[unparsedTuningMap], tuningSchemeSpec];
+getTuningMapMeanDamagePrivate[t_, tuningMap_, tuningSchemeSpec_] := Module[
   {
     forDamage,
     tuningSchemeOptions,
@@ -261,9 +234,9 @@ getTuningMapMeanDamage[t_, tuningMap_, tuningSchemeSpec_] := Module[
   ];
   (* set the temperedSideGeneratorsPart to the input tuningMap, in octaves, in the structure getAbsErrors needs it, 
   since getPowerMeanAbsError shares it with other methods *)
-  approximationParts[[1]] = {tuningMap};
+  approximationParts[[1]] = getA[tuningMap];
   (* override the other half of the temperedSideMappingPart too, since we have the whole tuning map already *)
-  approximationParts[[2]] = IdentityMatrix[getD[t]];
+  approximationParts[[2]] = IdentityMatrix[getDPrivate[t]];
   
   SetAccuracy[N[getPowerMeanAbsError[approximationParts]], outputPrecision]
 ];
@@ -279,18 +252,19 @@ getTuningMapMeanDamage[t_, tuningMap_, tuningSchemeSpec_] := Module[
   
   Examples:
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        quarterCommaGeneratorsTuningMap = {1200.000, 696.578};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
+        quarterCommaGeneratorsTuningMap = "⟨1200.000 696.578]";
         getGeneratorsTuningMapDamages[meantoneM, quarterCommaGeneratorsTuningMap, "minimax-S"]
     
-  Out   {0.000, 3.393, 0.000}
+  Out   {2 -> 0.000, 3 -> 3.393, 5 -> 0.000}
 *)
-getGeneratorsTuningMapDamages[t_, generatorsTuningMap_, tuningSchemeSpec_] := Module[
+getGeneratorsTuningMapDamages[unparsedT_, unparsedGeneratorsTuningMap_, tuningSchemeSpec_] := getGeneratorsTuningMapDamagesPrivate[parseT[unparsedT], parseT[unparsedGeneratorsTuningMap], tuningSchemeSpec];
+getGeneratorsTuningMapDamagesPrivate[t_, generatorsTuningMap_, tuningSchemeSpec_] := Module[
   {tuningMap},
   
-  tuningMap = generatorsTuningMap.getA[getM[t]];
+  tuningMap = {{First[getA[generatorsTuningMap]].getA[getM[t]]}, "co"};
   
-  getTuningMapDamages[t, tuningMap, tuningSchemeSpec]
+  getTuningMapDamagesPrivate[t, tuningMap, tuningSchemeSpec]
 ];
 
 (*
@@ -304,13 +278,14 @@ getGeneratorsTuningMapDamages[t_, generatorsTuningMap_, tuningSchemeSpec_] := Mo
   
   Examples:
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        quarterCommaTuningMap = {1200.000, 1896.578, 2786.314};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
+        quarterCommaTuningMap = "⟨1200.000 1896.578 2786.314]";
         getTuningMapDamages[meantoneM, quarterCommaTuningMap, "minimax-S"]
     
-  Out   {0.000, 3.393, 0.000}
+  Out   {2 -> 0.000, 3 -> 3.393, 5 -> 0.000}
 *)
-getTuningMapDamages[t_, tuningMap_, tuningSchemeSpec_] := Module[
+getTuningMapDamages[unparsedT_, unparsedTuningMap_, tuningSchemeSpec_] := getTuningMapDamagesPrivate[parseT[unparsedT], parseT[unparsedTuningMap], tuningSchemeSpec];
+getTuningMapDamagesPrivate[t_, tuningMap_, tuningSchemeSpec_] := Module[
   {
     forDamage,
     tuningSchemeOptions,
@@ -337,9 +312,9 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeSpec_] := Module[
   ];
   (* set the temperedSideGeneratorsPart to the input tuningMap, in octaves, in the structure getAbsErrors needs it, 
   since getPowerMeanAbsError shares it with other methods *)
-  approximationParts[[1]] = {tuningMap};
+  approximationParts[[1]] = getA[tuningMap];
   (* override the other half of the temperedSideMappingPart too, since we have the whole tuning map already *)
-  approximationParts[[2]] = IdentityMatrix[getD[t]];
+  approximationParts[[2]] = IdentityMatrix[getDPrivate[t]];
   
   damages = SetAccuracy[N[getAbsErrors[approximationParts]], outputPrecision];
   targetedIntervals = Map[pcvToQuotient, targetedIntervalsA];
@@ -358,18 +333,20 @@ getTuningMapDamages[t_, tuningMap_, tuningSchemeSpec_] := Module[
   
   Examples:
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
         graphTuningDamage[meantoneM, "minisos-copfr-EC"]
     
   Out   (3D graph)
   
-  In    12etM = {{{12, 19, 28}, "co"};
-        graphTuningDamage[meantoneM, "minisos-copfr-EC"]
+  In    12etM = "⟨12 19 28]";
+        graphTuningDamage[12etM, "minisos-copfr-EC"]
         
   Out   (2D graph)
 *)
-graphTuningDamage[t_, tuningSchemeSpec_] := Module[
+graphTuningDamage[unparsedT_, tuningSchemeSpec_] := Module[
   {
+    t,
+    
     forDamage,
     
     tuningSchemeOptions,
@@ -400,10 +377,12 @@ graphTuningDamage[t_, tuningSchemeSpec_] := Module[
     image
   },
   
+  t = parseT[unparsedT];
+  
   forDamage = True;
   
   tuningSchemeOptions = processTuningSchemeSpec[tuningSchemeSpec];
-  optimumGeneratorsTuningMap = optimizeGeneratorsTuningMap[t, tuningSchemeOptions];
+  optimumGeneratorsTuningMap = optimizeGeneratorsTuningMapPrivate[t, tuningSchemeOptions];
   
   tuningSchemeProperties = processTuningSchemeOptions[t, forDamage, tuningSchemeOptions];
   
@@ -479,7 +458,7 @@ graphTuningDamage[t_, tuningSchemeSpec_] := Module[
   AppendTo[plotArgs, MaxRecursion -> 6];
   
   (* plot type *)
-  r = getR[tWithPossiblyChangedIntervalBasis];
+  r = getRPrivate[tWithPossiblyChangedIntervalBasis];
   If[
     r == 1,
     Apply[Plot, plotArgs],
@@ -499,13 +478,14 @@ graphTuningDamage[t_, tuningSchemeSpec_] := Module[
   
   Examples:
   
-  In    meantoneM = {{{1, 1, 0}, {0, 1, 4}}, "co"};
-        quarterCommaTuningMap = {1200.000, 1896.578, 2786.314};
+  In    meantoneM = "[⟨1 1 0] ⟨0 1 4]⟩";
+        quarterCommaTuningMap = "⟨1200.000 1896.578 2786.314]";
         generatorsTuningMapFromTAndTuningMap[meantoneM, quarterCommaTuningMap]
     
-  Out   {1200.000, 696.578};
+  Out   "⟨1200.000 696.578]";
 *)
-generatorsTuningMapFromTAndTuningMap[t_, tuningMap_] := Module[
+generatorsTuningMapFromTAndTuningMap[unparsedT_, unparsedTuningMap_] := output[{{generatorsTuningMapFromTAndTuningMapPrivate[parseT[unparsedT], parseT[unparsedTuningMap]]}, "co"}];
+generatorsTuningMapFromTAndTuningMapPrivate[t_, tuningMap_] := Module[
   {generatorsTuningMap, ma, primeCentsMap, solution},
   
   {generatorsTuningMap, ma, primeCentsMap} = getTuningSchemeMappings[t];
@@ -663,7 +643,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; systematicComplexityName = "E"; pureStretchedInterval = First[getOctave[t]];
   ];
   If[
-    originalTuningSchemeName === "CTE",
+    originalTuningSchemeName === "CTE" || originalTuningSchemeName === "Constrained Tenney-Euclidean",
     targetedIntervals = {}; optimizationPower = \[Infinity]; damageWeightingSlope = "simplicityWeighted"; systematicComplexityName = "E"; unchangedIntervals = getOctave[t];
   ];
   
@@ -838,7 +818,7 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
     
     commaBasisInNonstandardIntervalBasis = getC[t];
     primeLimitIntervalBasis = getPrimes[getIntervalBasisDimension[intervalBasis]];
-    commaBasisInPrimeLimitIntervalBasis = changeIntervalBasis[commaBasisInNonstandardIntervalBasis, primeLimitIntervalBasis];
+    commaBasisInPrimeLimitIntervalBasis = changeIntervalBasisPrivate[commaBasisInNonstandardIntervalBasis, primeLimitIntervalBasis];
     intervalRebase = getIntervalRebaseForC[intervalBasis, primeLimitIntervalBasis];
     mappingInPrimeLimitIntervalBasis = getM[commaBasisInPrimeLimitIntervalBasis];
     tPossiblyWithChangedIntervalBasis = mappingInPrimeLimitIntervalBasis;
@@ -854,11 +834,11 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
         ],
         If[
           ToString[targetedIntervals] == "diamond",
-          getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
+          getDiamond[getDPrivate[tPossiblyWithChangedIntervalBasis]],
           If[
             ToString[targetedIntervals] == "primes",
-            IdentityMatrix[getD[tPossiblyWithChangedIntervalBasis]],
-            intervalRebase.getA[targetedIntervals]
+            IdentityMatrix[getDPrivate[tPossiblyWithChangedIntervalBasis]],
+            intervalRebase.getA[parseT[targetedIntervals]]
           ]
         ]
       ]
@@ -877,11 +857,11 @@ processTuningSchemeOptions[t_, forDamage_, OptionsPattern[]] := Module[
         ],
         If[
           ToString[targetedIntervals] == "diamond",
-          getDiamond[getD[tPossiblyWithChangedIntervalBasis]],
+          getDiamond[getDPrivate[tPossiblyWithChangedIntervalBasis]],
           If[
             ToString[targetedIntervals] == "primes",
-            IdentityMatrix[getD[tPossiblyWithChangedIntervalBasis]],
-            getA[targetedIntervals]
+            IdentityMatrix[getDPrivate[tPossiblyWithChangedIntervalBasis]],
+            getA[parseT[targetedIntervals]]
           ]
         ]
       ]
@@ -1034,9 +1014,9 @@ approximationPart[approximationParts_, partName_] := Part[approximationParts, ap
 
 (* SHARED *)
 
-getOctave[t_] := {Join[{1}, Table[0, getD[t] - 1]]};
+getOctave[t_] := {Join[{1}, Table[0, getDPrivate[t] - 1]]};
 
-getSummationMap[t_] := Table[1, getD[t]];
+getSummationMap[t_] := Table[1, getDPrivate[t]];
 
 getLogPrimeCoordinationA[t_] := DiagonalMatrix[Log2[getIntervalBasis[t]]];
 
@@ -1044,12 +1024,12 @@ logPrimeCentsMap[t_] := 1200 * getSummationMap[t].getLogPrimeCoordinationA[t];
 
 getPeriodsPerOctave[t_] := First[First[getA[getM[t]]]];
 
-getPrimesIdentityA[t_] := IdentityMatrix[getD[t]];
+getPrimesIdentityA[t_] := IdentityMatrix[getDPrivate[t]];
 
 getTuningSchemeMappings[t_] := Module[
   {generatorsTuningMap, ma, primeCentsMap},
   
-  generatorsTuningMap = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getR[t]}];
+  generatorsTuningMap = Table[Symbol["g" <> ToString@gtmIndex], {gtmIndex, 1, getRPrivate[t]}];
   ma = getA[getM[t]];
   primeCentsMap = logPrimeCentsMap[t];
   
@@ -1277,7 +1257,7 @@ getComplexityMultiplier[
   complexityMakeOdd_ (* trait 4d *)
 ] := Module[{complexityMultiplier},
   (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeApproximationParts, covers minimax-S ("TOP") and minimax-ES ("TE") *)
-  complexityMultiplier = IdentityMatrix[getD[t]];
+  complexityMultiplier = IdentityMatrix[getDPrivate[t]];
   
   If[
     (* when used by getDualMultiplier in getInfiniteTargetSetTuningSchemeApproximationParts, covers minimax-copfr-S (the L1 version of "Frobenius") and minimax-copfr-ES ("Frobenius") *)
@@ -1296,13 +1276,13 @@ getComplexityMultiplier[
     (yes, surprisingly, when computing minimax-lol-S and minimax-lol-ES tunings, we do not use the below, though user calls for odd-limit complexity do use it;
     the tuning calculations instead use only this size-sensitizer effect, and apply an unchanged octave constraint to achieve the oddness aspect) *)
     complexitySizeFactor > 0,
-    complexityMultiplier = Join[getPrimesIdentityA[t], {Table[complexitySizeFactor, getD[t]]}].complexityMultiplier
+    complexityMultiplier = Join[getPrimesIdentityA[t], {Table[complexitySizeFactor, getDPrivate[t]]}].complexityMultiplier
   ];
   
   If[
     (* When minimax-lol-S ("Kees") and minimax-lol-ES ("KE") need their dual norms, they don't use this; see note above *)
     complexityMakeOdd == True,
-    complexityMultiplier = complexityMultiplier.DiagonalMatrix[Join[{0}, Table[1, getD[t] - 1]]]
+    complexityMultiplier = complexityMultiplier.DiagonalMatrix[Join[{0}, Table[1, getDPrivate[t] - 1]]]
   ];
   
   complexityMultiplier
@@ -1463,7 +1443,7 @@ retrievePrimesIntervalBasisGeneratorsTuningMap[optimumGeneratorsTuningMap_, orig
   
   ma = getA[getM[t]];
   optimumTuningMap = optimumGeneratorsTuningMap.ma;
-  generatorsPreimageTransversal = Transpose[getA[getGeneratorsPreimageTransversal[originalT]]];
+  generatorsPreimageTransversal = Transpose[getA[getGeneratorsPreimageTransversalPrivate[originalT]]];
   f = Transpose[getFormalPrimesA[originalT]];
   
   optimumTuningMap.f.generatorsPreimageTransversal
@@ -1485,7 +1465,7 @@ getPureStretchedInterval[systematicTuningSchemeName_, t_] := Module[
     First[getOctave[t]],
     First[padVectorsWithZerosUpToD[
       {quotientToPcv[ToExpression[pureStretchedString]]},
-      getD[t]
+      getDPrivate[t]
     ]]
   ]
 ];
