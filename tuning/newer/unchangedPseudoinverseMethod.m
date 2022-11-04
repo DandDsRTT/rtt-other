@@ -162,3 +162,44 @@ Take[N[First[1200 * bold1.L]].
     ZeroMatrix[1]
   ]
 ]], 2]
+
+debug = True;
+format = "display";
+optimizeGeneratorTuningMap["[⟨1 1 0] ⟨0 1 4]⟩", {"optimizationPower" -> 2, "targetIntervals" -> "primes" , "damageWeightSlope" -> "simplicityWeight"}]
+optimizeGeneratorTuningMap["[⟨1 1 0] ⟨0 1 4]⟩", {"optimizationPower" -> 2, "targetIntervals" -> "primes" , "damageWeightSlope" -> "simplicityWeight", "unchangedIntervals" -> "octave"}]
+optimizeGeneratorTuningMap["[⟨12 19 28]⟩", {"optimizationPower" -> 2, "targetIntervals" -> "primes" , "damageWeightSlope" -> "simplicityWeight", "unchangedIntervals" -> "octave"}]
+debug = False;
+
+(* okay crap well... actually the code does do it in terms of 𝒋... *)
+
+N[Take[First[
+  1200 * bold1.L.
+      JoinHorizontally[
+        T.W.Transpose[M.T.W],
+        {}
+      ].Inverse[Join[
+    JoinHorizontally[
+      M.T.W.Transpose[M.T.W],
+      {}
+    ],
+    JoinHorizontally[
+      {},
+      {}
+    ]
+  ]]], 2]]
+(* and w/ *)
+N[Take[First[
+  1200 * bold1.L.
+      JoinHorizontally[
+        T.W.Transpose[M.T.W],
+        U
+      ].Inverse[Join[
+    JoinHorizontally[
+      M.T.W.Transpose[M.T.W],
+      M.U
+    ],
+    JoinHorizontally[
+      Transpose[M.U],
+      ZeroMatrix[1]
+    ]
+  ]]], 2]]
