@@ -112,3 +112,63 @@ M.T.C // MatrixForm
     
     j = 1200 * Log2[{2, 3, 5, 7}];
 j.T.C.K.Inverse[M.T.C.K] // N // MatrixForm
+    
+    M = {{1, 2, 3}, {0, -3, -5}};
+Linv = IdentityMatrix[3];(*Inverse[DiagonalMatrix[{2,3,5}]];*)
+K = Transpose[{{1, 1, 0}, {1, 0, 1}}];
+M.Linv.K // MatrixForm
+    Linv.K // MatrixForm
+    Simplify[Det[M.Linv.K]]
+    Inverse[M.Linv.K] *% // MatrixForm
+    Linv.K.Inverse[M.Linv.K] // N // MatrixForm
+    
+    2^0.489542 * 3^2.55229 * 5^-1.53137
+    Log2[%] * 1200
+    
+    Inverse[M.Linv.K] // MatrixForm
+    
+    Linv.K.Inverse[M.Linv.K] // MatrixForm
+    
+    3^5 * 5^-3
+    (*% // N*)
+    Log2[%] * 1200 // N
+    
+    MSp = {{1 / Log2[2], 2 / Log2[3], 3 / Log2[5], 0}, {0, -3 / Log2[3], -5 / Log2[5], 0}, {1, 1, 1, -1}};
+K = Transpose[{{1, 1, 0, 0}, {1, 0, 1, 0}, {1, 0, 0, 1}}];
+Sp = Inverse[DiagonalMatrix[Log2[{2, 3, 5, 2}]]];
+j = 1200 * {{Log2[2], Log2[3], Log2[5], 0}};
+
+MSp.K // MatrixForm // N
+    Sp.K // MatrixForm
+    
+    G = Sp.K.Inverse[MSp.K]
+    
+    j.G // N
+    
+    
+    Sp // MatrixForm
+    
+    Inverse[MSp.K] // MatrixForm // N
+    
+    G // MatrixForm // N
+    
+    j.G // N
+    
+    MSp = {{1 / Log2[2], 2 / Log2[3], 3 / Log2[5], 0, 1}, {0, -3 / Log2[3], -5 / Log2[5], 0, 0}, {1, 1, 1, -1, 0}};
+K = Transpose[{{1, 1, 0, 0, 0}, {1, 0, 1, 0, 0}, {0, 0, 0, 0, 1}}];
+Sp = Inverse[DiagonalMatrix[{Log2[2], Log2[3], Log2[5], 1, 1}]];
+j = 1200 * {{Log2[2], Log2[3], Log2[5], 0, 1}};
+G = Sp.K.Inverse[MSp.K];
+
+Sp // MatrixForm
+    
+    MSp.K // MatrixForm // N
+    
+    Sp.K // MatrixForm
+    
+    Inverse[MSp.K] // MatrixForm // N
+    
+    G // MatrixForm // N
+    
+    j.G // MatrixForm // N
+
