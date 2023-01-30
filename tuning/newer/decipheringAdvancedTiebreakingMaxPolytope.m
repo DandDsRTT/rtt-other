@@ -260,6 +260,9 @@ Plot[
 
 
 
+{{2, 3, 5, 6}, {0, 1, -2, -2}, {0, 0, -1, -1}}.{0, 2, 0, -1}
+{{2, 3, 5, 6}, {0, 1, -2, -2}, {0, 0, -1, -1}}.{0, 4, -2, 0}
+
 (* HERE ON OUT IS MY FINAL EXAMPLE *)
 M = {{2, 3, 5, 6}, {0, 1, -2, -2}, {0, 0, -1, -1}};
 r = {600, g2, g3}.M - 1200 * Log2[{2, 3, 5, 7}];
@@ -279,6 +282,120 @@ Plot3D[
   },
   {g2, 90, 115},
   {g3, -5, 50},
+  PlotRange -> {0, 50},
+  ClippingStyle -> None,
+  MaxRecursion -> 6,
+  ImageSize -> 1000
+]
+
+Plot3D[
+  {
+    (* the flat ceiling *)
+    Abs[r.{0, 0, -1, 1}], (* 7/5 *) (* yellow *)
+    
+    (* the ones that will make the tied line directly underneath that ceiling *)
+    (*Abs[r.{0,2,0,-1}], (* 9/7 *) (* blue *)
+    Abs[r.{0,4,-2,0}], (*81/25*)  (* green *)
+    
+    (* these two come in at an angle to that line, creating an interesting meta-diagonal line underneath *)
+    Abs[r.{-2,0,1,0}], (* 5/4 *) (* red *)
+    Abs[r.{-2,0,0,1}] (* 7/4 *) (* purple *)*)
+  },
+  {g2, 90, 115},
+  {g3, -5, 50},
+  PlotRange -> {0, 50},
+  ClippingStyle -> None,
+  MaxRecursion -> 6,
+  ImageSize -> 1000
+]
+
+Plot3D[
+  {
+    (* the flat ceiling *)
+    99999, (* 7/5 *) (* yellow *)
+    
+    (* the ones that will make the tied line directly underneath that ceiling *)
+    Abs[r.{0, 2, 0, -1}], (* 9/7 *) (* blue *)
+    Abs[r.{0, 4, -2, 0}], (*81/25*)  (* green *)
+    
+    (* these two come in at an angle to that line, creating an interesting meta-diagonal line underneath *)
+    (*Abs[r.{-2,0,1,0}], (* 5/4 *) (* red *)
+    Abs[r.{-2,0,0,1}] (* 7/4 *) (* purple *)*)
+  },
+  {g2, 90, 115},
+  {g3, -5, 50},
+  PlotRange -> {0, 50},
+  ClippingStyle -> None,
+  PlotStyle -> {None, Auto, Auto},
+  MaxRecursion -> 6,
+  ImageSize -> 1000
+]
+
+Plot3D[
+  {
+    (* the flat ceiling *)
+    9999,
+    
+    (* the ones that will make the tied line directly underneath that ceiling *)
+    9999, (* 9/7 *) (* blue *)
+    9999, (*81/25*)  (* green *)
+    
+    (* these two come in at an angle to that line, creating an interesting meta-diagonal line underneath *)
+    Abs[r.{-2, 0, 1, 0}], (* 5/4 *) (* red *)
+    Abs[r.{-2, 0, 0, 1}] (* 7/4 *) (* purple *)
+  },
+  {g2, 90, 115},
+  {g3, -5, 50},
+  PlotRange -> {0, 50},
+  ClippingStyle -> None,
+  PlotStyle -> {{Opacity[0]}, {Opacity[0]}, {Opacity[0]}, {Auto}, {Auto}},
+  MaxRecursion -> 6,
+  ImageSize -> 1000
+]
+
+
+Plot3D[
+  {
+    Max[
+      (* the flat ceiling *)
+      Abs[r.{0, 0, -1, 1}], (* 7/5 *) (* yellow *)
+      
+      (* the ones that will make the tied line directly underneath that ceiling *)
+      Abs[r.{0, 2, 0, -1}], (* 9/7 *) (* blue *)
+      Abs[r.{0, 4, -2, 0}], (*81/25*)  (* green *)
+      
+      (* these two come in at an angle to that line, creating an interesting meta-diagonal line underneath *)
+      Abs[r.{-2, 0, 1, 0}], (* 5/4 *) (* red *)
+      Abs[r.{-2, 0, 0, 1}] (* 7/4 *) (* purple *)
+    ]
+  },
+  {g2, 90, 115},
+  {g3, -5, 50},
+  PlotStyle -> {Gray},
+  PlotRange -> {0, 50},
+  ClippingStyle -> None,
+  MaxRecursion -> 6,
+  ImageSize -> 1000
+]
+
+Plot3D[
+  {
+    Max[
+      (* the flat ceiling *)
+      (*Abs[r.{0,0,-1,1}], (* 7/5 *) (* yellow *)*)
+      
+      (* the ones that will make the tied line directly underneath that ceiling *)
+      Abs[r.{0, 2, 0, -1}], (* 9/7 *) (* blue *)
+      Abs[r.{0, 4, -2, 0}], (*81/25*)  (* green *)
+      
+      (* these two come in at an angle to that line, creating an interesting meta-diagonal line underneath *)
+      Abs[r.{-2, 0, 1, 0}], (* 5/4 *) (* red *)
+      Abs[r.{-2, 0, 0, 1}] (* 7/4 *) (* purple *)
+    ]
+  },
+  {g2, 90, 115},
+  {g3, -5, 50},
+  PlotStyle -> {Gray},
   PlotRange -> {0, 50},
   ClippingStyle -> None,
   MaxRecursion -> 6,
@@ -323,3 +440,54 @@ Plot[
   PlotLabels -> "Expressions",
   ImageSize -> 1000
 ]
+
+M = {{5, 8, 12, 14}, {0, 0, -1, 0}, {0, 0, 0, 1}};
+r = {240, g2, g3}.M - 1200 * Log2[{2, 3, 5, 7}];
+
+Plot3D[
+  {
+    Abs[r.{2, -1, 0, 0}], (* 4/3 *)
+    Abs[r.{-2, 0, 1, 0}], (* 5/4 *)
+    Abs[r.{0, 0, -1, 1}], (* 7/5 *)
+    Abs[r.{0, -1, 0, 1}], (* 7/3 *)
+  },
+  {g2, 70, 120},
+  {g3, 0, 50},
+  PlotRange -> {0, 50},
+  ClippingStyle -> None,
+  MaxRecursion -> 6,
+  ImageSize -> 1000
+]
+
+
+debug = False;
+graphTuningDamage[blackwood, "TILT minimax-U"]
+
+debug = True;
+optimizeGeneratorTuningMap[blackwood, "TILT minimax-U"]
+
+Unprotect[D];
+Clear[{b1, g1, g2, g3}];
+M = {{5, 8, 0}, {0, 0, 1}};
+j = 1200 * Log2[{2, 3, 5}];
+D = {{0, 13.88}};
+b = {b1};
+gZero = {238.612, 2779.37};
+tZero = gZero.M;
+negativeRZero = j - tZero;
+
+damage[i_] := Abs[(b.D.M - negativeRZero).i];
+
+Plot[
+  {
+    damage[{1, 0, 0}],
+    damage[{0, 1, 0}],
+    damage[{0, 0, 1}]
+  },
+  {b1, -0.25, 1.25},
+  PlotRange -> {0, 20},
+  PlotLabels -> "Expressions",
+  PlotStyle -> {{RGBColor[0.9, 0.8, 0.3]}, {RGBColor[0.3, 0.5, 0.9], Dashing[{0.02, 0.02}]}, {RGBColor[0.4, 0.8, 0.3]}},
+  ImageSize -> 1000
+]
+
